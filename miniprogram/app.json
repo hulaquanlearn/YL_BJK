@@ -1,0 +1,11 @@
+{
+  "pages": [
+    "pages/index/index",  
+    "pages/detail/detail" 
+  ],
+  "window": {
+    "navigationBarTitleText": "设备配件查询系统", 
+    "navigationBarBackgroundColor": "#165DFF",  
+    "navigationBarTextStyle": "white"  
+  }
+}

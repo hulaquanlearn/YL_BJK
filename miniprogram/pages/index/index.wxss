@@ -1,0 +1,231 @@
+/* 全局样式 */
+page {
+  background-color: #f5f7fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 顶部导航栏 */
+.nav-bar {
+  background-color: #165DFF;
+  padding: 40rpx 30rpx 20rpx; /* 适配状态栏 */
+}
+.nav-title {
+  color: white;
+  font-size: 36rpx;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* 搜索框 */
+.search-box {
+  padding: 20rpx 30rpx;
+}
+.search-input {
+  width: 100%;
+  height: 80rpx;
+  background: white;
+  border-radius: 40rpx;
+  padding: 0 30rpx;
+  font-size: 28rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+/* 区域标题（工段/设备类型） */
+.section-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  padding: 20rpx 30rpx 10rpx;
+}
+
+/* 工段筛选区域（核心调整：一行显示，不滚动） */
+.category-grid {
+  display: flex;
+  padding: 0 20rpx; /* 减小左右边距 */
+  gap: 12rpx; /* 缩小按钮间距 */
+  margin-bottom: 20rpx;
+  flex-wrap: nowrap; /* 强制不换行 */
+  justify-content: flex-start; /* 左对齐 */
+}
+.category-item {
+  flex: 0 0 auto; /* 不拉伸 */
+  background: white;
+  border-radius: 15rpx; /* 小圆角 */
+  padding: 12rpx 22rpx; /* 缩小内边距（上下12rpx，左右22rpx） */
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05); /* 浅阴影 */
+  white-space: nowrap; /* 文字不换行 */
+}
+.category-item.selected {
+  background-color: #165DFF;
+}
+.category-name {
+  font-size: 24rpx; /* 小字体 */
+  color: #333;
+}
+.category-item.selected .category-name {
+  color: white;
+}
+
+/* 设备类型筛选标签 */
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 30rpx 20rpx;
+  gap: 20rpx;
+}
+.filter-tag {
+  padding: 15rpx 30rpx;
+  background: white;
+  border-radius: 20rpx;
+  font-size: 26rpx;
+  color: #666;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+.filter-tag.selected {
+  background-color: #165DFF;
+  color: white;
+}
+
+/* 排序区域 */
+.sort-bar {
+  display: flex;
+  align-items: center;
+  padding: 15rpx 30rpx;
+  background: white;
+  margin: 0 30rpx 20rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+.sort-label {
+  font-size: 28rpx;
+  color: #666;
+}
+.sort-selector {
+  display: flex;
+  align-items: center;
+  margin-left: 15rpx;
+  color: #165DFF;
+  font-size: 28rpx;
+}
+.sort-arrow {
+  font-size: 24rpx;
+  margin-left: 5rpx;
+  transition: transform 0.3s;
+}
+.sort-arrow.rotate {
+  transform: rotate(180deg);
+}
+
+/* 排序选择器 */
+.sort-picker-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 98;
+}
+.sort-picker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top-left-radius: 30rpx;
+  border-top-right-radius: 30rpx;
+  padding: 30rpx 0;
+  transform: translateY(100%);
+  transition: transform 0.3s;
+  z-index: 99;
+}
+.sort-picker.show {
+  transform: translateY(0);
+}
+.sort-picker-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25rpx 30rpx;
+  font-size: 30rpx;
+  border-bottom: 1rpx solid #f1f1f1;
+}
+.sort-picker-item:last-child {
+  border-bottom: none;
+}
+.sort-picker-check {
+  color: #165DFF;
+  font-size: 32rpx;
+}
+
+/* 配件列表 */
+.parts-list {
+  padding: 0 30rpx 20rpx;
+}
+.part-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-radius: 20rpx;
+  padding: 25rpx 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+.part-info {
+  flex: 1;
+}
+.part-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+.part-model, .part-device {
+  font-size: 26rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 5rpx;
+}
+.part-stock {
+  text-align: right;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+.stock-status {
+  font-size: 24rpx;
+  margin-left: 5rpx;
+}
+
+/* 空状态提示 */
+.empty-state {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 加载更多按钮 */
+.load-more {
+  width: calc(100% - 60rpx);
+  margin: 20rpx 30rpx 40rpx;
+  padding: 20rpx 0;
+  background: white;
+  border-radius: 20rpx;
+  font-size: 28rpx;
+  color: #666;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+.load-more[disabled] {
+  color: #ccc;
+}
+
+/* 已加载全部提示 */
+.load-all {
+  text-align: center;
+  padding: 20rpx 0 40rpx;
+  color: #999;
+  font-size: 26rpx;
+}

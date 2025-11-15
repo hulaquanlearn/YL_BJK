@@ -1,0 +1,79 @@
+<!-- 顶部导航 -->
+<view class="nav-bar">
+  <view class="back-btn" bindtap="goBack">返回</view>
+  <view class="nav-title">配件详情</view>
+</view>
+
+<!-- 配件基本信息卡片 -->
+<view class="info-card">
+  <view class="info-item">
+    <text class="info-label">配件名称：</text>
+    <text class="info-value">{{part.name}}</text>
+  </view>
+  <view class="info-item">
+    <text class="info-label">型号规格：</text>
+    <text class="info-value">{{part.model}}</text>
+  </view>
+  <view class="info-item">
+    <text class="info-label">所属工段：</text>
+    <text class="info-value">{{part.workshop}}</text>
+  </view>
+  <view class="info-item">
+    <text class="info-label">适用设备：</text>
+    <text class="info-value">{{part.device}}</text>
+  </view>
+  <view class="info-item">
+    <text class="info-label">配件类型：</text>
+    <text class="info-value">{{part.deviceType}}</text>
+  </view>
+</view>
+
+<!-- 库存信息卡片（突出显示） -->
+<view class="stock-card">
+  <view class="stock-title">库存状态</view>
+  <view class="stock-value">
+    <text class="num">{{part.stock}}</text>
+    <text class="unit">{{part.unit || '个'}}</text>
+  </view>
+  <view class="stock-status" style="color: {{part.stock < part.minStock ? '#F53F3F' : '#00B42A'}}">
+    {{part.stock < part.minStock ? '⚠️ 库存低于预警值（预警：' + part.minStock + part.unit + '）' : '✅ 库存充足'}}
+  </view>
+  <view class="stock-update">最后更新：{{part.lastUpdate || '未记录'}}</view>
+</view>
+
+<!-- 库存调整操作区 -->
+<view class="operate-area">
+  <view class="operate-title">库存调整</view>
+  
+  <!-- 入库操作 -->
+  <view class="operate-item">
+    <text class="operate-label">入库数量：</text>
+    <input 
+      type="number" 
+      placeholder="请输入入库数量" 
+      bindinput="onInStockInput"
+      class="num-input"
+      min="1"
+    ></input>
+    <button bindtap="confirmInStock" class="operate-btn in-btn">确认入库</button>
+  </view>
+  
+  <!-- 出库操作 -->
+  <view class="operate-item">
+    <text class="operate-label">出库数量：</text>
+    <input 
+      type="number" 
+      placeholder="请输入出库数量" 
+      bindinput="onOutStockInput"
+      class="num-input"
+      min="1"
+    ></input>
+    <button bindtap="confirmOutStock" class="operate-btn out-btn">确认出库</button>
+  </view>
+</view>
+
+<!-- 备注信息 -->
+<view class="remark-area" wx:if="{{part.remark}}">
+  <view class="remark-title">备注信息</view>
+  <view class="remark-content">{{part.remark}}</view>
+</view>

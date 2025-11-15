@@ -1,0 +1,136 @@
+/* 顶部导航 */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  background: #165DFF;
+  padding: 20rpx 30rpx;
+  color: white;
+}
+.back-btn {
+  font-size: 28rpx;
+  padding: 10rpx 15rpx;
+}
+.nav-title {
+  flex: 1;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+/* 信息卡片通用样式 */
+.info-card, .stock-card, .operate-area, .remark-area {
+  background: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 基本信息项 */
+.info-item {
+  display: flex;
+  padding: 15rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+.info-item:last-child {
+  border-bottom: none;
+}
+.info-label {
+  width: 200rpx;
+  font-size: 28rpx;
+  color: #666;
+}
+.info-value {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 库存卡片 */
+.stock-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+  color: #333;
+}
+.stock-value {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 20rpx;
+}
+.stock-value .num {
+  font-size: 60rpx;
+  font-weight: bold;
+  color: #165DFF;
+}
+.stock-value .unit {
+  font-size: 30rpx;
+  color: #666;
+  margin-left: 10rpx;
+}
+.stock-status {
+  font-size: 26rpx;
+  padding: 5rpx 0;
+  display: block;
+  margin-bottom: 15rpx;
+}
+.stock-update {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 操作区 */
+.operate-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 25rpx;
+  color: #333;
+}
+.operate-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.operate-label {
+  width: 180rpx;
+  font-size: 28rpx;
+  color: #666;
+}
+.num-input {
+  flex: 1;
+  height: 70rpx;
+  border: 1rpx solid #eee;
+  border-radius: 10rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+}
+.operate-btn {
+  width: 200rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+  font-size: 28rpx;
+  padding: 0;
+  margin-left: 20rpx;
+  border-radius: 10rpx;
+}
+.in-btn {
+  background: #00B42A;
+  color: white;
+}
+.out-btn {
+  background: #F53F3F;
+  color: white;
+}
+
+/* 备注区 */
+.remark-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 15rpx;
+  color: #333;
+}
+.remark-content {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.6;
+}

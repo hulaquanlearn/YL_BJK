@@ -1,0 +1,101 @@
+<view class="container">
+  <!-- 顶部标题栏 -->
+  <view class="header">
+    <text class="header-title">设备配件库</text>
+  </view>
+
+  <!-- 搜索框 -->
+  <view class="search-box">
+    <input 
+      type="text" 
+      placeholder="搜索名称/型号/设备..." 
+      bindinput="onSearch"
+      value="{{searchKeyword}}"
+    />
+  </view>
+
+  <!-- 工段筛选（带分类标题） -->
+  <view class="filter-section">
+    <text class="section-title">工段</text>
+    <view class="filter-tags">
+      <view 
+        class="tag {{selectedWorkshopId === item.id ? 'active' : ''}}" 
+        wx:for="{{workshops}}" 
+        wx:key="id"
+        bindtap="chooseWorkshop" 
+        data-id="{{item.id}}"
+      >
+        {{item.name}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 货架号筛选（带分类标题） -->
+  <view class="filter-section">
+    <text class="section-title">货架号</text>
+    <view class="filter-tags">
+      <view 
+        class="tag {{selectedShelfNo === '全部' ? 'active' : ''}}" 
+        bindtap="chooseShelfNo" 
+        data-shelf="全部"
+      >
+        全部
+      </view>
+      <view 
+        class="tag {{selectedShelfNo === item ? 'active' : ''}}" 
+        wx:for="{{shelfNoList}}" 
+        wx:key="*this"
+        bindtap="chooseShelfNo" 
+        data-shelf="{{item}}"
+      >
+        {{item}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 排序区域 -->
+  <view class="sort-bar">
+    <text class="list-title">配件列表</text>
+    <view class="sort-btn" bindtap="showSortPicker">
+      <text>排序：{{sortTypes[sortIndex]}}</text>
+      <text class="sort-arrow">{{isShowSort ? '▼' : '▲'}}</text>
+    </view>
+  </view>
+
+  <!-- 排序选项框 -->
+  <view class="sort-options" wx:if="{{isShowSort}}">
+    <view 
+      class="sort-item" 
+      wx:for="{{sortTypes}}" 
+      wx:key="index"
+      bindtap="chooseSort" 
+      data-index="{{index}}"
+    >
+      {{item}}
+    </view>
+  </view>
+
+  <!-- 配件列表（卡片式 + 库存状态色） -->
+  <view class="parts-list">
+    <view class="part-card" wx:for="{{parts}}" wx:key="_id" bindtap="goToDetail" data-id="{{item._id}}">
+      <view class="part-name">{{item.name}}</view>
+      <view class="part-info">
+        <text>型号：{{item.model}} | 适用：{{item.device}}</text>
+      </view>
+      <view class="part-stock">
+        <text class="stock-status {{item.stockStatus}}">{{item.stockStatusText}}</text>
+        <text class="stock-num">剩余：{{item.stock}}{{item.unit}}</text>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:if="{{parts.length === 0 && !isLoading}}">
+      暂无匹配配件
+    </view>
+
+    <!-- 加载中 -->
+    <view class="loading" wx:if="{{isLoading}}">
+      加载中...
+    </view>
+  </view>
+</view>
