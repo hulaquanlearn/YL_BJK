@@ -1,14 +1,23 @@
-# Windows
 [Dd]esktop.ini
 Thumbs.db
-$RECYCLE.BIN/
-
-# macOS
 .DS_Store
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-
-# Node.js
+.idea/
+.vscode/
+.agents/
+.codebuddy/
+.codex/
+.mcp.json
 node_modules/
+**/node_modules/
+miniprogram/miniprogram_npm/
+miniprogram_npm/
+dist/
+coverage/
+*.log
+npm-debug.log*
+.env
+.env.local
+.env.*.local
+server/.env
+project.private.config.json
+miniprogram/project.private.config.json

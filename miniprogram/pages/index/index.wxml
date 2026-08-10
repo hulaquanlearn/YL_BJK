@@ -1,101 +1,161 @@
 <view class="container">
-  <!-- 顶部标题栏 -->
-  <view class="header">
-    <text class="header-title">设备配件库</text>
+  <view class="page-intro">
+    <text class="page-intro-title">查找备件</text>
+    <text class="page-intro-desc">按名称、编码、规格型号或库位快速定位</text>
   </view>
 
-  <!-- 搜索框 -->
-  <view class="search-box">
-    <input 
-      type="text" 
-      placeholder="搜索名称/型号/设备..." 
-      bindinput="onSearch"
-      value="{{searchKeyword}}"
-    />
+  <view class="search-row">
+    <view class="search-container">
+      <input
+        class="search-input"
+        type="text"
+        placeholder="名称、编码、规格型号或库位"
+        bindinput="syncSearchKeyword"
+        bindconfirm="onSearch"
+        value="{{searchKeyword}}"
+        confirm-type="search"
+      />
+      <text class="clear-btn" wx:if="{{searchKeyword}}" bindtap="clearSearch">清除</text>
+    </view>
+    <button class="search-submit" bindtap="onSearch">查询</button>
   </view>
 
-  <!-- 工段筛选（带分类标题） -->
-  <view class="filter-section">
-    <text class="section-title">工段</text>
-    <view class="filter-tags">
-      <view 
-        class="tag {{selectedWorkshopId === item.id ? 'active' : ''}}" 
-        wx:for="{{workshops}}" 
-        wx:key="id"
-        bindtap="chooseWorkshop" 
-        data-id="{{item.id}}"
-      >
-        {{item.name}}
+  <view class="low-stock-banner" wx:if="{{lowStockOnly}}">
+    <text>低库存清单</text>
+    <text class="low-stock-desc">仅显示达到或低于订购点的备件</text>
+  </view>
+
+  <view class="filter-toolbar">
+    <view class="filter-main" bindtap="toggleFilters">
+      <view class="filter-title-row">
+        <text class="filter-title">筛选</text>
+        <text class="filter-count" wx:if="{{activeFilterCount}}">{{activeFilterCount}}</text>
       </view>
+      <text class="filter-summary">{{filterSummary}}</text>
+      <text class="filter-toggle">{{isFilterExpanded ? '收起' : '展开'}}</text>
+    </view>
+    <picker mode="selector" range="{{sortTypes}}" value="{{sortIndex}}" bindchange="onSortChange">
+      <view class="sort-compact">
+        <text class="sort-caption">排序</text>
+        <text class="sort-current">{{sortTypes[sortIndex]}}</text>
+      </view>
+    </picker>
+  </view>
+
+  <view class="filter-panel" wx:if="{{isFilterExpanded}}">
+    <view class="filter-panel-head">
+      <text>选择筛选条件</text>
+      <text class="filter-reset" wx:if="{{activeFilterCount}}" bindtap="resetFilters">全部重置</text>
+    </view>
+
+    <view class="filter-line">
+      <text class="filter-label">货区</text>
+      <scroll-view class="filter-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="tag-row">
+          <view
+            class="tag {{selectedArea === item.name ? 'active' : ''}}"
+            wx:for="{{areas}}"
+            wx:key="id"
+            bindtap="chooseArea"
+            data-name="{{item.name}}"
+          >{{item.name}}</view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="filter-line" wx:if="{{selectedArea !== '全部'}}">
+      <text class="filter-label">货架</text>
+      <scroll-view class="filter-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="tag-row">
+          <view
+            class="tag {{selectedShelfNo === item ? 'active' : ''}}"
+            wx:for="{{shelfNoList}}"
+            wx:key="*this"
+            bindtap="chooseShelfNo"
+            data-shelf="{{item}}"
+          >{{item}}</view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="filter-line" wx:if="{{selectedShelfNo !== '全部' && selectedArea !== '全部'}}">
+      <text class="filter-label">层数</text>
+      <scroll-view class="filter-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="tag-row">
+          <view
+            class="tag {{selectedLayer === item ? 'active' : ''}}"
+            wx:for="{{layerList}}"
+            wx:key="*this"
+            bindtap="chooseLayer"
+            data-layer="{{item}}"
+          >{{item}}</view>
+        </view>
+      </scroll-view>
     </view>
   </view>
 
-  <!-- 货架号筛选（带分类标题） -->
-  <view class="filter-section">
-    <text class="section-title">货架号</text>
-    <view class="filter-tags">
-      <view 
-        class="tag {{selectedShelfNo === '全部' ? 'active' : ''}}" 
-        bindtap="chooseShelfNo" 
-        data-shelf="全部"
-      >
-        全部
-      </view>
-      <view 
-        class="tag {{selectedShelfNo === item ? 'active' : ''}}" 
-        wx:for="{{shelfNoList}}" 
-        wx:key="*this"
-        bindtap="chooseShelfNo" 
-        data-shelf="{{item}}"
-      >
-        {{item}}
-      </view>
+  <view class="result-bar">
+    <view>
+      <text class="result-title">备件列表</text>
+      <text class="result-total">共 {{totalCount}} 项</text>
+    </view>
+    <text class="result-count">已显示 {{filteredParts.length}} 项</text>
+  </view>
+
+  <view class="skeleton-list" wx:if="{{isLoading}}">
+    <view class="skeleton-card" wx:for="{{skeletonRows}}" wx:key="*this">
+      <view class="skeleton-line wide"></view>
+      <view class="skeleton-line medium"></view>
+      <view class="skeleton-line narrow"></view>
     </view>
   </view>
 
-  <!-- 排序区域 -->
-  <view class="sort-bar">
-    <text class="list-title">配件列表</text>
-    <view class="sort-btn" bindtap="showSortPicker">
-      <text>排序：{{sortTypes[sortIndex]}}</text>
-      <text class="sort-arrow">{{isShowSort ? '▼' : '▲'}}</text>
-    </view>
-  </view>
-
-  <!-- 排序选项框 -->
-  <view class="sort-options" wx:if="{{isShowSort}}">
-    <view 
-      class="sort-item" 
-      wx:for="{{sortTypes}}" 
-      wx:key="index"
-      bindtap="chooseSort" 
-      data-index="{{index}}"
+  <view class="parts-list" wx:else>
+    <view
+      class="part-card"
+      wx:for="{{filteredParts}}"
+      wx:key="_id"
+      bindtap="goToDetail"
+      data-id="{{item._id}}"
+      hover-class="part-card-hover"
     >
-      {{item}}
-    </view>
-  </view>
-
-  <!-- 配件列表（卡片式 + 库存状态色） -->
-  <view class="parts-list">
-    <view class="part-card" wx:for="{{parts}}" wx:key="_id" bindtap="goToDetail" data-id="{{item._id}}">
-      <view class="part-name">{{item.name}}</view>
-      <view class="part-info">
-        <text>型号：{{item.model}} | 适用：{{item.device}}</text>
+      <view class="part-card-head">
+        <view class="part-heading">
+          <text class="part-name">{{item.materialDesc || '未命名备件'}}</text>
+          <text class="material-code">物料编码 {{item.materialCode || '-'}}</text>
+        </view>
+        <view class="stock-badge {{item.stockStatus}}">
+          <text class="stock-status">{{item.stockStatusText}}</text>
+          <text class="stock-value">{{item.totalStock || 0}}{{item.unit || ''}}</text>
+        </view>
       </view>
-      <view class="part-stock">
-        <text class="stock-status {{item.stockStatus}}">{{item.stockStatusText}}</text>
-        <text class="stock-num">剩余：{{item.stock}}{{item.unit}}</text>
+
+      <view class="spec-row">
+        <text class="spec-label">规格型号</text>
+        <text class="spec-value">{{item.specDisplay}}</text>
+      </view>
+      <view class="brand-row" wx:if="{{item.brandDisplay}}">
+        <text class="brand-label">品牌</text>
+        <text class="brand-value">{{item.brandDisplay}}</text>
+      </view>
+
+      <view class="part-location-row">
+        <text class="location-label">存放位置</text>
+        <text class="part-location">{{item.locationDisplay}}</text>
+        <text class="detail-link">详情</text>
       </view>
     </view>
 
-    <!-- 空状态 -->
-    <view class="empty" wx:if="{{parts.length === 0 && !isLoading}}">
-      暂无匹配配件
+    <view class="pagination-state" wx:if="{{filteredParts.length}}">
+      <text wx:if="{{isLoadingMore}}">正在加载下一页...</text>
+      <text wx:elif="{{hasMoreData}}">继续上滑加载更多</text>
+      <text wx:else>已显示全部 {{totalCount}} 项</text>
     </view>
 
-    <!-- 加载中 -->
-    <view class="loading" wx:if="{{isLoading}}">
-      加载中...
+    <view class="empty" wx:if="{{filteredParts.length === 0}}">
+      <text class="empty-title">{{searchKeyword ? '没有找到匹配备件' : '暂无备件数据'}}</text>
+      <text class="empty-desc">{{searchKeyword ? '可尝试缩短关键词或重置筛选条件' : '新增备件后会显示在这里'}}</text>
+      <button class="empty-reset" wx:if="{{searchKeyword || activeFilterCount}}" bindtap="resetAll">清除查询条件</button>
     </view>
   </view>
 </view>

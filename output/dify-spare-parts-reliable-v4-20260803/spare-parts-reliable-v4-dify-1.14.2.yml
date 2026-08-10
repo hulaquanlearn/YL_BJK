@@ -1,0 +1,644 @@
+app:
+  description: 原粮车间纯备件知识库助手。物料编码和常用统计由程序确定性解析，模糊查询与缺料表才调用模型。
+  icon: 🧭
+  icon_background: '#E8F3FF'
+  icon_type: emoji
+  mode: advanced-chat
+  name: 原粮车间备件智能中心 Reliable V4
+  use_icon_as_answer_icon: true
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/deepseek:0.0.19@5b68617c637b62d31e7f33a9f5677b76e88f81868fb04a728e208588564b72ea
+    version: null
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: '您好，我是原粮车间备件智能中心。
+
+
+      我可以快速完成：
+
+      - 按物料编码精确查询库存、货区、货架、东/西侧、层数和南北货位
+
+      - 按名称、规格、品牌模糊查找备件
+
+      - 查询易损件、质保件、厂家备件及货区分类数量
+
+      - 生成低库存、零库存和缺料补货表
+
+
+      提醒：数据来自知识库快照，并非实时数据库。'
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions:
+    - 502000268 在哪里？库存多少？
+    - 备件库有多少种易损件？
+    - 五粮货区有多少易损件？
+    - 生成当前缺料补货表
+    suggested_questions_after_answer:
+      enabled: true
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: code
+      id: '2000000000001'
+      source: '1000000000001'
+      sourceHandle: source
+      target: '1000000000002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: '2000000000002'
+      source: '1000000000002'
+      sourceHandle: source
+      target: '1000000000003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: '2000000000003'
+      source: '1000000000003'
+      sourceHandle: 'true'
+      target: '1000000000004'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: if-else
+      id: '2000000000004'
+      source: '1000000000003'
+      sourceHandle: 'false'
+      target: '1000000000005'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: '2000000000005'
+      source: '1000000000005'
+      sourceHandle: 'true'
+      target: '1000000000006'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: knowledge-retrieval
+      id: '2000000000006'
+      source: '1000000000005'
+      sourceHandle: 'false'
+      target: '1000000000007'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: knowledge-retrieval
+        targetType: code
+      id: '2000000000007'
+      source: '1000000000007'
+      sourceHandle: source
+      target: '1000000000008'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: '2000000000008'
+      source: '1000000000008'
+      sourceHandle: source
+      target: '1000000000009'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: '2000000000009'
+      source: '1000000000009'
+      sourceHandle: 'true'
+      target: '1000000000010'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: '2000000000010'
+      source: '1000000000009'
+      sourceHandle: 'false'
+      target: '1000000000011'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: '2000000000011'
+      source: '1000000000011'
+      sourceHandle: source
+      target: '1000000000012'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: 接收用户的备件问题
+        selected: false
+        title: 用户问题
+        type: start
+        variables: []
+      height: 100
+      id: '1000000000001'
+      position:
+        x: 40
+        y: 400
+      positionAbsolute:
+        x: 40
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import re\n\ndef main(query: str) -> dict:\n    text = (query or '').strip()\n    normalized = text.lower()\n    code_match = re.search(r'(?<!\\d)(\\d{6,12})(?!\\d)', text)\n    material_code = code_match.group(1) if code_match else ''\n\n    greetings = {\n        '你好', '您好', '嗨', 'hello', 'hi', '在吗',\n        '早上好', '下午好', '晚上好', '谢谢', '感谢'\n    }\n    spare_words = [\n        '备件', '物料', '库存', '库位', '货位', '货架', '货区',\n        '规格', '型号', '编码', '品牌', '单位', '补货', '缺料',\n        '缺件', '低库存', '零库存', '安全库存', '最高库存', '在途',\n        '多少种', '易损件', '质保件', '厂家备件', '分类', '统计',\n        '清单', '汇总', '导出', '位置', '在哪里', '轴承', '皮带',\n        '链条', '密封', '阀', '电机', '减速机', '传感器', '接触器',\n        '断路器', '螺栓', '滤芯', '油封'\n    ]\n    shortage_words = [\n        '缺料', '缺件', '低库存', '零库存', '补货', '采购',\n        '短缺', '不足', '待补', '补充清单'\n    ]\n    count_words = [\n        '多少', '几种', '几类', '统计', '汇总', '合计',\n        '分类', '占比', '数量'\n    ]\n    location_words = [\n        '位置', '哪里', '在哪', '库位',\
+          \ '货位', '货架',\n        '货区', '东侧', '西侧', '几层', '层数', '定位'\n    ]\n\n    if normalized in greetings or (\n        len(text) <= 8 and any(word in normalized for word in greetings)\n    ):\n        intent = 'greeting'\n    elif material_code or any(word in normalized for word in spare_words):\n        intent = 'spare_parts'\n    elif any('a' <= char.lower() <= 'z' for char in text) and len(text) <= 60:\n        intent = 'spare_parts'\n    else:\n        intent = 'restricted'\n\n    if material_code:\n        query_mode = 'location'\n    elif any(word in normalized for word in shortage_words):\n        query_mode = 'shortage'\n    elif any(word in normalized for word in count_words):\n        query_mode = 'count'\n    elif any(word in normalized for word in location_words) or material_code:\n        query_mode = 'location'\n    else:\n        query_mode = 'detail'\n\n    return {\n        'intent': intent,\n        'query_mode': query_mode,\n        'query': text,\n        'material_code':\
+          \ material_code,\n        # 精确编码只检索编码，避免经济型索引被“库存/货架”等公共词干扰。\n        'search_query': material_code if material_code else text\n    }"
+        code_language: python3
+        desc: 本地规则完成意图、模式和物料编码提取，不消耗模型
+        outputs:
+          intent:
+            children: null
+            type: string
+          material_code:
+            children: null
+            type: string
+          query:
+            children: null
+            type: string
+          query_mode:
+            children: null
+            type: string
+          search_query:
+            children: null
+            type: string
+        selected: false
+        title: 快速路由与编码提取
+        type: code
+        variables:
+        - value_selector:
+          - sys
+          - query
+          variable: query
+      height: 95
+      id: '1000000000002'
+      position:
+        x: 340
+        y: 400
+      positionAbsolute:
+        x: 340
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: '3000000000001'
+            value: greeting
+            varType: string
+            variable_selector:
+            - '1000000000002'
+            - intent
+          id: 'true'
+          logical_operator: and
+        desc: 问候直接回复，不检索、不调用模型
+        selected: false
+        title: 是否为问候
+        type: if-else
+      height: 175
+      id: '1000000000003'
+      position:
+        x: 680
+        y: 400
+      positionAbsolute:
+        x: 680
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: '您好，我是原粮车间备件智能中心。
+
+
+          您可以直接输入物料编码、备件名称或规格，也可以问：
+
+          - “502000268 在哪里？库存多少？”
+
+          - “有多少种易损件？”
+
+          - “生成缺料补货表”'
+        desc: 零模型快速问候
+        selected: false
+        title: 快速问候
+        type: answer
+        variables: []
+      height: 191
+      id: '1000000000004'
+      position:
+        x: 1020
+        y: 100
+      positionAbsolute:
+        x: 1020
+        y: 100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: '3000000000002'
+            value: restricted
+            varType: string
+            variable_selector:
+            - '1000000000002'
+            - intent
+          id: 'true'
+          logical_operator: and
+        desc: 无关问题直接说明能力边界
+        selected: false
+        title: 是否超出范围
+        type: if-else
+      height: 175
+      id: '1000000000005'
+      position:
+        x: 1020
+        y: 400
+      positionAbsolute:
+        x: 1020
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: '这个问题不在当前助手的业务范围内。
+
+
+          我只处理原粮车间备件信息，可以查询：
+
+          - 物料编码、名称、规格型号、品牌和单位
+
+          - 库存快照、库存状态和在途数量
+
+          - 货区、货架、东/西侧、层数和南北货位
+
+          - 易损件、质保件、厂家备件及货区统计
+
+          - 缺料、低库存、零库存和补货表
+
+
+          请换成备件相关问题，我会继续协助。'
+        desc: 固定业务范围提示
+        selected: false
+        title: 备件范围提醒
+        type: answer
+        variables: []
+      height: 255
+      id: '1000000000006'
+      position:
+        x: 1360
+        y: 200
+      positionAbsolute:
+        x: 1360
+        y: 200
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        dataset_ids: []
+        desc: 导入后只绑定“原粮车间备件信息中心”知识库
+        metadata_filtering_mode: disabled
+        multiple_retrieval_config:
+          reranking_enable: false
+          reranking_mode: reranking_model
+          score_threshold: 0
+          top_k: 15
+        query_attachment_selector: []
+        query_variable_selector:
+        - '1000000000002'
+        - search_query
+        retrieval_mode: multiple
+        selected: false
+        title: 检索备件知识库
+        type: knowledge-retrieval
+      height: 133
+      id: '1000000000007'
+      position:
+        x: 1360
+        y: 540
+      positionAbsolute:
+        x: 1360
+        y: 540
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "import json\nimport re\n\ndef collect_texts(value, depth=0):\n    if depth > 8 or value is None:\n        return []\n    if isinstance(value, str):\n        text = value.strip()\n        if not text:\n            return []\n        outputs = [text]\n        if text[:1] in ('{', '['):\n            try:\n                outputs.extend(collect_texts(json.loads(text), depth + 1))\n            except Exception:\n                pass\n        return outputs\n    if isinstance(value, dict):\n        outputs = []\n        priority = ('content', 'text', 'page_content', 'segment', 'metadata', 'data')\n        visited = set()\n        for key in priority:\n            if key in value:\n                outputs.extend(collect_texts(value.get(key), depth + 1))\n                visited.add(key)\n        for key, child in value.items():\n            if key not in visited:\n                outputs.extend(collect_texts(child, depth + 1))\n        return outputs\n    if isinstance(value, (list,\
+          \ tuple)):\n        outputs = []\n        for child in value:\n            outputs.extend(collect_texts(child, depth + 1))\n        return outputs\n    return []\n\ndef unique_blocks(results):\n    blocks = []\n    seen = set()\n    for block in collect_texts(results):\n        normalized = block.replace('\\r\\n', '\\n').replace('\\u00a0', ' ').strip()\n        if len(normalized) < 12 or normalized in seen:\n            continue\n        seen.add(normalized)\n        blocks.append(normalized)\n    return blocks\n\ndef field(block, label, fallback='未填写'):\n    match = re.search(r'^' + re.escape(label) + r'\\s*[：:]\\s*(.+?)\\s*$', block, re.M)\n    return match.group(1).strip() if match else fallback\n\ndef snapshot_of(blocks):\n    for block in blocks:\n        value = field(block, '数据快照时间', '')\n        if value:\n            return value\n    return '知识库未标注时间'\n\ndef table_rows(block):\n    rows = []\n    for line in block.splitlines():\n        line = line.strip()\n        if\
+          \ not line.startswith('|') or line.startswith('| ---'):\n            continue\n        cells = [cell.strip() for cell in line.strip('|').split('|')]\n        if cells:\n            rows.append(cells)\n    return rows\n\ndef exact_part_answer(code, blocks):\n    pattern = re.compile(r'^\\s*(?:[-*]\\s*)?物料编码\\s*[：:]\\s*' + re.escape(code) + r'\\s*$', re.M)\n    candidates = [block for block in blocks if pattern.search(block)]\n    if not candidates:\n        fragments = [block for block in blocks if code in block]\n        if fragments:\n            snapshot = snapshot_of(blocks)\n            return '\\n'.join([\n                f'数据快照：{snapshot}（非实时）', '', '⚠️ 检索结果不完整',\n                f'知识库检索到了物料编码 {code} 的关键词片段，但没有同时返回库存明细和具体位置。',\n                '请把知识库文档重新分段：分隔符改为 ---，最大长度设置为 1800～2500 tokens，重叠设为 0，然后重新测试。'\n            ])\n        return '\\n'.join([\n            '数据快照：知识库未标注时间（非实时）', '', '\U0001F50E 未找到精确记录',\n            f'本次知识库检索没有返回物料编码 {code} 的库存明细。',\n            '请确认编码无误，并检查“检索备件知识库”节点是否绑定了最新备件知识库。'\n\
+          \        ])\n    labels = ('物料描述', '规格型号', '当前库存', '库存状态', '货区', '具体位置')\n    block = max(candidates, key=lambda item: (sum(label in item for label in labels), len(item)))\n    snapshot = field(block, '数据快照时间', snapshot_of(blocks))\n    return '\\n'.join([\n        f'数据快照：{snapshot}（非实时）',\n        '',\n        '\U0001F4CD 精确定位',\n        f'- 物料编码：{field(block, \"物料编码\", code)}',\n        f'- 名称：{field(block, \"物料描述\")}',\n        f'- 规格型号：{field(block, \"规格型号\")}',\n        f'- 当前库存：{field(block, \"当前库存\")}',\n        f'- 库存状态：{field(block, \"库存状态\")}',\n        f'- 货区：{field(block, \"货区\")}',\n        f'- 具体位置：{field(block, \"具体位置\")}',\n        '',\n        '方位说明：东/西侧是货物在货架上的方位；货位按南到北依次排列。'\n    ])\n\ndef main(query: str, query_mode: str, material_code: str, results: list) -> dict:\n    blocks = unique_blocks(results or [])\n    context_text = '\\n\\n---\\n\\n'.join(blocks)\n    answer = ''\n    if material_code:\n        answer = exact_part_answer(material_code, blocks)\n \
+          \   return {\n        'found': 'yes' if answer else 'no',\n        'answer': answer,\n        'context_text': context_text\n    }"
+        code_language: python3
+        desc: 物料编码直接解析；分类统计、缺料表和模糊查询交给 AI 解读知识库
+        outputs:
+          answer:
+            children: null
+            type: string
+          context_text:
+            children: null
+            type: string
+          found:
+            children: null
+            type: string
+        selected: false
+        title: 确定性数据解析
+        type: code
+        variables:
+        - value_selector:
+          - '1000000000002'
+          - query
+          variable: query
+        - value_selector:
+          - '1000000000002'
+          - query_mode
+          variable: query_mode
+        - value_selector:
+          - '1000000000002'
+          - material_code
+          variable: material_code
+        - value_selector:
+          - '1000000000007'
+          - result
+          variable: results
+      height: 95
+      id: '1000000000008'
+      position:
+        x: 1720
+        y: 540
+      positionAbsolute:
+        x: 1720
+        y: 540
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: '3000000000003'
+            value: 'yes'
+            varType: string
+            variable_selector:
+            - '1000000000008'
+            - found
+          id: 'true'
+          logical_operator: and
+        desc: 精确结果直接回复，不调用模型
+        selected: false
+        title: 是否已有精确结果
+        type: if-else
+      height: 151
+      id: '1000000000009'
+      position:
+        x: 2060
+        y: 540
+      positionAbsolute:
+        x: 2060
+        y: 540
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: '{{#1000000000008.answer#}}'
+        desc: 输出程序解析的精确结果
+        selected: false
+        title: 回复精确结果
+        type: answer
+        variables:
+        - value_selector:
+          - '1000000000008'
+          - answer
+          variable: answer
+      height: 130
+      id: '1000000000010'
+      position:
+        x: 2400
+        y: 340
+      positionAbsolute:
+        x: 2400
+        y: 340
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 仅处理模糊名称、复杂统计和缺料表
+        memory:
+          query_prompt_template: '{{#sys.query#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: false
+            size: 2
+        model:
+          completion_params:
+            max_tokens: 4000
+            temperature: 0
+            top_p: 0.8
+          mode: chat
+          name: deepseek-v4-flash
+          provider: langgenius/deepseek/deepseek
+        prompt_template:
+        - role: system
+          text: '你是“原粮车间备件智能中心”的只读备件数据分析师。只处理备件查询、分类统计和缺料补货表，不回答维修、保养、故障诊断或其他无关问题。
+
+
+            当前问题模式：{{#1000000000002.query_mode#}}
+
+
+            规则：
+
+            1. 只能使用“检索内容”，严禁编造、估算、合并物料或用相似备件冒充精确结果。
+
+            2. 涉及库存、数量、位置或清单时，首行写“数据快照：知识库中的时间（非实时）”。
+
+            3. 分类数量只能引用“备件类型统计”或“货区与备件类型统计”中的预计算数字，不能数检索片段。
+
+            4. 缺料表只能引用“缺料与补货清单”，保留零库存记录；输出物料编码、名称/规格、当前库存、安全库存、最高库存、建议补货、单位、货区/精确位置。
+
+            5. 方位1=货架东侧，方位2=货架西侧；层数就是所在货架层；货位从南到北依次排列。
+
+            6. 没有精确证据时写“知识库中未找到精确记录”，并追问编码、完整名称、规格或货区。
+
+            7. 知识库是只读快照。不能更新库存或执行出入库、盘点；可提供可复制的 Markdown 表格。
+
+            8. 直接输出答案，不展示思考过程，不复述规则，不写英文分析。
+
+
+            <检索内容>
+
+            {{#1000000000008.context_text#}}
+
+            </检索内容>'
+        - role: user
+          text: '{{#sys.query#}}'
+        selected: false
+        title: 备件智能分析
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 115
+      id: '1000000000011'
+      position:
+        x: 2400
+        y: 700
+      positionAbsolute:
+        x: 2400
+        y: 700
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: '{{#1000000000011.text#}}'
+        desc: 输出模糊查询、复杂统计或缺料表
+        selected: false
+        title: 回复分析结果
+        type: answer
+        variables:
+        - value_selector:
+          - '1000000000011'
+          - text
+          variable: text
+      height: 130
+      id: '1000000000012'
+      position:
+        x: 2740
+        y: 700
+      positionAbsolute:
+        x: 2740
+        y: 700
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    viewport:
+      x: -1027.775
+      y: 0.24999999999994316
+      zoom: 0.55
+  rag_pipeline_variables: []

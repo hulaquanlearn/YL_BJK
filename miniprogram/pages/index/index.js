@@ -1,281 +1,312 @@
+const api = require('../../services/api.js');
+const auth = require('../../services/auth.js');
+
+function decodeOption(value) {
+  try {
+    return decodeURIComponent(value || '');
+  } catch (_) {
+    return String(value || '');
+  }
+}
+
+function stockState(item) {
+  const stock = Number(item.totalStock) || 0;
+  const hasReorderPoint = item.reorderPoint !== null && item.reorderPoint !== undefined;
+  if (stock <= 0) return { stockStatus: 'zero', stockStatusText: '无库存' };
+  if (hasReorderPoint && stock <= Number(item.reorderPoint)) {
+    return { stockStatus: 'low', stockStatusText: '低库存' };
+  }
+  return { stockStatus: 'normal', stockStatusText: '库存正常' };
+}
+
+function locationText(item) {
+  if (item.locationType === 'free_text') {
+    return [item.warehouseAreaName, item.locationNote].filter(Boolean).join(' · ') || '位置未登记';
+  }
+  const sideMap = { 1: '东侧', 2: '西侧' };
+  const side = sideMap[item.position] || (item.position ? String(item.position) : '');
+  const parts = [
+    item.warehouseAreaName || '未分区',
+    item.shelf === 0 || item.shelf ? `${item.shelf}号货架` : '货架未登记',
+    side,
+    item.layer === 0 || item.layer ? `${item.layer}层` : '层数未登记',
+    item.location === 0 || item.location ? `${item.location}货位` : ''
+  ];
+  return parts.filter(Boolean).join(' · ');
+}
+
 Page({
   data: {
-    // 工段数据（每个工段对应独立货架号）
-    workshops: [
-      { id: 1, name: '全部' },
-      { id: 2, name: '破曲工段' },
-      { id: 3, name: '五粮工段' },
-      { id: 4, name: '蒸糠工段' },
-      { id: 5, name: '输送工段' },
-    ],
-    selectedWorkshopId: 1, // 默认选中“全部”
-
-    // 工段→专属货架号（独立无重复）
-    shelvesByWorkshop: {
-      '全部': ['1号货架', '2号货架', '3号货架', '4号货架', '5号货架', '6号货架'],
-      '破曲工段': ['1号货架', '2号货架'],
-      '五粮工段': ['3号货架', '4号货架'],
-      '蒸糠工段': ['5号货架'],
-      '输送工段': ['6号货架']
-    },
-    shelfNoList: [], // 当前工段的货架号
+    searchKeyword: '',
+    areas: [{ id: 1, name: '全部' }],
+    selectedArea: '全部',
+    shelfNoList: ['全部'],
     selectedShelfNo: '全部',
-
-    // 货架号→对应层数（独立定义）
-    layersByShelf: {
-      '全部': ['1层', '2层', '3层', '4层'],
-      '1号货架': ['1层', '2层', '3层'],
-      '2号货架': ['1层', '2层'],
-      '3号货架': ['1层', '2层'],
-      '4号货架': ['1层', '2层', '3层', '4层'],
-      '5号货架': ['1层', '2层', '3层'],
-      '6号货架': ['1层', '2层']
-    },
-    layerList: [], // 当前货架号的层数
+    layerList: ['全部'],
     selectedLayer: '全部',
-
-    // 排序配置（默认按名称A-Z）
-    sortTypes: ['默认', '库存从高到低', '库存从低到高'],
+    sortTypes: ['名称顺序', '库存从少到多', '库存从多到少', '编码升序', '编码降序'],
     sortIndex: 0,
-    isShowSort: false,
-
-    // 数据与状态
-    parts: [], // 筛选后显示的列表
-    originParts: [], // 原始数据备份
+    filteredParts: [],
+    totalCount: 0,
     isLoading: false,
-    page: 1,
-    pageSize: 10,
-    hasMore: true,
-    searchKeyword: ''
+    isLoadingMore: false,
+    hasMoreData: true,
+    pageSize: 20,
+    currentPage: 1,
+    shelfMap: {},
+    layerMap: {},
+    isAdmin: false,
+    lowStockOnly: false,
+    isFilterExpanded: false,
+    activeFilterCount: 0,
+    filterSummary: '全部货区',
+    skeletonRows: [1, 2, 3]
   },
 
-  /**
-   * 页面加载初始化
-   */
-  onLoad() {
-    this.db = wx.cloud.database().collection('parts');
-    // 初始化货架号和层数（默认“全部”工段）
-    const defaultWorkshop = this.data.workshops[0].name;
+  onLoad(options = {}) {
+    if (!auth.requireLogin()) return;
+    this._hasShown = false;
     this.setData({
-      shelfNoList: this.data.shelvesByWorkshop[defaultWorkshop],
-      layerList: this.data.layersByShelf['全部']
+      isAdmin: auth.isAdmin(),
+      lowStockOnly: options.lowStock === '1',
+      searchKeyword: decodeOption(options.keyword)
     });
-    this.getPartsList(); // 加载配件数据
+    this.loadFilters();
+    this.loadParts({ page: 1 });
   },
 
-  /**
-   * 页面显示时刷新数据（从详情页返回）
-   */
   onShow() {
-    this.setData({ page: 1, hasMore: true }, () => {
-      this.getPartsList();
-    });
+    if (!this._hasShown) {
+      this._hasShown = true;
+      return;
+    }
+    this.refreshParts();
   },
 
-  /**
-   * 从云数据库加载配件数据（带分页）
-   */
-  getPartsList() {
-    const { page, pageSize } = this.data;
-    this.setData({ isLoading: true });
+  async onPullDownRefresh() {
+    try {
+      await this.loadParts({ page: 1 });
+    } finally {
+      wx.stopPullDownRefresh();
+    }
+  },
 
-    this.db
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .get()
-      .then(res => {
-        const newParts = res.data || [];
-        const originParts = page === 1 ? newParts : [...this.data.originParts, ...newParts];
-        this.setData({
-          originParts,
-          isLoading: false,
-          hasMore: newParts.length === pageSize
-        }, () => {
-          this.filterParts(); // 加载后立即筛选
-        });
-      })
-      .catch(err => {
-        console.error('加载配件失败：', err);
-        wx.showToast({ title: '数据加载失败', icon: 'none' });
-        this.setData({ isLoading: false });
+  refreshParts() {
+    this.setData({ currentPage: 1, hasMoreData: true });
+    return this.loadParts({ page: 1 });
+  },
+
+  async loadFilters() {
+    try {
+      const res = await api.getFilters();
+      if (!res.success) throw new Error(res.msg || '筛选数据加载失败');
+      const { areas, shelfMap, layerMap } = res.data || {};
+      const validAreas = (areas || []).filter(Boolean);
+      this.setData({
+        areas: [{ id: 1, name: '全部' }, ...validAreas.map((name, index) => ({
+          id: index + 2,
+          name
+        }))],
+        shelfMap: shelfMap || {},
+        layerMap: layerMap || {}
       });
+    } catch (err) {
+      console.error('加载筛选数据失败：', err);
+      wx.showToast({ title: err.message || '筛选数据加载失败', icon: 'none' });
+    }
   },
 
-  /**
-   * 搜索功能（关键词筛选）
-   */
-  onSearch(e) {
-    const keyword = e.detail.value.trim();
-    this.setData({ searchKeyword: keyword }, () => {
-      this.filterParts();
-    });
-  },
-
-  /**
-   * 选择工段：联动更新货架号
-   */
-  chooseWorkshop(e) {
-    const workshopId = e.currentTarget.dataset.id;
-    const workshop = this.data.workshops.find(ws => ws.id === workshopId);
+  refreshFilterMeta() {
+    const selected = [];
+    if (this.data.selectedArea !== '全部') selected.push(this.data.selectedArea);
+    if (this.data.selectedShelfNo !== '全部') selected.push(`${this.data.selectedShelfNo}货架`);
+    if (this.data.selectedLayer !== '全部') selected.push(this.data.selectedLayer);
     this.setData({
-      selectedWorkshopId: workshopId,
-      shelfNoList: this.data.shelvesByWorkshop[workshop.name], // 加载当前工段专属货架
-      selectedShelfNo: '全部', // 重置货架号
-      layerList: this.data.layersByShelf['全部'], // 重置层数
-      selectedLayer: '全部'
-    }, () => {
-      this.filterParts();
+      activeFilterCount: selected.length,
+      filterSummary: selected.length ? selected.join(' · ') : '全部货区'
     });
-    wx.showToast({ title: `已选：${workshop.name}`, icon: 'none' });
   },
 
-  /**
-   * 选择货架号：联动更新层数
-   */
+  toggleFilters() {
+    this.setData({ isFilterExpanded: !this.data.isFilterExpanded });
+  },
+
+  chooseArea(e) {
+    const areaName = e.currentTarget.dataset.name;
+    this.setData({
+      selectedArea: areaName,
+      selectedShelfNo: '全部',
+      shelfNoList: ['全部', ...(this.data.shelfMap[areaName] || [])],
+      selectedLayer: '全部',
+      layerList: ['全部'],
+      currentPage: 1,
+      hasMoreData: true
+    }, () => {
+      this.refreshFilterMeta();
+      this.loadParts({ page: 1 });
+    });
+  },
+
   chooseShelfNo(e) {
     const shelfNo = e.currentTarget.dataset.shelf;
+    const layers = this.data.layerMap[this.data.selectedArea]?.[shelfNo] || [];
     this.setData({
       selectedShelfNo: shelfNo,
-      layerList: this.data.layersByShelf[shelfNo], // 加载当前货架专属层数
-      selectedLayer: '全部' // 重置层数
-    }, () => {
-      this.filterParts();
-    });
-    wx.showToast({ title: `已选：${shelfNo}`, icon: 'none' });
-  },
-
-  /**
-   * 选择层数：筛选对应配件
-   */
-  chooseLayer(e) {
-    const layer = e.currentTarget.dataset.layer;
-    this.setData({ selectedLayer: layer }, () => {
-      this.filterParts();
-    });
-    wx.showToast({ title: `已选：${layer}`, icon: 'none' });
-  },
-
-  /**
-   * 多条件筛选（工段+货架号+层数+搜索）
-   */
-  filterParts() {
-    const {
-      originParts,
-      selectedWorkshopId,
-      workshops,
-      selectedShelfNo,
-      selectedLayer,
-      searchKeyword
-    } = this.data;
-
-    // 1. 工段筛选
-    const workshop = workshops.find(ws => ws.id === selectedWorkshopId);
-    const workshopName = workshop?.name || '全部';
-    let filtered = [...originParts];
-    if (workshopName !== '全部') {
-      filtered = filtered.filter(part => part.workshop === workshopName);
-    }
-
-    // 2. 货架号筛选
-    if (selectedShelfNo !== '全部') {
-      filtered = filtered.filter(part => part.shelfNo === selectedShelfNo);
-    }
-
-    // 3. 层数筛选
-    if (selectedLayer !== '全部') {
-      filtered = filtered.filter(part => part.shelfLayer === selectedLayer);
-    }
-
-    // 4. 搜索筛选
-    if (searchKeyword) {
-      filtered = filtered.filter(part =>
-        (part.name || '').includes(searchKeyword) ||
-        (part.model || '').includes(searchKeyword) ||
-        (part.device || '').includes(searchKeyword)
-      );
-    }
-
-    // 筛选后应用排序
-    this.setData({ parts: filtered }, () => {
-      this.changeSort(this.data.sortIndex);
-    });
-  },
-
-  /**
-   * 排序相关方法
-   */
-  showSortPicker() {
-    this.setData({ isShowSort: true });
-  },
-  hideSortPicker() {
-    this.setData({ isShowSort: false });
-  },
-  chooseSort(e) {
-    const sortIndex = e.currentTarget.dataset.index;
-    this.setData({ sortIndex, isShowSort: false }, () => {
-      this.changeSort(sortIndex);
-    });
-  },
-  changeSort(sortIndex) {
-    let sorted = [...this.data.parts];
-    switch (sortIndex) {
-      case 1: // 库存从高到低
-        sorted.sort((a, b) => (b.stock || 0) - (a.stock || 0));
-        break;
-      case 2: // 库存从低到高
-        sorted.sort((a, b) => (a.stock || 0) - (b.stock || 0));
-        break;
-      default: // 默认按名称A-Z
-        sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    }
-    this.setData({ parts: sorted });
-  },
-
-  /**
-   * 加载更多数据（分页）
-   */
-  loadMore() {
-    if (this.data.isLoading || !this.data.hasMore) return;
-    this.setData({ page: this.data.page + 1 }, () => {
-      this.getPartsList();
-    });
-  },
-
-  /**
-   * 跳转到配件详情页
-   */
-  goToDetail(e) {
-    const partId = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: `/pages/detail/detail?id=${partId}` });
-  },
-
-  /**
-   * 下拉刷新：重置所有筛选条件
-   */
-  onPullDownRefresh() {
-    this.setData({
-      page: 1,
-      hasMore: true,
-      selectedWorkshopId: 1,
-      selectedShelfNo: '全部',
       selectedLayer: '全部',
-      searchKeyword: '',
-      sortIndex: 0
+      layerList: ['全部', ...layers],
+      currentPage: 1,
+      hasMoreData: true
     }, () => {
-      const defaultWorkshop = this.data.workshops[0].name;
-      this.setData({
-        shelfNoList: this.data.shelvesByWorkshop[defaultWorkshop],
-        layerList: this.data.layersByShelf['全部']
-      }, () => {
-        this.getPartsList().then(() => wx.stopPullDownRefresh());
-      });
+      this.refreshFilterMeta();
+      this.loadParts({ page: 1 });
     });
   },
 
-  /**
-   * 上拉触底：加载更多
-   */
+  chooseLayer(e) {
+    this.setData({
+      selectedLayer: e.currentTarget.dataset.layer,
+      currentPage: 1,
+      hasMoreData: true
+    }, () => {
+      this.refreshFilterMeta();
+      this.loadParts({ page: 1 });
+    });
+  },
+
+  onSortChange(e) {
+    this.setData({
+      sortIndex: Number(e.detail.value) || 0,
+      currentPage: 1,
+      hasMoreData: true
+    }, () => this.loadParts({ page: 1 }));
+  },
+
+  syncSearchKeyword(e) {
+    this.setData({ searchKeyword: e.detail.value || '' });
+  },
+
+  onSearch() {
+    this.setData({ currentPage: 1, hasMoreData: true });
+    this.loadParts({ page: 1 });
+  },
+
+  clearSearch() {
+    this.setData({ searchKeyword: '', currentPage: 1, hasMoreData: true });
+    this.loadParts({ page: 1 });
+  },
+
+  resetFilters() {
+    this.setData({
+      selectedArea: '全部',
+      selectedShelfNo: '全部',
+      shelfNoList: ['全部'],
+      selectedLayer: '全部',
+      layerList: ['全部'],
+      currentPage: 1,
+      hasMoreData: true
+    }, () => {
+      this.refreshFilterMeta();
+      this.loadParts({ page: 1 });
+    });
+  },
+
+  resetAll() {
+    this.setData({
+      searchKeyword: '',
+      selectedArea: '全部',
+      selectedShelfNo: '全部',
+      shelfNoList: ['全部'],
+      selectedLayer: '全部',
+      layerList: ['全部'],
+      currentPage: 1,
+      hasMoreData: true
+    }, () => {
+      this.refreshFilterMeta();
+      this.loadParts({ page: 1 });
+    });
+  },
+
+  buildParams(page) {
+    const sortMap = ['name', 'stockAsc', 'stockDesc', 'codeAsc', 'codeDesc'];
+    const params = {
+      page,
+      pageSize: this.data.pageSize,
+      sort: sortMap[this.data.sortIndex] || 'name',
+      searchKeyword: this.data.searchKeyword.trim()
+    };
+    if (this.data.lowStockOnly) params.lowStock = '1';
+    if (this.data.selectedArea !== '全部') params.warehouseAreaName = this.data.selectedArea;
+    if (this.data.selectedShelfNo !== '全部') {
+      params.shelf = this.data.selectedShelfNo === '未指定'
+        ? '__EMPTY__'
+        : String(this.data.selectedShelfNo).replace('号', '');
+    }
+    if (this.data.selectedLayer !== '全部') {
+      params.layer = this.data.selectedLayer === '未指定'
+        ? '__EMPTY__'
+        : String(this.data.selectedLayer).replace('层', '');
+    }
+    return params;
+  },
+
+  formatPart(item) {
+    return {
+      ...item,
+      ...stockState(item),
+      specDisplay: item.spec || '未登记',
+      brandDisplay: item.brand || '',
+      locationDisplay: locationText(item)
+    };
+  },
+
+  async loadParts(options = {}) {
+    const targetPage = Number(options.page) || 1;
+    const append = options.append === true && targetPage > 1;
+    const requestId = (this._partsRequestId || 0) + 1;
+    this._partsRequestId = requestId;
+    this.setData(append ? { isLoadingMore: true } : { isLoading: true });
+
+    try {
+      const res = await api.getParts(this.buildParams(targetPage));
+      if (requestId !== this._partsRequestId) return;
+      const pageData = (res.data || []).map(item => this.formatPart(item));
+      const filteredParts = append ? this.data.filteredParts.concat(pageData) : pageData;
+      const totalCount = Number(res.total) || 0;
+      this.setData({
+        filteredParts,
+        totalCount,
+        currentPage: targetPage,
+        hasMoreData: filteredParts.length < totalCount
+      });
+    } catch (err) {
+      if (requestId !== this._partsRequestId) return;
+      console.error('加载备件失败：', err);
+      wx.showToast({ title: err.message || '加载失败，请重试', icon: 'none' });
+    } finally {
+      if (requestId === this._partsRequestId) {
+        this.setData({ isLoading: false, isLoadingMore: false });
+      }
+    }
+  },
+
+  loadMore() {
+    if (this.data.isLoading || this.data.isLoadingMore || !this.data.hasMoreData) return;
+    this.loadParts({ page: this.data.currentPage + 1, append: true });
+  },
+
   onReachBottom() {
     this.loadMore();
+  },
+
+  goToDetail(e) {
+    const partId = e?.currentTarget?.dataset?.id;
+    if (!partId) {
+      wx.showToast({ title: '备件信息异常', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/detail/detail?id=${partId}`,
+      fail: () => wx.showToast({ title: '详情打开失败，请重试', icon: 'none' })
+    });
   }
 });

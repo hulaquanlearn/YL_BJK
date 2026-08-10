@@ -1,79 +1,110 @@
-<!-- 顶部导航 -->
-<view class="nav-bar">
-  <view class="back-btn" bindtap="goBack">返回</view>
-  <view class="nav-title">配件详情</view>
-</view>
+<view class="detail-page">
+  <view class="card">
+    <view class="card-header">基本信息</view>
+    <view class="card-item">
+      <text class="label">物料编码：</text>
+      <text class="value">{{part.materialCode}}</text>
+    </view>
+    <view class="card-item">
+      <text class="label">物料描述：</text>
+      <text class="value">{{part.materialDesc}}</text>
+    </view>
+    <view class="card-item">
+      <text class="label">位置信息：</text>
+      <text class="value">{{part.locationDisplay}}</text>
+    </view>
+    <view class="card-item" wx:if="{{part.locationCode}}">
+      <text class="label">货位编码：</text>
+      <text class="value">{{part.locationCode}}</text>
+    </view>
+    <view class="card-item">
+      <text class="label">备件类型：</text>
+      <text class="value">{{part.partType || '未填写'}}</text>
+    </view>
+    <view class="card-item">
+      <text class="label">用途：</text>
+      <text class="value">{{part.usageDescription || '未填写'}}</text>
+    </view>
+  </view>
 
-<!-- 配件基本信息卡片 -->
-<view class="info-card">
-  <view class="info-item">
-    <text class="info-label">配件名称：</text>
-    <text class="info-value">{{part.name}}</text>
+  <view class="card">
+    <view class="card-header">库存状态</view>
+    <view class="stock-row">
+      <view class="stock-number">
+        <text class="number">{{part.totalStock}}</text>
+        <text class="unit">{{part.unit}}</text>
+      </view>
+    </view>
+    <view class="stock-info">
+      <text class="stock-update">最后更新：{{part.updateTime || '暂无记录'}}</text>
+    </view>
+    <view class="card-item">
+      <text class="label">订购点：</text>
+      <text class="value">{{part.reorderPointText}}</text>
+    </view>
+    <view class="card-item">
+      <text class="label">最高储备：</text>
+      <text class="value">{{part.maxStockText}}</text>
+    </view>
+    <view class="card-item">
+      <text class="label">未税单价：</text>
+      <text class="value">{{part.priceText}}</text>
+    </view>
   </view>
-  <view class="info-item">
-    <text class="info-label">型号规格：</text>
-    <text class="info-value">{{part.model}}</text>
-  </view>
-  <view class="info-item">
-    <text class="info-label">所属工段：</text>
-    <text class="info-value">{{part.workshop}}</text>
-  </view>
-  <view class="info-item">
-    <text class="info-label">适用设备：</text>
-    <text class="info-value">{{part.device}}</text>
-  </view>
-  <view class="info-item">
-    <text class="info-label">配件类型：</text>
-    <text class="info-value">{{part.deviceType}}</text>
-  </view>
-</view>
 
-<!-- 库存信息卡片（突出显示） -->
-<view class="stock-card">
-  <view class="stock-title">库存状态</view>
-  <view class="stock-value">
-    <text class="num">{{part.stock}}</text>
-    <text class="unit">{{part.unit || '个'}}</text>
+  <view class="card" wx:if="{{isAdmin}}">
+    <view class="card-header">库存调整</view>
+    <view class="operation-reason">
+      <text class="operation-label">操作原因：</text>
+      <input class="reason-input" placeholder="如：设备检修领用、采购到货" maxlength="200" value="{{stockReason}}" bindinput="bindStockReason" />
+    </view>
+    <view class="operation-item">
+      <text class="operation-label">入库数量：</text>
+      <input 
+        type="digit" 
+        placeholder="输入入库数量" 
+        value="{{stockIn}}"
+        bindinput="bindStockIn"
+        class="operation-input"
+        placeholder-style="color: #999;"
+      />
+      <button 
+        bindtap="confirmStockIn" 
+        class="btn stock-in" 
+        disabled="{{isStockOperating}}"
+      >
+        确认入库
+      </button>
+    </view>
+    <view class="operation-item">
+      <text class="operation-label">出库数量：</text>
+      <input 
+        type="digit" 
+        placeholder="输入出库数量" 
+        value="{{stockOut}}"
+        bindinput="bindStockOut"
+        class="operation-input"
+        placeholder-style="color: #999;"
+      />
+      <button 
+        bindtap="confirmStockOut" 
+        class="btn stock-out" 
+        disabled="{{isStockOperating}}"
+      >
+        确认出库
+      </button>
+    </view>
   </view>
-  <view class="stock-status" style="color: {{part.stock < part.minStock ? '#F53F3F' : '#00B42A'}}">
-    {{part.stock < part.minStock ? '⚠️ 库存低于预警值（预警：' + part.minStock + part.unit + '）' : '✅ 库存充足'}}
-  </view>
-  <view class="stock-update">最后更新：{{part.lastUpdate || '未记录'}}</view>
-</view>
 
-<!-- 库存调整操作区 -->
-<view class="operate-area">
-  <view class="operate-title">库存调整</view>
-  
-  <!-- 入库操作 -->
-  <view class="operate-item">
-    <text class="operate-label">入库数量：</text>
-    <input 
-      type="number" 
-      placeholder="请输入入库数量" 
-      bindinput="onInStockInput"
-      class="num-input"
-      min="1"
-    ></input>
-    <button bindtap="confirmInStock" class="operate-btn in-btn">确认入库</button>
+  <view class="card permission-note" wx:else>
+    <view class="card-header">权限说明</view>
+    <view class="remark-content">普通用户可查看库存信息，出入库操作仅限管理员。</view>
   </view>
-  
-  <!-- 出库操作 -->
-  <view class="operate-item">
-    <text class="operate-label">出库数量：</text>
-    <input 
-      type="number" 
-      placeholder="请输入出库数量" 
-      bindinput="onOutStockInput"
-      class="num-input"
-      min="1"
-    ></input>
-    <button bindtap="confirmOutStock" class="operate-btn out-btn">确认出库</button>
-  </view>
-</view>
 
-<!-- 备注信息 -->
-<view class="remark-area" wx:if="{{part.remark}}">
-  <view class="remark-title">备注信息</view>
-  <view class="remark-content">{{part.remark}}</view>
+  <view class="card">
+    <view class="card-header">备注信息</view>
+    <view class="remark-content">{{part.remark}}</view>
+  </view>
+
+  <button class="archive-btn" wx:if="{{isAdmin}}" bindtap="archivePart">停用该备件记录</button>
 </view>

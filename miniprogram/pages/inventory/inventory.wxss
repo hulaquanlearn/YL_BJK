@@ -1,0 +1,545 @@
+.container {
+  padding: 20rpx 15rpx;
+  background: #f5f5f5;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding-top: 30rpx;
+  padding-bottom: 120rpx; /* 预留底部按钮空间，避免遮挡最后一条数据 */
+}
+
+.list-scroll {
+  height: calc(100vh - 180rpx);
+  box-sizing: border-box;
+  overflow-y: auto; /* 确保滚动区域可滚动 */
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400rpx;
+  font-size: 28rpx;
+  color: #999;
+}
+
+.inventory-list {
+  background: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+  overflow: hidden; /* 隐藏内部边框溢出，优化圆角展示 */
+}
+
+.list-header {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 0rpx solid #eee;
+  font-weight: 800; /* 表头加粗 */
+  padding: 15rpx 0rpx; /* 修改：新增内边距，优化排版 */
+}
+
+/* 新增：表头列统一蓝色样式 */
+.list-header .col {
+  color: #1677ff; /* 统一表头文字颜色为蓝色 */
+}
+
+.list-item {
+  display: flex;
+  border-bottom: 1rpx solid #f0f0f0;
+  line-height: 60rpx;
+  min-height: 80rpx; /* 行高适配，避免文字挤压 */
+  align-items: center;
+}
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.col {
+  padding: 10rpx;
+  font-size: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* 备件名称列 */
+.name-col {
+  flex: 2.5;
+  justify-content: center;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: normal;
+}
+.name-text {
+  line-height: 32rpx;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.code-col {
+  flex: 2;
+}
+.stock-col {
+  width: 120rpx;
+}
+.status-col {
+  width: 160rpx;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 盘点状态按钮 - 三种状态清晰区分 */
+.status-btn {
+  width: 150rpx;
+  height: 55rpx;
+  line-height: 55rpx;
+  border-radius: 8rpx;
+  font-size:30rpx;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: none !important;
+  /* ========== 新增：禁止文字换行 ========== */
+  white-space: nowrap;
+  /* ========== 新增结束 ========== */
+}
+/* 正常（未盘点）- 绿色 */
+.normal-btn {
+  background: #07c160;
+  color: #fff;
+}
+/* 异常（未盘点）- 红色 */
+.abnormal-btn {
+  background: #ff4d4f;
+  color: #fff;
+}
+/* 已盘点 - 灰色（禁用状态） */
+.finished-btn {
+  background: #ccc;
+  color: #fff;
+  cursor: not-allowed;
+  box-shadow: none; /* 去除阴影，强化禁用感 */
+  opacity: 0.9; /* 轻微透明，区分可用状态 */
+  /* ========== 可选优化：确保已盘点按钮文字不换行 ========== */
+  white-space: nowrap;
+  /* ========== 优化结束 ========== */
+}
+
+/* 按钮点击反馈（仅未盘点状态有效） */
+.normal-btn:active {
+  background: #06b056;
+}
+.abnormal-btn:active {
+  background: #e64648;
+}
+.batch-btn:active {
+  background: #0f6ede;
+}
+.cancel-btn:active {
+  background: #e9e9e9;
+}
+.submit-btn:active {
+  background: #0f6ede;
+}
+
+.empty-tip {
+  text-align: center;
+  padding: 60rpx 10rpx; /* 修改：增加上下内边距 */
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 底部按钮容器（适配放大后的按钮，调整内边距和高度） */
+.batch-btn-wrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 25rpx 20rpx; /* 加大内边距，适配更大按钮 */
+  background: #fff;
+  box-shadow: 0 -2rpx 10rpx rgba(0,0,0,0.05);
+  z-index: 99;
+  box-sizing: border-box;
+  height: 140rpx; /* 对应按钮高度加大，避免挤压 */
+}
+
+/* 完成盘点按钮（核心优化：放大尺寸，更醒目） */
+.batch-btn {
+  width: 100%;
+  height: 100rpx; /* 原88rpx → 100rpx，加大点击区域 */
+  line-height: 100rpx; /* 行高与高度一致，保持文字垂直居中 */
+  background: #1677ff;
+  color: #fff;
+  font-size: 40rpx; /* 原30rpx → 34rpx，放大字体 */
+  border-radius: 12rpx; /* 原10rpx → 12rpx，圆角同步加大更协调 */
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600; /* 新增：字体加粗，视觉更突出 */
+}
+
+/* 弹窗样式 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* 优化：加深遮罩，提升层次感 */
+  z-index: 999;
+  pointer-events: auto;
+}
+
+.exception-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 680rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  z-index: 1000;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding-top: 20rpx;
+  pointer-events: auto; /* 新增：阻止事件冒泡到遮罩 */
+}
+
+.modal-body {
+  padding: 30rpx;
+  padding-top: 0;
+}
+
+/* 异常备件区域样式 */
+.section-wrap {
+  margin-bottom: 20rpx;
+}
+.section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+/* 标题行：两个字一行 */
+.title-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 30rpx; /* 调整每行间距 */
+  white-space: pre-wrap;
+}
+/* 库存数量列宽收窄 */
+.short-col {
+  flex: 0.6 !important; /* 比其他列窄 */
+}
+
+/* 异常备件标题行美化 */
+.beautify-header {
+  background: #e6f7ff;
+  font-weight: 700;
+  padding: 18rpx 15rpx;
+  border-bottom: 1rpx solid #ccc; /* 标题下框线 */
+}
+
+/* 异常备件数据行：加框线+列宽调整 */
+.beautify-item {
+  padding: 20rpx 15rpx;
+  margin: 5rpx 0;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.border-line {
+  border: 1rpx solid #eee;
+  border-top: none; /* 与标题框线衔接 */
+}
+/* 异常备件行文字/输入框居中 */
+.item-center {
+  text-align: center;
+}
+.exception-item text, .exception-item .actual-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.exception-list {
+  margin-bottom: 30rpx;
+  border: 1rpx solid #eee;
+  border-radius: 8rpx;
+  overflow: hidden; /* 隐藏内部边框溢出 */
+}
+
+.exception-item-header {
+  display: flex;
+  background: #f8f9fa;
+  padding: 15rpx;
+  font-weight: 600;
+  font-size: 26rpx;
+}
+.exception-item-header text {
+  flex: 1;
+  text-align: center;
+}
+
+.exception-item {
+  display: flex;
+  padding: 15rpx;
+  font-size: 24rpx;
+  align-items: center;
+}
+
+/* 实际数量输入框 */
+.actual-input {
+  width: 140rpx;
+  height: 55rpx;
+  font-size: 26rpx;
+  text-align: center;
+  border: 1rpx solid #1890ff;
+  border-radius: 8rpx;
+}
+
+/* 盘点人样式（全场景显示，优化底部间距） */
+.form-item {
+  padding: 15rpx 0;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx; /* 新增：优化全正常场景排版间距 */
+}
+.form-label {
+  font-size: 26rpx;
+  color: #333;
+  width: 120rpx;
+}
+.form-input {
+  flex: 1;
+  height: 55rpx;
+  font-size: 26rpx;
+  border: 1rpx solid #eee;
+  border-radius: 8rpx;
+  padding: 0 10rpx;
+}
+
+/* 盘点说明 */
+.reason-input-wrap {
+  width: 100%;
+}
+.label {
+  display: block;
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+textarea {
+  width: 100%;
+  min-height: 150rpx;
+  padding: 15rpx;
+  border: 1rpx solid #eee;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  box-sizing: border-box;
+}
+
+/* 新增：输入框聚焦样式（包含盘点人输入框，全场景生效） */
+.actual-input:focus, .form-input:focus, textarea:focus {
+  border-color: #40a9ff;
+  outline: none;
+}
+
+/* 弹窗底部按钮 */
+.modal-footer {
+  padding: 20rpx 30rpx;
+  border-top: 1rpx solid #eee;
+  display: flex;
+  gap: 20rpx;
+}
+.cancel-btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.submit-btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  background: #1677ff;
+  color: #fff;
+  border: none;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.submit-btn[disabled] {
+  background: #ccc;
+  color: #fff;
+}
+
+/* 加载更多按钮样式 */
+.load-more-wrap {
+  padding: 20rpx 0;
+  text-align: center;
+}
+.load-more-btn {
+  padding: 12rpx 30rpx;
+  background-color: #f5f7fa;
+  color: #666;
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  border: 1rpx solid #eee;
+}
+
+.scope-tip,
+.readonly-tip {
+  padding: 20rpx 24rpx;
+  color: #667085;
+  font-size: 24rpx;
+  line-height: 36rpx;
+  background: #f8fafc;
+}
+
+.readonly-tip {
+  position: fixed;
+  left: 20rpx;
+  right: 20rpx;
+  bottom: calc(20rpx + env(safe-area-inset-bottom));
+  z-index: 99;
+  text-align: center;
+  border-radius: 12rpx;
+}
+
+.status-btn {
+  line-height: 55rpx;
+}
+
+.pending-btn {
+  background: #faad14;
+  color: #fff;
+  opacity: 0.95;
+}
+
+.batch-btn-wrap {
+  height: auto;
+  min-height: 140rpx;
+  padding: 20rpx 20rpx calc(20rpx + env(safe-area-inset-bottom));
+}
+
+.batch-btn[disabled] {
+  background: #b7c0ce;
+  color: #fff;
+}
+
+.inventory-list {
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.scope-tip {
+  margin-bottom: 16rpx;
+  border-radius: 12rpx;
+}
+
+.scope-tip { display: flex; align-items: center; justify-content: space-between; gap: 18rpx; }
+.progress-title, .progress-meta { display: block; }
+.progress-title { color: #27313f; font-size: 27rpx; font-weight: 700; }
+.progress-meta { margin-top: 5rpx; font-size: 23rpx; }
+.scope-actions { display: flex; gap: 10rpx; }
+.mini-action { width: auto; min-width: 120rpx; height: 60rpx; margin: 0; padding: 0 16rpx; border-radius: 30rpx; color: #fff; background: #c6000b; font-size: 23rpx; line-height: 60rpx; }
+.mini-action.secondary { color: #8d1119; background: #fff1f2; }
+.check-actions { display: flex; flex: none; gap: 8rpx; }
+.check-btn { width: 88rpx; height: 56rpx; min-height: 56rpx; margin: 0; padding: 0; border: 1rpx solid #d9dee5; border-radius: 28rpx; color: #67717e; background: #fff; font-size: 23rpx; line-height: 56rpx; }
+.check-btn.normal.selected { border-color: #16845b; color: #fff; background: #16845b; }
+.check-btn.abnormal.selected { border-color: #c6000b; color: #fff; background: #c6000b; }
+
+.inventory-card {
+  margin-bottom: 16rpx;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  background: #fff;
+  box-shadow: 0 4rpx 16rpx rgba(31, 41, 55, 0.06);
+}
+
+.inventory-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+}
+
+.inventory-name {
+  flex: 1;
+  min-width: 0;
+  color: #1f2937;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 40rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  word-break: break-all;
+}
+
+.inventory-card .status-btn {
+  flex: none;
+  width: 112rpx;
+  height: 56rpx;
+  min-height: 56rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 28rpx;
+  font-size: 24rpx;
+  line-height: 56rpx;
+}
+
+.inventory-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-top: 18rpx;
+  color: #667085;
+  font-size: 24rpx;
+}
+
+.inventory-stock {
+  color: #1677ff;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.inventory-location {
+  margin-top: 14rpx;
+  color: #98a2b3;
+  font-size: 23rpx;
+}
+
+.batch-btn-wrap {
+  display: block;
+}
+
+.batch-btn {
+  width: 100%;
+  height: 88rpx;
+  min-height: 88rpx;
+  margin: 0;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+  line-height: 88rpx;
+  white-space: nowrap;
+}

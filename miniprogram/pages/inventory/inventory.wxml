@@ -1,0 +1,122 @@
+<view class="container">
+  <!-- 加载中 -->
+  <view class="loading" wx:if="{{isLoading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 备件列表：增加底部内边距，避免按钮遮挡 -->
+  <scroll-view class="list-scroll" scroll-y wx:else>
+    <view class="inventory-list">
+      <view class="scope-tip">
+        <view><text class="progress-title">盘点进度 {{checkedCount}} / {{editableCount}}</text><text class="progress-meta">未核对 {{uncheckedCount}} · 异常 {{abnormalCount}}</text></view>
+        <view class="scope-actions" wx:if="{{!isReadOnly}}"><button class="mini-action secondary" bindtap="markAllNormal" disabled="{{uncheckedCount === 0}}">剩余全正常</button></view>
+      </view>
+      <view class="inventory-card" wx:for="{{inventoryList}}" wx:key="_id">
+        <view class="inventory-card-top">
+          <text class="inventory-name">{{item.materialDesc}}</text>
+          <view class="check-actions" wx:if="{{item.checkStatus === '未核对' || item.checkStatus === '正常' || item.checkStatus === '异常'}}">
+            <button class="check-btn normal {{item.checkStatus === '正常' ? 'selected' : ''}}" bindtap="setCheckStatus" data-index="{{index}}" data-status="正常">正常</button>
+            <button class="check-btn abnormal {{item.checkStatus === '异常' ? 'selected' : ''}}" bindtap="setCheckStatus" data-index="{{index}}" data-status="异常">异常</button>
+          </view>
+          <button wx:else
+            class="status-btn {{item.checkStatus === '正常' ? 'normal-btn' : (item.checkStatus === '异常' ? 'abnormal-btn' : (item.checkStatus === '待审批' ? 'pending-btn' : 'finished-btn'))}}"
+            data-index="{{index}}"
+            disabled
+          >{{item.checkStatus || '正常'}}</button>
+        </view>
+        <view class="inventory-meta">
+          <text>编码 {{item.materialCode || '-'}}</text>
+          <text class="inventory-stock">账面库存 {{item.sysStockNum}}{{item.sysStockUnit}}</text>
+        </view>
+        <view class="inventory-location">
+          {{item.warehouseAreaName || '未分区'}} · {{item.shelf === 0 || item.shelf ? item.shelf : '-'}}号架 · {{item.layer === 0 || item.layer ? item.layer : '-'}}层
+        </view>
+      </view>
+
+      <!-- 空数据提示 -->
+      <view class="empty-tip" wx:if="{{inventoryList.length === 0}}">
+        暂无符合条件的备件
+      </view>
+
+    </view>
+  </scroll-view>
+
+  <view class="readonly-tip" wx:if="{{!isLoading && isReadOnly}}">当前为已盘点记录，仅供查看</view>
+
+  <view class="batch-btn-wrap" wx:if="{{!isLoading && !isReadOnly}}">
+    <button class="batch-btn" bindtap="completeInventory" disabled="{{isSubmitting || canSubmitCount === 0 || uncheckedCount > 0}}">
+      {{uncheckedCount > 0 ? '还有 ' + uncheckedCount + ' 条未核对' : '完成盘点（' + canSubmitCount + ' 条）'}}
+    </button>
+  </view>
+
+  <!-- 盘点单弹窗（核心修改：统一弹窗，全场景显示盘点人） -->
+  <view class="modal-mask" wx:if="{{showInventoryModal}}" bindtap="closeInventoryModal">
+    <!-- 弹窗主体：阻止点击穿透，避免内部点击触发遮罩关闭 -->
+    <view class="exception-modal" catchtap="stopPropagation">
+      <view class="modal-body">
+        <!-- 弹窗标题：适配全正常/异常场景 -->
+        <view class="modal-title" style="color: #1677ff; font-size: 32rpx; font-weight: 600; margin-bottom: 20rpx; text-align: center;">
+          {{abnormalList.length > 0 ? '盘点确认' : '盘点确认'}}
+        </view>
+
+        <!-- 盘点人：移除显示条件，全场景必填 -->
+        <view class="form-item">
+          <text class="form-label">盘点人：</text>
+          <input 
+            type="text" 
+            placeholder="请输入盘点人" 
+            value="{{inventoryUser}}"
+            disabled="true"
+            class="form-input"/>
+        </view>
+
+        <!-- 异常备件区域：仅异常场景显示 -->
+        <view class="section-wrap" wx:if="{{abnormalList.length > 0}}">
+          <text class="section-title">异常备件（请录入实际数量）</text>
+          <view class="exception-list">
+            <!-- 弹窗表头行：整行文字蓝色 -->
+            <view class="exception-item-header beautify-header" style="color: #1677ff;">
+              <text class="title-wrap">物料
+描述</text>
+              <text class="title-wrap">物料
+编码</text>
+              <text class="title-wrap short-col">库存
+数量</text>
+              <text class="title-wrap">实际
+数量</text>
+            </view>
+            <!-- 数据行：合并库存数量+单位，实际数量仅输数字 -->
+            <view class="exception-item beautify-item item-center border-line" wx:for="{{abnormalList}}" wx:key="_id">
+              <text class="name-text"> {{item.materialDesc}}</text>
+              <text>{{item.materialCode}}</text>
+              <text>{{item.sysStockNum}}{{item.sysStockUnit}}</text>
+              <input 
+                type="digit"
+                placeholder=" "
+                value="{{item.actualStock}}"
+                bindinput="inputAbnormalStock"
+                data-index="{{index}}"
+                class="actual-input"/>
+            </view>
+          </view>
+        </view>
+
+        <!-- 盘点说明 -->
+        <view class="reason-input-wrap">
+          <text class="label">盘点说明：</text>
+          <textarea placeholder="请填写本次盘点的说明(选填)" 
+                    value="{{inventoryRemark}}"
+                    bindinput="inputInventoryRemark"
+                    maxlength="500"/>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="cancel-btn" bindtap="closeInventoryModal">取消</button>
+        <button class="submit-btn" bindtap="submitInventoryToApprove" 
+                disabled="{{isSubmitDisabled || isSubmitting}}">
+          {{isSubmitting ? '提交中...' : '提交审批'}}
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

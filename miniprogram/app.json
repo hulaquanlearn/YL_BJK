@@ -1,11 +1,26 @@
 {
   "pages": [
-    "pages/index/index",  
-    "pages/detail/detail" 
+    "pages/login/login",
+    "pages/home/home",
+    "pages/index/index",
+    "pages/addPart/addPart",
+    "pages/detail/detail",
+    "pages/stats/stats",
+    "pages/inventory/inventory",
+    "pages/filter/filter",
+    "pages/approve/approve",
+    "pages/aiAgent/aiAgent",
+    "pages/locationGuide/locationGuide",
+    "pages/account/account",
+    "pages/users/users"
   ],
   "window": {
-    "navigationBarTitleText": "设备配件查询系统", 
-    "navigationBarBackgroundColor": "#165DFF",  
-    "navigationBarTextStyle": "white"  
-  }
+    "backgroundTextStyle": "light",
+    "navigationStyle": "default",
+    "navigationBarBackgroundColor": "#C6000B",
+    "navigationBarTextStyle": "white"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
 }
