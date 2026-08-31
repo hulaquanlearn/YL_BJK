@@ -16,3 +16,10 @@ export function clearSession() {
   window.dispatchEvent(new Event('auth-changed'))
 }
 export function isAdmin() { return getUser()?.role === 'admin' }
+export const WORKSHOP_ROLES = Object.freeze({ raw_grain: 'raw_grain', qu_making: 'qu_making', brewing: 'brewing' })
+export function userWorkshopCode() { return getUser()?.workshopCode || WORKSHOP_ROLES[getUser()?.role] || '' }
+export function canEditWorkshop(workshopCode) {
+  const user = getUser()
+  return user?.role === 'admin' || (userWorkshopCode() && userWorkshopCode() === workshopCode)
+}
+export function canEditAnyWorkshop() { return getUser()?.role === 'admin' || Boolean(userWorkshopCode()) }

@@ -1,0 +1,234 @@
+<view class="container">
+  <view class="stepper">
+    <view class="step {{currentStep >= 1 ? 'active' : ''}}"><text class="step-no">1</text><text>基础信息</text></view>
+    <view class="step-line {{currentStep >= 2 ? 'active' : ''}}"></view>
+    <view class="step {{currentStep >= 2 ? 'active' : ''}}"><text class="step-no">2</text><text>存放位置</text></view>
+    <view class="step-line {{currentStep >= 3 ? 'active' : ''}}"></view>
+    <view class="step {{currentStep >= 3 ? 'active' : ''}}"><text class="step-no">3</text><text>确认提交</text></view>
+  </view>
+  <view class="form-card">
+    <view class="form-group" wx:if="{{currentStep === 1}}">
+      <view class="group-title">基础信息</view>
+      <view class="group-desc">填写物料的基本识别信息</view>
+      <view class="form-item">
+        <text class="label">所属车间 <text class="required-mark">*</text></text>
+        <picker wx:if="{{isAdmin}}" mode="selector" range="{{workshopNames}}" value="{{workshopIndex}}" bindchange="onWorkshopChange" class="picker">
+          <view class="picker-text">{{selectedWorkshopName}}</view>
+        </picker>
+        <view wx:else class="picker"><view class="picker-text">{{selectedWorkshopName}}（已按账号权限锁定）</view></view>
+      </view>
+      <view class="form-item">
+        <text class="label">物料编码 <text class="required-mark">*</text></text>
+        <input placeholder="请输入物料编码" value="{{part.materialCode}}" bindinput="onInputChange" bindblur="checkMaterialCode" data-field="materialCode" class="input required" />
+        <text class="field-hint" wx:if="{{existingMaterialHint}}">{{existingMaterialHint}}</text>
+      </view>
+      <view class="form-item">
+        <text class="label">物料描述 <text class="required-mark">*</text></text>
+        <input 
+          placeholder="请输入物料描述" 
+          value="{{part.materialDesc}}" 
+          bindinput="onInputChange" 
+          data-field="materialDesc"
+          class="input required"
+        />
+      </view>
+      <view class="form-row">
+        <view class="form-item form-item-half">
+          <text class="label">初始库存</text>
+          <input
+            type="digit"
+            placeholder="默认为 0"
+            value="{{part.totalStock}}"
+            bindinput="onInputChange"
+            data-field="totalStock"
+            class="input"
+          />
+        </view>
+        <view class="form-item form-item-half">
+          <text class="label">单位</text>
+          <input
+            placeholder="如：个、套、台"
+            value="{{part.unit}}"
+            bindinput="onInputChange"
+            data-field="unit"
+            class="input"
+          />
+        </view>
+      </view>
+      <view class="form-row">
+        <view class="form-item form-item-half">
+          <text class="label">最高储备</text>
+          <input type="digit" placeholder="选填" value="{{part.maxStock}}" bindinput="onInputChange" data-field="maxStock" class="input" />
+        </view>
+        <view class="form-item form-item-half">
+          <text class="label">订购点</text>
+          <input type="digit" placeholder="选填" value="{{part.reorderPoint}}" bindinput="onInputChange" data-field="reorderPoint" class="input" />
+        </view>
+      </view>
+      <view class="form-row">
+        <view class="form-item form-item-half">
+          <text class="label">备件类型</text>
+          <picker mode="selector" range="{{partTypeOptions}}" value="{{partTypeIndex}}" bindchange="onPartTypeChange" class="picker">
+            <view class="picker-text">{{partTypeOptions[partTypeIndex]}}</view>
+          </picker>
+        </view>
+        <view class="form-item form-item-half">
+          <text class="label">不含税单价</text>
+          <input type="digit" placeholder="选填" value="{{part.price}}" bindinput="onInputChange" data-field="price" class="input" />
+        </view>
+      </view>
+      <view class="form-item">
+        <text class="label">用途</text>
+        <input placeholder="适用设备或使用场景" value="{{part.usageDescription}}" bindinput="onInputChange" data-field="usageDescription" class="input" />
+      </view>
+    </view>
+
+    <view class="form-group" wx:if="{{currentStep === 2}}">
+      <view class="group-title">位置信息</view>
+      <view class="group-desc" wx:if="{{usesWarehouseArea}}">标准库位选择货架信息，其他地点可直接填写位置说明</view>
+      <view class="group-desc" wx:else>制曲车间不设货区，可直接填写具体存放位置</view>
+      <view class="form-item" wx:if="{{usesWarehouseArea}}">
+        <text class="label">位置类型</text>
+        <picker mode="selector" range="{{locationTypeOptions}}" value="{{locationTypeIndex}}" bindchange="onLocationTypeChange" class="picker">
+          <view class="picker-text">{{locationTypeOptions[locationTypeIndex]}}</view>
+        </picker>
+      </view>
+      <view class="form-item" wx:if="{{usesWarehouseArea}}">
+        <text class="label">货区 <text class="required-mark">*</text></text>
+        <view class="picker-wrap">
+          <picker 
+            mode="selector" 
+            range="{{areaOptions}}" 
+            bindchange="onAreaChange"
+            value="{{selectedAreaIndex}}"
+            class="picker"
+          >
+            <view class="picker-text">{{selectedArea || '请选择货区'}}</view>
+          </picker>
+          <view class="add-btn" bindtap="showAddModal" data-type="area">+</view>
+        </view>
+      </view>
+      <view class="form-item" wx:if="{{usesWarehouseArea && locationTypeIndex === 0}}">
+        <text class="label">货架 <text class="required-mark">*</text></text>
+        <view class="picker-wrap">
+          <picker 
+            mode="selector" 
+            range="{{shelfOptions}}" 
+            bindchange="onShelfChange"
+            value="{{selectedShelfIndex}}"
+            class="picker"
+          >
+            <view class="picker-text">{{selectedShelf || '请选择货架'}}</view>
+          </picker>
+          <view class="add-btn {{selectedArea ? '' : 'disabled'}}" bindtap="showAddModal" data-type="shelf">+</view>
+        </view>
+      </view>
+      <view class="form-item" wx:if="{{usesWarehouseArea && locationTypeIndex === 0}}">
+        <text class="label">层数 <text class="required-mark">*</text></text>
+        <view class="picker-wrap">
+          <picker 
+            mode="selector" 
+            range="{{layerOptions}}" 
+            bindchange="onLayerChange"
+            value="{{selectedLayerIndex}}"
+            class="picker"
+          >
+            <view class="picker-text">{{selectedLayer || '请选择层数'}}</view>
+          </picker>
+          <view class="add-btn {{selectedShelf ? '' : 'disabled'}}" bindtap="showAddModal" data-type="layer">+</view>
+        </view>
+      </view>
+      <view class="form-row" wx:if="{{usesWarehouseArea && locationTypeIndex === 0}}">
+        <view class="form-item form-item-half">
+          <text class="label">方位（选填）</text>
+          <input
+            type="digit"
+            placeholder="如：2"
+            value="{{part.position}}"
+            bindinput="onInputChange"
+            data-field="position"
+            class="input"
+          />
+        </view>
+        <view class="form-item form-item-half">
+          <text class="label">货位（选填）</text>
+          <input
+            type="digit"
+            placeholder="如：6"
+            value="{{part.location}}"
+            bindinput="onInputChange"
+            data-field="location"
+            class="input"
+          />
+        </view>
+      </view>
+      <view class="form-item" wx:if="{{!usesWarehouseArea || locationTypeIndex === 1}}">
+        <text class="label">具体位置 <text class="required-mark" wx:if="{{usesWarehouseArea}}">*</text></text>
+        <input placeholder="如：破曲楼二楼、六车间、备件库地面" value="{{part.locationNote}}" bindinput="onInputChange" data-field="locationNote" class="input required" />
+      </view>
+      <view class="location-tip" wx:if="{{usesWarehouseArea}}">货区代码与库位编码将由系统自动处理</view>
+    </view>
+
+    <view class="form-group" wx:if="{{currentStep === 3}}">
+      <view class="group-title">确认并提交</view>
+      <view class="group-desc">请核对物料编码、库存和位置，备注可选填</view>
+      <view class="review-card">
+        <text>物料：{{part.materialCode}} · {{part.materialDesc}}</text>
+        <text>库存：{{part.totalStock || 0}}{{part.unit || '个'}}</text>
+        <text>车间：{{selectedWorkshopName}}</text>
+        <text>位置：{{usesWarehouseArea ? selectedArea + ' · ' + (locationTypeIndex === 0 ? selectedShelf + ' ' + selectedLayer : part.locationNote) : (part.locationNote || '未填写具体位置')}}</text>
+      </view>
+      <view class="form-item">
+        <textarea 
+          placeholder="请输入备注" 
+          value="{{part.remark}}" 
+          bindinput="onInputChange" 
+          data-field="remark"
+          class="textarea"
+          auto-height
+        ></textarea>
+      </view>
+    </view>
+  </view>
+
+  <view class="submit-btn-wrap">
+    <button class="step-back-btn" bindtap="previousStep" wx:if="{{currentStep > 1 && !isLoading}}">上一步</button>
+    <button class="submit-btn" bindtap="nextStep" wx:if="{{currentStep < 3 && !isLoading}}">下一步</button>
+    <button 
+      class="submit-btn {{isLoading ? 'loading' : ''}}"
+      bindtap="submitAdd"
+      disabled="{{isLoading}}"
+      wx:if="{{currentStep === 3 && !isLoading}}"
+    >
+      完成新增
+    </button>
+    <button class="submit-btn loading btn-disabled" disabled wx:if="{{currentStep === 3 && isLoading}}">
+      <text class="loading-icon">●●●</text> 提交中...
+    </button>
+  </view>
+
+  <!-- 新增货区/货架/层数弹窗 -->
+  <view class="modal-mask" wx:if="{{showAddModal}}" bindtap="closeAddModal"></view>
+  <view class="modal-content" wx:if="{{showAddModal}}">
+    <view class="modal-header">
+      <text class="modal-title">新增{{addType === 'area' ? '货区' : addType === 'shelf' ? '货架' : '层数'}}</text>
+      <view class="modal-close" bindtap="closeAddModal">×</view>
+    </view>
+    <view class="modal-body">
+      <input 
+        class="modal-input"
+        type="{{addType === 'area' ? 'text' : 'digit'}}"
+        placeholder="请输入{{addType === 'area' ? '货区名称' : addType === 'shelf' ? '货架号' : '层数'}}"
+        value="{{addValue}}"
+        bindinput="onAddInputChange"
+        focus="{{showAddModal}}"
+      />
+      <text class="modal-tip" wx:if="{{addType === 'shelf'}}">货架号将自动添加"号"后缀</text>
+      <text class="modal-tip" wx:if="{{addType === 'layer'}}">层数将自动添加"层"后缀</text>
+    </view>
+    <view class="modal-footer">
+      <view class="modal-btn cancel" bindtap="closeAddModal">取消</view>
+      <view class="modal-btn confirm" bindtap="confirmAdd">确定</view>
+    </view>
+  </view>
+</view>

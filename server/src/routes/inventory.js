@@ -8,6 +8,11 @@ const {
   findPendingInventoryOrder
 } = require('../inventory-guards');
 const { requireRole } = require('../auth');
+const {
+  normalizeWorkshopCode,
+  assertWorkshopWrite,
+  requireAnyWorkshopEditor
+} = require('../workshop-scope');
 
 const router = express.Router();
 
@@ -53,6 +58,10 @@ router.get('/inventory-orders', asyncHandler(async (req, res) => {
     conditions.push('inventoryDate = ?');
     params.push(req.query.date);
   }
+  if (req.query.workshopCode) {
+    conditions.push('workshop_code = ?');
+    params.push(normalizeWorkshopCode(req.query.workshopCode));
+  }
   const whereSql = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const limit = positiveInt(req.query.limit, 100, 200);
   const [rows] = await pool.query(
@@ -69,7 +78,7 @@ router.get('/inventory-orders/:id', asyncHandler(async (req, res) => {
   res.json({ success: true, data: toInventoryOrder(rows[0]) });
 }));
 
-router.post('/inventory-orders', asyncHandler(async (req, res) => {
+router.post('/inventory-orders', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
   const data = req.body || {};
   const inventoryNo = requireBoundedText(data.inventoryNo || `INV-${Date.now()}`, '盘点单号', 100);
   const inventoryDate = requireDate(data.inventoryDate);
@@ -89,6 +98,12 @@ router.post('/inventory-orders', asyncHandler(async (req, res) => {
     if (inventoryRows.length !== normalized.inventoryIds.length) {
       throw new ApiError(400, '部分盘点备件已不存在，请刷新后重试');
     }
+    const workshopCodes = [...new Set(inventoryRows.map(row => normalizeWorkshopCode(row.workshop_code, 'raw_grain')))];
+    if (workshopCodes.length !== 1) {
+      throw new ApiError(400, '一次盘点只能选择同一车间的备件');
+    }
+    const workshopCode = workshopCodes[0];
+    assertWorkshopWrite(req.user, workshopCode);
 
     const pendingOrder = await findPendingInventoryOrder(connection, normalized.inventoryIds);
     if (pendingOrder) {
@@ -97,11 +112,12 @@ router.post('/inventory-orders', asyncHandler(async (req, res) => {
 
     const [result] = await connection.query(
       `INSERT INTO inventory_orders
-       (inventoryNo, inventoryDate, filterParams, inventoryAllList, abnormalList,
+       (inventoryNo, workshop_code, inventoryDate, filterParams, inventoryAllList, abnormalList,
         inventoryUser, inventoryRemark, approveStatus, approveRemark)
-       VALUES (?, ?, ?, ?, ?, ?, ?, '待审批', ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, '待审批', ?)`,
       [
         inventoryNo,
+        workshopCode,
         inventoryDate,
         JSON.stringify(filterParams),
         JSON.stringify(normalized.normalizedAllList),

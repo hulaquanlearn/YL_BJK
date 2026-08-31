@@ -1,0 +1,58 @@
+<view class="stats-page">
+  <view wx:if="{{isLoading}}" class="loading-card">统计数据加载中...</view>
+
+  <block wx:else>
+    <view class="summary-grid">
+      <view class="summary-card"><text class="summary-value">{{summary.materialCategoryCount}}</text><text class="summary-label">备件品类</text></view>
+      <view class="summary-card"><text class="summary-value">{{summary.inventoryRecords}}</text><text class="summary-label">库存记录</text></view>
+      <view class="summary-card warning"><text class="summary-value">{{summary.lowStock}}</text><text class="summary-label">低库存</text></view>
+    </view>
+
+    <view class="card">
+      <view class="card-heading"><view><text class="section-title">按单位库存</text><text class="section-desc">不同计量单位不再混合相加</text></view></view>
+      <view class="unit-grid" wx:if="{{unitTotals.length}}">
+        <view class="unit-item" wx:for="{{unitTotals}}" wx:key="unit">
+          <text class="unit-total">{{item.total}}</text><text class="unit-name">{{item.unit}}</text>
+        </view>
+      </view>
+      <view class="empty" wx:else>暂无库存数量</view>
+    </view>
+
+    <view class="card">
+      <view class="card-heading"><view><text class="section-title">货区分布</text><text class="section-desc">点击货区或货架查看下一级</text></view></view>
+      <view class="area-list">
+        <block wx:for="{{areaStats}}" wx:key="area" wx:for-item="areaItem">
+          <view class="distribution-row area-row" bindtap="toggleAreaExpand" data-area="{{areaItem.area}}">
+            <view class="distribution-main"><text class="distribution-name">{{areaItem.area}}</text><text class="distribution-meta">{{areaItem.count}} 条库存记录</text></view>
+            <text class="distribution-stock">{{areaItem.unitSummary}}</text><text class="chevron">{{expandedAreas[areaItem.area] ? '⌃' : '⌄'}}</text>
+          </view>
+          <view class="shelf-list" wx:if="{{expandedAreas[areaItem.area]}}">
+            <block wx:for="{{areaItem.shelves}}" wx:key="shelfNo" wx:for-item="shelfItem">
+              <view class="distribution-row shelf-row" bindtap="toggleShelfExpand" data-key="{{areaItem.area + '-' + shelfItem.shelfNo}}">
+                <view class="distribution-main"><text class="distribution-name">{{shelfItem.shelfNo === '未指定' ? '未指定货架' : shelfItem.shelfNo + '号货架'}}</text><text class="distribution-meta">{{shelfItem.count}} 条</text></view>
+                <text class="distribution-stock">{{shelfItem.unitSummary}}</text>
+              </view>
+              <view class="layer-list" wx:if="{{expandedShelf[areaItem.area + '-' + shelfItem.shelfNo]}}">
+                <view class="distribution-row layer-row" wx:for="{{shelfItem.layers}}" wx:key="layer">
+                  <text class="distribution-name">{{item.layer === '未指定' ? '未指定层' : '第' + item.layer + '层'}}</text>
+                  <text class="distribution-stock">{{item.unitSummary}}</text>
+                </view>
+              </view>
+            </block>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-heading"><view><text class="section-title">低库存备件</text><text class="section-desc">仅统计已设置订购点的备件</text></view><text class="section-link" bindtap="goToLowStockParts">查看全部</text></view>
+      <view class="low-item" wx:for="{{lowStockParts}}" wx:key="_id">
+        <view class="low-main"><text class="low-name">{{item.materialDesc}}</text><text class="low-location">{{item.warehouseAreaName}} · {{item.shelf || '-'}}号架 · {{item.layer || '-'}}层</text><text class="replenish-tip" wx:if="{{item.suggestedQuantity !== null && item.suggestedQuantity > 0}}">建议补充 {{item.suggestedQuantity}}{{item.unit}} 至最高储备</text></view>
+        <text class="low-stock">余 {{item.totalStock}}{{item.unit}}</text>
+      </view>
+      <view class="empty" wx:if="{{!lowStockParts.length}}">暂无低库存备件</view>
+    </view>
+
+    <button class="export-btn" bindtap="exportStats">复制统计报表</button>
+  </block>
+</view>

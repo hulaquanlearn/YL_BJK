@@ -8,6 +8,8 @@
         <div class="freshness"><i></i>{{ generatedText }}</div>
       </div>
       <div class="hero-controls">
+        <span>统计车间</span>
+        <el-select v-model="workshopCode" clearable placeholder="全部车间" style="width:100%;margin-bottom:9px" @change="load"><el-option v-for="item in workshops" :key="item.code" :label="item.name" :value="item.code" /></el-select>
         <span>观察周期</span>
         <el-segmented v-model="days" :options="periodOptions" @change="load" />
         <el-button class="hero-refresh" :loading="loading" @click="load"><el-icon><Refresh /></el-icon>刷新</el-button>
@@ -18,8 +20,8 @@
     <section class="stat-kpis" aria-label="备件核心指标">
       <article><div class="kpi-icon is-red"><el-icon><Tickets /></el-icon></div><div><span>备件品类</span><strong>{{ formatNumber(data.summary.materialCategoryCount) }}</strong><small>不重复物料编码</small></div></article>
       <article><div class="kpi-icon is-blue"><el-icon><Collection /></el-icon></div><div><span>库存记录</span><strong>{{ formatNumber(data.summary.inventoryRecords) }}</strong><small>物料与库位记录</small></div></article>
-      <button type="button" class="is-clickable" @click="router.push('/replenishment')"><div class="kpi-icon is-orange"><el-icon><Warning /></el-icon></div><div><span>低库存预警</span><strong>{{ formatNumber(data.summary.lowStock) }}</strong><small>其中零库存 {{ data.summary.zeroStock || 0 }} 条</small></div><el-icon class="kpi-arrow"><ArrowRight /></el-icon></button>
-      <button type="button" class="is-clickable" @click="router.push('/movements')"><div class="kpi-icon is-green"><el-icon><Switch /></el-icon></div><div><span>{{ days }}天库存活动</span><strong>{{ formatNumber(data.movementSummary.total) }}</strong><small>入 {{ data.movementSummary.inbound || 0 }} · 出 {{ data.movementSummary.outbound || 0 }}</small></div><el-icon class="kpi-arrow"><ArrowRight /></el-icon></button>
+      <button type="button" class="is-clickable" @click="goScoped('/replenishment')"><div class="kpi-icon is-orange"><el-icon><Warning /></el-icon></div><div><span>低库存预警</span><strong>{{ formatNumber(data.summary.lowStock) }}</strong><small>其中零库存 {{ data.summary.zeroStock || 0 }} 条</small></div><el-icon class="kpi-arrow"><ArrowRight /></el-icon></button>
+      <button type="button" class="is-clickable" @click="goScoped('/movements')"><div class="kpi-icon is-green"><el-icon><Switch /></el-icon></div><div><span>{{ days }}天库存活动</span><strong>{{ formatNumber(data.movementSummary.total) }}</strong><small>入 {{ data.movementSummary.inbound || 0 }} · 出 {{ data.movementSummary.outbound || 0 }}</small></div><el-icon class="kpi-arrow"><ArrowRight /></el-icon></button>
     </section>
 
     <section class="unit-ribbon panel">
@@ -36,7 +38,7 @@
       <article class="chart-card panel">
         <header><div><span>STOCK HEALTH</span><h3>库存健康度</h3><p>四类状态互斥，合计等于全部有效库存记录。</p></div></header>
         <div ref="healthEl" class="chart-canvas health-canvas"></div>
-        <button type="button" class="card-action" @click="router.push('/replenishment')">查看全部预警 <el-icon><ArrowRight /></el-icon></button>
+        <button type="button" class="card-action" @click="goScoped('/replenishment')">查看全部预警 <el-icon><ArrowRight /></el-icon></button>
       </article>
 
       <article class="chart-card panel">
@@ -45,7 +47,7 @@
       </article>
 
       <article class="ranking-card panel">
-        <header><div><span>ACTIVE PARTS</span><h3>高频流动备件</h3><p>按当前周期内库存操作次数排名。</p></div><button type="button" @click="router.push('/movements')">全部流水</button></header>
+        <header><div><span>ACTIVE PARTS</span><h3>高频流动备件</h3><p>按当前周期内库存操作次数排名。</p></div><button type="button" @click="goScoped('/movements')">全部流水</button></header>
         <ol>
           <li v-for="(item,index) in data.topMovingParts" :key="item.inventoryId" @click="locate(item)">
             <b>{{ String(index + 1).padStart(2, '0') }}</b>
@@ -58,7 +60,7 @@
     </section>
 
     <section class="risk-strip panel">
-      <header><div><span>PRIORITY ALERTS</span><h3>优先补货备件</h3></div><el-button type="danger" plain @click="router.push('/replenishment')">生成补货清单</el-button></header>
+      <header><div><span>PRIORITY ALERTS</span><h3>优先补货备件</h3></div><el-button type="danger" plain @click="goScoped('/replenishment')">生成补货清单</el-button></header>
       <div class="risk-grid">
         <button v-for="item in data.lowStockParts.slice(0, 6)" :key="item._id" type="button" @click="locate(item)">
           <span class="risk-dot" :class="{ critical: Number(item.totalStock) <= 0 }"></span>
@@ -73,7 +75,7 @@
 
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import * as echarts from 'echarts/core'
 import { BarChart, LineChart, PieChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, TitleComponent, TooltipComponent } from 'echarts/components'
@@ -83,8 +85,11 @@ import { getStats } from '../api'
 echarts.use([BarChart, LineChart, PieChart, GridComponent, LegendComponent, TitleComponent, TooltipComponent, CanvasRenderer])
 
 const router = useRouter()
+const route = useRoute()
 const loading = ref(false)
 const days = ref(30)
+const workshopCode = ref(typeof route.query.workshopCode === 'string' ? route.query.workshopCode : '')
+const workshops = [{ code: 'raw_grain', name: '原粮车间' }, { code: 'qu_making', name: '制曲车间' }, { code: 'brewing', name: '酿酒车间' }]
 const periodOptions = [{ label: '7天', value: 7 }, { label: '30天', value: 30 }, { label: '90天', value: 90 }]
 const trendEl = ref(null)
 const healthEl = ref(null)
@@ -100,7 +105,8 @@ let areaChart
 
 const fontFamily = 'Microsoft YaHei, PingFang SC, sans-serif'
 function formatNumber(value) { return Number(value || 0).toLocaleString('zh-CN') }
-function locate(item) { router.push({ path: '/warehouse-3d', query: { partId: item._id || item.inventoryId } }) }
+function goScoped(path) { router.push({ path, query: workshopCode.value ? { workshopCode: workshopCode.value } : {} }) }
+function locate(item) { router.push({ path: '/warehouse-3d', query: { partId: item._id || item.inventoryId, ...(workshopCode.value ? { workshopCode: workshopCode.value } : {}) } }) }
 function axisStyle() { return { axisLine: { lineStyle: { color: '#d9dee7' } }, axisTick: { show: false }, axisLabel: { color: '#7c8798', fontFamily, fontSize: 12 }, splitLine: { lineStyle: { color: '#edf0f4' } } } }
 
 function renderTrend() {
@@ -162,7 +168,7 @@ async function renderCharts() { await nextTick(); if (trendEl.value) renderTrend
 async function load() {
   loading.value = true
   try {
-    const result = await getStats({ days: days.value })
+    const result = await getStats({ days: days.value, workshopCode: workshopCode.value })
     Object.assign(data, result.data || {})
     generatedText.value = result.data?.generatedAt ? `数据生成于 ${new Date(result.data.generatedAt).toLocaleString('zh-CN', { hour12: false })}` : '实时数据已同步'
     await renderCharts()

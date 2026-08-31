@@ -2,7 +2,6 @@ const { ApiError } = require('./utils');
 
 const MOVEMENT_REASONS = Object.freeze({
   in: Object.freeze({
-    procurement_receipt: '采购到货',
     return_to_stock: '维修退库',
     transfer_in: '调拨入库',
     inventory_correction: '库存纠正',

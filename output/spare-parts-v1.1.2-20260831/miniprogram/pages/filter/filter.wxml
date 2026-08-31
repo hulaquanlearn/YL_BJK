@@ -1,0 +1,93 @@
+<view class="filter-page">
+  <!-- 加载状态 -->
+  <view wx:if="{{isLoading}}" class="loading">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载筛选数据中...</text>
+  </view>
+
+  <!-- 筛选卡片容器 -->
+  <view class="filter-card" wx:if="{{!isLoading}}">
+    <!-- 工段筛选 -->
+    <view class="filter-item" bindtap="openWorkshopModal">
+      <text class="item-label">工段</text>
+      <view class="item-content">
+        <text class="item-value">{{selectedWorkshop}}</text>
+        <text class="selected-tag" wx:if="{{selectedWorkshop !== '全部'}}">已选</text>
+      </view>
+    </view>
+
+    <!-- 货架筛选 -->
+    <view class="filter-item" bindtap="openShelfModal" wx:if="{{selectedWorkshop !== '全部'}}">
+      <text class="item-label">货架</text>
+      <view class="item-content">
+        <text class="item-value">{{selectedShelfNo}}</text>
+        <text class="selected-tag" wx:if="{{selectedShelfNo !== '全部'}}">已选</text>
+      </view>
+    </view>
+
+    <!-- 层数筛选 -->
+    <view class="filter-item" bindtap="openLayerModal" wx:if="{{selectedWorkshop !== '全部' && selectedShelfNo !== '全部'}}">
+      <text class="item-label">层数</text>
+      <view class="item-content">
+        <text class="item-value">{{selectedLayer}}</text>
+        <text class="selected-tag" wx:if="{{selectedLayer !== '全部'}}">已选</text>
+      </view>
+    </view>
+
+    <!-- 盘点状态筛选 -->
+    <view class="filter-item" bindtap="openStatusModal">
+      <text class="item-label">盘点状态</text>
+      <view class="item-content">
+        <text class="item-value">{{selectedStatus}}</text>
+        <text class="selected-tag" wx:if="{{selectedStatus !== '全部'}}">已选</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 确定筛选按钮 -->
+  <button class="confirm-btn" bindtap="confirmFilter" disabled="{{isLoading}}" wx:if="{{!isLoading}}">
+    {{selectedStatus === '已盘点' ? '查看盘点记录' : '开始盘点'}}
+  </button>
+
+  <!-- 自定义筛选弹窗（选择工段/货架/层数/状态） -->
+  <view class="custom-modal" wx:if="{{showCustomModal}}">
+    <view class="modal-mask" bindtap="closeCustomModal"></view>
+    <view class="modal-content">
+      <view class="modal-title">{{modalTitle}}</view>
+      <view class="modal-list">
+        <view 
+          wx:for="{{modalOptions}}" 
+          wx:key="*this" 
+          class="modal-item {{item === modalSelectedValue ? 'selected-item' : ''}}" 
+          bindtap="selectModalItem" 
+          data-value="{{item}}"
+        >
+          {{item}}
+          <text class="check-icon" wx:if="{{item === modalSelectedValue}}">✓</text>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-cancel" bindtap="closeCustomModal">取消</button>
+        <button class="modal-confirm" bindtap="confirmCustomModal">确认</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 自定义确认筛选弹窗（替代wx.showModal） -->
+  <view class="confirm-filter-modal" wx:if="{{showConfirmModal}}">
+    <view class="modal-mask" bindtap="closeConfirmModal"></view>
+    <view class="modal-content">
+      <view class="modal-title">确认信息</view>
+      <view class="confirm-content">
+        <view class="content-item">工段：{{selectedWorkshop}}</view>
+        <view class="content-item">货架：{{selectedShelfNo}}</view>
+        <view class="content-item">层数：{{selectedLayer}}</view>
+        <view class="content-item">状态：{{selectedStatus}}</view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-cancel" bindtap="closeConfirmModal">取消</button>
+        <button class="modal-confirm" bindtap="confirmFinalFilter">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

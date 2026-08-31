@@ -34,6 +34,7 @@ function toInventoryOrder(row) {
   return {
     ...row,
     _id: String(row.id),
+    workshopCode: row.workshopCode || row.workshop_code || 'raw_grain',
     filterParams: parseJson(row.filterParams, {}),
     inventoryAllList: parseJson(row.inventoryAllList, []),
     abnormalList: parseJson(row.abnormalList, [])

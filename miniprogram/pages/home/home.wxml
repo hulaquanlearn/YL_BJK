@@ -94,7 +94,7 @@
         <text class="quick-title">去盘点</text>
         <text class="quick-desc">按货区盘点</text>
       </view>
-      <view class="quick-item" bindtap="gotoAddPart" wx:if="{{isAdmin}}">
+      <view class="quick-item" bindtap="gotoAddPart" wx:if="{{canEditParts}}">
         <view class="quick-icon icon-orange"><image src="/images/icons/新增备件.png"></image></view>
         <text class="quick-title">新增备件</text>
         <text class="quick-desc">录入新物料</text>

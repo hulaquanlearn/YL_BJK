@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "备件统计", 
+  "navigationBarBackgroundColor": "#C6000B",  
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
+}

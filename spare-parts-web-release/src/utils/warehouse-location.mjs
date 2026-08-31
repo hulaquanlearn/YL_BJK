@@ -1,14 +1,20 @@
 export const COMMON_SHELF_LEVELS = 4
 export const VENDOR_SIGN_COLOR = '#1d4ed8'
+export const PHYSICAL_ROOM_HALF_WIDTH = 9
 export const PHYSICAL_ROOM_HALF_DEPTH = 16
-export const PHYSICAL_ROW_GAP_Z = 3.4
+export const PHYSICAL_ROW_GAP_Z = 2.4
 
-const PHYSICAL_SHELF_WIDTH = 4.9
-const CENTRAL_LEFT_X = -1.25
-const CENTRAL_RIGHT_X = -6.35
-const LEFT_COLUMN_X = 6.35
-const FIRST_ROW_Z = -10.5
-const UNNAMED_ROW_Z = 13.4
+// 原粮库按现场平面图固定为：01-14 双列、15-20 单列，北侧三组待命名货架。
+// 这里恢复现场确认过的旧版尺寸与坐标；自定义拖拽过的位置仍以数据库为准。
+const CENTRAL_SHELF_WIDTH = 4.2
+const SINGLE_SHELF_WIDTH = 3.6
+const UNNAMED_SHELF_WIDTH = 3.8
+const CENTRAL_LEFT_X = -2.3
+const CENTRAL_RIGHT_X = 2.3
+const SINGLE_COLUMN_X = -6.4
+const FIRST_ROW_Z = -7.2
+const SINGLE_ROW_Z = [-7.2, -4.8, -2.4, 0.6, 3, 5.4]
+const UNNAMED_ROW_Z = 9.6
 
 export function resolvePartLocation(part = {}) {
   const code = String(part.locationCode || '').trim()
@@ -44,61 +50,87 @@ export function slotLocalX(width, slots, slot) {
   return -safeWidth / 2 + safeWidth * (safeSlot - 0.5) / safeSlots
 }
 
+// 两侧货位号都从各自通道观察方向依次递增，因此西侧在 3D 本地坐标中
+// 必须镜像，否则同一个“01 货位”会落到货架的错误一端。
+export function sideAwareSlotLocalX(width, slots, slot, position) {
+  const x = slotLocalX(width, slots, slot)
+  return String(position) === '2' ? -x : x
+}
+
 export function sideLocalZ(depth, position, offset = 0.18) {
   const sideDirection = String(position) === '2' ? -1 : 1
-  return sideDirection * ((Math.max(Number(depth) || 0, 0) / 2) + offset)
+  const safeDepth = Math.max(Number(depth) || 0, 0)
+  const insideOffset = Math.min(safeDepth * 0.28, Math.max(safeDepth / 2 - Math.max(Number(offset) || 0, 0), 0))
+  return sideDirection * insideOffset
 }
 
 export function layerLocalY(height, levels, layer) {
   const safeHeight = Math.max(Number(height) || 0, 0)
   const safeLevels = Math.max(Number(levels) || 1, 1)
   const safeLayer = Math.min(Math.max(Number(layer) || 1, 1), safeLevels)
-  return safeHeight - (safeLayer - 0.5) * (safeHeight - 0.25) / safeLevels
+  const boardCenter = safeLevels === 1
+    ? 0.16
+    : 0.16 + (safeHeight - 0.32) * (safeLayer - 1) / (safeLevels - 1)
+  return boardCenter + 0.04
 }
 
-export function applyPhysicalShelfLayout(shelf) {
+export function applyPhysicalShelfLayout(shelf, workshopCode = shelf?.workshopCode || 'raw_grain') {
   const next = {
     ...shelf,
     position: { ...(shelf.position || {}) },
     size: { ...(shelf.size || {}) }
   }
-  const layoutMatch = String(shelf.layoutKey || '').match(/^shelf-(\d{2})$/)
-  const physicalShelfNo = layoutMatch ? Number(layoutMatch[1]) : Number(shelf.shelfNo)
   let placement = null
+  let physicalWidth = null
 
-  if (Number.isInteger(physicalShelfNo) && physicalShelfNo >= 1 && physicalShelfNo <= 14) {
-    const row = Math.floor((physicalShelfNo - 1) / 2)
-    placement = {
-      x: physicalShelfNo % 2 === 1 ? CENTRAL_LEFT_X : CENTRAL_RIGHT_X,
-      z: FIRST_ROW_Z + row * PHYSICAL_ROW_GAP_Z
-    }
-  } else if (Number.isInteger(physicalShelfNo) && physicalShelfNo >= 15 && physicalShelfNo <= 20) {
-    placement = {
-      x: LEFT_COLUMN_X,
-      z: FIRST_ROW_Z + (physicalShelfNo - 15) * PHYSICAL_ROW_GAP_Z
-    }
-  } else {
-    const unnamedIndex = {
-      'unnamed-01': 0,
-      'unnamed-02': 1,
-      'unnamed-03': 2
-    }[shelf.layoutKey]
-    if (unnamedIndex !== undefined) {
+  // The measured 01-20 + three unnamed layout belongs to the raw-grain room
+  // only. Other workshops keep their database-configured coordinates.
+  if (workshopCode === 'raw_grain' && !shelf.positionOverridden) {
+    const layoutMatch = String(shelf.layoutKey || '').match(/^shelf-(\d{2})$/)
+    const physicalShelfNo = layoutMatch ? Number(layoutMatch[1]) : Number(shelf.shelfNo)
+
+    if (Number.isInteger(physicalShelfNo) && physicalShelfNo >= 1 && physicalShelfNo <= 14) {
+      const row = Math.floor((physicalShelfNo - 1) / 2)
       placement = {
-        x: [6.35, 1.25, -3.85][unnamedIndex],
-        z: UNNAMED_ROW_Z
+        x: physicalShelfNo % 2 === 1 ? CENTRAL_LEFT_X : CENTRAL_RIGHT_X,
+        z: FIRST_ROW_Z + row * PHYSICAL_ROW_GAP_Z
+      }
+      physicalWidth = CENTRAL_SHELF_WIDTH
+    } else if (Number.isInteger(physicalShelfNo) && physicalShelfNo >= 15 && physicalShelfNo <= 20) {
+      placement = {
+        x: SINGLE_COLUMN_X,
+        z: SINGLE_ROW_Z[physicalShelfNo - 15]
+      }
+      physicalWidth = SINGLE_SHELF_WIDTH
+    } else {
+      const unnamedIndex = {
+        'unnamed-01': 0,
+        'unnamed-02': 1,
+        'unnamed-03': 2
+      }[shelf.layoutKey]
+      if (unnamedIndex !== undefined) {
+        placement = {
+          x: [-4.8, 0, 4.8][unnamedIndex],
+          z: UNNAMED_ROW_Z
+        }
+        physicalWidth = UNNAMED_SHELF_WIDTH
       }
     }
   }
 
-  if (!placement) return next
-  next.position = { ...next.position, ...placement, rotationY: 0 }
-  next.size = {
-    ...next.size,
-    width: PHYSICAL_SHELF_WIDTH,
-    depth: Number(next.size.depth) || 0.9,
-    height: Number(next.size.height) || 3.2
-  }
+  next.size = workshopCode === 'raw_grain'
+    ? {
+        ...next.size,
+        width: !shelf.positionOverridden && physicalWidth ? physicalWidth : (Number(next.size.width) || CENTRAL_SHELF_WIDTH),
+        depth: Number(next.size.depth) || 0.9,
+        height: Number(next.size.height) || 3.2
+      }
+    : { ...next.size, width: Number(next.size.width) || 4.1, depth: Number(next.size.depth) || 0.9, height: Number(next.size.height) || 3.2 }
   next.levels = COMMON_SHELF_LEVELS
+
+  if (placement) {
+    next.position = { ...next.position, ...placement, rotationY: 0 }
+  }
+
   return next
 }

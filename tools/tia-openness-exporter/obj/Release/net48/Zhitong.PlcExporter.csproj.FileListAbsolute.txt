@@ -1,0 +1,12 @@
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\obj\Release\net48\Zhitong.PlcExporter.csproj.AssemblyReference.cache
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\obj\Release\net48\Zhitong.PlcExporter.GeneratedMSBuildEditorConfig.editorconfig
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\obj\Release\net48\Zhitong.PlcExporter.AssemblyInfoInputs.cache
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\obj\Release\net48\Zhitong.PlcExporter.AssemblyInfo.cs
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\obj\Release\net48\Zhitong.PlcExporter.csproj.CoreCompileInputs.cache
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\obj\Release\net48\Zhitong.PlcExporter.sourcelink.json
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\bin\V17\Zhitong.PlcExporter.exe.config
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\bin\V17\Zhitong.PlcExporter.exe
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\bin\V17\Zhitong.PlcExporter.pdb
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\obj\Release\net48\Zhitong.PlcExporter.exe
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\obj\Release\net48\Zhitong.PlcExporter.pdb
+D:\wx_xiangm\xiangmu\tools\tia-openness-exporter\obj\Release\net48\Zhitong.PlcExporter.exe.config

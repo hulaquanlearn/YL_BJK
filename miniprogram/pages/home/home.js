@@ -18,7 +18,8 @@ Page({
     lowStockParts: [],
     user: null,
     userInitial: '仓',
-    isAdmin: false
+    isAdmin: false,
+    canEditParts: false
   },
 
   onLoad() {
@@ -29,7 +30,12 @@ Page({
   onShow() {
     if (!auth.requireLogin()) return;
     const user = auth.getUser();
-    this.setData({ user, userInitial: user?.displayName?.slice(0, 1) || '仓', isAdmin: user?.role === 'admin' });
+    this.setData({
+      user,
+      userInitial: user?.displayName?.slice(0, 1) || '仓',
+      isAdmin: user?.role === 'admin',
+      canEditParts: auth.canEditAnyWorkshop()
+    });
     this.setUserContext();
     this.loadDashboard();
   },

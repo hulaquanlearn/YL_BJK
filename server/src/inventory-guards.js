@@ -77,7 +77,7 @@ async function lockInventoryRows(connection, inventoryIds) {
   if (!inventoryIds.length) return [];
   const placeholders = inventoryIds.map(() => '?').join(',');
   const [rows] = await connection.query(
-    `SELECT id, part_id, quantity
+    `SELECT id, part_id, quantity, workshop_code
      FROM inventory
      WHERE id IN (${placeholders})
      ORDER BY id

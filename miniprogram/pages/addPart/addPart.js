@@ -25,11 +25,62 @@ Page({
     partTypeOptions: ['易损件', '质保件'],
     partTypeIndex: 0,
     currentStep: 1,
-    existingMaterialHint: ''
+    existingMaterialHint: '',
+    workshops: [
+      { code: 'raw_grain', name: '原粮车间' },
+      { code: 'qu_making', name: '制曲车间' },
+      { code: 'brewing', name: '酿酒车间' }
+    ],
+    workshopNames: ['原粮车间', '制曲车间', '酿酒车间'],
+    workshopIndex: 0,
+    selectedWorkshopCode: 'raw_grain',
+    selectedWorkshopName: '原粮车间',
+    isAdmin: false,
+    usesWarehouseArea: true
   },
 
   onLoad() {
-    if (!auth.requireLogin({ admin: true })) return;
+    if (!auth.requireLogin({ editor: true })) return;
+    const user = auth.getUser();
+    const ownWorkshop = auth.userWorkshopCode();
+    const initialCode = user?.role === 'admin' ? 'raw_grain' : ownWorkshop;
+    const workshopIndex = Math.max(this.data.workshops.findIndex(item => item.code === initialCode), 0);
+    const workshop = this.data.workshops[workshopIndex];
+    this.setData({
+      isAdmin: user?.role === 'admin',
+      workshopIndex,
+      selectedWorkshopCode: workshop.code,
+      selectedWorkshopName: workshop.name,
+      usesWarehouseArea: workshop.code !== 'qu_making',
+      locationTypeIndex: workshop.code === 'qu_making' ? 1 : 0
+    });
+    this.loadLocationData();
+  },
+
+  onWorkshopChange(e) {
+    if (!this.data.isAdmin) return;
+    const workshopIndex = Number(e.detail.value) || 0;
+    const workshop = this.data.workshops[workshopIndex];
+    if (!workshop) return;
+    this.setData({
+      workshopIndex,
+      selectedWorkshopCode: workshop.code,
+      selectedWorkshopName: workshop.name,
+      usesWarehouseArea: workshop.code !== 'qu_making',
+      locationTypeIndex: workshop.code === 'qu_making' ? 1 : 0,
+      areas: [],
+      areaOptions: [],
+      selectedAreaIndex: 0,
+      selectedArea: '',
+      shelfOptions: [],
+      selectedShelfIndex: 0,
+      selectedShelf: '',
+      layerOptions: [],
+      selectedLayerIndex: 0,
+      selectedLayer: '',
+      'part.warehouseArea': '',
+      'part.locationNote': ''
+    });
     this.loadLocationData();
   },
 
@@ -37,7 +88,13 @@ Page({
     const code = String(this.data.part.materialCode || '').trim();
     if (!code) return;
     try {
-      const res = await api.getParts({ page: 1, pageSize: 20, searchKeyword: code, sort: 'codeAsc' });
+      const res = await api.getParts({
+        page: 1,
+        pageSize: 20,
+        searchKeyword: code,
+        workshopCode: this.data.selectedWorkshopCode,
+        sort: 'codeAsc'
+      });
       const existing = (res.data || []).find(item => String(item.materialCode || '').trim() === code);
       this.setData({ existingMaterialHint: existing ? `该编码已存在：${existing.materialDesc}。继续提交将为它新增库位。` : '' });
     } catch (_) {
@@ -46,12 +103,12 @@ Page({
   },
 
   nextStep() {
-    const { currentStep, part, selectedArea, selectedShelf, selectedLayer, locationTypeIndex } = this.data;
+    const { currentStep, part, selectedArea, selectedShelf, selectedLayer, locationTypeIndex, usesWarehouseArea } = this.data;
     if (currentStep === 1 && (!(part.materialCode || '').trim() || !(part.materialDesc || '').trim())) {
       wx.showToast({ title: '请先填写物料编码和描述', icon: 'none' });
       return;
     }
-    if (currentStep === 2) {
+    if (currentStep === 2 && usesWarehouseArea) {
       const freeText = locationTypeIndex === 1;
       if (!selectedArea || (!freeText && (!selectedShelf || !selectedLayer)) || (freeText && !(part.locationNote || '').trim())) {
         wx.showToast({ title: '请完善存放位置信息', icon: 'none' });
@@ -69,7 +126,7 @@ Page({
 
   async loadLocationData() {
     try {
-      const res = await api.getFilters();
+      const res = await api.getFilters({ workshopCode: this.data.selectedWorkshopCode });
       
       if (res.success && res.data) {
         const { areas, shelfMap, layerMap } = res.data;
@@ -341,12 +398,13 @@ Page({
       return;
     }
 
-    const isFreeTextLocation = this.data.locationTypeIndex === 1;
-    if (!selectedArea || (!isFreeTextLocation && (!selectedShelf || !selectedLayer))) {
+    const usesWarehouseArea = this.data.usesWarehouseArea;
+    const isFreeTextLocation = !usesWarehouseArea || this.data.locationTypeIndex === 1;
+    if (usesWarehouseArea && (!selectedArea || (!isFreeTextLocation && (!selectedShelf || !selectedLayer)))) {
       wx.showToast({ title: isFreeTextLocation ? '请选择货区' : '请选择完整的货区、货架和层数', icon: 'none' });
       return;
     }
-    if (isFreeTextLocation && !(part.locationNote || '').trim()) {
+    if (usesWarehouseArea && isFreeTextLocation && !(part.locationNote || '').trim()) {
       wx.showToast({ title: '请输入具体存放位置', icon: 'none' });
       return;
     }
@@ -380,6 +438,7 @@ Page({
           String(location).padStart(2, '0');
       
       const newPart = {
+        workshopCode: this.data.selectedWorkshopCode,
         materialCode: part.materialCode.trim(),
         materialDesc: part.materialDesc.trim(),
         totalStock,
@@ -394,10 +453,10 @@ Page({
         price: part.price === undefined || part.price === '' ? null : Number(part.price),
         partType: this.data.partTypeOptions[this.data.partTypeIndex],
         usageDescription: (part.usageDescription || '').trim(),
-        warehouseArea: String(part.warehouseArea || '').trim() || selectedArea,
-        warehouseAreaName: selectedArea || '',
+        warehouseArea: usesWarehouseArea ? (String(part.warehouseArea || '').trim() || selectedArea) : '',
+        warehouseAreaName: usesWarehouseArea ? (selectedArea || '') : '',
         locationType: isFreeTextLocation ? 'free_text' : 'shelf',
-        locationNote: isFreeTextLocation ? part.locationNote.trim() : '',
+        locationNote: isFreeTextLocation ? String(part.locationNote || '').trim() : '',
         remark: part.remark || ''
       };
 

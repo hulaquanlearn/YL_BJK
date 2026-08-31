@@ -1,5 +1,6 @@
 const TOKEN_KEY = 'spare_parts_auth_token';
 const USER_KEY = 'spare_parts_auth_user';
+const WORKSHOP_ROLES = Object.freeze({ raw_grain: 'raw_grain', qu_making: 'qu_making', brewing: 'brewing' });
 let redirecting = false;
 
 function getToken() { return wx.getStorageSync(TOKEN_KEY) || ''; }
@@ -14,6 +15,14 @@ function clearSession() {
   wx.removeStorageSync(USER_KEY);
 }
 function isAdmin() { return getUser()?.role === 'admin'; }
+function userWorkshopCode() {
+  const user = getUser();
+  return user?.workshopCode || WORKSHOP_ROLES[user?.role] || '';
+}
+function canEditAnyWorkshop() { return isAdmin() || Boolean(userWorkshopCode()); }
+function canEditWorkshop(workshopCode) {
+  return isAdmin() || (Boolean(userWorkshopCode()) && userWorkshopCode() === String(workshopCode || ''));
+}
 
 function goLogin() {
   if (redirecting) return;
@@ -36,7 +45,27 @@ function requireLogin(options = {}) {
     });
     return false;
   }
+  if (options.editor && !canEditAnyWorkshop()) {
+    wx.showModal({
+      title: '无权限',
+      content: '当前账号没有备件修改权限',
+      showCancel: false,
+      complete: () => wx.navigateBack({ fail: () => wx.reLaunch({ url: '/pages/home/home' }) })
+    });
+    return false;
+  }
   return true;
 }
 
-module.exports = { getToken, getUser, setSession, clearSession, isAdmin, goLogin, requireLogin };
+module.exports = {
+  getToken,
+  getUser,
+  setSession,
+  clearSession,
+  isAdmin,
+  userWorkshopCode,
+  canEditAnyWorkshop,
+  canEditWorkshop,
+  goLogin,
+  requireLogin
+};

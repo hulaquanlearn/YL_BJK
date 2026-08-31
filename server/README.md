@@ -20,7 +20,7 @@ cd /opt/spare-parts/server
 mysql -u spareparts -p spare_parts < sql/migration_all.sql
 ```
 
-总迁移入口按顺序执行盘点、运营、3D货架及四层布局修正，所有子脚本均可安全重复执行：
+总迁移入口按顺序执行盘点、运营、3D货架、四层布局修正、工程知识、程序分析及多车间权限迁移，所有子脚本均按增量方式执行：
 
 1. 为 `inventory` 增加三个盘点时间字段（字段不存在时才添加）。
 2. 新建 `inventory_orders` 盘点单表（表不存在时才创建）。
@@ -29,10 +29,12 @@ mysql -u spareparts -p spare_parts < sql/migration_all.sql
 5. 增加最高储备、订购点、备件类型、用途、自由位置和数据启停字段。
 6. 新建 `spare_parts_import_runs` 导入审计表。
 7. 新建 `stock_movements` 出入库与盘点差异流水表。
-8. 新建供应商、采购、设备与设备备件关系表，并补齐结构化流水字段。
+8. 新建设备与设备备件关系表，并补齐结构化流水字段；旧版采购、供应商表在末尾清理迁移中移除。
 9. 新建3D货架布局与审计表，最后统一修正为现场四层货架布局。
+10. 增加原粮、制曲、酿酒车间归属字段，并把存量数据回填为原粮车间。
+11. 将账号角色扩展为 `admin/raw_grain/qu_making/brewing/viewer`，车间账号跨库可见、写入隔离。
 
-脚本不包含 `DROP` 或 `TRUNCATE`，不更改现有唯一索引，不删除业务数据。执行前仍应先备份数据库。
+除最后的废弃功能清理脚本外，其余迁移不删除业务数据。`migration_remove_procurement_suppliers_20260829.sql` 会永久删除已停用的采购、供应商及关联历史，并把旧“在途”数量归零；执行前必须备份数据库。
 
 ## 盘点一致性
 
@@ -73,6 +75,8 @@ npm run import:new-data
 
 `POST /api/parts` 在物料编码已存在时会复用 `parts` 主数据，并按完整位置检查重复；界面同时支持标准货架库位和自由位置说明。
 
+网页批量导入还会执行货位唯一性预检：同一 Excel 内重复使用六位库位码，或新物料占用其他现有物料的库位，都会返回具体行号并拒绝整批写入。原物料使用相同物料编码和相同库位进行更新不视为冲突。存在错误时可调用 `POST /api/parts/import-error-report` 下载保留全部原始行、并追加“校验结果、错误原因、修改建议”的修正台账。
+
 ## 环境变量
 
 ```bash
@@ -95,8 +99,10 @@ MySQL 与后端在同一台服务器，不需要数据库 SSL，也不要开放 
 
 ## 登录与权限
 
-- 普通用户：查询备件、库存统计、AI咨询、库位导览和提交盘点。
-- 管理员：拥有普通用户权限，并可新增/删除备件、出入库、盘点审批和账号管理。
+- `viewer`：可以查询全部车间的备件、库存统计、库位、知识和程序资料，不能修改。
+- `raw_grain`、`qu_making`、`brewing`：可以查看全部车间，只能修改所属车间的备件、库存、盘点、货架和知识资料。
+- `admin`：拥有全部车间最高权限，并负责盘点审批、知识彻底删除和角色管理。
+- 网页不再提供账号管理板块；账号创建、删除、密码重置和角色调整统一通过独立 Windows 账号管理器完成。
 - 密码使用 Node.js 内置 `crypto.scrypt` 加盐哈希，数据库不保存明文。
 - 登录令牌为32字节随机值，数据库只保存 SHA-256 哈希；默认8小时过期。
 
@@ -115,7 +121,7 @@ BOOTSTRAP_ADMIN_PASSWORD=仅首次创建时临时填写
 npm run create-admin
 ```
 
-创建成功后必须立即从 `.env` 删除 `BOOTSTRAP_ADMIN_PASSWORD` 并重启 API。后续普通账号和管理员账号统一在小程序“账号设置 → 账号管理”中创建，不要重复运行初始化脚本。
+创建成功后必须立即从 `.env` 删除 `BOOTSTRAP_ADMIN_PASSWORD` 并重启 API。后续账号统一通过独立账号管理器创建和分配角色，不要重复运行初始化脚本。
 
 ## OpenClaw
 
@@ -181,6 +187,37 @@ ss -lntp | grep ':14504'
 
 官方参考：[OpenClaw Gateway 配置](https://docs.openclaw.ai/gateway/configuration-reference)。
 
+## 智能工程中心附件与程序解析
+
+智能工程中心与备件管理共用统一账号。车间角色只能上传和维护所属车间资料；总管理员可彻底删除知识记录及其服务器附件。知识删除不是“下架”，删除后数据库记录和对应物理文件均不保留。
+
+生产环境必须配置持久化附件目录：
+
+```env
+KNOWLEDGE_UPLOAD_DIR=/opt/spare-parts/uploads/fermentation-knowledge
+KNOWLEDGE_MAX_FILE_SIZE=524288000
+PLC_UPLOAD_DIR=/opt/spare-parts/data/plc-programs
+PLC_MAX_FILE_SIZE=52428800
+PLC_AGENT_TOKEN=使用 openssl rand -hex 32 生成
+```
+
+首次部署前创建目录并授权给API运行用户：
+
+```bash
+mkdir -p /opt/spare-parts/uploads/fermentation-knowledge
+chown -R $(id -un):$(id -gn) /opt/spare-parts/uploads
+chmod 750 /opt/spare-parts/uploads/fermentation-knowledge
+mkdir -p /opt/spare-parts/data/plc-programs
+chown -R $(id -un):$(id -gn) /opt/spare-parts/data/plc-programs
+chmod 750 /opt/spare-parts/data/plc-programs
+```
+
+附件目录不在网页静态目录中，也不应提交Git。服务器备份时需要将该目录和MySQL中的`fermentation_knowledge_entries`表一起备份，否则附件和条目会失去对应关系。
+
+程序文件目录同样不得放入网页静态目录或Git。备份时需同时备份 `PLC_UPLOAD_DIR` 和 `plc_projects`、`plc_project_files`、`plc_program_items`、`plc_analysis_runs` 四张表。AI请求固定使用 `tool_choice: none`，只发送当前项目检索出的程序证据；服务端不提供PLC或机器人在线连接、下载、强制或写入接口。
+
+TIA 自动解析需在 V17 实机和 V16 虚拟机分别运行 `tools/tia-openness-exporter/Start-ProgramAnalysisAgent.ps1`。两个节点使用与服务器一致的 `PLC_AGENT_TOKEN`，只主动访问网站 HTTPS，不开放入站端口。ABB RAPID 文件由服务器静态解析，不需要安装 RobotStudio。
+
 ## 离线知识库快照
 
 Dify不再调用本服务的HTTP接口。需要更新内网知识库时，由服务器从正式MySQL生成Markdown快照：
@@ -191,6 +228,14 @@ npm run export:knowledge -- --output=/opt/spare-parts/output/spare-parts-knowled
 ```
 
 生成文件只包含启用中的备件和库位，并预计算备件类型、货区分类及缺料补货清单。将该Markdown人工导入内网Dify知识库即可；API服务不保存Dify令牌，也不提供任何Dify HTTP接口。
+
+## 备件与类别模型
+
+- `parts.model_url` 是具体备件的专用模型，优先级最高；`parts.category_model_id` 关联可复用的 `part_category_models`。
+- 执行 `sql/migration_part_category_models_20260831.sql` 后，四个初始类别模型会登记到数据库，并为现有常见备件完成首次关联。
+- `/api/parts/batch-model` 和 `/api/parts/batch-category-model` 会逐个校验备件所属车间，单次最多处理500个备件。
+- `/api/part-category-models` 的查询对登录账号开放；新增、修改、替换和删除只允许 `admin`。
+- 用户上传的类别模型保存在 `PART_MODELS_UPLOAD_DIR`（生产建议 `/opt/spare-parts/uploads/part-models`），必须与数据库一起备份；部署包不携带该目录。
 
 ## 安装与 PM2
 

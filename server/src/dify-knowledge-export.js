@@ -282,7 +282,6 @@ function buildPartBlock(row, snapshotTime) {
 库存状态：${stockStatus(row)}
 安全库存：${safetyStock} ${unit}
 最高库存：${maxStock} ${unit}
-在途数量：${number(row.inTransit)} ${unit}
 货区：${area}
 具体位置：${formatLocation(row)}
 位置说明：方位1代表货架东侧，方位2代表货架西侧；货位按货物在货架上从南到北依次排列。
@@ -315,7 +314,7 @@ function buildLowStockBlocks(rows, snapshotTime, pageSize = 25) {
 数据快照时间：${snapshotTime}
 结论：本次快照没有低库存或零库存记录。
 
-检索关键词：缺料、缺件、低库存、零库存、待补货、补货清单、采购清单、需要补货的备件、生成缺料表格`];
+检索关键词：缺料、缺件、低库存、零库存、待补货、补货清单、需要补货的备件、生成缺料表格`];
   }
 
   const pages = [];
@@ -352,7 +351,7 @@ function buildLowStockBlocks(rows, snapshotTime, pageSize = 25) {
 | --- | --- | ---: | ---: | ---: | ---: | --- | --- |
 ${lines.join('\n')}
 
-检索关键词：缺料、缺件、低库存、零库存、待补货、补货清单、采购清单、需要补货的备件、补货数量、生成缺料表格、导出补货表`);
+检索关键词：缺料、缺件、低库存、零库存、待补货、补货清单、需要补货的备件、补货数量、生成缺料表格`);
   }
   return pages;
 }

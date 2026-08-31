@@ -56,7 +56,7 @@
     <view class="card-header">库存调整</view>
     <view class="operation-reason">
       <text class="operation-label">操作原因：</text>
-      <input class="reason-input" placeholder="如：设备检修领用、采购到货" maxlength="200" value="{{stockReason}}" bindinput="bindStockReason" />
+      <input class="reason-input" placeholder="如：设备检修领用、台账调整" maxlength="200" value="{{stockReason}}" bindinput="bindStockReason" />
     </view>
     <view class="operation-item">
       <text class="operation-label">入库数量：</text>

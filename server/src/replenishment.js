@@ -6,11 +6,10 @@ function nullableNumber(value) {
 
 function buildReplenishmentItem(part = {}) {
   const currentStock = Number(part.totalStock) || 0;
-  const inTransit = Number(part.inTransit) || 0;
   const reorderPoint = nullableNumber(part.reorderPoint ?? part.safetyStock);
   const maxStock = nullableNumber(part.maxStock);
   const price = nullableNumber(part.price);
-  const availableStock = currentStock + inTransit;
+  const availableStock = currentStock;
   const suggestedQuantity = maxStock === null
     ? null
     : Math.max(maxStock - availableStock, 0);
@@ -22,7 +21,6 @@ function buildReplenishmentItem(part = {}) {
   return {
     ...part,
     currentStock,
-    inTransit,
     availableStock,
     reorderPoint,
     maxStock,

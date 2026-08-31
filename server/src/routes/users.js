@@ -4,9 +4,11 @@ const { ApiError, asyncHandler } = require('../utils');
 const { requireRole } = require('../auth');
 const { validateUsername, validatePassword, validateDisplayName } = require('../password-policy');
 const { hashPassword } = require('../password');
+const { WORKSHOPS } = require('../workshop-scope');
 
 const router = express.Router();
 router.use(requireRole('admin'));
+const ALLOWED_ROLES = new Set(['admin', 'viewer', ...WORKSHOPS.map(item => item.role)]);
 
 router.get('/', asyncHandler(async (_req, res) => {
   const [rows] = await pool.query(
@@ -21,7 +23,8 @@ router.post('/', asyncHandler(async (req, res) => {
   const username = validateUsername(req.body?.username);
   const password = validatePassword(req.body?.password);
   const displayName = validateDisplayName(req.body?.displayName);
-  const role = req.body?.role === 'admin' ? 'admin' : 'user';
+  const role = String(req.body?.role || 'viewer');
+  if (!ALLOWED_ROLES.has(role)) throw new ApiError(400, '角色无效');
   const passwordHash = await hashPassword(password);
   try {
     const [result] = await pool.query(
@@ -46,7 +49,7 @@ router.patch('/:id', asyncHandler(async (req, res) => {
     params.push(validateDisplayName(req.body.displayName));
   }
   if (req.body?.role !== undefined) {
-    if (!['user', 'admin'].includes(req.body.role)) throw new ApiError(400, '角色无效');
+    if (!ALLOWED_ROLES.has(req.body.role)) throw new ApiError(400, '角色无效');
     if (String(id) === String(req.user.id) && req.body.role !== 'admin') throw new ApiError(400, '不能取消自己的管理员权限');
     updates.push('role = ?');
     params.push(req.body.role);

@@ -1,7 +1,7 @@
 <template>
   <main class="web-login">
     <section class="login-panel">
-      <div class="login-brand"><span><el-icon><Tools /></el-icon></span><div><h1>原粮车间备件管理</h1><p>使用分配的账号登录系统</p></div></div>
+      <div class="login-brand"><span><el-icon><Grid /></el-icon></span><div><h1>数字工作台</h1><p>统一登录备件管理与智能工程工作台</p></div></div>
       <el-form label-position="top" @submit.prevent="submit">
         <el-form-item label="用户名"><el-input v-model="form.username" size="large" maxlength="32" autofocus @keyup.enter="submit" /></el-form-item>
         <el-form-item label="密码"><el-input v-model="form.password" size="large" type="password" show-password maxlength="72" @keyup.enter="submit" /></el-form-item>
@@ -27,7 +27,7 @@ async function submit() {
   try {
     const result = await login({ username: form.username.trim().toLowerCase(), password: form.password })
     setSession(result.data.token, result.data.user)
-    router.replace(typeof route.query.redirect === 'string' ? route.query.redirect : '/inventory')
+    router.replace(typeof route.query.redirect === 'string' ? route.query.redirect : '/portal')
   } finally { loading.value = false }
 }
 </script>

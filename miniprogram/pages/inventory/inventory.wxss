@@ -463,18 +463,69 @@ textarea {
 .scope-actions { display: flex; gap: 10rpx; }
 .mini-action { width: auto; min-width: 120rpx; height: 60rpx; margin: 0; padding: 0 16rpx; border-radius: 30rpx; color: #fff; background: #c6000b; font-size: 23rpx; line-height: 60rpx; }
 .mini-action.secondary { color: #8d1119; background: #fff1f2; }
-.check-actions { display: flex; flex: none; gap: 8rpx; }
-.check-btn { width: 88rpx; height: 56rpx; min-height: 56rpx; margin: 0; padding: 0; border: 1rpx solid #d9dee5; border-radius: 28rpx; color: #67717e; background: #fff; font-size: 23rpx; line-height: 56rpx; }
-.check-btn.normal.selected { border-color: #16845b; color: #fff; background: #16845b; }
-.check-btn.abnormal.selected { border-color: #c6000b; color: #fff; background: #c6000b; }
+.check-actions {
+  flex: 0 0 236rpx;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6rpx;
+  padding: 5rpx;
+  border: 1rpx solid #e4e7ec;
+  border-radius: 30rpx;
+  background: #f2f4f7;
+}
+.check-btn {
+  width: auto;
+  height: 50rpx;
+  min-height: 50rpx;
+  margin: 0;
+  padding: 0 8rpx;
+  border: 0;
+  border-radius: 25rpx;
+  color: #667085;
+  background: transparent;
+  box-shadow: none;
+  font-size: 22rpx;
+  line-height: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7rpx;
+}
+.check-btn::after { border: 0; }
+.check-symbol {
+  width: 26rpx;
+  height: 26rpx;
+  border: 2rpx solid #98a2b3;
+  border-radius: 50%;
+  color: #98a2b3;
+  font-size: 18rpx;
+  font-weight: 800;
+  line-height: 24rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+.check-btn.selected {
+  background: #fff;
+  box-shadow: 0 2rpx 8rpx rgba(16, 24, 40, 0.12);
+  font-weight: 700;
+}
+.check-btn.normal.selected { color: #137a52; }
+.check-btn.normal.selected .check-symbol { border-color: #16845b; color: #fff; background: #16845b; }
+.check-btn.abnormal.selected { color: #b42318; }
+.check-btn.abnormal.selected .check-symbol { border-color: #d92d20; color: #fff; background: #d92d20; }
 
 .inventory-card {
   margin-bottom: 16rpx;
   padding: 24rpx;
+  border: 2rpx solid transparent;
   border-radius: 16rpx;
   background: #fff;
   box-shadow: 0 4rpx 16rpx rgba(31, 41, 55, 0.06);
+  transition: border-color 160ms ease, background-color 160ms ease;
 }
+
+.inventory-card.is-normal { border-color: #d1eadf; }
+.inventory-card.is-abnormal { border-color: #fda29b; background: #fffafa; }
 
 .inventory-card-top {
   display: flex;

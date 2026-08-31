@@ -1,7 +1,7 @@
 <template>
   <footer class="site-footer" aria-label="网站备案信息">
     <div class="site-footer__inner">
-      <span class="site-footer__copyright">原粮车间备件管理</span>
+      <span class="site-footer__copyright">数字工作台</span>
       <span class="site-footer__divider" aria-hidden="true"></span>
       <a
         class="site-footer__link"

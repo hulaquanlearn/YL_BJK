@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const config = require('./config');
 const { pool } = require('./db');
 const { ApiError, asyncHandler } = require('./utils');
+const { workshopForRole } = require('./workshop-scope');
 
 function publicUser(row) {
   return {
@@ -9,7 +10,8 @@ function publicUser(row) {
     username: row.username,
     displayName: row.display_name,
     role: row.role,
-    enabled: Boolean(row.enabled)
+    enabled: Boolean(row.enabled),
+    workshopCode: workshopForRole(row.role)
   };
 }
 

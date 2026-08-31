@@ -1,0 +1,240 @@
+/* 全局样式 */
+page {
+  background-color: #f5f7fa;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 加载状态 */
+.loading {
+  padding: 80rpx 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.loading-spinner {
+  width: 50rpx;
+  height: 50rpx;
+  border: 5rpx solid #f3f3f3;
+  border-top: 5rpx solid #1989fa;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+.loading-text {
+  color: #999;
+  font-size: 28rpx;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 筛选卡片 */
+.filter-card {
+  background: #fff;
+  border-radius: 20rpx;
+  margin: 30rpx;
+  box-shadow: 0 5rpx 15rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+/* 筛选项 */
+.filter-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 30rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+  transition: background-color 0.2s;
+}
+.filter-item:last-child {
+  border-bottom: none;
+}
+.filter-item:active {
+  background-color: #fafafa;
+}
+
+/* 筛选项标签 */
+.item-label {
+  font-size: 30rpx;
+  color: #666;
+  width: 140rpx;
+}
+
+/* 内容区 */
+.item-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* 选中值 */
+.item-value {
+  font-size: 30rpx;
+  color: #333;
+  margin-right: 15rpx;
+}
+
+/* 已选标签 */
+.selected-tag {
+  font-size: 24rpx;
+  color: #1989fa;
+  background: #e8f3ff;
+  padding: 4rpx 18rpx;
+  border-radius: 20rpx;
+}
+
+/* 确定筛选按钮 */
+.confirm-btn {
+  width: calc(100% - 60rpx);
+  margin: 30rpx;
+  padding: 28rpx 0;
+  background: linear-gradient(90deg, #1677ff, #0958d9);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 500;
+  border-radius: 15rpx;
+  box-shadow: 0 5rpx 15rpx rgba(22, 119, 255, 0.2);
+  border: none;
+}
+.confirm-btn[disabled] {
+  background: #e5e7eb;
+  color: #9ca3af;
+  box-shadow: none;
+}
+
+/* 自定义筛选弹窗（选择项） */
+.custom-modal .modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+.custom-modal .modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  z-index: 1000;
+  overflow: hidden;
+}
+.custom-modal .modal-title {
+  padding: 30rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  border-bottom: 1rpx solid #f5f5f5;
+  text-align: center;
+}
+.custom-modal .modal-list {
+  max-height: 480rpx;
+  overflow-y: auto;
+}
+.custom-modal .modal-item {
+  padding: 28rpx 30rpx;
+  font-size: 30rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+.custom-modal .modal-item:last-child {
+  border-bottom: none;
+}
+.custom-modal .modal-item:active {
+  background-color: #f5f5f5;
+}
+.custom-modal .selected-item {
+  background: #e8f3ff;
+  color: #1989fa;
+}
+.custom-modal .check-icon {
+  font-size: 30rpx;
+  font-weight: bold;
+}
+.custom-modal .modal-footer {
+  display: flex;
+  border-top: 1rpx solid #f5f5f5;
+}
+.custom-modal .modal-cancel {
+  flex: 1;
+  padding: 28rpx 0;
+  font-size: 30rpx;
+  color: #666;
+  background-color: #fff;
+  border: none;
+  border-right: 1rpx solid #f5f5f5;
+}
+.custom-modal .modal-confirm {
+  flex: 1;
+  padding: 28rpx 0;
+  font-size: 30rpx;
+  color: #000;
+  background-color: #fff;
+  border: none;
+}
+
+/* 自定义确认筛选弹窗 */
+.confirm-filter-modal .modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+.confirm-filter-modal .modal-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  z-index: 1000;
+  overflow: hidden;
+}
+.confirm-filter-modal .modal-title {
+  padding: 30rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  border-bottom: 1rpx solid #f5f5f5;
+  text-align: center;
+}
+.confirm-filter-modal .confirm-content {
+  padding: 30rpx;
+  font-size: 28rpx;
+  line-height: 48rpx;
+}
+.confirm-filter-modal .content-item {
+  margin: 10rpx 0;
+}
+.confirm-filter-modal .modal-footer {
+  display: flex;
+  border-top: 1rpx solid #f5f5f5;
+}
+.confirm-filter-modal .modal-cancel {
+  flex: 1;
+  padding: 28rpx 0;
+  font-size: 30rpx;
+  color: #666;
+  background-color: #fff;
+  border: none;
+  border-right: 1rpx solid #f5f5f5;
+}
+.confirm-filter-modal .modal-confirm {
+  flex: 1;
+  padding: 28rpx 0;
+  font-size: 30rpx;
+  color: #000;
+  background-color: #fff;
+  border: none;
+}

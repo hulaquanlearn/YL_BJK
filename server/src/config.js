@@ -1,3 +1,4 @@
+const path = require('path');
 require('dotenv').config();
 
 function numberFromEnv(name, fallback) {
@@ -25,5 +26,36 @@ module.exports = {
     token: process.env.OPENCLAW_GATEWAY_TOKEN || '',
     model: process.env.OPENCLAW_MODEL || 'openclaw/spare-parts-chat',
     timeoutMs: numberFromEnv('OPENCLAW_TIMEOUT_MS', 120000)
+  },
+  knowledge: {
+    uploadDir: process.env.KNOWLEDGE_UPLOAD_DIR
+      ? path.resolve(process.env.KNOWLEDGE_UPLOAD_DIR)
+      : path.resolve(__dirname, '../uploads/fermentation-knowledge'),
+    maxFileSize: Math.min(
+      Math.max(numberFromEnv('KNOWLEDGE_MAX_FILE_SIZE', 500 * 1024 * 1024), 1024 * 1024),
+      500 * 1024 * 1024
+    )
+  },
+  plc: {
+    agentToken: process.env.PLC_AGENT_TOKEN || '',
+    uploadDir: process.env.PLC_UPLOAD_DIR
+      ? path.resolve(process.env.PLC_UPLOAD_DIR)
+      : path.resolve(__dirname, '../uploads/plc-programs'),
+    maxFileSize: Math.min(
+      Math.max(numberFromEnv('PLC_MAX_FILE_SIZE', 50 * 1024 * 1024), 1024 * 1024),
+      200 * 1024 * 1024
+    )
+  },
+  parts: {
+    uploadDir: process.env.PARTS_UPLOAD_DIR
+      ? path.resolve(process.env.PARTS_UPLOAD_DIR)
+      : path.resolve(__dirname, '../uploads/part-images'),
+    modelDir: process.env.PART_MODELS_UPLOAD_DIR
+      ? path.resolve(process.env.PART_MODELS_UPLOAD_DIR)
+      : path.resolve(__dirname, '../uploads/part-models'),
+    maxFileSize: Math.min(
+      Math.max(numberFromEnv('PARTS_MAX_FILE_SIZE', 10 * 1024 * 1024), 1024 * 1024),
+      50 * 1024 * 1024
+    )
   }
 };

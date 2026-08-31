@@ -11,6 +11,13 @@
       <view class="group-title">基础信息</view>
       <view class="group-desc">填写物料的基本识别信息</view>
       <view class="form-item">
+        <text class="label">所属车间 <text class="required-mark">*</text></text>
+        <picker wx:if="{{isAdmin}}" mode="selector" range="{{workshopNames}}" value="{{workshopIndex}}" bindchange="onWorkshopChange" class="picker">
+          <view class="picker-text">{{selectedWorkshopName}}</view>
+        </picker>
+        <view wx:else class="picker"><view class="picker-text">{{selectedWorkshopName}}（已按账号权限锁定）</view></view>
+      </view>
+      <view class="form-item">
         <text class="label">物料编码 <text class="required-mark">*</text></text>
         <input placeholder="请输入物料编码" value="{{part.materialCode}}" bindinput="onInputChange" bindblur="checkMaterialCode" data-field="materialCode" class="input required" />
         <text class="field-hint" wx:if="{{existingMaterialHint}}">{{existingMaterialHint}}</text>
@@ -78,14 +85,15 @@
 
     <view class="form-group" wx:if="{{currentStep === 2}}">
       <view class="group-title">位置信息</view>
-      <view class="group-desc">标准库位选择货架信息，其他地点可直接填写位置说明</view>
-      <view class="form-item">
+      <view class="group-desc" wx:if="{{usesWarehouseArea}}">标准库位选择货架信息，其他地点可直接填写位置说明</view>
+      <view class="group-desc" wx:else>制曲车间不设货区，可直接填写具体存放位置</view>
+      <view class="form-item" wx:if="{{usesWarehouseArea}}">
         <text class="label">位置类型</text>
         <picker mode="selector" range="{{locationTypeOptions}}" value="{{locationTypeIndex}}" bindchange="onLocationTypeChange" class="picker">
           <view class="picker-text">{{locationTypeOptions[locationTypeIndex]}}</view>
         </picker>
       </view>
-      <view class="form-item">
+      <view class="form-item" wx:if="{{usesWarehouseArea}}">
         <text class="label">货区 <text class="required-mark">*</text></text>
         <view class="picker-wrap">
           <picker 
@@ -100,7 +108,7 @@
           <view class="add-btn" bindtap="showAddModal" data-type="area">+</view>
         </view>
       </view>
-      <view class="form-item" wx:if="{{locationTypeIndex === 0}}">
+      <view class="form-item" wx:if="{{usesWarehouseArea && locationTypeIndex === 0}}">
         <text class="label">货架 <text class="required-mark">*</text></text>
         <view class="picker-wrap">
           <picker 
@@ -115,7 +123,7 @@
           <view class="add-btn {{selectedArea ? '' : 'disabled'}}" bindtap="showAddModal" data-type="shelf">+</view>
         </view>
       </view>
-      <view class="form-item" wx:if="{{locationTypeIndex === 0}}">
+      <view class="form-item" wx:if="{{usesWarehouseArea && locationTypeIndex === 0}}">
         <text class="label">层数 <text class="required-mark">*</text></text>
         <view class="picker-wrap">
           <picker 
@@ -130,7 +138,7 @@
           <view class="add-btn {{selectedShelf ? '' : 'disabled'}}" bindtap="showAddModal" data-type="layer">+</view>
         </view>
       </view>
-      <view class="form-row" wx:if="{{locationTypeIndex === 0}}">
+      <view class="form-row" wx:if="{{usesWarehouseArea && locationTypeIndex === 0}}">
         <view class="form-item form-item-half">
           <text class="label">方位（选填）</text>
           <input
@@ -154,11 +162,11 @@
           />
         </view>
       </view>
-      <view class="form-item" wx:else>
-        <text class="label">具体位置 <text class="required-mark">*</text></text>
+      <view class="form-item" wx:if="{{!usesWarehouseArea || locationTypeIndex === 1}}">
+        <text class="label">具体位置 <text class="required-mark" wx:if="{{usesWarehouseArea}}">*</text></text>
         <input placeholder="如：破曲楼二楼、六车间、备件库地面" value="{{part.locationNote}}" bindinput="onInputChange" data-field="locationNote" class="input required" />
       </view>
-      <view class="location-tip">货区代码与库位编码将由系统自动处理</view>
+      <view class="location-tip" wx:if="{{usesWarehouseArea}}">货区代码与库位编码将由系统自动处理</view>
     </view>
 
     <view class="form-group" wx:if="{{currentStep === 3}}">
@@ -167,7 +175,8 @@
       <view class="review-card">
         <text>物料：{{part.materialCode}} · {{part.materialDesc}}</text>
         <text>库存：{{part.totalStock || 0}}{{part.unit || '个'}}</text>
-        <text>位置：{{selectedArea}} · {{locationTypeIndex === 0 ? selectedShelf + ' ' + selectedLayer : part.locationNote}}</text>
+        <text>车间：{{selectedWorkshopName}}</text>
+        <text>位置：{{usesWarehouseArea ? selectedArea + ' · ' + (locationTypeIndex === 0 ? selectedShelf + ' ' + selectedLayer : part.locationNote) : (part.locationNote || '未填写具体位置')}}</text>
       </view>
       <view class="form-item">
         <textarea 

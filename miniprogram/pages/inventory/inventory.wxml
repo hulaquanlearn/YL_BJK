@@ -11,12 +11,12 @@
         <view><text class="progress-title">盘点进度 {{checkedCount}} / {{editableCount}}</text><text class="progress-meta">未核对 {{uncheckedCount}} · 异常 {{abnormalCount}}</text></view>
         <view class="scope-actions" wx:if="{{!isReadOnly}}"><button class="mini-action secondary" bindtap="markAllNormal" disabled="{{uncheckedCount === 0}}">剩余全正常</button></view>
       </view>
-      <view class="inventory-card" wx:for="{{inventoryList}}" wx:key="_id">
+      <view class="inventory-card {{item.checkStatus === '正常' ? 'is-normal' : (item.checkStatus === '异常' ? 'is-abnormal' : '')}}" wx:for="{{inventoryList}}" wx:key="_id">
         <view class="inventory-card-top">
           <text class="inventory-name">{{item.materialDesc}}</text>
           <view class="check-actions" wx:if="{{item.checkStatus === '未核对' || item.checkStatus === '正常' || item.checkStatus === '异常'}}">
-            <button class="check-btn normal {{item.checkStatus === '正常' ? 'selected' : ''}}" bindtap="setCheckStatus" data-index="{{index}}" data-status="正常">正常</button>
-            <button class="check-btn abnormal {{item.checkStatus === '异常' ? 'selected' : ''}}" bindtap="setCheckStatus" data-index="{{index}}" data-status="异常">异常</button>
+            <button class="check-btn normal {{item.checkStatus === '正常' ? 'selected' : ''}}" bindtap="setCheckStatus" data-index="{{index}}" data-status="正常"><text class="check-symbol">✓</text><text>正常</text></button>
+            <button class="check-btn abnormal {{item.checkStatus === '异常' ? 'selected' : ''}}" bindtap="setCheckStatus" data-index="{{index}}" data-status="异常"><text class="check-symbol">!</text><text>异常</text></button>
           </view>
           <button wx:else
             class="status-btn {{item.checkStatus === '正常' ? 'normal-btn' : (item.checkStatus === '异常' ? 'abnormal-btn' : (item.checkStatus === '待审批' ? 'pending-btn' : 'finished-btn'))}}"

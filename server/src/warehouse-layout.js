@@ -29,12 +29,14 @@ function toShelf(row) {
   return {
     id: String(row.id),
     layoutKey: row.layoutKey,
+    workshopCode: row.workshopCode || 'raw_grain',
     shelfNo,
     customName,
     displayName: customName || (shelfNo === null ? '未命名' : `${shelfNo}号货架`),
     workshopGroup: row.workshopGroup || '未分组',
     warehouseCode: row.warehouseCode || null,
     isVendor: Boolean(row.isVendor),
+    positionOverridden: Boolean(row.positionOverridden),
     position: {
       x: Number(row.positionX) || 0,
       z: Number(row.positionZ) || 0,
