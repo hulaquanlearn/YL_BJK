@@ -10,8 +10,8 @@ function validateUsername(value) {
 
 function validatePassword(value) {
   const password = String(value || '');
-  if (password.length < 10 || password.length > 72 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
-    throw new ApiError(400, '密码须为10至72位，并同时包含字母和数字');
+  if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) {
+    throw new ApiError(400, '密码须同时包含大写字母、小写字母和数字');
   }
   return password;
 }

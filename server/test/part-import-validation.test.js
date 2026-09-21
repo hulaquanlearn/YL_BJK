@@ -59,3 +59,13 @@ test('error workbook keeps every original row and adds actionable columns', asyn
   assert.match(String(result.getRow(3).getCell(5).value), /011401/);
   assert.match(String(result.getRow(3).getCell(6).value), /未占用货位/);
 });
+
+test('free-text duplicate material/area/note is rejected but different storage notes remain separate', () => {
+  const rows = [
+    {sourceRow:2,materialCode:'A',warehouseAreaName:'一区',locationNote:'北墙'},
+    {sourceRow:3,materialCode:'A',warehouseAreaName:'一区',locationNote:'南墙'}
+  ];
+  assert.equal(duplicateLocationErrors(rows).length,0);
+  const errors = duplicateLocationErrors([...rows,{...rows[0],sourceRow:4}]);
+  assert.deepEqual(errors.map(error=>error.row),[2,4]);
+});

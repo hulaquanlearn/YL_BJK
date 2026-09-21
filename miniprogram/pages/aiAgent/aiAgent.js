@@ -1,5 +1,6 @@
 const api = require('../../services/api.js');
 const auth = require('../../services/auth.js');
+const config = require('../../config.js');
 const {
   classifyIntent,
   findShelfAreas,
@@ -14,6 +15,7 @@ const EMPTY_RESULT = {
   resultSummary: null,
   resultCards: [],
   resultTotal: 0,
+  resultEvidence: [],
   clarificationOptions: []
 };
 
@@ -21,6 +23,7 @@ function stockState(item) {
   const stock = Number(item.totalStock) || 0;
   const hasReorderPoint = item.reorderPoint !== null && item.reorderPoint !== undefined;
   if (stock <= 0) return { stockStatus: 'zero', stockStatusText: '无库存' };
+  if (!hasReorderPoint) return { stockStatus: 'unknown', stockStatusText: '订购点未配置' };
   if (hasReorderPoint && stock <= Number(item.reorderPoint)) {
     return { stockStatus: 'low', stockStatusText: '低库存' };
   }
@@ -245,9 +248,9 @@ Page({
           detail: '按当前数据库中的有效物料统计'
         },
         totalStock: {
-          value: Number(dashboard.totalStock) || 0,
-          label: '库存总量',
-          detail: '不同计量单位的数量合计，仅用于总览'
+          value: '',
+          label: '库存数量（按单位）',
+          detail: (dashboard.unitTotals || []).map(item => `${Number(item.total) || 0} ${item.unit}`).join('、') || '暂无按单位统计的数量，请在库存列表中查看。'
         },
         lowStock: {
           value: Number(dashboard.lowStock) || 0,
@@ -293,6 +296,7 @@ Page({
         resultTitle: '设备维修建议',
         resultBadge: 'AI辅助判断',
         resultText: answer,
+        resultEvidence: (res.data?.evidence || []).map(item => ({...item, typeLabel: ({knowledge:'知识文档',part:'备件库存',equipment:'设备型号'})[item.sourceType] || '依据'})),
         messages: [...newMessages, { role: 'assistant', content: answer }].slice(-6),
         isLoading: false
       });
@@ -309,6 +313,25 @@ Page({
   goToDetail(e) {
     const id = e.currentTarget.dataset.id;
     if (id) wx.navigateTo({ url: `/pages/detail/detail?id=${id}` });
+  },
+
+  viewEvidence(e) {
+    const item = this.data.resultEvidence[Number(e.currentTarget.dataset.index)];
+    if (!item) return;
+    if (item.sourceType === 'part' && item.sourceId) {
+      wx.navigateTo({url:`/pages/detail/detail?id=${encodeURIComponent(item.sourceId)}`});
+      return;
+    }
+    wx.showModal({
+      title: item.typeLabel,
+      content: `${item.title}\n\n${item.excerpt || '该条目暂无可展示的摘录'}\n\n摘录不是完整文档。可复制网页地址后在浏览器登录查看原文。`,
+      confirmText: '复制地址',
+      success: result => {
+        if (!result.confirm || !item.sourceId) return;
+        const path = item.sourceType === 'knowledge' ? `/knowledge?entryId=${encodeURIComponent(item.sourceId)}` : `/equipment?equipmentId=${encodeURIComponent(item.sourceId)}`;
+        wx.setClipboardData({data:config.apiBaseUrl.replace(/\/api\/?$/, '') + path});
+      }
+    });
   },
 
   clearChatHistory() {

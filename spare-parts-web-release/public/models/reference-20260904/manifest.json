@@ -1,0 +1,69 @@
+{
+  "version": "20260904",
+  "description": "用户参考图制作的类别示意模型；非精密 CAD，图片为原始参考图。",
+  "models": [
+    {
+      "key": "proximity-sensor",
+      "name": "接近开关",
+      "frontRotationY": -1.5707963267948966,
+      "model": "proximity-sensor.glb",
+      "image": "proximity-sensor.png",
+      "modelSha256": "38763e57971a4c8bbc8a629fc78a2d55eeff905d73defb3d3833d528288f013d",
+      "imageSha256": "050f3080471e2b92ba582cd585bcfc2ea75c0c2d0c80ede32c708179130afcd0"
+    },
+    {
+      "key": "circuit-breaker-3p",
+      "name": "断路器（三极示意）",
+      "frontRotationY": 0,
+      "model": "circuit-breaker-3p.glb",
+      "image": "circuit-breaker-3p.png",
+      "modelSha256": "a3b7432e5396efac99285f49c760244f2b4ae35f4e2daaef116c40bc01d9f7b3",
+      "imageSha256": "747192fb6eb41bb22f095239c1c38d0b5a8d9bc038c7bd99ff62bbae04d3c29b"
+    },
+    {
+      "key": "deep-groove-bearing",
+      "name": "深沟球轴承",
+      "frontRotationY": 0,
+      "model": "deep-groove-bearing.glb",
+      "image": "deep-groove-bearing.png",
+      "modelSha256": "4398f79fff1d976940d9cf9581d9410830de2cbd6a2e0f31f59f27604f741c2b",
+      "imageSha256": "7d25faffab5cd61dd2467f0d31ba676482008c7aabbd39d7dd4dac30f0fddbbb"
+    },
+    {
+      "key": "spherical-roller-bearing",
+      "name": "调心滚子轴承",
+      "frontRotationY": 0,
+      "model": "spherical-roller-bearing.glb",
+      "image": "spherical-roller-bearing.png",
+      "modelSha256": "641117a1d444e240ef83c4e1f871755bd973276dadd2dabcbf1ba3d667d5caf1",
+      "imageSha256": "f504826e7ab77ea514a64d8d172e84c43fc7b136661237aff363e0c0542ff66e"
+    },
+    {
+      "key": "pneumatic-solenoid-valve",
+      "name": "气动电磁阀",
+      "frontRotationY": 0,
+      "model": "pneumatic-solenoid-valve.glb",
+      "image": "pneumatic-solenoid-valve.png",
+      "modelSha256": "e5e5ce961a67e21fd7d946751971aa1f52d34addb9e46da73ba375dd7c5982d7",
+      "imageSha256": "ff955fc21ed73b61a32b91bd0213b40b689d5ed8eb71a654b8a8a5a7d3d274d4"
+    },
+    {
+      "key": "flanged-gate-valve",
+      "name": "法兰闸阀",
+      "frontRotationY": 0,
+      "model": "flanged-gate-valve.glb",
+      "image": "flanged-gate-valve.png",
+      "modelSha256": "dbee50249805e7ec2433d701875d40b8ce28c85d95aa6631bead6af8f241c097",
+      "imageSha256": "6348ae71999c5601409d8799d76c3422de7b68419c9cc141004c0443b1a9b149"
+    },
+    {
+      "key": "gearmotor",
+      "name": "减速电机",
+      "frontRotationY": 0,
+      "model": "gearmotor.glb",
+      "image": "gearmotor.png",
+      "modelSha256": "2503cd20221b8b82ac2d5d93a435b6d99a25d6fb1f35189fdb267187b53ec8cb",
+      "imageSha256": "1d4d4243afd21945b4aae0ca40fdd7d30d60159ed2693bac5701a6d791c53f8e"
+    }
+  ]
+}

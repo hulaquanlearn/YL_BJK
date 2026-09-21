@@ -15,13 +15,19 @@ function clearSession() {
   wx.removeStorageSync(USER_KEY);
 }
 function isAdmin() { return getUser()?.role === 'admin'; }
+function isViewer() { return getUser()?.role === 'viewer'; }
+function requireWrite(allowed = canEditAnyWorkshop()) {
+  if (allowed) return true;
+  wx.showModal({ title:'权限不足', content:'当前账号没有此操作权限。车间人员仅可查看，不能新增、修改、删除或提交业务数据。', showCancel:false });
+  return false;
+}
 function userWorkshopCode() {
   const user = getUser();
   return user?.workshopCode || WORKSHOP_ROLES[user?.role] || '';
 }
-function canEditAnyWorkshop() { return isAdmin() || Boolean(userWorkshopCode()); }
+function canEditAnyWorkshop() { return isAdmin() || Boolean(WORKSHOP_ROLES[getUser()?.role]); }
 function canEditWorkshop(workshopCode) {
-  return isAdmin() || (Boolean(userWorkshopCode()) && userWorkshopCode() === String(workshopCode || ''));
+  return isAdmin() || (Boolean(WORKSHOP_ROLES[getUser()?.role]) && WORKSHOP_ROLES[getUser().role] === String(workshopCode || ''));
 }
 
 function goLogin() {
@@ -63,6 +69,8 @@ module.exports = {
   setSession,
   clearSession,
   isAdmin,
+  isViewer,
+  requireWrite,
   userWorkshopCode,
   canEditAnyWorkshop,
   canEditWorkshop,

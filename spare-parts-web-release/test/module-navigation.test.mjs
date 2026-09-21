@@ -50,7 +50,8 @@ test('program import only asks for platform, project name and files', () => {
   assert.match(source, /const form = reactive\(\{ name: '', programFamily: 'siemens_tia' \}\)/)
   assert.doesNotMatch(source, /v-model="form\.(?:tiaVersion|cpuModel|plantArea|description)"/)
   assert.match(source, /TIA 版本、CPU、设备和网络由解析节点自动识别/)
-  assert.match(source, /服务器文件系统/)
+  assert.match(source, /内部物理路径不向浏览器暴露/)
+  assert.doesNotMatch(source, /currentProject\.(?:serverPath|uploadDir|storedFilename)/)
 })
 
 test('ABB RAPID import selects one complete folder and keeps relative paths', () => {
@@ -67,4 +68,9 @@ test('program analysis exposes a clickable project relationship map', () => {
   assert.match(source, /项目[\s\S]*源文件 \/ 模块[\s\S]*例程 \/ 程序块[\s\S]*变量 \/ I\/O/)
   assert.match(source, /v-for="item in section\.items"[\s\S]*@click="openItem\(item\)"/)
   assert.match(source, /async function loadMapItems\(\)/)
+  assert.match(source, /label="交叉引用"/)
+  assert.match(source, /getPlcGraph/)
+  assert.match(source, /getPlcReferences/)
+  assert.match(source, /静态索引建立/)
+  assert.match(source, /含引用关系/)
 })

@@ -1,4 +1,5 @@
 const path = require('path');
+const { buildReferenceIndex, stableProgramKey } = require('./plc-analysis');
 
 const ALLOWED_EXTENSIONS = new Set([
   '.xml', '.scl', '.awl', '.stl', '.csv', '.json', '.plcai', '.txt', '.md',
@@ -124,14 +125,15 @@ function rapidRoutineTree(lines, startLine = 1) {
     const command = instruction[1];
     const args = instruction[2].replace(/;$/, '').trim();
     const commandUpper = command.toUpperCase();
-    const type = /^MOVE[JLCA]|^SEARCH[LC]|^CIRPATH/i.test(command) ? 'motion'
+    const type = /:=/.test(source) ? 'io'
+      : /^MOVE[JLCA]|^SEARCH[LC]|^CIRPATH/i.test(command) ? 'motion'
       : /^(SETDO|RESET|SET|WAITDI|WAITDO|PULSEDO|ISIGNALDI|ISIGNALDO)$/i.test(command) ? 'io'
         : /^(WAITTIME|STOP|EXIT|RETURN|RAISE|RETRY|TRYNEXT)$/i.test(command) ? 'flow' : 'call';
     const node = rapidNode(type, args ? `${command} ${args}` : command, lineNo, { command, args, source });
     stack.at(-1).children.push(node);
     if (type === 'call') calls.add(command);
     if (type === 'io') {
-      const signal = args.split(/[\\,]/)[0]?.trim();
+      const signal = /:=/.test(source) ? command : args.split(/[\\,]/)[0]?.trim();
       if (signal) ioSignals.add(signal);
     }
   });
@@ -235,7 +237,7 @@ function rapidItems(text, filename) {
   const items = [{
     itemType: 'document', name: moduleName, blockType: /SYSMODULE/i.test(moduleMatch?.[0] || '') ? 'SYSMODULE' : 'MODULE',
     language: 'RAPID', contentText: source, sourcePath: filename, sourceRef: moduleName,
-    isProtected: isProtectedText(source), metadata: { platform: 'abb_rapid', module: moduleName }
+    isProtected: isProtectedText(source), metadata: { platform: 'abb_rapid', module: moduleName, startLine: 1, endLine: lines.length, parserKind: 'structured_source' }
   }];
   const routineStart = /^\s*(LOCAL\s+)?(PROC|FUNC|TRAP)\s+(?:(\w+)\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)/i;
   const declaration = /^\s*(LOCAL\s+)?(PERS|VAR|CONST|TASK\s+PERS)\s+(\w+)\s+([A-Za-z_][A-Za-z0-9_]*)/i;
@@ -244,7 +246,7 @@ function rapidItems(text, filename) {
     if (decl) items.push({
       itemType: 'tag', name: decl[4], blockType: decl[2].toUpperCase(), language: 'RAPID', dataType: decl[3],
       contentText: clean(lines[index]), sourcePath: filename, sourceRef: `${moduleName}:${index + 1}`,
-      isProtected: false, metadata: { platform: 'abb_rapid', module: moduleName, line: index + 1 }
+      isProtected: false, metadata: { platform: 'abb_rapid', module: moduleName, line: index + 1, startLine: index + 1, endLine: index + 1, parserKind: 'structured_source' }
     });
     const start = lines[index].match(routineStart);
     if (!start) continue;
@@ -264,7 +266,7 @@ function rapidItems(text, filename) {
       itemType: 'block', name: routineName, blockType: kind, language: 'RAPID',
       commentText: clean((lines[index - 1] || '').replace(/^\s*!\s?/, ''), 1000), contentText: clean(routineSource, 2 * 1024 * 1024),
       sourcePath: filename, sourceRef: `${moduleName}.${routineName}:${index + 1}`, isProtected: false,
-      metadata: { platform: 'abb_rapid', module: moduleName, parameters: clean(start[5], 1000), startLine: index + 1, endLine: Math.min(end + 1, lines.length), meaning, analysis, logicTree: logic.tree, calls: logic.calls, ioSignals: logic.ioSignals }
+      metadata: { platform: 'abb_rapid', module: moduleName, parameters: clean(start[5], 1000), startLine: index + 1, endLine: Math.min(end + 1, lines.length), parserKind: 'structured_source', meaning, analysis, logicTree: logic.tree, calls: logic.calls, ioSignals: logic.ioSignals }
     });
     for (const signal of logic.ioSignals) items.push({
       itemType: 'io', name: signal, blockType: 'SIGNAL', language: 'RAPID', address: signal,
@@ -301,27 +303,53 @@ function rapidItems(text, filename) {
 
 function textItems(text, filename) {
   const source = clean(text, 2 * 1024 * 1024);
-  const header = source.match(/\b(FUNCTION_BLOCK|FUNCTION|ORGANIZATION_BLOCK|DATA_BLOCK)\s+["']?([^"'\r\n:{]+)/i);
+  const headers = [...source.matchAll(/^\s*(FUNCTION_BLOCK|FUNCTION|ORGANIZATION_BLOCK|DATA_BLOCK)\s+["']?([^"'\r\n:{]+)/gim)];
+  if (headers.length > 1) {
+    return headers.slice(0, 500).flatMap((header, index) => {
+      const startIndex = header.index;
+      const endIndex = headers[index + 1]?.index ?? source.length;
+      const segment = source.slice(startIndex, endIndex);
+      const startLine = source.slice(0, startIndex).split(/\r?\n/).length;
+      return textItems(segment, filename).map(item => ({
+        ...item,
+        sourceRef: item.itemType === 'block' ? item.name : `${item.name}`,
+        metadata: {
+          ...item.metadata,
+          startLine: startLine + Number(item.metadata?.startLine || 1) - 1,
+          endLine: startLine + Number(item.metadata?.endLine || segment.split(/\r?\n/).length) - 1
+        }
+      }));
+    });
+  }
+  const header = headers[0] || source.match(/\b(FUNCTION_BLOCK|FUNCTION|ORGANIZATION_BLOCK|DATA_BLOCK)\s+["']?([^"'\r\n:{]+)/i);
   const blockType = header?.[1]?.toUpperCase() || 'DOCUMENT';
   const blockName = clean(header?.[2] || path.basename(filename, path.extname(filename)), 255);
   const language = path.extname(filename).replace('.', '').toUpperCase() || 'TEXT';
   const protectedFlag = isProtectedText(source);
-  const parts = source.split(/(?=\bNETWORK\b\s*(?:\d+)?)/i).filter(Boolean);
+  const networkMatches = [...source.matchAll(/^\s*NETWORK\b\s*(?:\d+)?/gim)];
   const logicTree = genericLogicTree(source);
   const analysis = buildProgramExplanation({ name: blockName, blockType, language, contentText: source, logicTree });
   const block = {
     itemType: 'block', name: blockName, blockType, language,
     address: extractAddresses(source).join(', '), contentText: source,
     sourcePath: filename, sourceRef: blockName, isProtected: protectedFlag,
-    metadata: { addresses: extractAddresses(source), meaning: analysis.purpose, analysis, logicTree }
+    metadata: { addresses: extractAddresses(source), startLine: 1, endLine: source.split(/\r?\n/).length, parserKind: 'source_heuristic', meaning: analysis.purpose, analysis, logicTree }
   };
-  if (parts.length <= 1) return [block];
-  return [block, ...parts.slice(1, 501).map((part, index) => ({
-    itemType: 'network', name: `${blockName} / 网络 ${index + 1}`, blockType, language,
-    networkNo: String(index + 1), address: extractAddresses(part).join(', '),
-    contentText: clean(part), sourcePath: filename, sourceRef: blockName,
-    isProtected: protectedFlag, metadata: { addresses: extractAddresses(part), meaning: `${blockName} 的第 ${index + 1} 个程序网络。`, logicTree: genericLogicTree(part) }
-  }))];
+  if (!networkMatches.length) return [block];
+  const networks = networkMatches.slice(0, 500).map((match, index) => {
+    const startIndex = match.index;
+    const endIndex = networkMatches[index + 1]?.index ?? source.length;
+    const part = source.slice(startIndex, endIndex);
+    const startLine = source.slice(0, startIndex).split(/\r?\n/).length;
+    const endLine = startLine + part.split(/\r?\n/).length - 1;
+    return {
+      itemType: 'network', name: `${blockName} / 网络 ${index + 1}`, blockType, language,
+      networkNo: String(index + 1), address: extractAddresses(part).join(', '),
+      contentText: clean(part, 2 * 1024 * 1024), sourcePath: filename, sourceRef: `${blockName}:网络${index + 1}`,
+      isProtected: protectedFlag, metadata: { addresses: extractAddresses(part), startLine, endLine, parserKind: 'source_heuristic', meaning: `${blockName} 的第 ${index + 1} 个程序网络。`, logicTree: genericLogicTree(part, startLine) }
+    };
+  });
+  return [block, ...networks];
 }
 
 function xmlItems(text, filename) {
@@ -338,12 +366,12 @@ function xmlItems(text, filename) {
     itemType: 'block', name: primary, blockType: typeMatch?.[1]?.toUpperCase() || 'BLOCK',
     language: clean(languageMatch?.[1] || 'XML', 30), address: extractAddresses(decoded).join(', '),
     contentText: decoded, sourcePath: filename, sourceRef: primary,
-    isProtected: isProtectedText(decoded), metadata: { addresses: extractAddresses(decoded), meaning: `${typeMatch?.[1]?.toUpperCase() || 'BLOCK'} ${primary} 的 TIA Openness 程序证据。`, logicTree: rapidNode('routine', `${primary} 程序块`, 1, { children: blocks.slice(0, 500).map((_match, index) => rapidNode('network', `网络 ${index + 1}`, index + 1)) }) }
+    isProtected: isProtectedText(decoded), metadata: { addresses: extractAddresses(decoded), parserKind: 'structured_export', sourceLocationKind: 'export_structure', meaning: `${typeMatch?.[1]?.toUpperCase() || 'BLOCK'} ${primary} 的 TIA Openness 程序证据。`, logicTree: rapidNode('routine', `${primary} 程序块`, 1, { children: blocks.slice(0, 500).map((_match, index) => rapidNode('network', `网络 ${index + 1}`, index + 1)) }) }
   };
   return [base, ...blocks.slice(0, 500).map((match, index) => ({
     ...base, itemType: 'network', name: `${primary} / 网络 ${index + 1}`,
-    networkNo: String(index + 1), contentText: clean(match[1]),
-    address: extractAddresses(match[1]).join(', '), metadata: { addresses: extractAddresses(match[1]), meaning: `${primary} 的第 ${index + 1} 个 TIA 程序网络。`, logicTree: genericLogicTree(match[1]) }
+    networkNo: String(index + 1), contentText: clean(match[1], 2 * 1024 * 1024),
+    address: extractAddresses(match[1]).join(', '), metadata: { addresses: extractAddresses(match[1]), parserKind: 'structured_export', sourceLocationKind: 'export_structure', meaning: `${primary} 的第 ${index + 1} 个 TIA 程序网络。`, logicTree: genericLogicTree(match[1]) }
   }))];
 }
 
@@ -365,7 +393,7 @@ function csvItems(text, filename) {
       address: clean(cells[addressIndex] || extractAddresses(line).join(', '), 120),
       dataType: clean(cells[typeIndex], 120), commentText: clean(cells[commentIndex], 1000),
       contentText: clean(line), sourcePath: filename, sourceRef: `line:${index + 2}`,
-      isProtected: false, metadata: {}
+      isProtected: false, metadata: { line: index + 2, startLine: index + 2, endLine: index + 2, parserKind: 'structured_export' }
     };
   });
 }
@@ -384,6 +412,15 @@ function enrichItemMetadata(item) {
     });
   }
   if (!current.meaning && current.analysis) current.meaning = current.analysis.purpose;
+  const startLine = Number(current.startLine || current.line) || 1;
+  if (!current.referenceIndex) current.referenceIndex = buildReferenceIndex({
+    contentText: item.contentText,
+    language: item.language,
+    startLine,
+    definition: item.itemType === 'block' ? item.name : '',
+    parserKind: current.parserKind || 'source_heuristic'
+  });
+  if (!current.stableKey) current.stableKey = stableProgramKey(item);
   return current;
 }
 
@@ -425,6 +462,7 @@ function parsePlcFile(buffer, filename) {
   else if (extension === '.xml') items = xmlItems(text, filename);
   else if (extension === '.csv') items = csvItems(text, filename);
   else items = textItems(text, filename);
+  items = items.map(item => ({ ...item, metadata: enrichItemMetadata(item) }));
   return { items, projectMetadata, warnings, status: items.length ? 'parsed' : 'skipped', message: warnings.length ? `解析包包含 ${warnings.length} 条警告，结果可能不完整` : (items.length ? '' : '文件中没有识别出可检索内容'), version: versionFromFilename(filename, projectMetadata.tiaVersion) };
 }
 

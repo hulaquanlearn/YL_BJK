@@ -77,11 +77,11 @@ const user = ref(getUser())
 const isAdmin = computed(() => user.value?.role === 'admin')
 const roleLabel = computed(() => ({
   admin: '总管理员',
-  raw_grain: '原粮车间',
-  qu_making: '制曲车间',
-  brewing: '酿酒车间',
-  viewer: '只读用户'
-}[user.value?.role] || '只读用户'))
+  raw_grain: '原粮车间管理员',
+  qu_making: '制曲车间管理员',
+  brewing: '酿酒车间管理员',
+  viewer: '车间人员（只读）'
+}[user.value?.role] || '车间人员（只读）'))
 const isKnowledge = computed(() => route.meta.module === 'knowledge')
 const moduleName = computed(() => isKnowledge.value ? '智能工程中心' : '备件管理中心')
 const userInitial = computed(() => user.value?.displayName?.slice(0, 1) || '用')

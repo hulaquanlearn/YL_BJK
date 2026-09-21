@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const path = require('path');
 const crypto = require('crypto');
 const config = require('./config');
@@ -16,24 +15,31 @@ const operationsRouter = require('./routes/operations');
 const knowledgeRouter = require('./routes/knowledge');
 const plcRouter = require('./routes/plc');
 const plcAgentRouter = require('./routes/plc-agent');
-const { requireAuth, assertAuthConfig } = require('./auth');
+const { requireAuth, requireAssetAuth, assertAuthConfig } = require('./auth');
+const { privateResponse, createAccessLimits } = require('./data-protection');
+const { enforceReadOnly } = require('./workshop-scope');
 
 assertAuthConfig();
 
 const app = express();
-app.set('trust proxy', 1);
+app.set('trust proxy', 'loopback');
 app.use(helmet());
 app.use(cors({ origin: false }));
+app.use(privateResponse);
+const accessLimits = createAccessLimits();
+app.use(accessLimits.ip);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.text({ type: 'text/plain', limit: '8kb' }));
-// Only part preview assets are public. Knowledge and PLC source files must go
-// through their authenticated download routes and must never be exposed by a
-// broad static directory mapping.
-app.use('/uploads/part-images', express.static(config.parts.uploadDir));
-// Reusable display-only geometry is public so Three.js can load it directly.
-// Knowledge attachments and industrial-program sources stay authenticated.
-app.use('/uploads/part-models', express.static(config.parts.modelDir));
-app.use(rateLimit({ windowMs: 60 * 1000, limit: 180, standardHeaders: true, legacyHeaders: false }));
+// All uploaded and bundled model/reference assets require a live session.
+// No business directory is publicly mapped, including the packaged reference photos.
+app.use('/uploads', requireAssetAuth, accessLimits.asset);
+const privateStatic = { index:false, dotfiles:'deny', cacheControl:false, etag:false, lastModified:false };
+app.use('/uploads/part-images', express.static(config.parts.uploadDir, privateStatic));
+app.use('/uploads/part-models', express.static(config.parts.modelDir, privateStatic));
+const modelRoots = process.env.MODEL_ASSETS_DIR ? [path.resolve(process.env.MODEL_ASSETS_DIR)]
+  : [path.resolve(__dirname, '../../web/dist'), path.resolve(__dirname, '../../spare-parts-web-release/public')];
+app.use('/models', requireAssetAuth, accessLimits.asset,
+  ...modelRoots.map(root => express.static(path.join(root, 'models'), privateStatic)));
 
 app.get('/api/health', async (_req, res) => {
   try {
@@ -51,6 +57,10 @@ app.use(['/api/suppliers', '/api/suppliers/*', '/api/procurement-orders', '/api/
   res.status(410).json({ success: false, msg: '采购与供应商功能已停用' });
 });
 app.use('/api', requireAuth);
+app.use('/api', accessLimits.account, accessLimits.hourly);
+app.use('/api', (req, res, next) => /\/(download|preview|import-template|export)$/.test(req.path)
+  ? accessLimits.download(req, res, next) : next());
+app.use('/api', enforceReadOnly);
 app.use('/api/users', usersRouter);
 app.use('/api', partsRouter);
 app.use('/api', inventoryRouter);

@@ -8,6 +8,14 @@ const WORKSHOPS = Object.freeze([
 
 const WORKSHOP_CODES = new Set(WORKSHOPS.map(item => item.code));
 const EDIT_ROLES = new Set(['admin', 'raw_grain', 'qu_making', 'brewing']);
+const ROLE_LABELS = Object.freeze({admin:'系统管理员',raw_grain:'原粮车间管理员',qu_making:'制曲车间管理员',brewing:'酿酒车间管理员',viewer:'车间人员（只读）'});
+
+function enforceReadOnly(req, _res, next) {
+  if (['GET','HEAD','OPTIONS'].includes(req.method) || EDIT_ROLES.has(req.user?.role)) return next();
+  // Questions produce answers and internal usage records, not business changes.
+  if (req.method === 'POST' && (req.path === '/ai/chat' || /^\/plc\/projects\/\d+\/analyze$/.test(req.path))) return next();
+  next(new ApiError(403, '权限不足：车间人员仅可查看，不能新增、修改、删除、导入或审批业务数据'));
+}
 
 function normalizeWorkshopCode(value, fallback = '') {
   const code = String(value || '').trim().toLowerCase();
@@ -47,5 +55,7 @@ module.exports = {
   workshopForRole,
   canWriteWorkshop,
   assertWorkshopWrite,
-  requireAnyWorkshopEditor
+  requireAnyWorkshopEditor,
+  ROLE_LABELS,
+  enforceReadOnly
 };

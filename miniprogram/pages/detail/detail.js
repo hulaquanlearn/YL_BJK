@@ -18,12 +18,13 @@ Page({
     stockOut: '',    
     stockReason: '',
     isStockOperating: false,
-    isAdmin: false
+    isAdmin: false,
+    canEditPart: false, isViewer: false
   },
 
   onLoad(options) {
     if (!auth.requireLogin()) return;
-    this.setData({ isAdmin: auth.isAdmin() });
+    this.setData({ isAdmin: auth.isAdmin(), isViewer: auth.isViewer() });
     if (options.id) {
       this.partId = options.id;
       this.fetchPartByID(options.id);
@@ -48,7 +49,7 @@ Page({
           maxStockText: res.data.maxStock === null || res.data.maxStock === undefined ? '未设置' : `${res.data.maxStock}${res.data.unit || ''}`,
           reorderPointText: res.data.reorderPoint === null || res.data.reorderPoint === undefined ? '未设置' : `${res.data.reorderPoint}${res.data.unit || ''}`
         };
-        this.setData({ part });
+        this.setData({ part, canEditPart: auth.canEditWorkshop(part.workshopCode) });
       } else {
         wx.showToast({ title: '未找到该备件', icon: 'none' });
         wx.navigateBack();
@@ -85,11 +86,9 @@ Page({
   },
 
   confirmStockOperation(type) {
-    if (!auth.isAdmin()) {
-      wx.showToast({ title: '仅管理员可以调整库存', icon: 'none' });
-      return;
-    }
+    if (!auth.requireWrite(auth.canEditWorkshop(this.data.part?.workshopCode))) return;
     if (this.data.isStockOperating) return;
+    if (this.data.part?.inventoryStatus === '待审批') { wx.showToast({ title: '盘点审批期间库存已冻结', icon: 'none' }); return; }
     const { stockIn, stockOut, stockReason, part } = this.data;
     const quantityStr = type === 'in' ? stockIn : stockOut;
 
@@ -123,6 +122,7 @@ Page({
   },
 
   async executeStockOperation(type, quantity) {
+    if (!auth.requireWrite(auth.canEditWorkshop(this.data.part?.workshopCode))) return;
     if (this.data.isStockOperating) return;
     const loadingTitle = type === 'in' ? '入库中...' : '出库中...';
     const successTitle = type === 'in' ? '入库成功' : '出库成功';
@@ -158,7 +158,8 @@ Page({
   },
 
   archivePart() {
-    if (!auth.isAdmin() || !this.data.part) return;
+    if (!auth.requireWrite(auth.canEditWorkshop(this.data.part?.workshopCode))) return;
+    if (!this.data.part) return;
     if (Number(this.data.part.totalStock) !== 0) {
       wx.showToast({ title: '库存为0后才能停用', icon: 'none' });
       return;

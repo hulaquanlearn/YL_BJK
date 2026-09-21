@@ -1,0 +1,28 @@
+{
+  "performedAt": "2026-09-20T14:33:53.6249565+08:00",
+  "workspace": "D:\\wx_xiangm\\xiangmu",
+  "method": "Windows Recycle Bin",
+  "removed": [
+    "output/spare-parts-v1.7.4-20260915.tar.gz",
+    "output/DEPLOY_V1.7.4.md",
+    "output/QA_V1.7.4.md",
+    "output/RELEASE_VERIFICATION_V1.7.4.json",
+    "output/SHA256SUMS-V1.7.4.txt",
+    "output/USER_GUIDE_V1.7.4.md",
+    "output/inventory-20260915.png",
+    "output/portal-20260915.png",
+    "output/portal-mobile-20260915.png",
+    "output/spare-parts-v1.8.0-20260920/"
+  ],
+  "preserved": [
+    "source code",
+    "server/data",
+    "server/uploads",
+    "spare-parts-web-release/public/models",
+    "current V1.8.0 deployment archive and docs",
+    "backups and database migration files",
+    ".local/modeling evidence and audit data"
+  ],
+  "currentPackage": "output/spare-parts-v1.8.0-20260920.tar.gz",
+  "currentPackageSha256": "F0801241EB5C8656826FB8E00B70441703FC4D386C5CCCE4ADFF9C3FAFBC9CF8"
+}

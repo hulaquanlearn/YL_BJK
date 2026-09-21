@@ -9,7 +9,7 @@
     <view class="inventory-list">
       <view class="scope-tip">
         <view><text class="progress-title">盘点进度 {{checkedCount}} / {{editableCount}}</text><text class="progress-meta">未核对 {{uncheckedCount}} · 异常 {{abnormalCount}}</text></view>
-        <view class="scope-actions" wx:if="{{!isReadOnly}}"><button class="mini-action secondary" bindtap="markAllNormal" disabled="{{uncheckedCount === 0}}">剩余全正常</button></view>
+        <view class="scope-actions" wx:if="{{!isReadOnly}}"><button class="mini-action secondary" bindtap="markAllNormal" disabled="{{!isViewer && uncheckedCount === 0}}">剩余全正常</button></view>
       </view>
       <view class="inventory-card {{item.checkStatus === '正常' ? 'is-normal' : (item.checkStatus === '异常' ? 'is-abnormal' : '')}}" wx:for="{{inventoryList}}" wx:key="_id">
         <view class="inventory-card-top">
@@ -44,7 +44,7 @@
   <view class="readonly-tip" wx:if="{{!isLoading && isReadOnly}}">当前为已盘点记录，仅供查看</view>
 
   <view class="batch-btn-wrap" wx:if="{{!isLoading && !isReadOnly}}">
-    <button class="batch-btn" bindtap="completeInventory" disabled="{{isSubmitting || canSubmitCount === 0 || uncheckedCount > 0}}">
+    <button class="batch-btn" bindtap="completeInventory" disabled="{{!isViewer && (isSubmitting || canSubmitCount === 0 || uncheckedCount > 0)}}">
       {{uncheckedCount > 0 ? '还有 ' + uncheckedCount + ' 条未核对' : '完成盘点（' + canSubmitCount + ' 条）'}}
     </button>
   </view>

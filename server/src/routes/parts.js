@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const ExcelJS = require('exceljs');
 const readXlsxFile = require('read-excel-file/node');
 const config = require('../config');
 const { pool } = require('../db');
@@ -27,6 +28,26 @@ const { buildReplenishmentItem } = require('../replenishment');
 const { buildMovementTrend } = require('../dashboard-stats');
 const { workshopImportSchema, makePartsTemplate, makePartsErrorWorkbook, sendXlsx } = require('../import-workbook');
 const { duplicateLocationErrors } = require('../part-import-validation');
+const { changedSharedDescriptors } = require('../part-import-identity');
+const { deleteParts } = require('../part-deletion');
+const { previewMatches, applyMatches } = require('../category-model-matching');
+const { assertAssetScope, withPartAssetWrite } = require('../part-asset-permissions');
+const { summarizeInventory, summarizeInventoryScopes } = require('../inventory-metrics');
+const { warehouseJoin } = require('../warehouse-join');
+const WAREHOUSE_JOIN = warehouseJoin();
+
+async function inventoryMetrics(query) {
+  const where = buildPartWhere(query);
+  const [rows] = await pool.query(`SELECT p.id AS partId,p.part_type AS partType,i.quantity,
+    ${UNIT_SQL} AS unit,${PRICE_SQL} AS price,${SAFETY_STOCK_SQL} AS safetyStock,
+    COALESCE(i.workshop_code,w.workshop_code,'raw_grain') AS workshopCode,
+    COALESCE(w.name,i.warehouse,'未指定货区') AS warehouseAreaName
+    FROM inventory i INNER JOIN parts p ON p.id=i.part_id
+    ${WAREHOUSE_JOIN} ${where.sql}`, where.params);
+  const metrics = summarizeInventory(rows);
+  const workshopNames = Object.fromEntries(WORKSHOPS.map(item => [item.code, item.name]));
+  return { ...metrics, scopeBreakdown: summarizeInventoryScopes(rows, workshopNames) };
+}
 
 const router = express.Router();
 
@@ -49,12 +70,16 @@ const PART_SELECT = `
          p.name AS materialDesc,
          p.name AS partName, p.spec,
          ${UNIT_SQL} AS unit, p.category_id AS categoryId, c.name AS categoryName,
+            (SELECT GROUP_CONCAT(DISTINCT COALESCE(owner.workshop_code,'raw_grain')) FROM inventory owner WHERE owner.part_id=p.id AND COALESCE(owner.active,1)=1) AS assetWorkshopCodes,
          p.brand, ${SAFETY_STOCK_SQL} AS safetyStock, ${SAFETY_STOCK_SQL} AS reorderPoint,
          ${MAX_STOCK_SQL} AS maxStock, p.part_type AS partType,
          p.usage_description AS usageDescription, ${PRICE_SQL} AS price, p.remark,
-         p.image_url AS imageUrl, p.model_url AS modelUrl, COALESCE(p.model_scale,1) AS modelScale,
+         p.image_url AS partImageUrl, COALESCE(NULLIF(p.image_url,''),cm.image_url) AS imageUrl,
+         CASE WHEN NULLIF(p.image_url,'') IS NOT NULL THEN 'part' WHEN cm.image_url IS NOT NULL THEN 'category' ELSE 'none' END AS imageSource,
+         NULL AS modelUrl, 1 AS modelScale,
          p.category_model_id AS categoryModelId, cm.name AS categoryModelName,
-         cm.model_url AS categoryModelUrl, COALESCE(cm.model_scale,1) AS categoryModelScale,
+         cm.model_url AS categoryModelUrl, cm.image_url AS categoryImageUrl, COALESCE(cm.model_scale,1) AS categoryModelScale,
+         COALESCE(cm.front_rotation_y,0) AS categoryFrontRotationY,
          i.quantity AS totalStock,
          i.shelf, i.direction AS position, i.layer, i.slot AS location,
          i.location AS locationCode, i.warehouse AS warehouseArea,
@@ -75,7 +100,7 @@ const PART_SELECT = `
   INNER JOIN parts p ON p.id = i.part_id
   LEFT JOIN categories c ON c.id = p.category_id
   LEFT JOIN part_category_models cm ON cm.id = p.category_model_id AND cm.active = 1
-  LEFT JOIN warehouses w ON w.code = i.warehouse OR w.name = i.warehouse
+  ${WAREHOUSE_JOIN}
   LEFT JOIN workshops ws ON ws.code = COALESCE(i.workshop_code, w.workshop_code, 'raw_grain')
 `;
 
@@ -303,25 +328,20 @@ const partLedgerUpload = multer({
 }).single('file');
 
 async function assertPartAssetWrite(user, partId) {
-  if (user?.role === 'admin') return;
-  const workshopCode = workshopForRole(user?.role);
-  if (!workshopCode) throw new ApiError(403, '当前账号没有备件资源修改权限');
-  const [[row]] = await pool.query(
-    `SELECT 1 AS allowed
-     FROM inventory
-     WHERE part_id = ?
-       AND COALESCE(active, 1) = 1
-       AND COALESCE(workshop_code, 'raw_grain') = ?
-     LIMIT 1`,
-    [partId, workshopCode]
-  );
-  if (!row) throw new ApiError(403, '当前账号只能修改所属车间的备件资源');
+  const [rows] = await pool.query("SELECT COALESCE(workshop_code,'raw_grain') AS workshopCode FROM inventory WHERE part_id=? AND COALESCE(active,1)=1", [partId]);
+  assertAssetScope(user, rows.map(row => row.workshopCode));
 }
 
 function buildMovementWhere(query) {
   const conditions = [];
   const params = [];
   const allowedTypes = new Set(['in', 'out', 'inventory_adjustment', 'initial']);
+  const activeOnly = String(query.activeOnly) === '1';
+  if (activeOnly) {
+    const scope = buildPartWhere(query);
+    conditions.push(`i.id IN (SELECT i.id FROM inventory i INNER JOIN parts p ON p.id=i.part_id ${WAREHOUSE_JOIN} ${scope.sql})`);
+    params.push(...scope.params);
+  }
 
   if (allowedTypes.has(String(query.type || ''))) {
     conditions.push('sm.movement_type = ?');
@@ -335,7 +355,7 @@ function buildMovementWhere(query) {
     conditions.push('sm.created_at < DATE_ADD(?, INTERVAL 1 DAY)');
     params.push(String(query.dateTo));
   }
-  if (query.searchKeyword) {
+  if (query.searchKeyword && !activeOnly) {
     const keyword = `%${String(query.searchKeyword).trim()}%`;
     conditions.push(`(p.code LIKE ? OR p.name LIKE ? OR p.spec LIKE ? OR sm.reason LIKE ?
       OR sm.operator_name LIKE ? OR sm.related_order_no LIKE ? OR i.location LIKE ?
@@ -348,6 +368,19 @@ function buildMovementWhere(query) {
     conditions.push("COALESCE(i.workshop_code, 'raw_grain') = ?");
     params.push(normalizeWorkshopCode(query.workshopCode));
   }
+  if (query.warehouseAreaName) {
+    conditions.push('(w.name = ? OR i.warehouse = ?)');
+    params.push(String(query.warehouseAreaName), String(query.warehouseAreaName));
+  }
+  if (query.partType) {
+    conditions.push("COALESCE(NULLIF(TRIM(p.part_type),''),'未填写') = ?");
+    params.push(String(query.partType));
+  }
+  if (['1', 'true'].includes(String(query.lowStock))) conditions.push(`${SAFETY_STOCK_SQL} IS NOT NULL AND i.quantity <= ${SAFETY_STOCK_SQL}`);
+  if (query.stockStatus === 'zero') conditions.push('i.quantity <= 0');
+  if (query.stockStatus === 'low') conditions.push(`i.quantity > 0 AND ${SAFETY_STOCK_SQL} IS NOT NULL AND i.quantity <= ${SAFETY_STOCK_SQL}`);
+  if (query.stockStatus === 'normal') conditions.push(`i.quantity > 0 AND ${SAFETY_STOCK_SQL} IS NOT NULL AND i.quantity > ${SAFETY_STOCK_SQL}`);
+  if (query.stockStatus === 'unconfigured') conditions.push(`i.quantity > 0 AND ${SAFETY_STOCK_SQL} IS NULL`);
 
   return {
     sql: conditions.length ? `WHERE ${conditions.join(' AND ')}` : '',
@@ -411,7 +444,7 @@ router.get('/parts', asyncHandler(async (req, res) => {
     pool.query(
       `SELECT COUNT(*) AS total FROM inventory i
        INNER JOIN parts p ON p.id = i.part_id
-       LEFT JOIN warehouses w ON w.code = i.warehouse ${where.sql}`,
+       ${WAREHOUSE_JOIN} ${where.sql}`,
       where.params
     ),
     pool.query(
@@ -429,12 +462,35 @@ router.get('/parts', asyncHandler(async (req, res) => {
   });
 }));
 
+router.get('/parts/export', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+  const where = buildPartWhere(req.query);
+  const orderSql = SORT_SQL[req.query.sort] || SORT_SQL.name;
+  const [rows] = await pool.query(`${PART_SELECT} ${where.sql} ORDER BY ${orderSql}`, where.params);
+  const columns = ['物料编码','物料名称','单位','规格型号','库存量','订购点','最高储备','不含税单价','备件类型','货区','六位库位码','存放位置','用途','备注'];
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = '备件管理中心';
+  const sheet = workbook.addWorksheet('备件台账', { views: [{ state: 'frozen', ySplit: 1 }] });
+  sheet.columns = columns.map((header, index) => ({ header, key: `c${index}`, width: Math.max(14, Math.min(36, header.length * 3 + 5)) }));
+  sheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  sheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB91C2B' } };
+  sheet.autoFilter = { from: 'A1', to: `${sheet.getColumn(columns.length).letter}1` };
+  for (const row of rows) {
+    const part = toPart(row);
+    sheet.addRow([part.materialCode, part.materialDesc, part.unit, part.spec, part.totalStock, part.reorderPoint ?? '', part.maxStock ?? '', part.price ?? '', part.partType, part.warehouseAreaName, part.locationType === 'shelf' ? part.locationCode : '', part.locationType === 'free_text' ? (part.locationNote || '') : '', part.usageDescription, part.remark]);
+  }
+  const filename = `备件台账-${new Date().toISOString().slice(0, 10)}.xlsx`;
+  res.set({ 'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`, 'Cache-Control': 'no-store' });
+  res.send(await workbook.xlsx.writeBuffer());
+}));
+
 router.get('/stats', asyncHandler(async (req, res) => {
+  const metrics = await inventoryMetrics(req.query);
+  const scopedWhere = buildPartWhere(req.query);
   const days = positiveInt(req.query.days, 30, 180);
   const periodStartSql = `DATE_SUB(CURDATE(), INTERVAL ${days - 1} DAY)`;
   const workshopCode = req.query.workshopCode ? normalizeWorkshopCode(req.query.workshopCode) : '';
-  const workshopSql = workshopCode ? " AND COALESCE(i.workshop_code, 'raw_grain') = ?" : '';
-  const workshopParams = workshopCode ? [workshopCode] : [];
+  const workshopSql = ` AND i.id IN (SELECT i.id FROM inventory i INNER JOIN parts p ON p.id=i.part_id ${WAREHOUSE_JOIN} ${scopedWhere.sql})`;
+  const workshopParams = scopedWhere.params;
   const [
     [summaryRows],
     [unitRows],
@@ -475,7 +531,7 @@ router.get('/stats', asyncHandler(async (req, res) => {
               COALESCE(SUM(i.quantity), 0) AS totalStock
        FROM inventory i
        INNER JOIN parts p ON p.id = i.part_id
-       LEFT JOIN warehouses w ON w.code = i.warehouse OR w.name = i.warehouse
+       ${WAREHOUSE_JOIN}
        WHERE COALESCE(i.active, 1) = 1 AND COALESCE(p.active, 1) = 1${workshopSql}
        GROUP BY COALESCE(w.name, i.warehouse, '未分区'), i.shelf, i.layer,
                 ${UNIT_SQL}`,
@@ -495,7 +551,7 @@ router.get('/stats', asyncHandler(async (req, res) => {
               SUM(CASE WHEN ${SAFETY_STOCK_SQL} IS NOT NULL AND i.quantity <= ${SAFETY_STOCK_SQL} THEN 1 ELSE 0 END) AS lowStock
        FROM inventory i
        INNER JOIN parts p ON p.id = i.part_id
-       LEFT JOIN warehouses w ON w.code = i.warehouse OR w.name = i.warehouse
+       ${WAREHOUSE_JOIN}
        WHERE COALESCE(i.active, 1) = 1 AND COALESCE(p.active, 1) = 1${workshopSql}
        GROUP BY COALESCE(w.name, i.warehouse, '未分区')
        ORDER BY inventoryRecords DESC, area ASC`,
@@ -545,6 +601,9 @@ router.get('/stats', asyncHandler(async (req, res) => {
     success: true,
     data: {
       summary: {
+        totalValue: metrics.totalValue,
+        missingPrice: metrics.missingPrice,
+        missingReorderPoint: metrics.missingReorderPoint,
         materialCategoryCount: Number(summary.materialCategoryCount) || 0,
         inventoryRecords: Number(summary.inventoryRecords) || 0,
         lowStock: Number(summary.lowStock) || 0,
@@ -553,7 +612,9 @@ router.get('/stats', asyncHandler(async (req, res) => {
         healthyStock: Number(summary.healthyStock) || 0,
         unconfiguredStock: Number(summary.unconfiguredStock) || 0
       },
-      unitTotals: formatUnitTotals(unitRows),
+      unitTotals: metrics.unitTotals,
+      typeSummaries: metrics.typeSummaries,
+      scopeBreakdown: metrics.scopeBreakdown,
       areaStats: buildAreaStats(distributionRows),
       areaOverview: areaRows.map(row => ({
         area: row.area,
@@ -592,7 +653,7 @@ router.get('/stock-movements', asyncHandler(async (req, res) => {
   const baseFrom = `FROM stock_movements sm
     INNER JOIN inventory i ON i.id = sm.inventory_id
     INNER JOIN parts p ON p.id = i.part_id
-    LEFT JOIN warehouses w ON w.code = i.warehouse OR w.name = i.warehouse
+    ${WAREHOUSE_JOIN}
     LEFT JOIN app_users u ON u.id = sm.operator_user_id
     LEFT JOIN workshop_equipment equipment ON equipment.id = sm.equipment_id
     LEFT JOIN maintenance_work_orders maintenance_order ON maintenance_order.id = sm.maintenance_order_id`;
@@ -607,7 +668,7 @@ router.get('/stock-movements', asyncHandler(async (req, res) => {
       where.params
     ),
     pool.query(
-      `SELECT sm.*, p.code AS material_code, p.name AS material_desc, p.spec, p.unit,
+      `SELECT sm.*, p.code AS material_code, p.name AS material_desc, p.spec, ${UNIT_SQL} AS unit,
               i.warehouse, COALESCE(w.name, i.warehouse) AS warehouse_area_name,
               i.location AS location_code, i.shelf, i.direction, i.layer, i.slot,
               equipment.equipment_name, maintenance_order.order_no AS maintenance_order_no,
@@ -640,7 +701,7 @@ router.get('/replenishment', asyncHandler(async (req, res) => {
   const where = buildPartWhere({ ...req.query, lowStock: '1' });
   const baseFrom = `FROM inventory i
     INNER JOIN parts p ON p.id = i.part_id
-    LEFT JOIN warehouses w ON w.code = i.warehouse OR w.name = i.warehouse`;
+    ${WAREHOUSE_JOIN}`;
 
   const [[[summary]], [suggestedUnitRows], [rows]] = await Promise.all([
     pool.query(
@@ -705,6 +766,14 @@ router.get('/parts/:id/movements', asyncHandler(async (req, res) => {
   res.json({ success: true, data: rows.map(toMovement) });
 }));
 
+router.get('/parts/import-template', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+  const workshopCode = normalizeWorkshopCode(req.query?.workshopCode, 'raw_grain');
+  assertWorkshopWrite(req.user, workshopCode);
+  const schema = workshopImportSchema(workshopCode);
+  const buffer = await makePartsTemplate(workshopCode);
+  sendXlsx(res, `${schema.name}备件导入模板.xlsx`, buffer);
+}));
+
 router.get('/parts/:id', asyncHandler(async (req, res) => {
   const [rows] = await pool.query(
     `${PART_SELECT} WHERE i.id = ? AND COALESCE(i.active, 1) = 1 AND COALESCE(p.active, 1) = 1 LIMIT 1`,
@@ -728,19 +797,40 @@ router.post('/parts', requireAnyWorkshopEditor, asyncHandler(async (req, res) =>
   try {
     await connection.beginTransaction();
     const [existingParts] = await connection.query(
-      'SELECT id FROM parts WHERE code = ? LIMIT 1 FOR UPDATE',
+      'SELECT id,name,spec,part_type,usage_description,remark FROM parts WHERE code = ? LIMIT 1 FOR UPDATE',
       [code]
     );
     const existingPart = existingParts.length > 0;
     let partId;
     if (existingPart) {
       partId = existingParts[0].id;
-      await connection.query(
-        `UPDATE parts SET active=1, name=?, spec=COALESCE(?, spec), unit=COALESCE(?, unit),
-          part_type=COALESCE(?, part_type), usage_description=COALESCE(?, usage_description)
-         WHERE id=?`,
-        [name, optionalValue(data.spec), optionalValue(data.unit), optionalValue(data.partType), optionalValue(data.usageDescription), partId]
-      );
+      let sharedMaster = false;
+      if (req.user.role !== 'admin') {
+        const [[otherUse]] = await connection.query(
+          `SELECT COUNT(*) AS total FROM inventory WHERE part_id=? AND COALESCE(active,1)=1
+           AND COALESCE(workshop_code,'raw_grain')<>?`,
+          [partId, workshopCode]
+        );
+        sharedMaster = Number(otherUse.total) > 0;
+        if (sharedMaster && changedSharedDescriptors(existingParts[0], {
+          materialDesc: name,
+          spec: optionalValue(data.spec),
+          partType: optionalValue(data.partType),
+          usageDescription: optionalValue(data.usageDescription)
+        }).length) {
+          throw new ApiError(403, '该物料被其他车间使用，主信息只能由总管理员修改；请保留原主信息后新增本车间库位');
+        }
+      }
+      // A local unit/price/threshold belongs to this new inventory record; do
+      // not change shared defaults used by another workshop's inventory.
+      if (!sharedMaster) {
+        await connection.query(
+          `UPDATE parts SET active=1, name=?, spec=COALESCE(?, spec), unit=COALESCE(?, unit),
+            part_type=COALESCE(?, part_type), usage_description=COALESCE(?, usage_description)
+           WHERE id=?`,
+          [name, optionalValue(data.spec), optionalValue(data.unit), optionalValue(data.partType), optionalValue(data.usageDescription), partId]
+        );
+      }
     } else {
       const brand = name.includes(',') ? name.split(',')[0].trim() : null;
       const [partResult] = await connection.query(
@@ -763,9 +853,9 @@ router.post('/parts', requireAnyWorkshopEditor, asyncHandler(async (req, res) =>
     const layer = optionalValue(data.layer);
     const location = optionalValue(data.location);
     const [duplicateLocations] = await connection.query(
-      `SELECT id
+      `SELECT i.id
        FROM inventory i
-       LEFT JOIN warehouses existing_warehouse ON existing_warehouse.code = i.warehouse
+       ${warehouseJoin('i', 'existing_warehouse')}
        WHERE i.part_id = ?
          AND COALESCE(i.active, 1) = 1
          AND COALESCE(i.workshop_code, 'raw_grain') = ?
@@ -813,14 +903,6 @@ router.post('/parts', requireAnyWorkshopEditor, asyncHandler(async (req, res) =>
   } finally {
     connection.release();
   }
-}));
-
-router.get('/parts/import-template', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
-  const workshopCode = normalizeWorkshopCode(req.query?.workshopCode, 'raw_grain');
-  assertWorkshopWrite(req.user, workshopCode);
-  const schema = workshopImportSchema(workshopCode);
-  const buffer = await makePartsTemplate(workshopCode);
-  sendXlsx(res, `${schema.name}备件导入模板.xlsx`, buffer);
 }));
 
 router.post('/parts/import-preview', requireAnyWorkshopEditor, partLedgerUpload, asyncHandler(async (req, res) => {
@@ -871,6 +953,22 @@ router.post('/parts/import', requireAnyWorkshopEditor, partLedgerUpload, asyncHa
       [defaultWarehouse.code, defaultWarehouse.name, workshopCode]
     );
     for (const record of records) {
+      const [[existingPart]] = await connection.query(
+        'SELECT id,name,spec,part_type,usage_description,remark FROM parts WHERE code=? LIMIT 1 FOR UPDATE',
+        [record.materialCode]
+      );
+      let sharedMaster = false;
+      if (existingPart && req.user.role !== 'admin') {
+        const [[otherUse]] = await connection.query(
+          `SELECT COUNT(*) AS total FROM inventory WHERE part_id=? AND COALESCE(active,1)=1
+           AND COALESCE(workshop_code,'raw_grain')<>?`, [existingPart.id, workshopCode]
+        );
+        sharedMaster = Number(otherUse.total) > 0;
+        if (sharedMaster && changedSharedDescriptors(existingPart, record).length) {
+          throw new ApiError(403, `物料 ${record.materialCode} 被其他车间使用，主信息不一致，请由总管理员核对；本次导入全部回滚`);
+        }
+      }
+      if (!sharedMaster) {
       await connection.query(
         `INSERT INTO parts
          (code, name, spec, unit, safety_stock, max_stock, part_type, usage_description, price, remark, active)
@@ -883,6 +981,7 @@ router.post('/parts/import', requireAnyWorkshopEditor, partLedgerUpload, asyncHa
         [record.materialCode, record.materialDesc, record.spec, record.unit, record.reorderPoint,
           record.maxStock, record.partType, record.usageDescription, record.price, record.remark]
       );
+      }
       const [[part]] = await connection.query('SELECT id FROM parts WHERE code=? LIMIT 1 FOR UPDATE', [record.materialCode]);
       const warehouseName = record.warehouseAreaName || defaultWarehouse.name;
       let warehouseCode = defaultWarehouse.code;
@@ -901,14 +1000,22 @@ router.post('/parts/import', requireAnyWorkshopEditor, partLedgerUpload, asyncHa
           );
         }
       }
+      const locationType = record.locationCode ? 'shelf' : 'free_text';
+      const defaultLocationNote = `${warehouseName}（未提供固定库位码）`;
+      const locationNote = record.locationCode ? null : (String(record.locationNote || '').trim() || defaultLocationNote);
       const [existingRows] = await connection.query(
         `SELECT id, quantity FROM inventory
          WHERE part_id=? AND COALESCE(workshop_code, 'raw_grain')=? AND COALESCE(active,1)=1
-         ORDER BY CASE WHEN NULLIF(location,'') <=> ? THEN 0 ELSE 1 END, id ASC LIMIT 1 FOR UPDATE`,
-        [part.id, workshopCode, record.locationCode]
+           AND NULLIF(location,'') <=> ? AND (warehouse=? OR warehouse=?)
+           AND (? IS NOT NULL OR COALESCE(NULLIF(TRIM(location_note),''),?)=?)
+         ORDER BY id ASC LIMIT 1 FOR UPDATE`,
+        [part.id, workshopCode, record.locationCode, warehouseCode, warehouseName,
+          record.locationCode, defaultLocationNote, locationNote]
       );
-      const locationType = record.locationCode ? 'shelf' : 'free_text';
-      const locationNote = record.locationCode ? null : (record.locationNote || `${warehouseName}（未提供固定库位码）`);
+      if (existingRows.length) {
+        const pending = await findPendingInventoryOrder(connection, [existingRows[0].id]);
+        if (pending) throw new ApiError(409, `物料 ${record.materialCode} 正在盘点中，导入已全部回滚`);
+      }
       let inventoryId;
       let beforeQuantity = 0;
       if (existingRows.length) {
@@ -961,37 +1068,118 @@ router.post('/parts/import', requireAnyWorkshopEditor, partLedgerUpload, asyncHa
   }
 }));
 
-router.delete('/parts/:id', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+router.patch('/parts/:id', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
   const inventoryId = parseInventoryId(req.params.id);
+  const data = req.body || {};
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
     const [rows] = await connection.query(
-      "SELECT part_id, quantity, COALESCE(workshop_code, 'raw_grain') AS workshop_code FROM inventory WHERE id = ? AND COALESCE(active, 1) = 1 FOR UPDATE",
+      `SELECT i.part_id AS partId, COALESCE(i.workshop_code,'raw_grain') AS workshopCode,
+              p.code, p.name, p.spec, p.unit, p.brand, p.part_type AS partType,
+              p.usage_description AS usageDescription, p.remark
+       FROM inventory i INNER JOIN parts p ON p.id=i.part_id
+       WHERE i.id=? AND COALESCE(i.active,1)=1 AND COALESCE(p.active,1)=1 FOR UPDATE`,
       [inventoryId]
     );
-    if (!rows.length) throw new ApiError(404, '备件库存记录不存在');
-    assertWorkshopWrite(req.user, rows[0].workshop_code);
-    if (Number(rows[0].quantity) !== 0) throw new ApiError(409, '库存不为0，不能删除');
+    if (!rows.length) throw new ApiError(404, '备件库存记录不存在或已停用');
+    const current = rows[0];
+    assertWorkshopWrite(req.user, current.workshopCode);
     const pendingOrder = await findPendingInventoryOrder(connection, [inventoryId]);
-    if (pendingOrder) {
-      throw new ApiError(409, `该库存正在盘点单${pendingOrder.inventoryNo || pendingOrder.id}中等待审批，不能删除`);
+    if (pendingOrder) throw new ApiError(409, `该库存正在盘点单${pendingOrder.inventoryNo || pendingOrder.id}中等待审批，暂不能编辑`);
+
+    const code = String(data.materialCode ?? current.code).trim();
+    const name = String(data.materialDesc ?? current.name).trim();
+    if (!code) throw new ApiError(400, '物料编码不能为空');
+    if (!name) throw new ApiError(400, '物料名称不能为空');
+    if (code.length > 60 || name.length > 300) throw new ApiError(400, '物料编码或名称超过长度限制');
+    const globalValues = {
+      code,
+      name,
+      spec: optionalValue(data.spec),
+      unit: optionalValue(data.unit) || '个',
+      brand: optionalValue(data.brand),
+      partType: optionalValue(data.partType),
+      usageDescription: optionalValue(data.usageDescription),
+      remark: optionalValue(data.remark)
+    };
+    const globalChanged = code !== current.code || name !== current.name
+      || ['spec', 'brand', 'partType', 'usageDescription', 'remark']
+        .some(key => String(globalValues[key] ?? '') !== String(current[key] ?? ''));
+    let sharedAcrossWorkshops = false;
+    if (req.user.role !== 'admin') {
+      const [[usage]] = await connection.query(
+        `SELECT COUNT(DISTINCT COALESCE(workshop_code,'raw_grain')) AS workshopCount
+         FROM inventory WHERE part_id=? AND COALESCE(active,1)=1`,
+        [current.partId]
+      );
+      sharedAcrossWorkshops = Number(usage.workshopCount) > 1;
+      if (globalChanged && sharedAcrossWorkshops) throw new ApiError(403, '该物料被多个车间共用，物料主信息只能由总管理员修改');
     }
-    const partId = rows[0].part_id;
-    await connection.query('UPDATE inventory SET active = 0 WHERE id = ?', [inventoryId]);
-    const [[countRow]] = await connection.query(
-      'SELECT COUNT(*) AS total FROM inventory WHERE part_id = ? AND COALESCE(active, 1) = 1',
-      [partId]
+    const [codeRows] = await connection.query('SELECT id FROM parts WHERE code=? AND id<>? LIMIT 1', [code, current.partId]);
+    if (codeRows.length) throw new ApiError(409, '该物料编码已被其他备件使用');
+
+    const reorderPoint = data.reorderPoint === '' || data.reorderPoint == null ? null : parseNonNegativeQuantity(data.reorderPoint, '订购点');
+    const maxStock = data.maxStock === '' || data.maxStock == null ? null : parseNonNegativeQuantity(data.maxStock, '最高储备');
+    const price = data.price === '' || data.price == null ? null : parseNonNegativeQuantity(data.price, '不含税单价');
+    if (reorderPoint !== null && maxStock !== null && maxStock < reorderPoint) throw new ApiError(400, '最高储备不能低于订购点');
+
+    const locationType = data.locationType === 'free_text' ? 'free_text' : 'shelf';
+    const locationCode = locationType === 'shelf' ? String(data.locationCode || '').trim() : '';
+    let shelf = null;
+    let position = null;
+    let layer = null;
+    let slot = null;
+    if (locationCode) {
+      if (!/^\d{6}$/.test(locationCode)) throw new ApiError(400, '六位库位码必须是6位数字');
+      shelf = Number(locationCode.slice(0, 2));
+      position = Number(locationCode.slice(2, 3));
+      layer = Number(locationCode.slice(3, 4));
+      slot = Number(locationCode.slice(4, 6));
+      if (shelf < 1 || ![1, 2].includes(position) || layer < 1 || layer > 4 || slot < 1) {
+        throw new ApiError(400, '六位库位码中的货架、方位、层数或货位无效');
+      }
+      const [occupied] = await connection.query(
+        `SELECT i.id, p.code FROM inventory i INNER JOIN parts p ON p.id=i.part_id
+         WHERE i.id<>? AND COALESCE(i.workshop_code,'raw_grain')=?
+           AND COALESCE(i.active,1)=1 AND NULLIF(i.location,'')=? LIMIT 1 FOR UPDATE`,
+        [inventoryId, current.workshopCode, locationCode]
+      );
+      if (occupied.length) throw new ApiError(409, `库位${locationCode}已被物料${occupied[0].code}占用`);
+    }
+    const warehouse = await resolveWarehouse(connection, { ...data, workshopCode: current.workshopCode });
+
+    await connection.query(
+      `UPDATE parts SET code=?,name=?,spec=?,unit=?,brand=?,part_type=?,usage_description=?,remark=? WHERE id=?`,
+      [globalValues.code, globalValues.name, globalValues.spec, sharedAcrossWorkshops ? current.unit : globalValues.unit, globalValues.brand,
+        globalValues.partType, globalValues.usageDescription, globalValues.remark, current.partId]
     );
-    if (!Number(countRow.total)) await connection.query('UPDATE parts SET active = 0 WHERE id = ?', [partId]);
+    await connection.query(
+      `UPDATE inventory SET warehouse=?,location=?,shelf=?,direction=?,layer=?,slot=?,location_type=?,location_note=?,
+              unit_override=?,safety_stock_override=?,max_stock_override=?,price_override=? WHERE id=?`,
+      [warehouse.code, locationCode || null, shelf, position, layer, slot, locationType,
+        locationType === 'free_text' ? optionalValue(data.locationNote) : null,
+        globalValues.unit, reorderPoint, maxStock, price, inventoryId]
+    );
+    const [updatedRows] = await connection.query(`${PART_SELECT} WHERE i.id=? LIMIT 1`, [inventoryId]);
     await connection.commit();
-    res.json({ success: true, msg: '备件记录已停用' });
+    res.json({ success: true, msg: '备件信息已保存', data: toPart(updatedRows[0]) });
   } catch (error) {
     await connection.rollback();
     throw error;
   } finally {
     connection.release();
   }
+}));
+
+router.post('/parts/batch-delete', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+  const data = await deleteParts(pool, req.user, req.body?.ids, { dryRun: req.body?.dryRun === true });
+  res.json({ success: true, msg: req.body?.dryRun === true ? '删除条件已校验' : `已删除${data.deletedCount}条备件，历史流水已保留`, data });
+}));
+
+router.delete('/parts/:id', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+  const data = await deleteParts(pool, req.user, [req.params.id]);
+  res.json({ success: true, msg: '备件记录已停用，历史流水已保留', data });
 }));
 
 router.post('/parts/:id/stock', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
@@ -1060,7 +1248,7 @@ router.get('/filters', asyncHandler(async (req, res) => {
             COALESCE(i.workshop_code, w.workshop_code, 'raw_grain') AS workshopCode,
             i.shelf, i.layer
      FROM inventory i
-     LEFT JOIN warehouses w ON w.code = i.warehouse
+     ${WAREHOUSE_JOIN}
      INNER JOIN parts p ON p.id = i.part_id
      WHERE COALESCE(i.active, 1) = 1 AND COALESCE(p.active, 1) = 1${workshopSql}
      ORDER BY warehouseAreaName ASC, i.shelf ASC, i.layer ASC`,
@@ -1092,68 +1280,99 @@ router.get('/filters', asyncHandler(async (req, res) => {
 }));
 
 router.get('/dashboard', asyncHandler(async (req, res) => {
-  const workshopCode = req.query.workshopCode ? normalizeWorkshopCode(req.query.workshopCode) : '';
-  const workshopSql = workshopCode ? " AND COALESCE(i.workshop_code, 'raw_grain') = ?" : '';
-  const workshopParams = workshopCode ? [workshopCode] : [];
-  const [[[summary]], [unitRows], [lowRows], [[pendingRow]]] = await Promise.all([
-    pool.query(
-      `SELECT COUNT(DISTINCT p.id) AS partTypes,
-              COUNT(i.id) AS inventoryRecords,
-              COALESCE(SUM(i.quantity), 0) AS totalStock,
-              COALESCE(SUM(i.quantity * COALESCE(${PRICE_SQL}, 0)), 0) AS totalValue,
-              SUM(CASE WHEN ${SAFETY_STOCK_SQL} IS NOT NULL AND i.quantity <= ${SAFETY_STOCK_SQL} THEN 1 ELSE 0 END) AS lowStock,
-              SUM(CASE WHEN i.quantity > 0 AND ${SAFETY_STOCK_SQL} IS NULL THEN 1 ELSE 0 END) AS unconfiguredStock
-       FROM inventory i INNER JOIN parts p ON p.id = i.part_id
-       WHERE COALESCE(i.active, 1) = 1 AND COALESCE(p.active, 1) = 1${workshopSql}`,
-      workshopParams
-    ),
-    pool.query(
-      `SELECT ${UNIT_SQL} AS unit,
-              COALESCE(SUM(i.quantity), 0) AS totalStock
-       FROM inventory i INNER JOIN parts p ON p.id = i.part_id
-       WHERE COALESCE(i.active, 1) = 1 AND COALESCE(p.active, 1) = 1${workshopSql}
-       GROUP BY ${UNIT_SQL}`,
-      workshopParams
-    ),
-    pool.query(
-      `${PART_SELECT}
-       WHERE COALESCE(i.active, 1) = 1 AND COALESCE(p.active, 1) = 1
-         AND ${SAFETY_STOCK_SQL} IS NOT NULL AND i.quantity <= ${SAFETY_STOCK_SQL}${workshopSql}
-       ORDER BY i.quantity ASC, i.id ASC LIMIT 3`,
-      workshopParams
-    ),
-    workshopCode
-      ? pool.query("SELECT COUNT(*) AS total FROM inventory_orders WHERE approveStatus = '待审批' AND workshop_code = ?", [workshopCode])
-      : pool.query("SELECT COUNT(*) AS total FROM inventory_orders WHERE approveStatus = '待审批'")
+  const metrics = await inventoryMetrics(req.query);
+  const where = buildPartWhere(req.query);
+  const [[lowRows], [[pendingRow]]] = await Promise.all([
+    pool.query(`${PART_SELECT} ${where.sql} AND ${SAFETY_STOCK_SQL} IS NOT NULL AND i.quantity <= ${SAFETY_STOCK_SQL} ORDER BY i.quantity ASC,i.id ASC LIMIT 3`, where.params),
+    pool.query(`SELECT COUNT(*) AS pendingApproval
+      FROM inventory i INNER JOIN parts p ON p.id=i.part_id
+      ${WAREHOUSE_JOIN}
+      ${where.sql} AND ${PENDING_INVENTORY_SQL}`, where.params)
   ]);
-  res.json({
-    success: true,
-    data: {
-      dashboard: {
-        partTypes: Number(summary.partTypes) || 0,
-        inventoryRecords: Number(summary.inventoryRecords) || 0,
-        totalStock: Number(summary.totalStock) || 0,
-        totalValue: Number(summary.totalValue) || 0,
-        lowStock: Number(summary.lowStock) || 0,
-        unconfiguredStock: Number(summary.unconfiguredStock) || 0,
-        pendingApproval: Number(pendingRow.total) || 0,
-        unitTotals: formatUnitTotals(unitRows)
-      },
-      lowStockParts: lowRows.map(toPart)
-    }
-  });
+  res.json({ success:true, data:{ dashboard:{ ...metrics, totalStock: metrics.unitTotals.length === 1 ? metrics.unitTotals[0].total : null, pendingApproval:Number(pendingRow.pendingApproval)||0 }, lowStockParts:lowRows.map(toPart) } });
 }));
 
 const partImageDir = config.parts.uploadDir;
 const categoryModelDir = config.parts.modelDir;
+const categoryImageDir = path.join(partImageDir, 'categories');
 fs.mkdirSync(partImageDir, { recursive: true });
 fs.mkdirSync(categoryModelDir, { recursive: true });
+fs.mkdirSync(categoryImageDir, { recursive: true });
+
+const IMAGE_EXTENSIONS = /^\.(jpe?g|png|webp|gif|bmp)$/i;
+
+function imageExtension(file) {
+  return path.extname(file?.originalname || file?.filename || '').toLowerCase();
+}
+
+function isSupportedImageFile(file) {
+  return IMAGE_EXTENSIONS.test(imageExtension(file));
+}
+
+async function assertValidImage(file) {
+  const handle = await fs.promises.open(file.path, 'r');
+  try {
+    const header = Buffer.alloc(12);
+    const { bytesRead } = await handle.read(header, 0, header.length, 0);
+    let detected = '';
+    if (bytesRead >= 8 && header.subarray(0, 8).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]))) detected = '.png';
+    else if (bytesRead >= 3 && header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff) detected = '.jpg';
+    else if (bytesRead >= 6 && ['GIF87a', 'GIF89a'].includes(header.toString('ascii', 0, 6))) detected = '.gif';
+    else if (bytesRead >= 12 && header.toString('ascii', 0, 4) === 'RIFF' && header.toString('ascii', 8, 12) === 'WEBP') detected = '.webp';
+    else if (bytesRead >= 2 && header.toString('ascii', 0, 2) === 'BM') detected = '.bmp';
+    if (!detected) throw new ApiError(400, '图片内容无效，仅支持 JPG、PNG、WEBP、GIF 或 BMP；不支持 SVG');
+    const declared = imageExtension(file);
+    const compatible = detected === declared || (detected === '.jpg' && declared === '.jpeg');
+    if (!compatible) throw new ApiError(400, '图片内容与文件扩展名不一致，请使用原始图片文件');
+    return detected;
+  } finally {
+    await handle.close();
+  }
+}
+
+function uploadedCategoryFiles(req) {
+  return {
+    model: req.files?.model?.[0] || null,
+    image: req.files?.image?.[0] || null
+  };
+}
+
+async function removeUploadedFiles(files) {
+  await Promise.all((Array.isArray(files) ? files : [files]).filter(Boolean).map(file => fs.promises.unlink(file.path).catch(() => {})));
+}
+
+function uploadedPartImagePath(url) {
+  const prefix = '/uploads/part-images/';
+  const value = String(url || '');
+  if (!value.startsWith(prefix)) return null;
+  const relative = value.slice(prefix.length);
+  if (!relative || relative.includes('/') || path.basename(relative) !== relative) return null;
+  return path.join(partImageDir, relative);
+}
+
+function uploadedCategoryImagePath(url) {
+  const prefix = '/uploads/part-images/categories/';
+  const value = String(url || '');
+  if (!value.startsWith(prefix)) return null;
+  const relative = value.slice(prefix.length);
+  if (!relative || relative.includes('/') || path.basename(relative) !== relative) return null;
+  return path.join(categoryImageDir, relative);
+}
+
+function uploadedCategoryModelPath(url) {
+  const prefix = '/uploads/part-models/';
+  const value = String(url || '');
+  if (!value.startsWith(prefix)) return null;
+  const relative = value.slice(prefix.length);
+  if (!relative || relative.includes('/') || path.basename(relative) !== relative) return null;
+  return path.join(categoryModelDir, relative);
+}
 
 const partImageStorage = multer.diskStorage({
   destination: (_req, _file, callback) => callback(null, partImageDir),
   filename: (_req, file, callback) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    if (!/^\\.(jpe?g|png|webp|gif|bmp|svg)$/.test(ext)) return callback(new Error('仅支持图片文件'));
+    if (!IMAGE_EXTENSIONS.test(ext)) return callback(new Error('仅支持 JPG、PNG、WEBP、GIF 或 BMP 图片；不支持 SVG'));
     callback(null, `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`);
   }
 });
@@ -1162,121 +1381,76 @@ const partImageUpload = multer({
   storage: partImageStorage,
   limits: { fileSize: config.parts.maxFileSize, files: 1 },
   fileFilter: (_req, file, callback) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    callback(/^\\.(jpe?g|png|webp|gif|bmp|svg)$/.test(ext) ? null : new Error('仅支持图片文件'), /^\\.(jpe?g|png|webp|gif|bmp|svg)$/.test(ext));
+    const ok = isSupportedImageFile(file);
+    callback(ok ? null : new Error('仅支持 JPG、PNG、WEBP、GIF 或 BMP 图片；不支持 SVG'), ok);
   }
 }).single('image');
 
 router.post('/parts/:partId/image', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
-  const partId = positiveInt(req.params.partId, 1, Number.MAX_SAFE_INTEGER);
+  const partId = positiveInt(req.params.partId, 0, Number.MAX_SAFE_INTEGER);
   if (!partId) throw new ApiError(400, '备件ID无效');
   await assertPartAssetWrite(req.user, partId);
-  partImageUpload(req, res, error => {
+  partImageUpload(req, res, async error => {
     if (error) return res.status(error.code === 'LIMIT_FILE_SIZE' ? 413 : 400).json({ success: false, msg: error.message || '图片上传失败' });
     if (!req.file) return res.status(400).json({ success: false, msg: '请选择图片文件' });
-    const imageUrl = `/uploads/part-images/${req.file.filename}`;
-    pool.query('UPDATE parts SET image_url=? WHERE id=?', [imageUrl, partId])
-      .then(([result]) => {
-        if (!result.affectedRows) {
-          fs.promises.unlink(req.file.path).catch(() => {});
-          return res.status(404).json({ success: false, msg: '备件不存在' });
-        }
-        res.json({ success: true, msg: '图片已上传', data: { imageUrl } });
-      })
-      .catch(err => {
-        fs.promises.unlink(req.file.path).catch(() => {});
-        res.status(500).json({ success: false, msg: '保存失败' });
+    try {
+      await assertValidImage(req.file);
+      let previousImageUrl;
+      const imageUrl = `/uploads/part-images/${req.file.filename}`;
+      await withPartAssetWrite(pool, req.user, [partId], async connection => {
+        const [[part]]=await connection.query('SELECT image_url FROM parts WHERE id=?',[partId]);
+        previousImageUrl=part.image_url;
+        return connection.query('UPDATE parts SET image_url=? WHERE id=?',[imageUrl,partId]);
       });
+      const previousPath = uploadedPartImagePath(previousImageUrl);
+      if (previousPath && previousPath !== req.file.path) await fs.promises.unlink(previousPath).catch(() => {});
+      res.json({ success: true, msg: '实物图片已上传', data: { imageUrl, imageSource: 'part' } });
+    } catch (cause) {
+      await removeUploadedFiles(req.file);
+      if (cause instanceof ApiError) return res.status(cause.status || 400).json({ success: false, msg: cause.message });
+      return res.status(500).json({ success: false, msg: '保存失败' });
+    }
   });
 }));
 
 router.delete('/parts/:partId/image', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
-  const partId = positiveInt(req.params.partId, 1, Number.MAX_SAFE_INTEGER);
+  const partId = positiveInt(req.params.partId, 0, Number.MAX_SAFE_INTEGER);
   if (!partId) throw new ApiError(400, '备件ID无效');
   await assertPartAssetWrite(req.user, partId);
-  const [[part]] = await pool.query('SELECT image_url FROM parts WHERE id=?', [partId]);
-  if (!part) throw new ApiError(404, '备件不存在');
-  if (part.image_url) {
-    const filename = path.basename(part.image_url);
-    fs.promises.unlink(path.join(partImageDir, filename)).catch(() => {});
-  }
-  await pool.query('UPDATE parts SET image_url=NULL WHERE id=?', [partId]);
-  res.json({ success: true, msg: '图片已删除' });
-}));
-
-const glbStorage = multer.diskStorage({
-  destination: (_req, _file, callback) => {
-    const dir = path.join(partImageDir, 'glb');
-    fs.mkdirSync(dir, { recursive: true });
-    callback(null, dir);
-  },
-  filename: (_req, file, callback) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (ext !== '.glb' && ext !== '.gltf') return callback(new Error('仅支持 GLB/GLTF 文件'));
-    callback(null, `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`);
-  }
-});
-
-const glbUpload = multer({
-  storage: glbStorage,
-  limits: { fileSize: 50 * 1024 * 1024, files: 1 },
-  fileFilter: (_req, file, callback) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const ok = ext === '.glb' || ext === '.gltf';
-    callback(ok ? null : new Error('仅支持 GLB/GLTF 文件'), ok);
-  }
-}).single('model');
-
-router.post('/parts/:partId/model', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
-  const partId = positiveInt(req.params.partId, 1, Number.MAX_SAFE_INTEGER);
-  if (!partId) throw new ApiError(400, '备件ID无效');
-  await assertPartAssetWrite(req.user, partId);
-  glbUpload(req, res, error => {
-    if (error) return res.status(error.code === 'LIMIT_FILE_SIZE' ? 413 : 400).json({ success: false, msg: error.message || '模型上传失败' });
-    if (!req.file) return res.status(400).json({ success: false, msg: '请选择GLB/GLTF文件' });
-    const modelUrl = `/uploads/part-images/glb/${req.file.filename}`;
-    const modelScale = Number(req.body?.modelScale) || 1;
-    pool.query('UPDATE parts SET model_url=?, model_scale=? WHERE id=?', [modelUrl, modelScale, partId])
-      .then(([result]) => {
-        if (!result.affectedRows) {
-          fs.promises.unlink(req.file.path).catch(() => {});
-          return res.status(404).json({ success: false, msg: '备件不存在' });
-        }
-        res.json({ success: true, msg: '3D模型已上传', data: { modelUrl, modelScale } });
-      })
-      .catch(() => {
-        fs.promises.unlink(req.file.path).catch(() => {});
-        res.status(500).json({ success: false, msg: '保存失败' });
-      });
+  let previousImageUrl;
+  await withPartAssetWrite(pool, req.user, [partId], async connection=>{
+    const [[part]]=await connection.query('SELECT image_url FROM parts WHERE id=?',[partId]);
+    previousImageUrl=part.image_url;
+    return connection.query('UPDATE parts SET image_url=NULL WHERE id=?',[partId]);
   });
+  const ownedPath = uploadedPartImagePath(previousImageUrl);
+  if (ownedPath) await fs.promises.unlink(ownedPath).catch(() => {});
+  res.json({ success: true, msg: '实物图片已删除；如已绑定类别模型，将继续显示类别参考图' });
 }));
 
-router.delete('/parts/:partId/model', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
-  const partId = positiveInt(req.params.partId, 1, Number.MAX_SAFE_INTEGER);
-  if (!partId) throw new ApiError(400, '备件ID无效');
-  await assertPartAssetWrite(req.user, partId);
-  const [[part]] = await pool.query('SELECT model_url FROM parts WHERE id=?', [partId]);
-  if (!part) throw new ApiError(404, '备件不存在');
-  if (part.model_url) {
-    const [[usage]] = await pool.query('SELECT COUNT(*) AS total FROM parts WHERE model_url=? AND id<>?', [part.model_url, partId]);
-    if (!Number(usage.total)) {
-      const filename = path.basename(part.model_url);
-      fs.promises.unlink(path.join(partImageDir, 'glb', filename)).catch(() => {});
+function modelUploadError(error) {
+  return error?.code === 'LIMIT_FILE_SIZE' ? {status:413,msg:'模型文件超过50MB，请压缩后重新上传'} : {status:400,msg:error?.message || '模型上传失败'};
+}
+
+async function assertValidGlb(file) {
+  const handle = await fs.promises.open(file.path, 'r');
+  try {
+    const header = Buffer.alloc(12);
+    const { bytesRead } = await handle.read(header, 0, header.length, 0);
+    if (bytesRead !== 12 || header.toString('ascii', 0, 4) !== 'glTF') {
+      throw new ApiError(400, 'GLB文件无效：文件头不正确，可能只是修改了扩展名');
     }
+    if (header.readUInt32LE(4) !== 2) throw new ApiError(400, '仅支持GLB 2.0格式');
+    if (header.readUInt32LE(8) !== Number(file.size)) throw new ApiError(400, 'GLB文件不完整：声明长度与实际文件大小不一致');
+  } finally {
+    await handle.close();
   }
-  await pool.query('UPDATE parts SET model_url=NULL, model_scale=1 WHERE id=?', [partId]);
-  res.json({ success: true, msg: '3D模型已删除' });
-}));
+}
 
-router.patch('/parts/:partId/model-scale', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
-  const partId = positiveInt(req.params.partId, 1, Number.MAX_SAFE_INTEGER);
-  if (!partId) throw new ApiError(400, '备件ID无效');
-  await assertPartAssetWrite(req.user, partId);
-  const scale = Math.min(Math.max(Number(req.body?.modelScale) || 1, 0.1), 10);
-  const [result] = await pool.query('UPDATE parts SET model_scale=? WHERE id=?', [scale, partId]);
-  if (!result.affectedRows) throw new ApiError(404, '备件不存在');
-  res.json({ success: true, msg: '缩放比例已更新', data: { modelScale: scale } });
-}));
+// Dedicated per-part geometry is retired. Keep legacy data untouched for rollback.
+router.all(['/parts/:partId/model', '/parts/:partId/model-scale', '/parts/batch-model'], (_req, res) => {
+  res.status(410).json({success:false,msg:'专用模型功能已停用，请使用类别模型关联'});
+});
 
 router.get('/part-model-library', asyncHandler(async (req, res) => {
   const workshopCode = normalizeWorkshopCode(req.query.workshopCode, '');
@@ -1293,10 +1467,14 @@ router.get('/part-model-library', asyncHandler(async (req, res) => {
     params.push(keyword, keyword, keyword, keyword, keyword);
   }
   const [rows] = await pool.query(
-    `SELECT p.id, p.code, p.name, p.spec, p.brand, p.unit, p.image_url AS imageUrl,
-            p.model_url AS modelUrl, p.model_scale AS modelScale,
+    `SELECT p.id, p.code, p.name, p.spec, p.brand, p.unit,
+            p.image_url AS partImageUrl,
+            COALESCE(NULLIF(p.image_url,''),cm.image_url) AS imageUrl,
+            CASE WHEN NULLIF(p.image_url,'') IS NOT NULL THEN 'part' WHEN cm.image_url IS NOT NULL THEN 'category' ELSE 'none' END AS imageSource,
+            NULL AS modelUrl, 1 AS modelScale,
             p.category_model_id AS categoryModelId, cm.name AS categoryModelName,
             cm.model_url AS categoryModelUrl, cm.model_scale AS categoryModelScale,
+            cm.image_url AS categoryImageUrl, COALESCE(cm.front_rotation_y,0) AS categoryFrontRotationY,
             p.category_id AS categoryId, c.name AS categoryName,
             COALESCE(i.workshop_code, 'raw_grain') AS workshopCode,
             i.quantity AS stock, i.shelf, i.location AS locationCode
@@ -1308,7 +1486,17 @@ router.get('/part-model-library', asyncHandler(async (req, res) => {
      ORDER BY p.code ASC`,
     params
   );
-  res.json({ success: true, data: rows });
+  const byPart = new Map();
+  for (const row of rows) {
+    const key = String(row.id);
+    const existing = byPart.get(key);
+    if (!existing) {
+      byPart.set(key, { ...row, workshopCodes: String(row.assetWorkshopCodes || row.workshopCode || '').split(',').filter(Boolean) });
+      continue;
+    }
+    if (row.workshopCode && !existing.workshopCodes.includes(row.workshopCode)) existing.workshopCodes.push(row.workshopCode);
+  }
+  res.json({ success: true, data: [...byPart.values()] });
 }));
 
 function parsePartIds(value) {
@@ -1322,74 +1510,83 @@ function parsePartIds(value) {
   return ids;
 }
 
-router.post('/parts/batch-model', requireAnyWorkshopEditor, (req, res, next) => {
-  glbUpload(req, res, async error => {
-    if (error) return res.status(error.code === 'LIMIT_FILE_SIZE' ? 413 : 400).json({ success: false, msg: error.message || '模型上传失败' });
-    if (!req.file) return res.status(400).json({ success: false, msg: '请选择GLB/GLTF文件' });
-    try {
-      const partIds = parsePartIds(req.body?.partIds);
-      for (const partId of partIds) await assertPartAssetWrite(req.user, partId);
-      const modelUrl = `/uploads/part-images/glb/${req.file.filename}`;
-      const modelScale = Math.min(Math.max(Number(req.body?.modelScale) || 1, 0.1), 10);
-      const placeholders = partIds.map(() => '?').join(',');
-      const [result] = await pool.query(
-        `UPDATE parts SET model_url=?,model_scale=? WHERE active=1 AND id IN (${placeholders})`,
-        [modelUrl, modelScale, ...partIds]
-      );
-      res.json({ success: true, msg: `已为${result.affectedRows}个备件关联专用模型`, data: { affected: result.affectedRows, modelUrl, modelScale } });
-    } catch (err) {
-      fs.promises.unlink(req.file.path).catch(() => {});
-      next(err);
-    }
-  });
-});
-
 router.post('/parts/batch-category-model', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
   const partIds = parsePartIds(req.body?.partIds);
   const categoryModelId = req.body?.categoryModelId == null || req.body.categoryModelId === ''
     ? null
-    : positiveInt(req.body.categoryModelId, 1, Number.MAX_SAFE_INTEGER);
+    : positiveInt(req.body.categoryModelId, 0, Number.MAX_SAFE_INTEGER);
   if (req.body?.categoryModelId != null && req.body.categoryModelId !== '' && !categoryModelId) throw new ApiError(400, '类别模型无效');
-  if (categoryModelId) {
-    const [[model]] = await pool.query('SELECT id FROM part_category_models WHERE id=? AND active=1', [categoryModelId]);
-    if (!model) throw new ApiError(404, '类别模型不存在或已删除');
-  }
-  for (const partId of partIds) await assertPartAssetWrite(req.user, partId);
   const placeholders = partIds.map(() => '?').join(',');
-  const [result] = await pool.query(
+  const [result] = await withPartAssetWrite(pool, req.user, partIds, connection => connection.query(
     `UPDATE parts SET category_model_id=? WHERE active=1 AND id IN (${placeholders})`,
     [categoryModelId, ...partIds]
-  );
+  ), async connection=>{
+    if(categoryModelId){
+      const [[model]]=await connection.query('SELECT id FROM part_category_models WHERE id=? AND active=1 FOR UPDATE',[categoryModelId]);
+      if(!model)throw new ApiError(404,'类别模型不存在或已删除');
+    }
+  });
   res.json({ success: true, msg: categoryModelId ? `已关联${result.affectedRows}个备件` : `已清除${result.affectedRows}个类别关联`, data: { affected: result.affectedRows } });
 }));
 
 const categoryModelStorage = multer.diskStorage({
-  destination: (_req, _file, callback) => callback(null, categoryModelDir),
+  destination: (_req, file, callback) => {
+    if (file.fieldname === 'model') return callback(null, categoryModelDir);
+    if (file.fieldname === 'image') return callback(null, categoryImageDir);
+    return callback(new Error('上传字段无效'));
+  },
   filename: (_req, file, callback) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    if (!['.glb', '.gltf'].includes(ext)) return callback(new Error('仅支持 GLB/GLTF 文件'));
+    if (file.fieldname === 'model' && ext !== '.glb') return callback(new Error('仅支持自包含GLB文件；请先把GLTF及其BIN、贴图打包导出为GLB'));
+    if (file.fieldname === 'image' && !IMAGE_EXTENSIONS.test(ext)) return callback(new Error('类别参考图仅支持 JPG、PNG、WEBP、GIF 或 BMP；不支持 SVG'));
     callback(null, `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`);
   }
 });
 const categoryModelUpload = multer({
   storage: categoryModelStorage,
-  limits: { fileSize: 50 * 1024 * 1024, files: 1 },
+  limits: { fileSize: 50 * 1024 * 1024, files: 2 },
   fileFilter: (_req, file, callback) => {
-    const ok = ['.glb', '.gltf'].includes(path.extname(file.originalname).toLowerCase());
-    callback(ok ? null : new Error('仅支持 GLB/GLTF 文件'), ok);
+    if (file.fieldname === 'model') {
+      const ok = path.extname(file.originalname).toLowerCase() === '.glb';
+      return callback(ok ? null : new Error('仅支持自包含GLB文件；请先把GLTF及其BIN、贴图打包导出为GLB'), ok);
+    }
+    if (file.fieldname === 'image') {
+      const ok = isSupportedImageFile(file);
+      return callback(ok ? null : new Error('类别参考图仅支持 JPG、PNG、WEBP、GIF 或 BMP；不支持 SVG'), ok);
+    }
+    return callback(new Error('上传字段无效'));
   }
-}).single('model');
+}).fields([{ name: 'model', maxCount: 1 }, { name: 'image', maxCount: 1 }]);
 
-function categoryModelPayload(body, requireName = true) {
-  const name = String(body?.name || '').trim().slice(0, 80);
+function normalizeFrontRotation(value, fallback = 0) {
+  const angle = Number(value);
+  if (!Number.isFinite(angle)) return Number(fallback) || 0;
+  const fullTurn = Math.PI * 2;
+  const normalized = ((angle + Math.PI) % fullTurn + fullTurn) % fullTurn - Math.PI;
+  return Math.abs(normalized) < 1e-10 ? 0 : normalized;
+}
+
+function categoryModelPayload(body, requireName = true, fallback = {}) {
+  const name = String(body?.name ?? fallback.name ?? '').trim().slice(0, 80);
   if (requireName && !name) throw new ApiError(400, '请填写类别模型名称');
+  const rawScale = body?.modelScale ?? fallback.model_scale ?? 1;
   return {
     name,
     keywords: String(body?.keywords || '').trim().slice(0, 500) || null,
     description: String(body?.description || '').trim().slice(0, 500) || null,
-    modelScale: Math.min(Math.max(Number(body?.modelScale) || 1, 0.1), 10)
+    modelScale: Math.min(Math.max(Number(rawScale) || 1, 0.1), 10),
+    frontRotationY: normalizeFrontRotation(body?.frontRotationY, fallback.front_rotation_y)
   };
 }
+
+router.post('/part-category-model-matches/preview', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+  res.json({ success:true, data:await previewMatches(pool, req.user, req.body?.partIds) });
+}));
+
+router.post('/part-category-model-matches/apply', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+  const result = await applyMatches(pool, req.user, req.body?.items);
+  res.json({ success:true, data:result, msg:`已关联${result.affected}种物料` });
+}));
 
 router.get('/part-category-models', asyncHandler(async (req, res) => {
   const search = String(req.query?.search || '').trim();
@@ -1400,7 +1597,8 @@ router.get('/part-category-models', asyncHandler(async (req, res) => {
     params.push(`%${search}%`, `%${search}%`, `%${search}%`);
   }
   const [rows] = await pool.query(
-    `SELECT pcm.id,pcm.name,pcm.keywords,pcm.description,pcm.model_url AS modelUrl,pcm.model_scale AS modelScale,
+    `SELECT pcm.id,pcm.name,pcm.keywords,pcm.description,pcm.model_url AS modelUrl,pcm.image_url AS imageUrl,
+            pcm.model_scale AS modelScale,COALESCE(pcm.front_rotation_y,0) AS frontRotationY,
             pcm.built_in AS builtIn,pcm.created_at AS createdAt,pcm.updated_at AS updatedAt,
             (SELECT COUNT(*) FROM parts p WHERE p.category_model_id=pcm.id AND COALESCE(p.active,1)=1) AS associatedParts
      FROM part_category_models pcm WHERE ${where.join(' AND ')}
@@ -1412,19 +1610,28 @@ router.get('/part-category-models', asyncHandler(async (req, res) => {
 
 router.post('/part-category-models', requireRole('admin'), (req, res, next) => {
   categoryModelUpload(req, res, async error => {
-    if (error) return res.status(error.code === 'LIMIT_FILE_SIZE' ? 413 : 400).json({ success: false, msg: error.message || '模型上传失败' });
+    if (error) {
+      await removeUploadedFiles(Object.values(req.files || {}).flat());
+      const detail = modelUploadError(error);
+      return res.status(detail.status).json({ success: false, msg: detail.msg });
+    }
+    const files = uploadedCategoryFiles(req);
     try {
-      if (!req.file) throw new ApiError(400, '请选择GLB/GLTF模型文件');
+      if (!files.model) throw new ApiError(400, '请选择自包含GLB模型文件');
+      if (!files.image) throw new ApiError(400, '请选择与模型对应的类别参考图');
+      if (files.image.size > config.parts.maxFileSize) throw new ApiError(413, '类别参考图文件过大');
+      await Promise.all([assertValidGlb(files.model), assertValidImage(files.image)]);
       const data = categoryModelPayload(req.body);
-      const modelUrl = `/uploads/part-models/${req.file.filename}`;
+      const modelUrl = `/uploads/part-models/${files.model.filename}`;
+      const imageUrl = `/uploads/part-images/categories/${files.image.filename}`;
       const [result] = await pool.query(
-        `INSERT INTO part_category_models (name,keywords,description,model_url,model_scale,built_in,active,created_by)
-         VALUES (?,?,?,?,?,0,1,?)`,
-        [data.name, data.keywords, data.description, modelUrl, data.modelScale, req.user.id]
+        `INSERT INTO part_category_models (name,keywords,description,model_url,image_url,model_scale,front_rotation_y,built_in,active,created_by)
+         VALUES (?,?,?,?,?,?,?,0,1,?)`,
+        [data.name, data.keywords, data.description, modelUrl, imageUrl, data.modelScale, data.frontRotationY, req.user.id]
       );
-      res.status(201).json({ success: true, msg: '类别模型已新增', data: { id: result.insertId, ...data, modelUrl } });
+      res.status(201).json({ success: true, msg: '类别模型、参考图和正面方向已新增', data: { id: result.insertId, ...data, modelUrl, imageUrl } });
     } catch (err) {
-      if (req.file) fs.promises.unlink(req.file.path).catch(() => {});
+      await removeUploadedFiles([files.model, files.image]);
       next(err);
     }
   });
@@ -1432,24 +1639,33 @@ router.post('/part-category-models', requireRole('admin'), (req, res, next) => {
 
 router.put('/part-category-models/:id', requireRole('admin'), (req, res, next) => {
   categoryModelUpload(req, res, async error => {
-    if (error) return res.status(error.code === 'LIMIT_FILE_SIZE' ? 413 : 400).json({ success: false, msg: error.message || '模型上传失败' });
+    if (error) {
+      await removeUploadedFiles(Object.values(req.files || {}).flat());
+      const detail = modelUploadError(error);
+      return res.status(detail.status).json({ success: false, msg: detail.msg });
+    }
+    const files = uploadedCategoryFiles(req);
     try {
       const id = positiveInt(req.params.id, 1, Number.MAX_SAFE_INTEGER);
       if (!id) throw new ApiError(400, '类别模型ID无效');
       const [[current]] = await pool.query('SELECT * FROM part_category_models WHERE id=? AND active=1', [id]);
       if (!current) throw new ApiError(404, '类别模型不存在');
-      const data = categoryModelPayload(req.body);
-      const modelUrl = req.file ? `/uploads/part-models/${req.file.filename}` : current.model_url;
+      if (files.image && files.image.size > config.parts.maxFileSize) throw new ApiError(413, '类别参考图文件过大');
+      if (files.model) await assertValidGlb(files.model);
+      if (files.image) await assertValidImage(files.image);
+      const data = categoryModelPayload(req.body, true, current);
+      const modelUrl = files.model ? `/uploads/part-models/${files.model.filename}` : current.model_url;
+      const imageUrl = files.image ? `/uploads/part-images/categories/${files.image.filename}` : current.image_url;
       await pool.query(
-        `UPDATE part_category_models SET name=?,keywords=?,description=?,model_url=?,model_scale=? WHERE id=?`,
-        [data.name, data.keywords, data.description, modelUrl, data.modelScale, id]
+        `UPDATE part_category_models SET name=?,keywords=?,description=?,model_url=?,image_url=?,model_scale=?,front_rotation_y=? WHERE id=?`,
+        [data.name, data.keywords, data.description, modelUrl, imageUrl, data.modelScale, data.frontRotationY, id]
       );
-      if (req.file && String(current.model_url || '').startsWith('/uploads/part-models/')) {
-        fs.promises.unlink(path.join(categoryModelDir, path.basename(current.model_url))).catch(() => {});
-      }
-      res.json({ success: true, msg: '类别模型已更新', data: { id, ...data, modelUrl } });
+      const previousModelPath = files.model && uploadedCategoryModelPath(current.model_url);
+      const previousImagePath = files.image && uploadedCategoryImagePath(current.image_url);
+      await Promise.all([previousModelPath && fs.promises.unlink(previousModelPath).catch(() => {}), previousImagePath && fs.promises.unlink(previousImagePath).catch(() => {})]);
+      res.json({ success: true, msg: '类别模型、参考图和正面方向已更新', data: { id, ...data, modelUrl, imageUrl } });
     } catch (err) {
-      if (req.file) fs.promises.unlink(req.file.path).catch(() => {});
+      await removeUploadedFiles([files.model, files.image]);
       next(err);
     }
   });
@@ -1462,7 +1678,7 @@ router.delete('/part-category-models/:id', requireRole('admin'), asyncHandler(as
   let current;
   try {
     await connection.beginTransaction();
-    [[current]] = await connection.query('SELECT model_url AS modelUrl FROM part_category_models WHERE id=? AND active=1 FOR UPDATE', [id]);
+    [[current]] = await connection.query('SELECT model_url AS modelUrl,image_url AS imageUrl FROM part_category_models WHERE id=? AND active=1 FOR UPDATE', [id]);
     if (!current) throw new ApiError(404, '类别模型不存在');
     await connection.query('UPDATE parts SET category_model_id=NULL WHERE category_model_id=?', [id]);
     await connection.query('UPDATE part_category_models SET active=0 WHERE id=?', [id]);
@@ -1471,25 +1687,25 @@ router.delete('/part-category-models/:id', requireRole('admin'), asyncHandler(as
     await connection.rollback();
     throw error;
   } finally { connection.release(); }
-  if (String(current.modelUrl || '').startsWith('/uploads/part-models/')) {
-    fs.promises.unlink(path.join(categoryModelDir, path.basename(current.modelUrl))).catch(() => {});
-  }
+  const modelPath = uploadedCategoryModelPath(current.modelUrl);
+  const imagePath = uploadedCategoryImagePath(current.imageUrl);
+  await Promise.all([modelPath && fs.promises.unlink(modelPath).catch(() => {}), imagePath && fs.promises.unlink(imagePath).catch(() => {})]);
   res.json({ success: true, msg: '类别模型已删除，原关联备件已恢复为通用模型' });
 }));
 
 router.post('/parts/batch-images', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
   const updates = Array.isArray(req.body?.updates) ? req.body.updates : [];
-  if (!updates.length) throw new ApiError(400, '没有需要更新的数据');
-  let affected = 0;
-  for (const item of updates) {
-    const partId = Number(item.partId);
-    const imageUrl = item.imageUrl === null ? null : String(item.imageUrl || '').slice(0, 500);
-    if (!Number.isInteger(partId) || partId < 1) continue;
-    await assertPartAssetWrite(req.user, partId);
-    const [result] = await pool.query('UPDATE parts SET image_url=? WHERE id=? AND active=1', [imageUrl, partId]);
-    if (result.affectedRows) affected++;
-  }
-  res.json({ success: true, msg: `已更新 ${affected} 个备件图片`, data: { affected } });
+  if (!updates.length || updates.length > 500) throw new ApiError(400, '请选择1至500条备件');
+  const affected = await withPartAssetWrite(pool, req.user, updates.map(item => item.partId), async connection => {
+    let count = 0;
+    for (const item of updates) {
+      const imageUrl = item.imageUrl === null ? null : String(item.imageUrl || '').slice(0,500);
+      const [result] = await connection.query('UPDATE parts SET image_url=? WHERE id=? AND active=1',[imageUrl,Number(item.partId)]);
+      count += result.affectedRows;
+    }
+    return count;
+  });
+  res.json({success:true,msg:`已更新 ${affected} 个备件图片`,data:{affected}});
 }));
 
 module.exports = router;

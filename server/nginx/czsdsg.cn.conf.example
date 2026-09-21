@@ -21,22 +21,25 @@ server {
     add_header Strict-Transport-Security "max-age=31536000" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "no-referrer" always;
+    add_header X-Robots-Tag "noindex, nofollow, noarchive" always;
 
     location = /api/auth/login {
         limit_req zone=spare_login burst=5 nodelay;
         proxy_pass http://127.0.0.1:3000/api/auth/login;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header X-Forwarded-Proto https;
     }
 
     location /api/ {
         proxy_pass http://127.0.0.1:3000/api/;
+        proxy_no_cache 1;
+        proxy_cache_bypass 1;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header X-Forwarded-Proto https;
         proxy_request_buffering off;
         proxy_buffering off;
@@ -46,12 +49,34 @@ server {
         client_max_body_size 520m;
     }
 
+    # 包内类别模型与参考照片同样鉴权，禁止用 alias/root 直接公开 models。
+    location /models/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_no_cache 1;
+        proxy_cache_bypass 1;
+        proxy_read_timeout 300s;
+    }
+    # 上传的图片/模型也由 API 校验登录会话。禁止用 alias/root 直接公开 uploads/data。
+    location ~ ^/uploads/(part-images|part-models)/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_no_cache 1;
+        proxy_cache_bypass 1;
+        proxy_read_timeout 300s;
+    }
+    location /uploads/ { return 404; }
+
     location / {
         proxy_pass http://127.0.0.1:8503;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-For $remote_addr;
         proxy_set_header X-Forwarded-Proto https;
     }
 }

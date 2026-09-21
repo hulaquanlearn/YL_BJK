@@ -4,6 +4,7 @@ const { ApiError, asyncHandler, parseJson, positiveInt, toInventoryOrder } = req
 const {
   parseInventoryId,
   normalizeInventoryOrderLists,
+  assertInventorySnapshots,
   lockInventoryRows,
   findPendingInventoryOrder
 } = require('../inventory-guards');
@@ -50,10 +51,6 @@ function idsFromLegacyOrder(order) {
 router.get('/inventory-orders', asyncHandler(async (req, res) => {
   const conditions = [];
   const params = [];
-  if (req.query.status) {
-    conditions.push('approveStatus = ?');
-    params.push(req.query.status);
-  }
   if (req.query.date) {
     conditions.push('inventoryDate = ?');
     params.push(req.query.date);
@@ -62,13 +59,20 @@ router.get('/inventory-orders', asyncHandler(async (req, res) => {
     conditions.push('workshop_code = ?');
     params.push(normalizeWorkshopCode(req.query.workshopCode));
   }
+  const scopeSql = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  const [[counts]] = await pool.query(`SELECT COUNT(*) AS total,
+    SUM(approveStatus='待审批') AS pending,SUM(approveStatus='已通过') AS approved,
+    SUM(approveStatus='已驳回') AS rejected FROM inventory_orders ${scopeSql}`, params);
+  if (req.query.status) { conditions.push('approveStatus = ?'); params.push(req.query.status); }
   const whereSql = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-  const limit = positiveInt(req.query.limit, 100, 200);
-  const [rows] = await pool.query(
-    `SELECT * FROM inventory_orders ${whereSql} ORDER BY createTime DESC LIMIT ?`,
-    [...params, limit]
-  );
-  res.json({ success: true, data: rows.map(toInventoryOrder) });
+  const pageSize = positiveInt(req.query.pageSize ?? req.query.limit, 100, 200);
+  const page = positiveInt(req.query.page, 1, 1000000);
+  const [[totalRows], [rows]] = await Promise.all([
+    pool.query(`SELECT COUNT(*) AS total FROM inventory_orders ${whereSql}`, params),
+    pool.query(`SELECT * FROM inventory_orders ${whereSql} ORDER BY createTime DESC,id DESC LIMIT ? OFFSET ?`, [...params, pageSize, (page - 1) * pageSize])
+  ]);
+  const summary = Object.fromEntries(Object.entries(counts).map(([key, value]) => [key, Number(value) || 0]));
+  res.json({ success: true, data: rows.map(toInventoryOrder), total: Number(totalRows[0].total), page, pageSize, summary });
 }));
 
 router.get('/inventory-orders/:id', asyncHandler(async (req, res) => {
@@ -98,6 +102,7 @@ router.post('/inventory-orders', requireAnyWorkshopEditor, asyncHandler(async (r
     if (inventoryRows.length !== normalized.inventoryIds.length) {
       throw new ApiError(400, '部分盘点备件已不存在，请刷新后重试');
     }
+    assertInventorySnapshots(normalized, inventoryRows);
     const workshopCodes = [...new Set(inventoryRows.map(row => normalizeWorkshopCode(row.workshop_code, 'raw_grain')))];
     if (workshopCodes.length !== 1) {
       throw new ApiError(400, '一次盘点只能选择同一车间的备件');

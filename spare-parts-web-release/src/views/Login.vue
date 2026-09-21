@@ -4,7 +4,7 @@
       <div class="login-brand"><span><el-icon><Grid /></el-icon></span><div><h1>数字工作台</h1><p>统一登录备件管理与智能工程工作台</p></div></div>
       <el-form label-position="top" @submit.prevent="submit">
         <el-form-item label="用户名"><el-input v-model="form.username" size="large" maxlength="32" autofocus @keyup.enter="submit" /></el-form-item>
-        <el-form-item label="密码"><el-input v-model="form.password" size="large" type="password" show-password maxlength="72" @keyup.enter="submit" /></el-form-item>
+      <el-form-item label="密码"><el-input v-model="form.password" size="large" type="password" show-password @keyup.enter="submit" /></el-form-item>
         <el-button type="primary" size="large" :loading="loading" style="width:100%" @click="submit">登录</el-button>
       </el-form>
       <p class="login-help">账号由管理员创建。如忘记密码，请联系管理员重置。</p>

@@ -1,25 +1,42 @@
 <view class="workbench">
-  <view class="hero-card">
-    <view class="hero-decoration hero-decoration-one"></view>
-    <view class="hero-decoration hero-decoration-two"></view>
-    <view class="hero-top">
+  <view class="section">
+    <view class="section-heading">
       <view>
-        <text class="eyebrow">备件管理工作台</text>
-        <view class="greeting-row">
-          <text class="greeting">{{greeting}}，{{user.displayName || '欢迎使用'}}</text>
-        </view>
+        <text class="section-title">常用功能</text>
+
       </view>
-      <view class="avatar" bindtap="gotoAccount">{{userInitial}}</view>
     </view>
-    <view class="hero-bottom">
-      <text>{{dateText}}</text>
-      <view class="refresh-action" bindtap="retryDashboard">
-        <text class="refresh-icon">↻</text>
-        <text>{{lastUpdated ? lastUpdated + ' 更新' : '刷新数据'}}</text>
+    <view class="quick-grid">
+      <view class="quick-item" bindtap="gotoPartList">
+        <view class="quick-icon icon-blue"><image src="/images/icons/备件信息.png"></image></view>
+        <text class="quick-title">查备件</text>
+        <text class="quick-desc">库存与位置</text>
+      </view>
+      <view class="quick-item" bindtap="gotoFilter">
+        <view class="quick-icon icon-green"><image src="/images/icons/备件盘点.png"></image></view>
+        <text class="quick-title">去盘点</text>
+        <text class="quick-desc">按货区盘点</text>
+      </view>
+      <view class="quick-item" bindtap="gotoAddPart" wx:if="{{canEditParts || isViewer}}">
+        <view class="quick-icon icon-orange"><image src="/images/icons/新增备件.png"></image></view>
+        <text class="quick-title">新增备件</text>
+        <text class="quick-desc">录入新物料</text>
+      </view>
+      <view class="quick-item" bindtap="gotoaiAgent">
+        <view class="quick-icon icon-purple"><image src="/images/icons/AI咨询.png"></image></view>
+        <text class="quick-title">智能查询</text>
+        <text class="quick-desc">用自然语言找</text>
       </view>
     </view>
   </view>
 
+  <view class="dashboard-heading">
+    <text class="section-title">库存概况</text>
+    <view class="dashboard-refresh">
+      <text class="update-time" wx:if="{{lastUpdated}}">{{lastUpdated}} 更新</text>
+      <button class="refresh-button" bindtap="retryDashboard" disabled="{{dashboardLoading}}">{{dashboardLoading ? '刷新中' : '刷新'}}</button>
+    </view>
+  </view>
   <view class="metric-grid">
     <view class="metric-card" bindtap="gotoPartList">
       <view class="metric-icon metric-blue">件</view>
@@ -31,12 +48,12 @@
       <text class="metric-value">{{dashboardLoading ? '--' : dashboard.inventoryRecords}}</text>
       <text class="metric-label">库存记录</text>
     </view>
-    <view class="metric-card {{dashboard.lowStock > 0 ? 'metric-card-warning' : ''}}" bindtap="gotoPartStats">
+    <view class="metric-card {{dashboard.lowStock > 0 ? 'metric-card-warning' : ''}}" bindtap="gotoLowStock">
       <view class="metric-icon metric-orange">低</view>
       <text class="metric-value">{{dashboardLoading ? '--' : dashboard.lowStock}}</text>
       <text class="metric-label">低库存</text>
     </view>
-    <view class="metric-card" bindtap="gotoApprove" wx:if="{{isAdmin}}">
+    <view class="metric-card" bindtap="gotoApprove" wx:if="{{isAdmin || isViewer}}">
       <view class="metric-icon metric-purple">审</view>
       <text class="metric-value">{{dashboardLoading ? '--' : dashboard.pendingApproval}}</text>
       <text class="metric-label">待审批</text>
@@ -55,9 +72,9 @@
     <view class="section-heading">
       <view>
         <text class="section-title">库存提醒</text>
-        <text class="section-subtitle">建议优先检查以下备件</text>
+
       </view>
-      <text class="section-link" bindtap="gotoPartStats">查看全部</text>
+      <text class="section-link" bindtap="gotoLowStock">查看全部</text>
     </view>
     <view class="warning-card">
       <view
@@ -79,39 +96,8 @@
   <view class="section">
     <view class="section-heading">
       <view>
-        <text class="section-title">常用功能</text>
-        <text class="section-subtitle">快速完成日常库存工作</text>
-      </view>
-    </view>
-    <view class="quick-grid">
-      <view class="quick-item" bindtap="gotoPartList">
-        <view class="quick-icon icon-blue"><image src="/images/icons/备件信息.png"></image></view>
-        <text class="quick-title">查备件</text>
-        <text class="quick-desc">库存与位置</text>
-      </view>
-      <view class="quick-item" bindtap="gotoFilter">
-        <view class="quick-icon icon-green"><image src="/images/icons/备件盘点.png"></image></view>
-        <text class="quick-title">去盘点</text>
-        <text class="quick-desc">按货区盘点</text>
-      </view>
-      <view class="quick-item" bindtap="gotoAddPart" wx:if="{{canEditParts}}">
-        <view class="quick-icon icon-orange"><image src="/images/icons/新增备件.png"></image></view>
-        <text class="quick-title">新增备件</text>
-        <text class="quick-desc">录入新物料</text>
-      </view>
-      <view class="quick-item" bindtap="gotoaiAgent">
-        <view class="quick-icon icon-purple"><image src="/images/icons/AI咨询.png"></image></view>
-        <text class="quick-title">智能查询</text>
-        <text class="quick-desc">用自然语言找</text>
-      </view>
-    </view>
-  </view>
-
-  <view class="section">
-    <view class="section-heading">
-      <view>
         <text class="section-title">管理工具</text>
-        <text class="section-subtitle">统计、审批与库位资料</text>
+
       </view>
     </view>
     <view class="tool-list">
@@ -120,7 +106,7 @@
         <view class="tool-content"><text class="tool-title">库存统计</text><text class="tool-desc">查看货区分布和低库存</text></view>
         <text class="tool-arrow">›</text>
       </view>
-      <view class="tool-item" bindtap="gotoApprove" wx:if="{{isAdmin}}">
+      <view class="tool-item" bindtap="gotoApprove" wx:if="{{isAdmin || isViewer}}">
         <view class="tool-icon"><image src="/images/icons/盘点审批.png"></image></view>
         <view class="tool-content"><text class="tool-title">盘点审批</text><text class="tool-desc">处理盘点差异与库存调整</text></view>
         <text class="tool-badge" wx:if="{{dashboard.pendingApproval > 0}}">{{dashboard.pendingApproval > 99 ? '99+' : dashboard.pendingApproval}}</text>
@@ -128,30 +114,16 @@
       </view>
       <view class="tool-item" bindtap="gotoAccount">
         <view class="tool-icon tool-icon-text">账</view>
-        <view class="tool-content"><text class="tool-title">账号设置</text><text class="tool-desc">{{isAdmin ? '账号管理、修改密码和退出登录' : '修改密码和退出登录'}}</text></view>
+        <view class="tool-content"><text class="tool-title">账号设置</text><text class="tool-desc">{{isAdmin || isViewer ? '账号管理、修改密码和退出登录' : '修改密码和退出登录'}}</text></view>
         <text class="tool-arrow">›</text>
       </view>
       <view class="tool-item" bindtap="gotoLocationGuide">
         <view class="tool-icon"><image src="/images/icons/导览.png"></image></view>
-        <view class="tool-content"><text class="tool-title">库位导览</text><text class="tool-desc">查看货架位置和物料说明</text></view>
+        <view class="tool-content"><text class="tool-title">库位说明</text><text class="tool-desc">查看库房示意图和库位规则</text></view>
         <text class="tool-arrow">›</text>
       </view>
     </view>
   </view>
 
-  <view class="flow-card">
-    <view class="flow-title-row">
-      <text class="flow-title">标准盘点流程</text>
-      <text class="flow-tip">4 步完成</text>
-    </view>
-    <view class="flow-steps">
-      <view class="flow-step"><text class="step-no">1</text><text>选择范围</text></view>
-      <view class="flow-line"></view>
-      <view class="flow-step"><text class="step-no">2</text><text>核对库存</text></view>
-      <view class="flow-line"></view>
-      <view class="flow-step"><text class="step-no">3</text><text>提交盘点</text></view>
-      <view class="flow-line"></view>
-      <view class="flow-step"><text class="step-no">4</text><text>审批完成</text></view>
-    </view>
-  </view>
+
 </view>

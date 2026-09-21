@@ -11,6 +11,12 @@ function buildQuery(params = {}) {
 
 function request(path, options = {}) {
   const method = options.method || 'GET';
+  if (auth.isViewer() && !['GET','HEAD','OPTIONS'].includes(method.toUpperCase())
+    && !['/auth/login','/auth/logout','/auth/change-password','/ai/chat'].includes(path.split('?')[0])) {
+    const error=new Error('权限不足：车间人员仅可查看，不能修改业务数据');
+    error.statusCode=403;
+    return Promise.reject(error);
+  }
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   const token = auth.getToken();
   if (token) headers.Authorization = `Bearer ${token}`;

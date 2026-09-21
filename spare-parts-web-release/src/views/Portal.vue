@@ -1,7 +1,7 @@
 <template>
-  <main class="module-portal">
+  <main class="workbench">
     <header class="portal-header">
-      <div class="portal-brand"><span><el-icon><Grid /></el-icon></span><div><strong>数字工作台</strong><small>RAW GRAIN WORKSHOP</small></div></div>
+      <div class="portal-brand"><span><el-icon><Grid /></el-icon></span><div><strong>数字工作台</strong></div></div>
       <el-dropdown trigger="click" @command="handleAccountCommand">
         <button class="portal-account" type="button"><span>{{ initial }}</span><div><strong>{{ user?.displayName }}</strong><small>{{ roleLabel }}</small></div><el-icon><ArrowDown /></el-icon></button>
         <template #dropdown><el-dropdown-menu><el-dropdown-item command="logout" divided><el-icon><SwitchButton /></el-icon>退出登录</el-dropdown-item></el-dropdown-menu></template>
@@ -9,25 +9,34 @@
     </header>
 
     <section class="portal-hero">
-      <span class="portal-kicker">WORKSPACE SELECTOR</span>
-      <h1>选择今天要处理的业务</h1>
-      <p>一次登录，在备件管理与智能工程之间快速切换。</p>
+      
+      <p>工作空间</p>
+      <h1>从这里开始工作</h1>
     </section>
 
     <section class="module-grid">
-      <router-link class="module-card spare-card" to="/inventory">
-        <div class="module-card-top"><span class="module-icon"><el-icon><Box /></el-icon></span><span class="module-status"><i></i>在线</span></div>
-        <div><small>SPARE PARTS OPERATIONS</small><h2>备件管理中心</h2><p>库存、库位、盘点、统计与 3D 定位一体化管理。</p></div>
-        <ul><li>实时库存与补货预警</li><li>多车间盘点与权限闭环</li><li>3D 库房精准定位</li></ul>
-        <span class="module-enter">进入备件管理 <el-icon><Right /></el-icon></span>
-      </router-link>
+      <article class="module-card spare-card">
+        <div class="module-card-top"><span class="module-icon"><el-icon><Box /></el-icon></span><span class="module-status">库存与现场</span></div>
+        <div><h2>备件管理中心</h2><p>查库存、找备件，掌握现场库位与补货需求。</p></div>
+        
+        <router-link class="module-enter" to="/inventory">进入备件管理 <el-icon><Right /></el-icon></router-link>
+        <nav class="workspace-links" aria-label="备件常用功能">
+          <router-link to="/warehouse-3d"><el-icon><Location /></el-icon><span>3D 库位</span><el-icon><ArrowRight /></el-icon></router-link>
+          <router-link to="/replenishment"><el-icon><ShoppingCartFull /></el-icon><span>补货清单</span><el-icon><ArrowRight /></el-icon></router-link>
+          <router-link to="/check"><el-icon><DocumentChecked /></el-icon><span>盘点管理</span><el-icon><ArrowRight /></el-icon></router-link>
+        </nav>
+      </article>
 
-      <router-link class="module-card knowledge-card" to="/knowledge">
-        <div class="module-card-top"><span class="module-icon"><el-icon><Reading /></el-icon></span><span class="module-status"><i></i>可用</span></div>
-        <div><small>ENGINEERING INTELLIGENCE</small><h2>智能工程中心</h2><p>集中沉淀工程资料，并解析 Siemens TIA 与 ABB RAPID 程序逻辑。</p></div>
-        <ul><li>工程资料分类上传与下载</li><li>PLC 与机器人程序统一归档</li><li>逻辑关系、程序含义与证据式分析</li></ul>
-        <span class="module-enter">进入智能工程中心 <el-icon><Right /></el-icon></span>
-      </router-link>
+      <article class="module-card knowledge-card">
+        <div class="module-card-top"><span class="module-icon"><el-icon><Reading /></el-icon></span><span class="module-status">资料与经验</span></div>
+        <div><h2>智能工程中心</h2><p>查阅工程资料与故障经验，理解设备程序。</p></div>
+        
+        <router-link class="module-enter" to="/knowledge">进入工程知识 <el-icon><Right /></el-icon></router-link>
+        <nav class="workspace-links" aria-label="工程常用功能">
+          <router-link to="/knowledge"><el-icon><Document /></el-icon><span>工程知识库</span><el-icon><ArrowRight /></el-icon></router-link>
+          <router-link to="/plc-analysis"><el-icon><Cpu /></el-icon><span>程序智能分析</span><el-icon><ArrowRight /></el-icon></router-link>
+        </nav>
+      </article>
     </section>
   </main>
 </template>
@@ -47,7 +56,7 @@ const roleLabel = computed(() => ({
   raw_grain: '原粮车间',
   qu_making: '制曲车间',
   brewing: '酿酒车间',
-  viewer: '只读用户'
+  viewer: '车间人员（只读）'
 }[user?.role] || '只读用户'))
 
 async function handleAccountCommand(command) {
@@ -69,4 +78,17 @@ async function handleAccountCommand(command) {
 .portal-hero{max-width:760px;margin:72px auto 38px;text-align:center}.portal-kicker{color:#5eead4;font-size:11px;font-weight:800;letter-spacing:.22em}.portal-hero h1{margin:16px 0 12px;font-size:clamp(32px,4.4vw,56px);letter-spacing:-.04em}.portal-hero p{margin:0;color:#9bacc3;font-size:15px;line-height:1.8}
 .module-grid{width:min(1120px,100%);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px;margin:0 auto}.module-card{position:relative;overflow:hidden;min-height:390px;display:flex;flex-direction:column;padding:32px;border:1px solid rgba(255,255,255,.13);border-radius:28px;color:#f6f9ff;background:rgba(255,255,255,.065);box-shadow:0 28px 70px rgba(0,0,0,.2);text-decoration:none;transition:.28s ease}.module-card:before{content:"";position:absolute;inset:auto -70px -90px auto;width:240px;height:240px;border-radius:50%;background:var(--glow);filter:blur(4px);opacity:.18}.module-card:hover{transform:translateY(-7px);border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.095)}.spare-card{--accent:#fb7185;--glow:#e11d48}.knowledge-card{--accent:#5eead4;--glow:#14b8a6}.module-card-top{display:flex;align-items:center;justify-content:space-between}.module-icon{width:58px;height:58px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);border-radius:18px;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);font-size:28px}.module-status{display:flex;align-items:center;gap:7px;color:#a9b8cc;font-size:11px}.module-status i{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.13)}.module-card>div:nth-child(2){margin-top:32px}.module-card small{color:var(--accent);font-size:10px;font-weight:800;letter-spacing:.18em}.module-card h2{margin:10px 0 12px;font-size:26px}.module-card p{min-height:54px;margin:0;color:#9bacc3;font-size:14px;line-height:1.8}.module-card ul{display:grid;gap:11px;margin:24px 0 30px;padding:0;list-style:none;color:#c3cfdf;font-size:13px}.module-card li:before{content:"✓";margin-right:10px;color:var(--accent);font-weight:900}.module-enter{display:flex;align-items:center;gap:8px;margin-top:auto;color:var(--accent);font-size:14px;font-weight:800}
 @media(max-width:760px){.module-portal{padding:20px 16px 40px}.portal-account div{display:none}.portal-hero{margin:52px auto 30px}.module-grid{grid-template-columns:1fr}.module-card{min-height:350px;padding:24px}.module-card>div:nth-child(2){margin-top:28px}}
+.workbench{flex:1;min-height:calc(100dvh - 60px);padding:0 0 56px;background:#f3f5f8;color:#1d2939}
+.workbench .portal-header{padding:20px clamp(20px,5vw,80px);background:#fff;border-bottom:1px solid #e5e9ef}
+.workbench .portal-brand>span{background:#253b53;color:#fff;border:0;border-radius:12px}
+.workbench .portal-account{background:#fff;border-color:#e5e9ef;color:#344054}.workbench .portal-account>span{background:#f4e7e9;color:#b71929}.workbench .portal-account small{color:#667085}
+.workbench .portal-hero{max-width:1104px;margin:48px auto 28px;padding:0 28px;text-align:left}.workbench .portal-hero p{color:#667085;font-size:13px}.workbench .portal-hero h1{margin:8px 0 0;font-size:30px;letter-spacing:.02em}
+.workbench .module-grid{width:min(1160px,100%);padding:0 28px;box-sizing:border-box;gap:24px}
+.workbench .module-card{--accent:#bd182a;--soft:#fff2f3;min-height:0;padding:28px;border:1px solid #e1e6ec;border-top:4px solid var(--accent);border-radius:16px;background:#fff;color:#1d2939;box-shadow:0 6px 20px #1d293906;transition:none}
+.workbench .knowledge-card{--accent:#087f7b;--soft:#edf9f7}.workbench .module-card:before{display:none}.workbench .module-card:hover{transform:none;background:#fff;border-color:#e1e6ec;border-top-color:var(--accent)}
+.workbench .module-card-top{justify-content:flex-start;gap:12px}.workbench .module-icon{width:48px;height:48px;background:var(--soft);border:0;border-radius:14px;font-size:25px}.workbench .module-status{color:#667085;font-size:13px}
+.workbench .module-card>div:nth-child(2){margin-top:22px}.workbench .module-card h2{margin:0 0 10px;font-size:25px}.workbench .module-card p{min-height:0;color:#667085;font-size:14px;line-height:1.8}
+.workbench .module-enter{justify-content:space-between;margin-top:26px;padding:13px 16px;border-radius:9px;background:var(--accent);color:#fff;text-decoration:none}.workbench .module-enter:hover{filter:brightness(.94)}
+.workspace-links{display:grid;margin-top:22px;border-top:1px solid #edf0f3;padding-top:10px}.workspace-links a{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 10px;border-radius:8px;color:#475467;text-decoration:none;font-size:14px}.workspace-links a span{flex:1}.workspace-links a:hover{background:var(--soft);color:var(--accent)}.workspace-links a>.el-icon:last-child{font-size:12px;color:#98a2b3}.workbench a:focus-visible,.workbench button:focus-visible{outline:3px solid #4b83bd;outline-offset:3px}
+@media(max-width:760px){.workbench{padding-bottom:28px}.workbench .portal-header{padding:16px}.workbench .portal-hero{margin:28px auto 20px;padding:0 16px}.workbench .portal-hero h1{font-size:24px}.workbench .module-grid{padding:0 16px;gap:18px}.workbench .module-card{padding:22px}.workbench .module-card h2{font-size:23px}.workbench .module-enter{margin-top:20px}.workspace-links{margin-top:16px}}
 </style>

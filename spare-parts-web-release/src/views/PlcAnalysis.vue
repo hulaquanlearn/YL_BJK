@@ -2,19 +2,19 @@
   <div class="plc-page">
     <section class="plc-commandbar">
       <div class="command-copy">
-        <span class="eyebrow">PROGRAM INTELLIGENCE · READ ONLY</span>
-        <h2>工业程序智能解析台</h2>
-        <p>看清项目、文件、例程与 I/O 的关系，再进入具体程序证据。</p>
+
+        <h2>程序项目</h2>
+
       </div>
       <div class="compact-stats" aria-label="程序统计">
         <span><b>{{ stats.projects }}</b>项目</span><span><b>{{ stats.items }}</b>条目</span><span><b>{{ stats.blocks }}</b>程序块</span><span :class="{ warning: stats.protectedBlocks }"><b>{{ stats.protectedBlocks }}</b>加密</span>
       </div>
-      <div class="hero-actions"><el-button @click="showGuide = true">本机解析助手</el-button><el-button v-if="isAdmin" type="primary" @click="uploadVisible = true">导入程序项目</el-button><el-tag v-else effect="plain">项目只读</el-tag></div>
+      <div class="hero-actions"><el-button @click="showGuide = true">本机解析助手</el-button><el-button v-write v-if="$showControl(isAdmin)" type="primary" @click="uploadVisible = true">导入程序项目</el-button><el-tag v-else effect="plain">项目只读</el-tag></div>
     </section>
 
     <section class="plc-workbench">
       <aside class="project-rail">
-        <div class="panel-heading"><div><span>PROJECTS</span><h3>程序项目</h3></div><el-button text type="primary" @click="loadAll">刷新</el-button></div>
+        <div class="panel-heading"><div><h3>程序项目</h3></div><el-button text type="primary" @click="loadAll">刷新</el-button></div>
         <el-input v-model="projectSearch" clearable placeholder="搜索项目或控制器" @keyup.enter="loadProjects" />
         <div class="project-list">
           <button v-for="project in projects" :key="project.id" type="button" class="project-card" :class="{ active: project.id === selectedId }" @click="selectProject(project.id)">
@@ -30,16 +30,22 @@
         <template v-if="currentProject">
           <div class="project-overview">
             <div><span class="eyebrow">{{ currentProject.programFamily === 'abb_rapid' ? 'ABB RAPID' : currentProject.tiaVersion }} PROGRAM MAP</span><h3>{{ currentProject.name }}</h3><p>{{ platformSummary(currentProject) }}</p></div>
-            <div class="project-tags"><el-tag>{{ currentProject.programFamily === 'abb_rapid' ? '机器人程序' : 'PLC 程序' }}</el-tag><el-tag :type="currentProject.parseStatus === 'parsed' ? 'success' : 'warning'">{{ parseStatusLabel(currentProject.parseStatus) }}</el-tag><el-button v-if="isAdmin" type="danger" plain size="small" @click="removeCurrentProject">删除项目</el-button></div>
+            <div class="project-tags"><el-tag>{{ currentProject.programFamily === 'abb_rapid' ? '机器人程序' : 'PLC 程序' }}</el-tag><el-tag :type="currentProject.parseStatus === 'parsed' ? 'success' : 'warning'">{{ parseStatusLabel(currentProject.parseStatus) }}</el-tag><el-button v-write v-if="$showControl(isAdmin)" type="danger" plain size="small" @click="removeCurrentProject">删除项目</el-button></div>
           </div>
 
-          <el-alert v-if="currentProject.parseStatus === 'requires_extractor' || currentProject.parseStatus === 'partial'" type="warning" :closable="false" show-icon>
+          <el-alert v-if="currentProject.parseStatus === 'extracting'" type="info" :closable="false" show-icon>
+            <template #title>已分配给本机解析节点</template>正在等待解析节点回传结果；超过 30 分钟未回传，任务会自动重新开放领取。
+          </el-alert>
+          <el-alert v-else-if="currentProject.parseStatus === 'requires_extractor' || currentProject.parseStatus === 'partial'" type="warning" :closable="false" show-icon>
             <template #title>该项目需要本机解析助手</template>{{ currentProject.parseMessage }}。解析必须在安装对应 TIA Portal 的 Windows 电脑上完成。
           </el-alert>
           <el-alert v-if="currentProject.protectedCount" type="warning" :closable="false" show-icon><template #title>检测到 {{ currentProject.protectedCount }} 个受保护条目</template>密码只允许在本机解析时自愿输入，不上传、不保存。</el-alert>
+          <el-alert v-if="graph.coverage" type="info" :closable="false" show-icon><template #title>静态索引建立 {{ graph.coverage.referenceCoveragePercent }}% · 含引用关系 {{ graph.coverage.relationCoveragePercent ?? 0 }}%</template>{{ graph.coverage.scope }}</el-alert>
 
           <el-tabs v-model="activeTab" class="program-tabs">
             <el-tab-pane label="程序关系" name="map">
+              <div v-if="graph.coverage" class="coverage-strip"><span><b>{{ graph.coverage.sourceFileCount }}</b>源文件</span><span><b>{{ graph.coverage.blockCount }}</b>程序块</span><span><b>{{ graph.edges.length }}</b>已解析调用</span><span><b>{{ graph.unresolved.length }}</b>未解析调用</span></div>
+              <div v-if="graph.risks.length" class="static-risks"><article v-for="risk in graph.risks" :key="risk.code"><el-tag :type="risk.level==='warning'?'warning':'info'">静态提示</el-tag><div><b>{{ risk.title }}</b><small>{{ risk.detail }}</small></div></article></div>
               <div class="relation-path">
                 <button type="button" class="relation-node root-node"><span>项目</span><b>{{ currentProject.name }}</b></button><i>→</i>
                 <button type="button" class="relation-node"><span>源文件 / 模块</span><b>{{ programGroups.length }}</b></button><i>→</i>
@@ -69,6 +75,7 @@
                 </section>
                 <section v-else class="module-detail empty-map"><el-empty description="选择左侧文件或模块" /></section>
               </div>
+              <section v-loading="graphLoading" class="call-chain-panel"><header><div><b>静态调用链</b><small>只显示名称能匹配到已导入程序块的调用</small></div><el-tag effect="plain">{{ graph.edges.length }} 条</el-tag></header><div v-if="graphEdgeRows.length" class="call-edge-list"><button v-for="edge in graphEdgeRows.slice(0,120)" :key="`${edge.sourceId}-${edge.targetId}-${edge.line}`" type="button" @click="openGraphNode(edge.targetId)"><strong>{{ edge.sourceName }}</strong><span>第 {{ edge.line||'?' }} 行 →</span><strong>{{ edge.targetName }}</strong></button></div><el-empty v-else-if="!graphLoading" description="暂未识别到可解析的块间调用" :image-size="56" /></section>
             </el-tab-pane>
 
             <el-tab-pane label="全部程序对象" name="objects">
@@ -80,7 +87,7 @@
               <div class="item-table-wrap">
                 <el-table :data="items" v-loading="itemsLoading" @row-click="openItem">
                   <el-table-column prop="itemType" label="类型" width="90"><template #default="scope"><span class="item-type">{{ typeLabel(scope.row.itemType) }}</span></template></el-table-column>
-                  <el-table-column prop="name" label="程序对象" min-width="210"><template #default="scope"><strong>{{ scope.row.name }}</strong><small class="source-line">{{ scope.row.sourcePath || scope.row.sourceRef || '结构化解析包' }}</small></template></el-table-column>
+                  <el-table-column prop="name" label="程序对象" min-width="210"><template #default="scope"><strong>{{ scope.row.name }}</strong><small class="source-line">{{ scope.row.sourcePath || scope.row.sourceRef || '结构化解析包' }}<template v-if="scope.row.startLine"> : {{ scope.row.startLine }}<template v-if="scope.row.endLine&&scope.row.endLine!==scope.row.startLine">-{{ scope.row.endLine }}</template></template></small></template></el-table-column>
                   <el-table-column prop="language" label="语言" width="86" />
                   <el-table-column prop="address" label="地址 / 信号" min-width="150"><template #default="scope"><code>{{ scope.row.address || '—' }}</code></template></el-table-column>
                   <el-table-column prop="meaning" label="作用与含义" min-width="260" show-overflow-tooltip><template #default="scope">{{ scope.row.meaning || scope.row.commentText || '点击查看源码与逻辑树' }}</template></el-table-column>
@@ -90,9 +97,15 @@
               </div>
             </el-tab-pane>
 
+            <el-tab-pane label="交叉引用" name="references">
+              <div class="reference-search"><el-input v-model="referenceSymbol" clearable placeholder="输入程序块、变量或 I/O 地址，例如 DriveStart 或 %Q0.0" @keyup.enter="searchReferences"/><el-button type="primary" :loading="referenceLoading" @click="searchReferences">查找定义与读写</el-button></div>
+              <el-alert title="交叉引用来自已导入文本的静态识别；动态地址、库块内部和受保护块可能无法完整覆盖。" type="info" :closable="false"/>
+              <div v-if="referenceResult.symbol" class="reference-results"><header><b>{{ referenceResult.symbol }}</b><span>{{ referenceResult.definitions.length }} 处定义 · {{ referenceResult.references.length }} 处引用</span></header><el-table :data="referenceRows" @row-click="row=>openGraphNode(row.id)"><el-table-column prop="kindLabel" label="类型" width="100"/><el-table-column prop="name" label="所在对象" min-width="200"/><el-table-column prop="sourcePath" label="源文件" min-width="220"/><el-table-column prop="line" label="行号" width="90"/></el-table></div><el-empty v-else description="输入符号后查看其定义、调用、读取和写入位置"/>
+            </el-tab-pane>
+
             <el-tab-pane label="项目归档" name="storage">
               <section class="storage-card">
-                <div><span>原文件</span><strong>服务器文件系统</strong><small>{{ currentProject.storage?.root || '服务器程序文件目录' }}</small></div>
+                <div><span>原文件</span><strong>受管服务器存储</strong><small>内部物理路径不向浏览器暴露</small></div>
                 <div><span>数据库</span><strong>索引与解析结果</strong><small>保存校验值、关系、变量、I/O 和分析证据</small></div>
                 <div><span>已保存文件</span><strong>{{ currentProject.files?.length || 0 }} 个</strong><small>随机文件名保存，原始名称保留在数据库</small></div>
               </section>
@@ -108,7 +121,7 @@
         <div class="prompt-chips"><button v-for="prompt in prompts" :key="prompt" type="button" @click="question = prompt">{{ prompt }}</button></div>
         <el-input v-model="question" type="textarea" :rows="4" maxlength="2000" show-word-limit placeholder="输入要追踪的信号、程序或执行流程" />
         <el-button class="analyze-button" type="primary" :loading="analyzing" :disabled="!currentProject" @click="analyze">开始证据分析</el-button>
-        <div v-if="analysis.answer" class="analysis-result"><div class="result-title"><span>ANALYSIS</span><strong>分析结论</strong></div><pre>{{ analysis.answer }}</pre><div v-if="analysis.evidence?.length" class="evidence-list"><button v-for="evidence in analysis.evidence" :key="evidence.id" type="button" @click="openEvidence(evidence)"><b>[{{ evidence.label }}]</b><span>{{ evidence.name }}</span><small>{{ evidence.address || evidence.sourcePath }}</small></button></div></div>
+        <div v-if="analysis.answer" class="analysis-result"><div class="result-title"><span>ANALYSIS</span><strong>分析结论</strong></div><pre>{{ analysis.answer }}</pre><small v-if="analysis.coverage" class="analysis-scope">静态索引：{{ analysis.coverage.referenceIndexedCount }}/{{ analysis.coverage.blockCount || analysis.coverage.itemCount }}；其中 {{ analysis.coverage.relationIndexedCount ?? 0 }} 项提取到调用、读写或地址。索引数量不代表语法解析完整率。</small><div v-if="analysis.evidence?.length" class="evidence-list"><button v-for="evidence in analysis.evidence" :key="evidence.id" type="button" @click="openEvidence(evidence)"><b>[{{ evidence.label }}]</b><span>{{ evidence.name }}</span><small>{{ evidence.address || evidence.sourcePath }}<template v-if="evidence.line"> · 第 {{ evidence.line }} 行</template></small></button></div></div>
         <div class="safety-banner"><b>安全边界</b><span>不接入在线 PLC，不执行下载、强制、启停或写入操作。</span></div>
       </aside>
     </section>
@@ -126,7 +139,7 @@
           <small v-else class="field-help">选择 RAPID 根文件夹，系统递归收集 `.mod/.modx/.sys/.sysx/.cfg/.pgf/.rapid` 并保留相对目录。</small>
         </el-form-item>
       </el-form>
-      <template #footer><el-button @click="uploadVisible = false">取消</el-button><el-button type="primary" :loading="uploading" @click="submitProject">{{ submitLabel }}</el-button></template>
+      <template #footer><el-button @click="uploadVisible = false">取消</el-button><el-button v-write type="primary" :loading="uploading" @click="submitProject">{{ submitLabel }}</el-button></template>
     </el-dialog>
 
     <el-dialog v-model="showGuide" title="PLC 解析助手怎么用" width="720px"><div class="helper-steps"><article><b>1</b><div><strong>安装一次</strong><p>在工具目录双击 `Install-PlcAnalysisHelper.cmd`。本机 TIA V17 选择 1，V16 虚拟机选择 2；安装后桌面会出现对应快捷方式。</p></div></article><article><b>2</b><div><strong>生成 .plcai</strong><p>双击桌面助手，选择 `.ap17` 或 `.ap16` 项目入口和输出目录。完成后资源管理器会自动选中生成的 `.plcai`。</p></div></article><article><b>3</b><div><strong>在本页导入</strong><p>点“导入程序项目”，程序平台选 Siemens TIA，直接选择刚生成的 `.plcai`。系统即可展示程序块、调用关系和 I/O 证据。</p></div></article></div><el-alert type="info" :closable="false" title="V16 工程必须在装有 TIA V16 的虚拟机解析；V17 工程在本机解析。助手只读打开工程，不连接或写入 PLC。" /></el-dialog>
@@ -134,7 +147,7 @@
     <el-drawer v-model="itemDrawer" size="58%" title="程序证据与逻辑树">
       <template v-if="activeItem">
         <div class="item-detail-head"><span class="item-type">{{ typeLabel(activeItem.itemType) }}</span><h3>{{ activeItem.name }}</h3><code>{{ activeItem.address || '无地址' }}</code></div>
-        <dl class="item-meta"><div><dt>语言</dt><dd>{{ activeItem.language || '—' }}</dd></div><div><dt>源文件</dt><dd>{{ activeItem.sourcePath || '—' }}</dd></div><div><dt>网络 / 行号</dt><dd>{{ activeItem.networkNo || activeMetadata.startLine || '—' }}</dd></div><div><dt>保护状态</dt><dd>{{ activeItem.isProtected ? '受保护' : '可检索' }}</dd></div></dl>
+        <dl class="item-meta"><div><dt>语言</dt><dd>{{ activeItem.language || '—' }}</dd></div><div><dt>源文件</dt><dd>{{ activeItem.sourcePath || '—' }}</dd></div><div><dt>网络 / 行号</dt><dd>{{ activeItem.networkNo || sourceRange(activeMetadata) }}</dd></div><div><dt>保护状态</dt><dd>{{ activeItem.isProtected ? '受保护' : '可检索' }}</dd></div></dl>
         <section v-if="activeMetadata.analysis" class="explanation-grid">
           <article><span>这段程序的作用</span><p>{{ activeMetadata.analysis.purpose }}</p></article>
           <article><span>怎么执行</span><ol><li v-for="(step,index) in activeMetadata.analysis.execution" :key="`step-${index}`">{{ step }}</li></ol></article>
@@ -155,7 +168,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { analyzePlcProject, createPlcProject, deletePlcProject, getPlcItem, getPlcItems, getPlcProject, getPlcProjects, getPlcStats } from '../api'
+import { analyzePlcProject, createPlcProject, deletePlcProject, getPlcGraph, getPlcItem, getPlcItems, getPlcProject, getPlcProjects, getPlcReferences, getPlcStats } from '../api'
 import { getUser } from '../auth'
 import ProgramLogicTree from '../components/ProgramLogicTree.vue'
 
@@ -163,14 +176,16 @@ const stats = reactive({ projects: 0, items: 0, blocks: 0, protectedBlocks: 0 })
 const isAdmin = getUser()?.role === 'admin'
 const projects = ref([]), selectedId = ref(''), currentProject = ref(null), projectSearch = ref(''), loading = ref(false)
 const items = ref([]), allItems = ref([]), itemSearch = ref(''), itemType = ref(''), itemTotal = ref(0), itemPage = ref(1), itemPageSize = 20, itemsLoading = ref(false), mapLoading = ref(false)
+const graphLoading = ref(false), graph = reactive({ nodes: [], edges: [], unresolved: [], risks: [], coverage: null })
+const referenceSymbol = ref(''), referenceLoading = ref(false), referenceResult = reactive({ symbol: '', definitions: [], references: [] })
 const activeTab = ref('map'), activeGroupKey = ref('')
 const uploadVisible = ref(false), uploading = ref(false), uploadFiles = ref([]), fileInput = ref(null), folderInput = ref(null), showGuide = ref(false)
-const itemDrawer = ref(false), activeItem = ref(null), question = ref(''), analyzing = ref(false), analysis = reactive({ answer: '', evidence: [] })
+const itemDrawer = ref(false), activeItem = ref(null), question = ref(''), analyzing = ref(false), analysis = reactive({ answer: '', evidence: [], coverage: null, risks: [] })
 const form = reactive({ name: '', programFamily: 'siemens_tia' })
 const typeOptions = [{ value: 'block', label: '程序块' }, { value: 'network', label: '网络' }, { value: 'tag', label: '变量' }, { value: 'io', label: 'I/O' }, { value: 'alarm', label: '报警' }, { value: 'document', label: '文档' }]
 const prompts = computed(() => currentProject.value?.programFamily === 'abb_rapid' ? ['解释 Main 例程的完整执行流程', '罗列所有运动指令和目标点', '哪些 I/O 信号控制机器人节拍？'] : ['沿启动信号链分析联锁条件', '查找与变频器故障相关的逻辑', '这个输出地址由哪些条件控制？'])
 const typeLabel = value => typeOptions.find(item => item.value === value)?.label || value
-const parseStatusLabel = value => ({ parsed: '解析完成', partial: '部分解析', requires_extractor: '等待本机解析', failed: '解析失败' }[value] || '已归档')
+const parseStatusLabel = value => ({ ready: '解析完成', parsed: '解析完成', partial: '部分解析', requires_extractor: '等待本机解析', extracting: '解析中', failed: '解析失败' }[value] || '已归档')
 const platformSummary = project => { const metadata = project?.platformMetadata || {}; if (project?.programFamily === 'abb_rapid') return [metadata.controllerFamily || project.cpuModel, metadata.robotWareVersion, metadata.moduleCount ? `${metadata.moduleCount} 个模块` : ''].filter(Boolean).join(' · ') || 'ABB RAPID'; return [project?.tiaVersion, metadata.cpuModel || project?.cpuModel, metadata.deviceCount ? `${metadata.deviceCount} 个设备` : ''].filter(Boolean).join(' · ') || 'Siemens TIA' }
 const nativeProjectOnly = computed(() => uploadFiles.value.length > 0 && uploadFiles.value.every(file => /\.(?:ap|zap)1[67]$/i.test(file.name)))
 const submitLabel = computed(() => nativeProjectOnly.value ? '上传并登记' : '导入并解析')
@@ -193,11 +208,23 @@ const programGroups = computed(() => {
 })
 const activeGroup = computed(() => programGroups.value.find(group => group.key === activeGroupKey.value) || programGroups.value[0] || null)
 const relationCounts = computed(() => ({ blocks: allItems.value.filter(item => item.itemType === 'block').length, signals: allItems.value.filter(item => item.itemType === 'tag' || item.itemType === 'io').length }))
+const graphEdgeRows = computed(() => { const names=new Map(graph.nodes.map(item=>[item.id,item.name]));return graph.edges.map(edge=>({...edge,sourceName:names.get(edge.sourceId)||edge.sourceId,targetName:names.get(edge.targetId)||edge.targetId})) })
+const referenceRows = computed(() => [
+  ...referenceResult.definitions.map(item=>({...item,kindLabel:'定义'})),
+  ...referenceResult.references.map(item=>({...item,kindLabel:{call:'调用',read:'读取',write:'写入',address:'地址'}[item.kind]||item.kind}))
+])
+const sourceRange = metadata => {
+  const start = Number(metadata?.startLine || 0)
+  const end = Number(metadata?.endLine || 0)
+  if (!start) return '—'
+  return end && end !== start ? `${start}-${end}` : String(start)
+}
 
 async function loadProjects() { loading.value = true; try { projects.value = (await getPlcProjects({ search: projectSearch.value })).data || [] } finally { loading.value = false } }
-async function selectProject(id) { selectedId.value = id; itemPage.value = 1; analysis.answer = ''; analysis.evidence = []; currentProject.value = (await getPlcProject(id)).data; await Promise.all([loadItems(), loadMapItems()]); activeTab.value = 'map' }
+async function selectProject(id) { selectedId.value = id; itemPage.value = 1; analysis.answer = ''; analysis.evidence = []; analysis.coverage=null;referenceResult.symbol='';referenceResult.definitions=[];referenceResult.references=[]; currentProject.value = (await getPlcProject(id)).data; await Promise.all([loadItems(), loadMapItems(), loadGraph()]); activeTab.value = 'map' }
 async function loadItems() { if (!selectedId.value) return; itemsLoading.value = true; try { const result = await getPlcItems(selectedId.value, { page: itemPage.value, pageSize: itemPageSize, type: itemType.value, search: itemSearch.value }); items.value = result.data || []; itemTotal.value = result.total || 0 } finally { itemsLoading.value = false } }
 async function loadMapItems() { if (!selectedId.value) return; const requestId = selectedId.value; mapLoading.value = true; try { const collected = []; let page = 1; let total = 0; do { const result = await getPlcItems(requestId, { page, pageSize: 100 }); if (requestId !== selectedId.value) return; collected.push(...(result.data || [])); total = Number(result.total || 0); page += 1 } while (collected.length < total && page <= 100); allItems.value = collected; activeGroupKey.value = programGroups.value[0]?.key || '' } finally { if (requestId === selectedId.value) mapLoading.value = false } }
+async function loadGraph(){if(!selectedId.value)return;const requestId=selectedId.value;graphLoading.value=true;try{const result=await getPlcGraph(requestId);if(requestId!==selectedId.value)return;Object.assign(graph,{nodes:[],edges:[],unresolved:[],risks:[],coverage:null},result.data||{})}finally{if(requestId===selectedId.value)graphLoading.value=false}}
 async function loadAll() { const [statResult] = await Promise.all([getPlcStats(), loadProjects()]); Object.assign(stats, statResult.data || {}); if (selectedId.value) await selectProject(selectedId.value) }
 function pickFiles(event) { uploadFiles.value = Array.from(event?.target?.files || []) }
 function pickRapidFolder(event) { const allowed = /\.(?:modx?|sysx?|cfg|pgf|rapid)$/i; uploadFiles.value = Array.from(event?.target?.files || []).filter(file => allowed.test(file.name)); if (!uploadFiles.value.length) ElMessage.warning('所选文件夹内没有可解析的 ABB RAPID 程序文件') }
@@ -206,10 +233,12 @@ function resetUploadForm() { clearFiles(); form.name = '' }
 function formatFileSize(size) { if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))} KB`; return `${(size / 1024 / 1024).toFixed(1)} MB` }
 async function submitProject() { if (!form.name.trim()) return ElMessage.warning('请填写项目名称'); const files = uploadFiles.value.slice(); if (!files.length) return ElMessage.warning(form.programFamily === 'abb_rapid' ? '请选择包含 RAPID 程序的文件夹' : '请选择 TIA 项目入口、归档、导出文件或 .plcai 解析包'); uploading.value = true; try { const data = new FormData(); Object.entries(form).forEach(([key, value]) => data.append(key, value)); data.append('relativePaths', JSON.stringify(files.map(file => file.relativePath || file.webkitRelativePath || file.name))); files.forEach(file => data.append('files', file, file.name)); const result = await createPlcProject(data); ElMessage.success(result.msg); uploadVisible.value = false; await loadAll(); await selectProject(result.data.id) } finally { uploading.value = false } }
 async function openItem(row) { activeItem.value = (await getPlcItem(selectedId.value, row.id)).data; itemDrawer.value = true }
+async function openGraphNode(id){if(!id)return;await openItem({id})}
 async function openEvidence(evidence) { activeItem.value = (await getPlcItem(selectedId.value, evidence.id)).data; itemDrawer.value = true }
+async function searchReferences(){if(!referenceSymbol.value.trim())return ElMessage.warning('请输入程序块、变量或 I/O 地址');referenceLoading.value=true;try{const result=await getPlcReferences(selectedId.value,{symbol:referenceSymbol.value.trim()});Object.assign(referenceResult,{symbol:'',definitions:[],references:[]},result.data||{})}finally{referenceLoading.value=false}}
 async function removeCurrentProject() { const project = currentProject.value; if (!project) return; await ElMessageBox.confirm(`将永久删除“${project.name}”及服务器保存的原始文件、程序索引和分析记录。此操作不可恢复。`,'删除程序项目',{type:'warning',confirmButtonText:'永久删除',cancelButtonText:'取消'}); await deletePlcProject(project.id); ElMessage.success('程序项目已删除'); selectedId.value=''; currentProject.value=null; items.value=[]; allItems.value=[]; activeItem.value=null; itemDrawer.value=false; await loadAll() }
 async function analyze() { if (!question.value.trim()) return ElMessage.warning('请输入分析问题'); analyzing.value = true; analysis.answer = ''; try { const result = await analyzePlcProject(selectedId.value, { question: question.value }); Object.assign(analysis, result.data || {}) } finally { analyzing.value = false } }
-onMounted(loadAll)
+onMounted(async()=>{await loadAll();const route=window.location?new URLSearchParams(window.location.search):null;const projectId=route?.get('projectId');const itemId=route?.get('itemId');if(projectId){await selectProject(projectId);if(itemId)await openGraphNode(itemId)}})
 </script>
 
 <style scoped>
@@ -217,4 +246,7 @@ onMounted(loadAll)
 @media(max-width:1450px){.plc-commandbar{grid-template-columns:1fr auto}.compact-stats{grid-row:2;grid-column:1/-1}.plc-workbench{grid-template-columns:230px minmax(520px,1fr)}.ai-panel{grid-column:1/-1;border-left:0;border-top:1px solid var(--line)}}
 @media(max-width:900px){.plc-commandbar{grid-template-columns:1fr}.compact-stats,.hero-actions{grid-column:1}.compact-stats{overflow-x:auto}.plc-workbench{grid-template-columns:1fr}.project-rail{border-right:0;border-bottom:1px solid var(--line)}.project-list{grid-template-columns:repeat(2,minmax(0,1fr));max-height:310px}.relationship-browser{grid-template-columns:1fr}.module-browser{border-right:0;border-bottom:1px solid var(--line);max-height:260px}.object-cards{grid-template-columns:1fr}.relation-path{grid-template-columns:1fr 1fr}.relation-path>i{display:none}.search-bar,.storage-card{grid-template-columns:1fr}}
 .helper-steps{display:grid;gap:10px;margin-bottom:16px}.helper-steps article{display:grid;grid-template-columns:36px 1fr;gap:12px;padding:13px;border:1px solid #d5e7e6;border-radius:12px;background:#f5fbfa}.helper-steps b{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:#fff;background:#087c78}.helper-steps strong{display:block}.helper-steps p{margin:4px 0 0;color:#607984;line-height:1.65}
+.coverage-strip{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px}.coverage-strip span{min-width:112px;padding:9px 12px;border:1px solid #d7e8e8;border-radius:10px;color:#5c747d;background:#f7fbfb;font-size:12px}.coverage-strip b{margin-right:4px;color:#087c78;font-size:17px}.static-risks{display:grid;gap:7px;margin-bottom:12px}.static-risks article{display:flex;align-items:flex-start;gap:9px;padding:9px 11px;border:1px solid #f0ddbd;border-radius:10px;background:#fffaf1}.static-risks b,.static-risks small{display:block}.static-risks small{margin-top:3px;color:#7b756b;line-height:1.5}.call-chain-panel{min-height:112px;margin-top:14px;padding:14px;border:1px solid #dbe9eb;border-radius:14px;background:#fbfdfd}.call-chain-panel>header,.reference-results>header{display:flex;justify-content:space-between;align-items:center;gap:12px}.call-chain-panel header small{display:block;margin-top:3px;color:#7c8f98}.call-edge-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px}.call-edge-list button{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:7px;padding:9px 10px;border:1px solid #e0eaed;border-radius:9px;color:#2d4d58;background:#fff;text-align:left;cursor:pointer}.call-edge-list button:hover{border-color:#78c8c2;background:#f3fbfa}.call-edge-list strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.call-edge-list span{color:#78909a;font-size:11px}.reference-search{display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:9px;margin:4px 0 10px}.reference-results{margin-top:12px;border:1px solid #dce8eb;border-radius:12px;overflow:hidden}.reference-results>header{padding:11px 14px;background:#f4faf9}.reference-results header span,.analysis-scope{color:#71858f;font-size:12px}.analysis-scope{display:block;margin:8px 0}.evidence-list button:hover{color:#087c78}.evidence-list button:focus-visible,.call-edge-list button:focus-visible{outline:2px solid #20a79f;outline-offset:2px}
+@media(max-width:900px){.call-edge-list{grid-template-columns:1fr}.reference-search{grid-template-columns:1fr}}
+.plc-commandbar{display:flex;flex-wrap:wrap;gap:14px;min-height:0;padding:14px 20px}.command-copy{margin-right:auto}.command-copy h2{font-size:20px;margin:0}.plc-commandbar .compact-stats{margin:0;gap:6px}.compact-stats span{min-width:0;padding:6px 9px}.compact-stats b{display:inline;margin-right:4px;font-size:16px}@media(max-width:760px){.plc-commandbar{padding:14px}.compact-stats{order:3;flex-basis:100%}.plc-commandbar .hero-actions{flex-wrap:wrap}}
 </style>

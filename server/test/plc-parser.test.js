@@ -18,6 +18,24 @@ test('parses SCL blocks and networks', () => {
   assert.equal(result.items.filter(item => item.itemType === 'network').length, 2);
 });
 
+test('parses every top-level block in a multi-block SCL source', () => {
+  const result = parsePlcFile(Buffer.from(`FUNCTION "First" : Void
+END_FUNCTION
+FUNCTION_BLOCK "Second"
+END_FUNCTION_BLOCK`), 'multi.scl');
+  assert.deepEqual(result.items.filter(item => item.itemType === 'block').map(item => item.name), ['First', 'Second']);
+  assert.equal(result.items[1].metadata.startLine, 3);
+});
+
+test('extracts TIA structured XML symbols and calls from plcai exports', () => {
+  const xml = `<Document><SW.Blocks.FB><AttributeList><Name>Main</Name><ProgrammingLanguage>LAD</ProgrammingLanguage></AttributeList><ObjectList><SW.Blocks.CompileUnit><AttributeList><NetworkSource><FlgNet><Parts><Access Scope="GlobalVariable" UId="21"><Symbol><Component Name="Ready" /></Symbol></Access><Call UId="22"><CallInfo Name="DriveStart" BlockType="FC" /></Call></Parts></FlgNet></NetworkSource></AttributeList></SW.Blocks.CompileUnit></ObjectList></SW.Blocks.FB></Document>`;
+  const result = parsePlcFile(Buffer.from(JSON.stringify({ items: [{ itemType: 'block', name: 'Main', language: 'LAD', contentText: xml }] })), 'export.plcai');
+  const refs = result.items[0].metadata.referenceIndex;
+  assert.ok(refs.reads.some(item => item.symbol === 'Ready'));
+  assert.ok(refs.calls.some(item => item.symbol === 'DriveStart'));
+  assert.equal(refs.completeness, 'partial');
+});
+
 test('marks native projects and protected content safely', () => {
   assert.equal(parsePlcFile(Buffer.from('x'), 'floor.ap17').status, 'requires_extractor');
   assert.equal(isProtectedText('Know-how protected block'), true);

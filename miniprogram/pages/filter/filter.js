@@ -27,7 +27,6 @@ Page({
     modalSelectedValue: "",
     
     // 自定义确认筛选弹窗控制
-    showConfirmModal: false,
     
     // 加载状态
     isLoading: false
@@ -207,17 +206,8 @@ Page({
       return;
     }
     
-    // 校验通过，打开确认弹窗
-    this.setData({
-      showConfirmModal: true
-    });
-  },
-
-  // 关闭自定义确认弹窗
-  closeConfirmModal() {
-    this.setData({
-      showConfirmModal: false
-    });
+    // 校验通过，直接进入盘点列表
+    this.confirmFinalFilter();
   },
 
   // 确认最终筛选（跳转页面：优化URL拼接，确保参数传递准确，兼容旧字段）
@@ -246,6 +236,6 @@ Page({
       }
     });
     
-    this.closeConfirmModal();
+
   }
 });

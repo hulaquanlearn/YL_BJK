@@ -49,6 +49,8 @@ Page({
     filteredParts: [],
     totalCount: 0,
     isLoading: false,
+    loadError: false,
+    failedPage: 1,
     isLoadingMore: false,
     hasMoreData: true,
     pageSize: 20,
@@ -264,11 +266,12 @@ Page({
     const append = options.append === true && targetPage > 1;
     const requestId = (this._partsRequestId || 0) + 1;
     this._partsRequestId = requestId;
-    this.setData(append ? { isLoadingMore: true } : { isLoading: true });
+    this.setData(append ? { isLoadingMore: true, loadError: false } : { isLoading: true, loadError: false });
 
     try {
       const res = await api.getParts(this.buildParams(targetPage));
       if (requestId !== this._partsRequestId) return;
+      if (res.success === false) throw new Error(res.msg || '加载失败，请重试');
       const pageData = (res.data || []).map(item => this.formatPart(item));
       const filteredParts = append ? this.data.filteredParts.concat(pageData) : pageData;
       const totalCount = Number(res.total) || 0;
@@ -280,6 +283,7 @@ Page({
       });
     } catch (err) {
       if (requestId !== this._partsRequestId) return;
+      this.setData({ loadError: true, failedPage: targetPage });
       console.error('加载备件失败：', err);
       wx.showToast({ title: err.message || '加载失败，请重试', icon: 'none' });
     } finally {
@@ -289,8 +293,10 @@ Page({
     }
   },
 
+  retryParts() { const page = this.data.failedPage; return this.loadParts({ page, append: page > 1 }); },
+
   loadMore() {
-    if (this.data.isLoading || this.data.isLoadingMore || !this.data.hasMoreData) return;
+    if (this.data.loadError || this.data.isLoading || this.data.isLoadingMore || !this.data.hasMoreData) return;
     this.loadParts({ page: this.data.currentPage + 1, append: true });
   },
 

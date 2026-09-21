@@ -182,6 +182,7 @@
 .inventory-stock.normal { color: #147850; background: #e9f8f2; }
 .inventory-stock.low { color: #a75b00; background: #fff2d4; }
 .inventory-stock.zero { color: #b11923; background: #ffe9eb; }
+.inventory-stock.unknown { color: #667085; background: #eef1f5; }
 .inventory-stock-state,
 .inventory-stock-value { display: block; white-space: nowrap; }
 .inventory-stock-state { font-size: 18rpx; }
@@ -228,3 +229,4 @@
   font-size: 22rpx;
   line-height: 1.55;
 }
+.evidence-list{margin-top:24rpx;padding-top:20rpx;border-top:1rpx solid #e7eaee}.evidence-heading{display:block;color:#344054;font-size:25rpx;font-weight:700}.evidence-list button{margin:12rpx 0 0;padding:17rpx;border-radius:12rpx;text-align:left;color:#344054;background:#f4f7fa;font-size:24rpx;line-height:1.6}.evidence-list button::after{border:0}.evidence-list button text{display:block}.evidence-excerpt{margin-top:6rpx;color:#7c8796;font-size:22rpx;display:-webkit-box!important;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.evidence-empty{display:block;margin-top:20rpx;color:#8a6425;font-size:22rpx}

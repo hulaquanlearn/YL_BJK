@@ -45,7 +45,8 @@ function normalizeInventoryOrderLists(allList, abnormalList) {
     if (allIdSet.has(id)) throw new ApiError(400, `库存记录${id}重复`);
     allIdSet.add(id);
     inventoryIds.push(id);
-    return { ...item, partId: String(id) };
+    const snapshotStock = parseNonNegativeQuantity(item.snapshotStock ?? item.sysStockNum, `库存记录${id}的账面快照`);
+    return { ...item, partId: String(id), snapshotStock, sysStockNum: snapshotStock };
   });
 
   const abnormalIdSet = new Set();
@@ -61,7 +62,8 @@ function normalizeInventoryOrderLists(allList, abnormalList) {
     const actualQuantity = parseNonNegativeQuantity(item.actualStock, `库存记录${id}的实盘库存`);
     abnormalIdSet.add(id);
     actualQuantityById.set(id, actualQuantity);
-    return { ...item, partId: String(id), actualStock: actualQuantity };
+    const snapshotStock = normalizedAllList.find(row => row.partId === String(id)).snapshotStock;
+    return { ...item, partId: String(id), snapshotStock, sysStockNum: snapshotStock, actualStock: actualQuantity };
   });
 
   return {
@@ -73,13 +75,24 @@ function normalizeInventoryOrderLists(allList, abnormalList) {
   };
 }
 
+function assertInventorySnapshots(normalized, rows) {
+  const current = new Map(rows.map(row => [String(row.id), row]));
+  for (const item of normalized.normalizedAllList) {
+    const row = current.get(item.partId);
+    if (!row || row.active === 0 || !Number.isFinite(Number(row.quantity))
+      || Math.abs(Number(row.quantity) - item.snapshotStock) > 1e-9) {
+      throw new ApiError(409, `库存记录${item.partId}已变化或停用，请刷新后重新盘点`);
+    }
+  }
+}
+
 async function lockInventoryRows(connection, inventoryIds) {
   if (!inventoryIds.length) return [];
   const placeholders = inventoryIds.map(() => '?').join(',');
   const [rows] = await connection.query(
     `SELECT id, part_id, quantity, workshop_code
      FROM inventory
-     WHERE id IN (${placeholders})
+     WHERE id IN (${placeholders}) AND COALESCE(active, 1) = 1
      ORDER BY id
      FOR UPDATE`,
     inventoryIds
@@ -139,6 +152,7 @@ module.exports = {
   parseInventoryId,
   parseNonNegativeQuantity,
   normalizeInventoryOrderLists,
+  assertInventorySnapshots,
   lockInventoryRows,
   findPendingInventoryOrder
 };

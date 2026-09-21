@@ -11,6 +11,7 @@ import {
   resolvePartLocation,
   sideAwareSlotLocalX,
   sideLocalZ,
+  slotCapacityForLocation,
   slotLocalX
 } from '../src/utils/warehouse-location.mjs'
 
@@ -53,34 +54,34 @@ test('matches the supplied room drawing and keeps four physical levels', () => {
   const shelf15 = applyPhysicalShelfLayout({ shelfNo: 15, layoutKey: 'shelf-15', position: {}, size: {} })
   const unnamed = applyPhysicalShelfLayout({ shelfNo: null, layoutKey: 'unnamed-03', position: {}, size: {} })
 
-  assert.deepEqual(shelf1.position, { x: -2.3, z: -7.2, rotationY: 0 })
-  assert.deepEqual(shelf2.position, { x: 2.3, z: -7.2, rotationY: 0 })
-  assert.deepEqual(shelf15.position, { x: -6.4, z: -7.2, rotationY: 0 })
-  assert.deepEqual(unnamed.position, { x: 4.8, z: 9.6, rotationY: 0 })
+  assert.deepEqual(shelf1.position, { x: -1.25, z: -10.5, rotationY: 0 })
+  assert.deepEqual(shelf2.position, { x: -6.35, z: -10.5, rotationY: 0 })
+  assert.deepEqual(shelf15.position, { x: 6.35, z: -10.5, rotationY: 0 })
+  assert.deepEqual(unnamed.position, { x: -3.85, z: 13.4, rotationY: 0 })
   assert.equal(shelf1.levels, COMMON_SHELF_LEVELS)
-  assert.equal(shelf1.size.width, 4.2)
-  assert.equal(shelf15.size.width, 3.6)
-  assert.equal(unnamed.size.width, 3.8)
+  assert.equal(shelf1.size.width, 4.9)
+  assert.equal(shelf15.size.width, 4.9)
+  assert.equal(unnamed.size.width, 4.9)
   assert.equal(PHYSICAL_ROOM_HALF_DEPTH, 16)
 })
 
-test('keeps shelves 1 and 2 mirrored with a visible gap instead of overlapping', () => {
+test('keeps paired shelves 1 and 2 close together without overlapping', () => {
   const shelf1 = applyPhysicalShelfLayout({ shelfNo: 1, layoutKey: 'shelf-01', position: {}, size: {} })
   const shelf2 = applyPhysicalShelfLayout({ shelfNo: 2, layoutKey: 'shelf-02', position: {}, size: {} })
   const clearGap = Math.abs(shelf2.position.x - shelf1.position.x) - (shelf1.size.width + shelf2.size.width) / 2
-  assert.ok(Math.abs(clearGap - 0.4) < 1e-9)
+  assert.ok(Math.abs(clearGap - 0.2) < 1e-9)
 })
 
 test('keeps a wide viewing aisle between front and back shelf rows', () => {
   const firstRow = applyPhysicalShelfLayout({ shelfNo: 1, layoutKey: 'shelf-01', position: {}, size: {} })
   const secondRow = applyPhysicalShelfLayout({ shelfNo: 3, layoutKey: 'shelf-03', position: {}, size: {} })
   assert.ok(Math.abs((secondRow.position.z - firstRow.position.z) - PHYSICAL_ROW_GAP_Z) < 1e-9)
-  assert.equal(PHYSICAL_ROW_GAP_Z, 2.4)
+  assert.equal(PHYSICAL_ROW_GAP_Z, 3.4)
 })
 
 test('keeps a physical rack in place after an administrator renumbers it', () => {
   const shelf = applyPhysicalShelfLayout({ shelfNo: 21, layoutKey: 'shelf-01', position: { x: 99, z: 99 }, size: {} })
-  assert.deepEqual(shelf.position, { x: -2.3, z: -7.2, rotationY: 0 })
+  assert.deepEqual(shelf.position, { x: -1.25, z: -10.5, rotationY: 0 })
 })
 
 test('does not apply the raw-grain floor plan to another workshop', () => {
@@ -111,6 +112,29 @@ test('maps side 1 east and side 2 west on the same shelf', () => {
   assert.ok(Math.abs(sideLocalZ(0.9, 2)) < 0.9 / 2)
 })
 
+test('keeps slot capacity independent for each shelf side and layer', () => {
+  const shelf = {
+    maxSlot: 18,
+    slotCapacity: {
+      1: { 1: 14, 4: 7 },
+      2: { 1: 10, 4: 4 }
+    }
+  }
+  assert.equal(slotCapacityForLocation(shelf, { locationCode: '011401' }), 7)
+  assert.equal(slotCapacityForLocation(shelf, { locationCode: '012401' }), 4)
+  assert.equal(slotCapacityForLocation(shelf, { locationCode: '011109' }), 14)
+})
+
+test('derives per-layer slot capacity from loaded parts for older APIs', () => {
+  const parts = [
+    { locationCode: '011401' },
+    { locationCode: '011407' },
+    { locationCode: '012418' }
+  ]
+  assert.equal(slotCapacityForLocation({}, parts[0], parts), 7)
+  assert.equal(slotCapacityForLocation({}, parts[2], parts), 18)
+})
+
 test('maps layer numbers from the bottom shelf upwards', () => {
   const firstLayer = layerLocalY(3.2, 4, 1)
   const fourthLayer = layerLocalY(3.2, 4, 4)
@@ -121,7 +145,8 @@ test('uses a precise location card and side-aware camera instead of a sphere rin
   assert.doesNotMatch(warehouseViewSource, /TorusGeometry|SphereGeometry|part-3d-label/)
   assert.match(warehouseViewSource, /part-location-card/)
   assert.match(warehouseViewSource, /addScaledVector\(outward/)
-  assert.match(warehouseViewSource, /shelf\.size\.depth \* 0\.5 \+ 4\.2/)
+  assert.match(warehouseViewSource, /const aisleDistance = shelf\.size\.depth \* 0\.5 \+ 2\.15/)
+  assert.match(warehouseViewSource, /const centerwardOffset = Math\.min\(Math\.max\(-placement\.x \* 0\.58/)
   assert.doesNotMatch(warehouseViewSource, /EdgesGeometry|locationOutline/)
 })
 

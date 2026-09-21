@@ -73,21 +73,4 @@
     </view>
   </view>
 
-  <!-- 自定义确认筛选弹窗（替代wx.showModal） -->
-  <view class="confirm-filter-modal" wx:if="{{showConfirmModal}}">
-    <view class="modal-mask" bindtap="closeConfirmModal"></view>
-    <view class="modal-content">
-      <view class="modal-title">确认信息</view>
-      <view class="confirm-content">
-        <view class="content-item">工段：{{selectedWorkshop}}</view>
-        <view class="content-item">货架：{{selectedShelfNo}}</view>
-        <view class="content-item">层数：{{selectedLayer}}</view>
-        <view class="content-item">状态：{{selectedStatus}}</view>
-      </view>
-      <view class="modal-footer">
-        <button class="modal-cancel" bindtap="closeConfirmModal">取消</button>
-        <button class="modal-confirm" bindtap="confirmFinalFilter">确定</button>
-      </view>
-    </view>
-  </view>
 </view>

@@ -16,6 +16,7 @@ if (-not $SearchRoots -or $SearchRoots.Count -eq 0) {
   $SearchRoots = Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Root -and (Test-Path $_.Root) } | Select-Object -ExpandProperty Root
 }
 $headers = @{ 'X-Program-Agent-Token' = $token }
+$cooldowns = @{}
 $tempRoot = Join-Path $env:LOCALAPPDATA 'ZhitongProgramAgent'
 New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
 
@@ -31,11 +32,27 @@ function Find-ProjectEntry([string]$Name, [string]$ExpectedHash) {
 }
 
 do {
+  $job = $null
+  $heartbeatJob = $null
+  $completed = $false
   try {
-    $jobUrl = "$($ServerUrl.TrimEnd('/'))/api/program-agent/jobs/next?version=$Version"
+    foreach ($key in @($cooldowns.Keys)) { if ($cooldowns[$key] -lt (Get-Date)) { $cooldowns.Remove($key) } }
+    $excluded = (@($cooldowns.Keys) | Select-Object -First 100) -join ','
+    $jobUrl = "$($ServerUrl.TrimEnd('/'))/api/program-agent/jobs/next?version=$Version&protocol=2&exclude=$excluded"
     $response = Invoke-RestMethod -Method Get -Uri $jobUrl -Headers $headers -TimeoutSec 30
     $job = $response.data
     if ($null -ne $job -and $job.entries.Count -gt 0) {
+      $claimHeaders = @{ 'X-Program-Agent-Token' = $token; 'X-Program-Claim-Token' = $job.claimToken }
+      $heartbeatUrl = "$($ServerUrl.TrimEnd('/'))/api/program-agent/jobs/$($job.id)/heartbeat"
+      # Keep the lease alive while recursive file search, export and upload are running.
+      $heartbeatJob = Start-Job -ArgumentList $heartbeatUrl, $claimHeaders -ScriptBlock {
+        param($url, $requestHeaders)
+        while ($true) {
+          try { Invoke-RestMethod -Method Post -Uri $url -Headers $requestHeaders -TimeoutSec 25 -ErrorAction Stop | Out-Null }
+          catch { Write-Error '任务心跳失败，结果提交将由服务器重新验证租约。'; break }
+          Start-Sleep -Seconds 60
+        }
+      }
       $entry = $job.entries[0]
       Write-Host "收到解析任务 #$($job.id)：$($job.name)" -ForegroundColor Cyan
       $projectPath = Find-ProjectEntry $entry.originalFilename $entry.sha256.ToUpperInvariant()
@@ -49,6 +66,7 @@ do {
       Add-Type -AssemblyName System.Net.Http
       $client = [System.Net.Http.HttpClient]::new()
       $client.DefaultRequestHeaders.Add('X-Program-Agent-Token', $token)
+      $client.DefaultRequestHeaders.Add('X-Program-Claim-Token', $job.claimToken)
       $multipart = [System.Net.Http.MultipartFormDataContent]::new()
       $stream = [System.IO.File]::OpenRead($result.FullName)
       $fileContent = [System.Net.Http.StreamContent]::new($stream)
@@ -62,9 +80,19 @@ do {
         $multipart.Dispose(); $stream.Dispose(); $client.Dispose()
       }
       Write-Host "任务 #$($job.id) 已完成并回传。" -ForegroundColor Green
+      $completed = $true
     } elseif ($Once) { Write-Host '当前没有待解析任务。' }
   } catch {
     Write-Warning $_.Exception.Message
+  } finally {
+    if ($heartbeatJob) { Stop-Job -Job $heartbeatJob -ErrorAction SilentlyContinue; Remove-Job -Job $heartbeatJob -Force -ErrorAction SilentlyContinue }
+    if ($job -and -not $completed -and $job.claimToken) {
+      $cooldowns[[string]$job.id] = (Get-Date).AddMinutes(10)
+      try {
+        $releaseUrl = "$($ServerUrl.TrimEnd('/'))/api/program-agent/jobs/$($job.id)/release"
+        Invoke-RestMethod -Method Post -Uri $releaseUrl -Headers @{ 'X-Program-Agent-Token'=$token; 'X-Program-Claim-Token'=$job.claimToken } -TimeoutSec 25 | Out-Null
+      } catch { Write-Warning '任务释放未确认；服务器会在租约到期后重新开放。' }
+    }
   }
   if (-not $Once) { Start-Sleep -Seconds ([Math]::Max(10, $PollSeconds)) }
 } while (-not $Once)

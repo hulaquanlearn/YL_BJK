@@ -7,6 +7,16 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 8502,
     proxy: {
+      '/models': {
+        target: process.env.VITE_API_TARGET || 'http://127.0.0.1:3000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/uploads': {
+        target: process.env.VITE_API_TARGET || 'http://127.0.0.1:3000',
+        changeOrigin: true,
+        secure: false
+      },
       '/api': {
         target: process.env.VITE_API_TARGET || 'http://127.0.0.1:3000',
         changeOrigin: true,

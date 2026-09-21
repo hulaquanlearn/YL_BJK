@@ -1,6 +1,6 @@
 <view class="container">
   <!-- 加载中 -->
-  <view class="loading" wx:if="{{isLoading}}">
+  <view class="loading" wx:if="{{isLoading && approveList.length === 0}}">
     <text>加载待审批盘点单...</text>
   </view>
 
@@ -10,7 +10,8 @@
   </view>
 
   <!-- 待审批列表 -->
-  <scroll-view class="list-scroll" scroll-y wx:else>
+  <scroll-view class="list-scroll" scroll-y wx:else bindscrolltolower="loadMore">
+    <view class="empty-tip">待审批共 {{total}} 条</view>
     <view class="approve-item" wx:for="{{approveList}}" wx:key="_id">
       <!-- 盘点单标题栏（移除内联样式，统一通过WXSS控制） -->
       <view class="item-header">
@@ -70,5 +71,7 @@
         <text>盘点单ID无效，无法操作</text>
       </view>
     </view>
+    <button wx:if="{{hasMore}}" bindtap="loadMore" loading="{{isLoading}}" disabled="{{isLoading}}">加载更多</button>
+    <view class="empty-tip" wx:else>已加载全部 {{total}} 条</view>
   </scroll-view>
 </view>

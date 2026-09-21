@@ -4,19 +4,25 @@ const { ApiError, asyncHandler } = require('../utils');
 const { requireRole } = require('../auth');
 const { validateUsername, validatePassword, validateDisplayName } = require('../password-policy');
 const { hashPassword } = require('../password');
-const { WORKSHOPS } = require('../workshop-scope');
+const { WORKSHOPS, ROLE_LABELS } = require('../workshop-scope');
 
 const router = express.Router();
-router.use(requireRole('admin'));
+router.use((req,res,next) => {
+  if (req.user?.role === 'viewer' && ['GET','HEAD'].includes(req.method) && ['/','/roles'].includes(req.path)) return next();
+  return requireRole('admin')(req,res,next);
+});
 const ALLOWED_ROLES = new Set(['admin', 'viewer', ...WORKSHOPS.map(item => item.role)]);
+router.get('/roles', (_req, res) => res.json({success:true,data:Object.entries(ROLE_LABELS).map(([value,label])=>({value,label}))}));
 
-router.get('/', asyncHandler(async (_req, res) => {
+router.get('/', asyncHandler(async (req, res) => {
   const [rows] = await pool.query(
     `SELECT id, username, display_name AS displayName, role, enabled,
             last_login_at AS lastLoginAt, created_at AS createdAt
      FROM app_users ORDER BY role = 'admin' DESC, username ASC`
   );
-  res.json({ success: true, data: rows.map(row => ({ ...row, id: String(row.id), enabled: Boolean(row.enabled) })) });
+  res.json({ success: true, data: rows.map(row => req.user.role === 'viewer'
+    ? { id:String(row.id), username:row.username, displayName:row.displayName, role:row.role, enabled:Boolean(row.enabled) }
+    : { ...row, id:String(row.id), enabled:Boolean(row.enabled) }) });
 }));
 
 router.post('/', asyncHandler(async (req, res) => {

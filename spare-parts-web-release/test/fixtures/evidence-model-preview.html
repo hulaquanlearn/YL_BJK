@@ -1,0 +1,10 @@
+<!doctype html><html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>尺寸参考模型核对</title>
+<style>body{margin:24px;background:#f4f6f8;color:#182b40;font:14px system-ui}h1{font-size:22px}main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}article{padding:16px;background:white;border-radius:16px}p{line-height:1.6;color:#607080}@media(max-width:650px){body{margin:12px}main{grid-template-columns:1fr}}</style>
+<h1>尺寸参考模型核对</h1><p>外廓按厂家图纸；端子、孔位及安装扣为近似。下列为公开产品信息，不含业务清单。</p><div id="app"></div>
+<script type="module">
+import {createApp,h} from 'vue'
+import ModelPreview from '../../src/components/ModelPreview.vue'
+import {evidenceModels} from '../../src/utils/evidence-models.mjs'
+// Local public product fixtures only. Production /models remains authenticated.
+createApp({render:()=>h('main',evidenceModels.map(m=>h('article',{key:m.id},[h('h2',m.model),h(ModelPreview,{modelUrl:'/public'+m.detailUrl,initialAngle:.55,height:'360px'}),h('p',`${m.dimensionsMm.width} × ${m.dimensionsMm.height} × ${m.dimensionsMm.depth} mm · ${m.quality}`),h('p',m.note)])))}).mount('#app')
+</script></html>

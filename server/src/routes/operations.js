@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const path = require('path');
 const multer = require('multer');
 const readXlsxFile = require('read-excel-file/node');
@@ -8,7 +9,8 @@ const { normalizeWorkshopCode, assertWorkshopWrite, requireAnyWorkshopEditor } =
 const { parseInventoryId, findPendingInventoryOrder } = require('../inventory-guards');
 const { summarizeDataQuality, ISSUE_DEFINITIONS } = require('../data-quality');
 const { parseMovementMetadata, movementReasonOptions, assertMovementAssociations } = require('../movement-metadata');
-const { makeEquipmentTemplate, sendXlsx } = require('../import-workbook');
+const { makeEquipmentTemplate, makePartsErrorWorkbook, sendXlsx } = require('../import-workbook');
+const { warehouseJoin } = require('../warehouse-join');
 
 const router = express.Router();
 
@@ -22,49 +24,86 @@ const equipmentImportUpload = multer({
 
 function cellText(value) { return String(value ?? '').trim().replace(/\.0$/, ''); }
 
-async function parseEquipmentWorkbook(buffer, kind) {
+function equipmentModelCode(workshopCode, equipmentName) {
+  const digest = crypto.createHash('sha256').update(`${workshopCode}\0${equipmentName}`).digest('hex').slice(0, 16).toUpperCase();
+  return `MODEL-${digest}`;
+}
+
+async function parseEquipmentWorkbook(buffer) {
   const rows = await readXlsxFile(buffer);
-  const required = kind === 'relations' ? ['设备编码', '物料编码'] : ['设备编码', '设备名称'];
+  const required = ['设备型号'];
   const headerIndex = rows.slice(0, 20).findIndex(row => required.every(name => row.map(cellText).includes(name)));
-  if (headerIndex < 0) return { records: [], errors: [{ row: 1, field: '表头', reason: `缺少${required.join('、')}列`, suggestion: '下载对应模板后重新填写' }] };
+  if (headerIndex < 0) return { records: [], errors: [{ row: 1, field: '表头', reason: `缺少${required.join('、')}列`, suggestion: '下载“设备型号与备件关系”模板后重新填写' }] };
   const headers = rows[headerIndex].map(cellText);
   const records = [];
   const errors = [];
+  const seen = new Map();
   for (let index = headerIndex + 1; index < rows.length; index += 1) {
     const source = rows[index];
     const row = Object.fromEntries(headers.map((header, column) => [header, source[column] ?? '']));
-    const equipmentCode = cellText(row['设备编码']);
-    const second = cellText(row[kind === 'relations' ? '物料编码' : '设备名称']);
-    if (!equipmentCode && !second) continue;
-    if (!equipmentCode) errors.push({ row: index + 1, field: '设备编码', reason: '关键字段为空', suggestion: '填写所属车间内唯一设备编码' });
-    if (!second) errors.push({ row: index + 1, field: kind === 'relations' ? '物料编码' : '设备名称', reason: '关键字段为空', suggestion: '补充关键字段' });
-    const quantity = row['单台用量'] === '' ? null : Number(row['单台用量']);
-    if (kind === 'relations' && row['单台用量'] !== '' && (!Number.isFinite(quantity) || quantity < 0)) {
+    const equipmentName = cellText(row['设备型号']);
+    const materialCode = cellText(row['物料编码']);
+    if (!equipmentName && !materialCode) continue;
+    if (!equipmentName) errors.push({ row: index + 1, field: '设备型号', reason: '关键字段为空', suggestion: '填写需要建立备件关系的设备型号' });
+    const rawQuantity = row['单台用量'];
+    const hasQuantity = rawQuantity !== '' && rawQuantity !== null && rawQuantity !== undefined;
+    const quantity = hasQuantity ? Number(rawQuantity) : null;
+    if (hasQuantity && (!Number.isFinite(quantity) || quantity < 0)) {
       errors.push({ row: index + 1, field: '单台用量', reason: '不是大于或等于0的数字', suggestion: '填写有效数字或留空' });
     }
-    if (equipmentCode && second) records.push(kind === 'relations'
-      ? { sourceRow: index + 1, equipmentCode, materialCode: second, quantityPerEquipment: quantity, notes: cellText(row['备注']) || null }
-      : { sourceRow: index + 1, equipmentCode, equipmentName: second, workshopGroup: cellText(row['所属工段']) || null, location: cellText(row['设备位置']) || null, notes: cellText(row['备注']) || null });
+    if (equipmentName) {
+      if (materialCode) {
+        const duplicateKey = `${equipmentName.toLowerCase()}\0${materialCode.toLowerCase()}`;
+        if (seen.has(duplicateKey)) {
+          errors.push({ row: index + 1, field: '设备型号/物料编码', reason: `与第${seen.get(duplicateKey)}行重复`, suggestion: '同一型号与同一备件只保留一行' });
+        } else seen.set(duplicateKey, index + 1);
+      }
+      records.push({
+        sourceRow: index + 1,
+        equipmentName,
+        materialCode,
+        workshopGroup: cellText(row['所属工段']) || null,
+        quantityPerEquipment: quantity,
+        notes: cellText(row['备注']) || null
+      });
+    }
   }
   if (!records.length && !errors.length) errors.push({ row: headerIndex + 2, field: '数据', reason: '没有有效数据行', suggestion: '至少填写一行记录' });
   if (records.length > 5000) errors.push({ row: '-', field: '文件', reason: '超过单次5000行上限', suggestion: '拆分为多个文件' });
   return { records, errors };
 }
 
+async function findEquipmentImportPartErrors(records, workshopCode) {
+  const relationRecords = records.filter(item => item.materialCode);
+  if (!relationRecords.length) return [];
+  const materialCodes = [...new Set(relationRecords.map(item => item.materialCode))];
+  const [partRows] = await pool.query(
+    `SELECT DISTINCT p.code FROM parts p INNER JOIN inventory i ON i.part_id=p.id
+     WHERE COALESCE(i.workshop_code,'raw_grain')=? AND COALESCE(i.active,1)=1 AND COALESCE(p.active,1)=1
+       AND p.code IN (${materialCodes.map(() => '?').join(',')})`,
+    [workshopCode, ...materialCodes]
+  );
+  const knownParts = new Set(partRows.map(row => row.code));
+  return relationRecords.filter(item => !knownParts.has(item.materialCode)).map(item => ({
+    row: item.sourceRow, field: '物料编码', reason: `所选车间不存在备件“${item.materialCode}”`,
+    suggestion: '先导入备件台账或修正编码，也可以留空仅创建设备型号'
+  }));
+}
+
 const QUALITY_SELECT = `SELECT i.id, p.id AS partId, p.code AS materialCode, p.name AS materialDesc,
-  p.spec, COALESCE(NULLIF(TRIM(i.unit_override), ''), NULLIF(TRIM(p.unit), ''), '未标单位') AS unit,
+  p.spec, COALESCE(NULLIF(TRIM(i.unit_override), ''), NULLIF(TRIM(p.unit), '')) AS unit,
   COALESCE(i.safety_stock_override, p.safety_stock) AS reorderPoint,
   COALESCE(i.max_stock_override, p.max_stock) AS maxStock,
   COALESCE(i.price_override, p.price) AS price,
   i.quantity AS totalStock, i.warehouse AS warehouseArea,
-  i.workshop_code AS workshopCode,
+  COALESCE(i.workshop_code, w.workshop_code, 'raw_grain') AS workshopCode,
   COALESCE(w.name, i.warehouse) AS warehouseAreaName, i.location AS locationCode,
   i.location_type AS locationType, i.location_note AS locationNote,
   i.shelf, i.direction AS position, i.layer, i.slot AS location,
   i.last_inventory_date AS lastInventoryDate, COALESCE(dup.duplicateCount, 1) AS duplicateCount
   FROM inventory i
   INNER JOIN parts p ON p.id = i.part_id
-  LEFT JOIN warehouses w ON w.code = i.warehouse OR w.name = i.warehouse
+  ${warehouseJoin()}
   LEFT JOIN (
     SELECT code, COUNT(*) AS duplicateCount FROM parts WHERE COALESCE(active, 1) = 1 GROUP BY code HAVING COUNT(*) > 1
   ) dup ON dup.code = p.code
@@ -94,21 +133,50 @@ router.get('/movement-reasons', (_req, res) => {
   res.json({ success: true, data: movementReasonOptions() });
 });
 
+// Keep the six shared inventory filters before profiling, so KPI drill-downs
+// and quality percentages use the same population as inventory/statistics.
+function buildQualityScope(query) {
+  const conditions = [];
+  const params = [];
+  const safetyStock = 'COALESCE(i.safety_stock_override, p.safety_stock)';
+  if (query.workshopCode) {
+    conditions.push("COALESCE(i.workshop_code, w.workshop_code, 'raw_grain') = ?");
+    params.push(normalizeWorkshopCode(query.workshopCode));
+  }
+  if (query.warehouseAreaName) {
+    conditions.push('(w.name = ? OR i.warehouse = ?)');
+    params.push(query.warehouseAreaName, query.warehouseAreaName);
+  }
+  if (query.partType) {
+    conditions.push("COALESCE(NULLIF(TRIM(p.part_type), ''), '未填写') = ?");
+    params.push(String(query.partType).trim());
+  }
+  if (query.searchKeyword) {
+    conditions.push(`(p.name LIKE ? OR p.code LIKE ? OR p.spec LIKE ? OR p.brand LIKE ?
+      OR p.part_type LIKE ? OR p.usage_description LIKE ? OR i.location LIKE ? OR i.location_note LIKE ?
+      OR i.warehouse LIKE ? OR w.name LIKE ? OR CAST(i.shelf AS CHAR) LIKE ? OR CAST(i.layer AS CHAR) LIKE ?
+      OR CAST(i.direction AS CHAR) LIKE ? OR CAST(i.slot AS CHAR) LIKE ?)`);
+    params.push(...Array(14).fill(`%${String(query.searchKeyword).trim()}%`));
+  }
+  if (query.lowStock === '1' || query.lowStock === 'true') {
+    conditions.push(`${safetyStock} IS NOT NULL AND i.quantity <= ${safetyStock}`);
+  }
+  if (query.stockStatus === 'zero') conditions.push('i.quantity <= 0');
+  else if (query.stockStatus === 'low') conditions.push(`i.quantity > 0 AND ${safetyStock} IS NOT NULL AND i.quantity <= ${safetyStock}`);
+  else if (query.stockStatus === 'normal') conditions.push(`i.quantity > 0 AND ${safetyStock} IS NOT NULL AND i.quantity > ${safetyStock}`);
+  else if (query.stockStatus === 'unconfigured') conditions.push(`i.quantity > 0 AND ${safetyStock} IS NULL`);
+  return { sql: conditions.length ? ` AND ${conditions.join(' AND ')}` : '', params };
+}
+
 router.get('/data-quality', asyncHandler(async (req, res) => {
   const page = positiveInt(req.query.page, 1, 100000);
   const pageSize = positiveInt(req.query.pageSize, 30, 200);
-  const workshopCode = normalizeWorkshopCode(req.query.workshopCode, '');
-  const [rows] = await pool.query(`${QUALITY_SELECT}${workshopCode ? ' AND i.workshop_code = ?' : ''}`, workshopCode ? [workshopCode] : []);
+  const scope = buildQualityScope(req.query);
+  const [rows] = await pool.query(`${QUALITY_SELECT}${scope.sql}`, scope.params);
   const profile = summarizeDataQuality(rows);
   const issueType = Object.prototype.hasOwnProperty.call(ISSUE_DEFINITIONS, req.query.issueType)
     ? req.query.issueType : '';
-  const keyword = String(req.query.searchKeyword || '').trim().toLowerCase();
-  const filtered = profile.records.filter(row => {
-    if (issueType && !row.issues.includes(issueType)) return false;
-    if (!keyword) return true;
-    return [row.materialCode, row.materialDesc, row.spec, row.locationCode, row.warehouseAreaName]
-      .some(value => String(value || '').toLowerCase().includes(keyword));
-  });
+  const filtered = profile.records.filter(row => !issueType || row.issues.includes(issueType));
   const offset = (page - 1) * pageSize;
   res.json({
     success: true,
@@ -164,73 +232,71 @@ router.use(['/suppliers', '/suppliers/*', '/procurement-orders', '/procurement-o
 
 // 采购与供应商模块已按业务要求下线。旧地址由上方 410 兼容拦截统一处理。
 router.get('/equipment/import-template', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
-  const kind = req.query.kind === 'relations' ? 'relations' : 'equipment';
-  const buffer = await makeEquipmentTemplate(kind);
-  sendXlsx(res, kind === 'relations' ? '设备备件关系导入模板.xlsx' : '设备台账导入模板.xlsx', buffer);
+  const buffer = await makeEquipmentTemplate();
+  sendXlsx(res, '设备型号与备件关系导入模板.xlsx', buffer);
 }));
 
 router.post('/equipment/import-preview', requireAnyWorkshopEditor, equipmentImportUpload, asyncHandler(async (req, res) => {
   if (!req.file) throw new ApiError(400, '请选择要校验的 .xlsx 文件');
   const workshopCode = normalizeWorkshopCode(req.body?.workshopCode, 'raw_grain');
-  const kind = req.body?.kind === 'relations' ? 'relations' : 'equipment';
   assertWorkshopWrite(req.user, workshopCode);
-  const { records, errors } = await parseEquipmentWorkbook(req.file.buffer, kind);
-  if (kind === 'relations' && records.length) {
-    const equipmentCodes = [...new Set(records.map(item => item.equipmentCode))];
-    const materialCodes = [...new Set(records.map(item => item.materialCode))];
-    const [[equipmentRows], [partRows]] = await Promise.all([
-      pool.query(`SELECT equipment_code AS code FROM workshop_equipment WHERE workshop_code=? AND equipment_code IN (${equipmentCodes.map(() => '?').join(',')})`, [workshopCode, ...equipmentCodes]),
-      pool.query(`SELECT DISTINCT p.code FROM parts p INNER JOIN inventory i ON i.part_id=p.id WHERE COALESCE(i.workshop_code,'raw_grain')=? AND p.code IN (${materialCodes.map(() => '?').join(',')})`, [workshopCode, ...materialCodes])
-    ]);
-    const knownEquipment = new Set(equipmentRows.map(row => row.code));
-    const knownParts = new Set(partRows.map(row => row.code));
-    records.forEach(item => {
-      if (!knownEquipment.has(item.equipmentCode)) errors.push({ row: item.sourceRow, field: '设备编码', reason: `所选车间不存在设备“${item.equipmentCode}”`, suggestion: '先导入设备台账或修正编码' });
-      if (!knownParts.has(item.materialCode)) errors.push({ row: item.sourceRow, field: '物料编码', reason: `所选车间不存在备件“${item.materialCode}”`, suggestion: '先导入备件台账或修正编码' });
-    });
-  }
-  res.json({ success: errors.length === 0, msg: errors.length ? `发现 ${errors.length} 个问题，尚未写入数据` : `校验通过，共 ${records.length} 条`, data: { kind, workshopCode, total: records.length, errorCount: errors.length, errors, sample: records.slice(0, 8) } });
+  const { records, errors } = await parseEquipmentWorkbook(req.file.buffer);
+  const relationRecords = records.filter(item => item.materialCode);
+  errors.push(...await findEquipmentImportPartErrors(records, workshopCode));
+  const modelCount = new Set(records.map(item => item.equipmentName.toLowerCase())).size;
+  res.json({ success: errors.length === 0, msg: errors.length ? `发现 ${errors.length} 个问题，尚未写入数据` : `校验通过：${modelCount} 个设备型号，${relationRecords.length} 条备件关系`, data: { workshopCode, total: records.length, modelCount, relationCount: relationRecords.length, errorCount: errors.length, errors, sample: records.slice(0, 8) } });
+}));
+
+router.post('/equipment/import-error-report', requireAnyWorkshopEditor, equipmentImportUpload, asyncHandler(async (req, res) => {
+  if (!req.file) throw new ApiError(400, '请选择要生成错误台账的 .xlsx 文件');
+  const workshopCode = normalizeWorkshopCode(req.body?.workshopCode, 'raw_grain');
+  assertWorkshopWrite(req.user, workshopCode);
+  const { records, errors } = await parseEquipmentWorkbook(req.file.buffer);
+  errors.push(...await findEquipmentImportPartErrors(records, workshopCode));
+  if (!errors.length) throw new ApiError(400, '文件校验通过，不需要生成错误台账');
+  const buffer = await makePartsErrorWorkbook(req.file.buffer, errors);
+  sendXlsx(res, `设备型号与备件关系-错误修正台账-${Date.now()}.xlsx`, buffer);
 }));
 
 router.post('/equipment/import', requireAnyWorkshopEditor, equipmentImportUpload, asyncHandler(async (req, res) => {
   if (!req.file) throw new ApiError(400, '请选择要导入的 .xlsx 文件');
   const workshopCode = normalizeWorkshopCode(req.body?.workshopCode, 'raw_grain');
-  const kind = req.body?.kind === 'relations' ? 'relations' : 'equipment';
   assertWorkshopWrite(req.user, workshopCode);
-  const { records, errors } = await parseEquipmentWorkbook(req.file.buffer, kind);
+  const { records, errors } = await parseEquipmentWorkbook(req.file.buffer);
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    if (kind === 'equipment') {
-      if (errors.length) throw new ApiError(422, `导入校验失败，共 ${errors.length} 个问题；未写入任何数据`, { errors });
-      for (const item of records) {
-        await connection.query(
+    for (const item of records.filter(record => record.materialCode)) {
+      const [partRows] = await connection.query("SELECT p.id FROM parts p INNER JOIN inventory i ON i.part_id=p.id WHERE COALESCE(i.workshop_code,'raw_grain')=? AND p.code=? AND COALESCE(i.active,1)=1 AND COALESCE(p.active,1)=1 LIMIT 1 FOR UPDATE", [workshopCode, item.materialCode]);
+      if (!partRows.length) errors.push({ row: item.sourceRow, field: '物料编码', reason: `所选车间不存在备件“${item.materialCode}”`, suggestion: '先导入备件台账或修正编码' });
+      else item.partId = partRows[0].id;
+    }
+    if (errors.length) throw new ApiError(422, `导入校验失败，共 ${errors.length} 个问题；未写入任何数据`, { errors });
+    for (const item of records) {
+      const [existing] = await connection.query('SELECT id FROM workshop_equipment WHERE workshop_code=? AND equipment_name=? LIMIT 1', [workshopCode, item.equipmentName]);
+      let equipmentId = existing[0]?.id;
+      if (!equipmentId) {
+        const [created] = await connection.query(
           `INSERT INTO workshop_equipment (workshop_code,equipment_code,equipment_name,workshop_group,location,notes)
-           VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE equipment_name=VALUES(equipment_name),workshop_group=VALUES(workshop_group),location=VALUES(location),notes=VALUES(notes)`,
-          [workshopCode, item.equipmentCode, item.equipmentName, item.workshopGroup, item.location, item.notes]
+           VALUES (?,?,?,?,NULL,?)`,
+          [workshopCode, equipmentModelCode(workshopCode, item.equipmentName), item.equipmentName, item.workshopGroup, item.notes]
         );
+        equipmentId = created.insertId;
+      } else {
+        await connection.query('UPDATE workshop_equipment SET workshop_group=COALESCE(?,workshop_group), notes=COALESCE(?,notes) WHERE id=?', [item.workshopGroup, item.notes, equipmentId]);
       }
-    } else {
-      for (const item of records) {
-        const [[equipment], [partRows]] = await Promise.all([
-          connection.query('SELECT id FROM workshop_equipment WHERE workshop_code=? AND equipment_code=? LIMIT 1', [workshopCode, item.equipmentCode]),
-          connection.query("SELECT p.id FROM parts p INNER JOIN inventory i ON i.part_id=p.id WHERE COALESCE(i.workshop_code,'raw_grain')=? AND p.code=? AND COALESCE(i.active,1)=1 LIMIT 1", [workshopCode, item.materialCode])
-        ]);
-        if (!equipment.length) errors.push({ row: item.sourceRow, field: '设备编码', reason: `所选车间不存在设备“${item.equipmentCode}”`, suggestion: '先导入设备台账' });
-        if (!partRows.length) errors.push({ row: item.sourceRow, field: '物料编码', reason: `所选车间不存在备件“${item.materialCode}”`, suggestion: '先导入备件台账' });
-        if (equipment.length && partRows.length) item.resolved = { equipmentId: equipment[0].id, partId: partRows[0].id };
-      }
-      if (errors.length) throw new ApiError(422, `导入校验失败，共 ${errors.length} 个问题；未写入任何数据`, { errors });
-      for (const item of records) {
+      if (item.materialCode) {
         await connection.query(
           `INSERT INTO equipment_parts (equipment_id,part_id,quantity_per_equipment,notes) VALUES (?,?,?,?)
            ON DUPLICATE KEY UPDATE quantity_per_equipment=VALUES(quantity_per_equipment),notes=VALUES(notes)`,
-          [item.resolved.equipmentId, item.resolved.partId, item.quantityPerEquipment, item.notes]
+          [equipmentId, item.partId, item.quantityPerEquipment, item.notes]
         );
       }
     }
     await connection.commit();
-    res.json({ success: true, msg: `已导入 ${records.length} 条${kind === 'relations' ? '设备备件关系' : '设备记录'}`, data: { kind, total: records.length, workshopCode } });
+    const modelCount = new Set(records.map(item => item.equipmentName.toLowerCase())).size;
+    const relationCount = records.filter(item => item.materialCode).length;
+    res.json({ success: true, msg: `已导入 ${modelCount} 个设备型号、${relationCount} 条备件关系`, data: { total: records.length, modelCount, relationCount, workshopCode } });
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -242,24 +308,23 @@ router.get('/equipment', asyncHandler(async (req, res) => {
   const search = optionalText(req.query.searchKeyword, 100);
   const conditions = [];
   const params = [];
+  if (req.query.status !== 'all') { conditions.push('e.status=?'); params.push(req.query.status === 'inactive' ? 'inactive' : 'active'); }
   if (workshopCode) { conditions.push("COALESCE(e.workshop_code, 'raw_grain')=?"); params.push(workshopCode); }
   if (search) {
-    conditions.push('(e.equipment_code LIKE ? OR e.equipment_name LIKE ? OR e.workshop_group LIKE ? OR e.location LIKE ?)');
+    conditions.push('(e.equipment_name LIKE ? OR e.workshop_group LIKE ?)');
     const keyword = `%${search}%`;
-    params.push(keyword, keyword, keyword, keyword);
+    params.push(keyword, keyword);
   }
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const [rows] = await pool.query(
     `SELECT e.id, COALESCE(e.workshop_code, 'raw_grain') AS workshopCode,
-            e.equipment_code AS equipmentCode, e.equipment_name AS equipmentName,
-            e.workshop_group AS workshopGroup, e.location, e.status, e.notes,
-            COUNT(DISTINCT ep.id) AS partCount,
-            COUNT(DISTINCT CASE WHEN wo.status IN ('open','in_progress') THEN wo.id END) AS openWorkOrders
+            e.equipment_name AS equipmentName, e.workshop_group AS workshopGroup, e.status, e.notes,
+            COUNT(DISTINCT CASE WHEN relation_part.id IS NOT NULL THEN ep.id END) AS partCount
      FROM workshop_equipment e
      LEFT JOIN equipment_parts ep ON ep.equipment_id=e.id
-     LEFT JOIN maintenance_work_orders wo ON wo.equipment_id=e.id
+     LEFT JOIN parts relation_part ON relation_part.id=ep.part_id AND COALESCE(relation_part.active,1)=1
      ${where}
-     GROUP BY e.id, e.workshop_code, e.equipment_code, e.equipment_name, e.workshop_group, e.location, e.status, e.notes
+     GROUP BY e.id, e.workshop_code, e.equipment_name, e.workshop_group, e.status, e.notes
      ORDER BY e.workshop_code, e.workshop_group, e.equipment_name`,
     params
   );
@@ -269,25 +334,26 @@ router.get('/equipment', asyncHandler(async (req, res) => {
 router.post('/equipment', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
   const workshopCode = normalizeWorkshopCode(req.body?.workshopCode, 'raw_grain');
   assertWorkshopWrite(req.user, workshopCode);
-  const code = optionalText(req.body?.equipmentCode, 50);
   const name = optionalText(req.body?.equipmentName, 150);
-  if (!code || !name) throw new ApiError(400, '设备编码和名称不能为空');
+  if (!name) throw new ApiError(400, '设备型号不能为空');
+  const [existing] = await pool.query('SELECT id FROM workshop_equipment WHERE workshop_code=? AND equipment_name=? LIMIT 1', [workshopCode, name]);
+  if (existing.length) throw new ApiError(409, '该车间已存在同名设备型号');
   try {
     const [result] = await pool.query(
       `INSERT INTO workshop_equipment (workshop_code, equipment_code, equipment_name, workshop_group, location, notes) VALUES (?, ?, ?, ?, ?, ?)`,
-      [workshopCode, code, name, optionalText(req.body?.workshopGroup, 100), optionalText(req.body?.location, 200), optionalText(req.body?.notes)]
+      [workshopCode, equipmentModelCode(workshopCode, name), name, optionalText(req.body?.workshopGroup, 100), null, optionalText(req.body?.notes)]
     );
-    res.status(201).json({ success: true, msg: '设备已创建', data: { id: String(result.insertId) } });
+    res.status(201).json({ success: true, msg: '设备型号已创建', data: { id: String(result.insertId) } });
   } catch (error) {
-    if (error?.code === 'ER_DUP_ENTRY') throw new ApiError(409, '设备编码已存在');
+    if (error?.code === 'ER_DUP_ENTRY') throw new ApiError(409, '设备型号已存在');
     throw error;
   }
 }));
 
 router.get('/equipment/:id', asyncHandler(async (req, res) => {
   const equipmentId = parseInventoryId(req.params.id);
-  const [[equipmentRows], [parts], [orders]] = await Promise.all([
-    pool.query(`SELECT id, COALESCE(workshop_code, 'raw_grain') AS workshopCode, equipment_code AS equipmentCode, equipment_name AS equipmentName, workshop_group AS workshopGroup, location, status, notes FROM workshop_equipment WHERE id=?`, [equipmentId]),
+  const [[equipmentRows], [parts]] = await Promise.all([
+    pool.query(`SELECT id, COALESCE(workshop_code, 'raw_grain') AS workshopCode, equipment_name AS equipmentName, workshop_group AS workshopGroup, status, notes FROM workshop_equipment WHERE id=?`, [equipmentId]),
     pool.query(
       `SELECT ep.id, ep.quantity_per_equipment AS quantityPerEquipment, ep.notes,
               p.id AS partId, p.code AS materialCode, p.name AS materialDesc, p.spec, p.unit,
@@ -296,72 +362,101 @@ router.get('/equipment/:id', asyncHandler(async (req, res) => {
        INNER JOIN workshop_equipment scope_equipment ON scope_equipment.id=ep.equipment_id
        LEFT JOIN inventory i ON i.part_id=p.id AND COALESCE(i.active,1)=1
          AND COALESCE(i.workshop_code,'raw_grain')=COALESCE(scope_equipment.workshop_code,'raw_grain')
-       WHERE ep.equipment_id=? GROUP BY ep.id, ep.quantity_per_equipment, ep.notes, p.id, p.code, p.name, p.spec, p.unit`, [equipmentId]
-    ),
-    pool.query(`SELECT id, order_no AS orderNo, title, status, notes, opened_at AS openedAt, completed_at AS completedAt FROM maintenance_work_orders WHERE equipment_id=? ORDER BY opened_at DESC`, [equipmentId])
+       WHERE ep.equipment_id=? AND COALESCE(p.active,1)=1 GROUP BY ep.id, ep.quantity_per_equipment, ep.notes, p.id, p.code, p.name, p.spec, p.unit`, [equipmentId]
+    )
   ]);
   if (!equipmentRows.length) throw new ApiError(404, '设备不存在');
-  res.json({ success: true, data: { ...equipmentRows[0], id: String(equipmentRows[0].id), parts, workOrders: orders } });
+  res.json({ success: true, data: { ...equipmentRows[0], id: String(equipmentRows[0].id), parts } });
+}));
+
+router.patch('/equipment/:id', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+  const id = parseInventoryId(req.params.id);
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [[current]] = await connection.query("SELECT *,COALESCE(workshop_code,'raw_grain') AS workshopCode FROM workshop_equipment WHERE id=? FOR UPDATE", [id]);
+    if (!current) throw new ApiError(404, '设备型号不存在');
+    assertWorkshopWrite(req.user, current.workshopCode);
+    const body = req.body || {};
+    const name = body.equipmentName === undefined ? current.equipment_name : optionalText(body.equipmentName, 150);
+    if (!name) throw new ApiError(400, '设备型号不能为空');
+    const status = body.status === undefined ? current.status : body.status;
+    if (!['active', 'inactive'].includes(status)) throw new ApiError(400, '型号状态无效');
+    const [[duplicate]] = await connection.query('SELECT id FROM workshop_equipment WHERE workshop_code=? AND equipment_name=? AND id<>? LIMIT 1', [current.workshopCode, name, id]);
+    if (duplicate) throw new ApiError(409, '该车间已存在同名设备型号');
+    await connection.query('UPDATE workshop_equipment SET equipment_name=?,workshop_group=?,notes=?,status=? WHERE id=?', [name,
+      body.workshopGroup === undefined ? current.workshop_group : optionalText(body.workshopGroup, 100),
+      body.notes === undefined ? current.notes : optionalText(body.notes), status, id]);
+    await connection.commit();
+    res.json({ success: true, msg: '设备型号已更新' });
+  } catch (error) { await connection.rollback(); throw error; } finally { connection.release(); }
+}));
+
+router.patch('/equipment/:id/parts/:relationId', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+  const equipmentId = parseInventoryId(req.params.id);
+  const relationId = parseInventoryId(req.params.relationId);
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [[row]] = await connection.query("SELECT ep.*,COALESCE(e.workshop_code,'raw_grain') AS workshopCode,e.status FROM equipment_parts ep INNER JOIN workshop_equipment e ON e.id=ep.equipment_id WHERE ep.id=? AND ep.equipment_id=? FOR UPDATE", [relationId, equipmentId]);
+    if (!row) throw new ApiError(404, '备件关系不存在');
+    assertWorkshopWrite(req.user, row.workshopCode);
+    if (row.status !== 'active') throw new ApiError(409, '请先恢复设备型号再维护关系');
+    const quantity = req.body?.quantityPerEquipment === undefined ? row.quantity_per_equipment : optionalNumber(req.body.quantityPerEquipment, '单台用量');
+    if (quantity !== null && quantity < 0) throw new ApiError(400, '单台用量不能为负数');
+    const notes = req.body?.notes === undefined ? row.notes : optionalText(req.body.notes, 300);
+    await connection.query('UPDATE equipment_parts SET quantity_per_equipment=?,notes=? WHERE id=? AND equipment_id=?', [quantity, notes, relationId, equipmentId]);
+    await connection.commit();
+    res.json({ success: true, msg: '备件关系已更新' });
+  } catch (error) { await connection.rollback(); throw error; } finally { connection.release(); }
 }));
 
 router.post('/equipment/:id/parts', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
   const equipmentId = parseInventoryId(req.params.id);
   const inventoryId = parseInventoryId(req.body?.inventoryId);
-  const [[equipment], [inventoryRows]] = await Promise.all([
-    pool.query("SELECT id, COALESCE(workshop_code, 'raw_grain') AS workshopCode FROM workshop_equipment WHERE id=? LIMIT 1", [equipmentId]),
-    pool.query("SELECT part_id, COALESCE(workshop_code, 'raw_grain') AS workshopCode FROM inventory WHERE id=? LIMIT 1", [inventoryId])
-  ]);
-  if (!equipment.length) throw new ApiError(404, '设备不存在');
-  const inventory = inventoryRows[0];
-  if (!inventory) throw new ApiError(404, '库存记录不存在');
-  assertWorkshopWrite(req.user, equipment[0].workshopCode);
-  if (equipment[0].workshopCode !== inventory.workshopCode) throw new ApiError(400, '设备只能关联同一车间的备件');
+  const connection = await pool.getConnection();
   try {
-    await pool.query(
-      `INSERT INTO equipment_parts (equipment_id, part_id, quantity_per_equipment, notes) VALUES (?, ?, ?, ?)`,
-      [equipmentId, inventory.part_id, optionalNumber(req.body?.quantityPerEquipment, '单台用量'), optionalText(req.body?.notes, 300)]
+    await connection.beginTransaction();
+    const [inventoryRows] = await connection.query(
+      "SELECT i.part_id, COALESCE(i.workshop_code,'raw_grain') AS workshopCode FROM inventory i INNER JOIN parts p ON p.id=i.part_id WHERE i.id=? AND COALESCE(i.active,1)=1 AND COALESCE(p.active,1)=1 FOR UPDATE", [inventoryId]
     );
+    const [equipment] = await connection.query("SELECT id,status, COALESCE(workshop_code,'raw_grain') AS workshopCode FROM workshop_equipment WHERE id=? FOR UPDATE", [equipmentId]);
+    if (!equipment.length) throw new ApiError(404, '设备型号不存在');
+    if (!inventoryRows.length) throw new ApiError(404, '备件不存在或已经删除');
+    assertWorkshopWrite(req.user, equipment[0].workshopCode);
+    if (equipment[0].status !== 'active') throw new ApiError(409, '请先恢复设备型号再关联备件');
+    if (equipment[0].workshopCode !== inventoryRows[0].workshopCode) throw new ApiError(400, '设备只能关联同一车间的备件');
+    await connection.query(
+      'INSERT INTO equipment_parts (equipment_id, part_id, quantity_per_equipment, notes) VALUES (?, ?, ?, ?)',
+      [equipmentId, inventoryRows[0].part_id, optionalNumber(req.body?.quantityPerEquipment, '单台用量'), optionalText(req.body?.notes, 300)]
+    );
+    await connection.commit();
     res.status(201).json({ success: true, msg: '设备与备件关系已建立' });
   } catch (error) {
+    await connection.rollback();
     if (error?.code === 'ER_DUP_ENTRY') throw new ApiError(409, '该设备已关联此备件');
     throw error;
-  }
+  } finally { connection.release(); }
 }));
 
-router.post('/equipment/:id/work-orders', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+router.delete('/equipment/:id/parts/:relationId', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
   const equipmentId = parseInventoryId(req.params.id);
-  const title = optionalText(req.body?.title, 200);
-  if (!title) throw new ApiError(400, '工单标题不能为空');
-  const [equipmentRows] = await pool.query("SELECT id, COALESCE(workshop_code, 'raw_grain') AS workshopCode FROM workshop_equipment WHERE id=? LIMIT 1", [equipmentId]);
-  if (!equipmentRows.length) throw new ApiError(404, '设备不存在');
-  assertWorkshopWrite(req.user, equipmentRows[0].workshopCode);
-  const orderNo = makeNo('WX');
-  const [result] = await pool.query(
-    `INSERT INTO maintenance_work_orders (order_no, equipment_id, title, status, notes, created_by, created_by_name)
-     VALUES (?, ?, ?, 'open', ?, ?, ?)`,
-    [orderNo, equipmentId, title, optionalText(req.body?.notes), req.user.id, req.user.displayName]
-  );
-  res.status(201).json({ success: true, msg: '维修工单已创建', data: { id: String(result.insertId), orderNo } });
-}));
-
-router.patch('/work-orders/:id/status', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
-  const workOrderId = parseInventoryId(req.params.id);
-  const status = String(req.body?.status || '');
-  if (!['open', 'in_progress', 'completed'].includes(status)) throw new ApiError(400, '工单状态无效');
-  const [[order]] = await pool.query(
-    `SELECT COALESCE(e.workshop_code, 'raw_grain') AS workshopCode
-     FROM maintenance_work_orders wo INNER JOIN workshop_equipment e ON e.id=wo.equipment_id
-     WHERE wo.id=? LIMIT 1`,
-    [workOrderId]
-  );
-  if (!order) throw new ApiError(404, '维修工单不存在');
-  assertWorkshopWrite(req.user, order.workshopCode);
-  const [result] = await pool.query(
-    `UPDATE maintenance_work_orders SET status=?, completed_at=${status === 'completed' ? 'NOW()' : 'NULL'} WHERE id=?`,
-    [status, workOrderId]
-  );
-  if (!result.affectedRows) throw new ApiError(404, '维修工单不存在');
-  res.json({ success: true, msg: status === 'completed' ? '维修工单已完成' : '工单状态已更新' });
+  const relationId = parseInventoryId(req.params.relationId);
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [rows] = await connection.query(
+      `SELECT ep.id,e.status,COALESCE(e.workshop_code,'raw_grain') AS workshopCode
+       FROM equipment_parts ep INNER JOIN workshop_equipment e ON e.id=ep.equipment_id
+       WHERE ep.id=? AND ep.equipment_id=? FOR UPDATE`, [relationId, equipmentId]
+    );
+    if (!rows.length) throw new ApiError(404, '设备型号与备件关系不存在');
+    assertWorkshopWrite(req.user, rows[0].workshopCode);
+    if (rows[0].status !== 'active') throw new ApiError(409, '请先恢复设备型号再维护关系');
+    await connection.query('DELETE FROM equipment_parts WHERE id=? AND equipment_id=?', [relationId, equipmentId]);
+    await connection.commit();
+    res.json({ success: true, msg: '设备型号与备件关系已解除' });
+  } catch (error) { await connection.rollback(); throw error; } finally { connection.release(); }
 }));
 
 router.post('/stock-movements/batch', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {

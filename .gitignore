@@ -20,5 +20,6 @@ npm-debug.log*
 .env.*.local
 server/.env
 server/uploads/
+.local/
 project.private.config.json
 miniprogram/project.private.config.json

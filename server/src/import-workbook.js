@@ -116,17 +116,16 @@ async function makePartsErrorWorkbook(sourceBuffer, errors) {
   return workbook.xlsx.writeBuffer();
 }
 
-async function makeEquipmentTemplate(kind = 'equipment') {
-  const relation = kind === 'relations';
+async function makeEquipmentTemplate() {
   return makeWorkbook({
-    title: relation ? '设备备件关系' : '设备台账',
-    columns: relation ? ['设备编码', '物料编码', '单台用量', '备注'] : ['设备编码', '设备名称', '所属工段', '设备位置', '备注'],
-    example: relation
-      ? { 设备编码: 'EQ-001', 物料编码: '示例-001', 单台用量: 2, 备注: '示例行，导入前可删除' }
-      : { 设备编码: 'EQ-001', 设备名称: '1号输送机', 所属工段: '输送工段', 设备位置: '一层东侧', 备注: '示例行，导入前可删除' },
-    notes: relation
-      ? ['设备编码与物料编码必须已存在于所选车间；重复关系会更新单台用量。']
-      : ['设备编码和设备名称为必填字段；同一车间内设备编码不可重复。']
+    title: '设备型号与备件关系',
+    columns: ['设备型号', '物料编码', '单台用量', '所属工段', '备注'],
+    example: { 设备型号: '斗式提升机NE30', 物料编码: '示例-001', 单台用量: 2, 所属工段: '输送工段', 备注: '示例行，导入前可删除' },
+    notes: [
+      '“设备型号”为必填列；“物料编码”为选填列；不需要填写具体设备编码。',
+      '只填写设备型号时建立型号台账；填写物料编码时同时建立该型号与备件的关系。',
+      '设备型号不存在时会自动创建；同一型号可填写多行绑定多个备件，物料编码必须存在于所选车间。'
+    ]
   });
 }
 

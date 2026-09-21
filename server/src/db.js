@@ -131,6 +131,11 @@ async function ensureSchema() {
       SET width=18,depth=32,entrance_wall='east',entrance_offset=11.8,entrance_width=2.4
       WHERE workshop_code='raw_grain' AND width=19 AND depth=34
         AND entrance_wall='west' AND entrance_offset=12.4`);
+    // 现场确认的平面图以画面上方为东；只修正旧版原粮库默认方向。
+    await conn.query(`UPDATE warehouse_rooms
+      SET east_axis='+z'
+      WHERE workshop_code='raw_grain' AND east_axis='+x'
+        AND width=18 AND depth=32 AND entrance_wall='east'`);
 
     if (!(await columnExists('knowledge_process_stages', 'workshop_code'))) {
       await conn.query(`ALTER TABLE knowledge_process_stages ADD COLUMN workshop_code VARCHAR(30) NOT NULL DEFAULT 'raw_grain' AFTER id`);
@@ -141,6 +146,35 @@ async function ensureSchema() {
       await conn.query(`ALTER TABLE fermentation_knowledge_entries ADD COLUMN workshop_code VARCHAR(30) NOT NULL DEFAULT 'raw_grain' AFTER id`);
       await conn.query(`UPDATE fermentation_knowledge_entries SET workshop_code='raw_grain' WHERE workshop_code IS NULL OR workshop_code=''`);
     }
+
+    for (const [name, definition] of [
+      ['revision_no', 'INT UNSIGNED NOT NULL DEFAULT 1'],
+      ['index_status', "VARCHAR(20) NOT NULL DEFAULT 'pending'"],
+      ['index_message', 'VARCHAR(500) DEFAULT NULL'],
+      ['indexed_at', 'DATETIME DEFAULT NULL']
+    ]) {
+      if (!(await columnExists('fermentation_knowledge_entries', name))) {
+        await conn.query(`ALTER TABLE fermentation_knowledge_entries ADD COLUMN ${name} ${definition}`);
+      }
+    }
+    await conn.query(`CREATE TABLE IF NOT EXISTS knowledge_entry_revisions (
+      id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, entry_id BIGINT UNSIGNED NOT NULL,
+      revision_no INT UNSIGNED NOT NULL, workshop_code VARCHAR(30) NOT NULL,
+      entry_type VARCHAR(20) NOT NULL, title VARCHAR(200) NOT NULL, category VARCHAR(80) NOT NULL,
+      process_stage VARCHAR(80) DEFAULT NULL, equipment_name VARCHAR(150) DEFAULT NULL,
+      summary VARCHAR(1000) DEFAULT NULL, fault_symptom TEXT NULL, fault_cause TEXT NULL,
+      solution MEDIUMTEXT NULL, preventive_action TEXT NULL, content_text MEDIUMTEXT NULL,
+      tags VARCHAR(500) DEFAULT NULL, original_filename VARCHAR(255) DEFAULT NULL,
+      stored_filename VARCHAR(255) DEFAULT NULL, mime_type VARCHAR(120) DEFAULT NULL,
+      file_size BIGINT UNSIGNED DEFAULT NULL, index_status VARCHAR(20) NOT NULL DEFAULT 'pending',
+      index_message VARCHAR(500) DEFAULT NULL, indexed_at DATETIME DEFAULT NULL,
+      change_kind VARCHAR(30) NOT NULL DEFAULT 'edit', change_summary VARCHAR(500) DEFAULT NULL,
+      created_by BIGINT UNSIGNED DEFAULT NULL, created_by_name VARCHAR(80) DEFAULT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY(id), UNIQUE KEY uq_knowledge_revision(entry_id,revision_no),
+      KEY idx_knowledge_revision_time(entry_id,created_at),
+      CONSTRAINT fk_knowledge_revision_entry FOREIGN KEY(entry_id) REFERENCES fermentation_knowledge_entries(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
 
     const [idxRows] = await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='knowledge_process_stages' AND INDEX_NAME='uk_knowledge_process_stage_name'`);
     if (idxRows[0].cnt > 0) {
@@ -155,8 +189,16 @@ async function ensureSchema() {
       await conn.query(`ALTER TABLE warehouse_shelves ADD COLUMN position_overridden TINYINT(1) NOT NULL DEFAULT 0 AFTER rotation_y`);
     }
 
+    // 解析节点领取任务时写入认领时间；超过 plc-agent 认领超时的任务可被重新领取。
+    if (await tableExists('plc_projects') && !(await columnExists('plc_projects', 'extracting_since'))) {
+      await conn.query(`ALTER TABLE plc_projects ADD COLUMN extracting_since DATETIME DEFAULT NULL AFTER parse_message`);
+    }
+
     if (await tableExists('parts') && !(await columnExists('parts', 'image_url'))) {
       await conn.query(`ALTER TABLE parts ADD COLUMN image_url VARCHAR(500) DEFAULT NULL AFTER remark`);
+    }
+    if (await tableExists('plc_projects') && !(await columnExists('plc_projects', 'extracting_claim_hash'))) {
+      await conn.query('ALTER TABLE plc_projects ADD COLUMN extracting_claim_hash CHAR(64) DEFAULT NULL');
     }
     if (await tableExists('parts') && !(await columnExists('parts', 'model_url'))) {
       await conn.query(`ALTER TABLE parts ADD COLUMN model_url VARCHAR(500) DEFAULT NULL AFTER image_url`);
@@ -180,28 +222,22 @@ async function ensureSchema() {
       UNIQUE KEY uk_part_category_model_name (name),
       KEY idx_part_category_model_active_name (active,name)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
-    await conn.query(`INSERT INTO part_category_models (name,keywords,description,model_url,model_scale,built_in,active) VALUES
+    if (!(await columnExists('part_category_models', 'image_url'))) {
+      await conn.query('ALTER TABLE part_category_models ADD COLUMN image_url VARCHAR(500) DEFAULT NULL');
+    }
+    if (!(await columnExists('part_category_models', 'front_rotation_y'))) {
+      await conn.query('ALTER TABLE part_category_models ADD COLUMN front_rotation_y DECIMAL(9,6) NOT NULL DEFAULT 0');
+    }
+    const [[modelCount]] = await conn.query('SELECT COUNT(*) AS total FROM part_category_models');
+    // Only seed an empty catalog. A rename or soft deletion must survive restarts.
+    if (!Number(modelCount.total)) await conn.query(`INSERT INTO part_category_models (name,keywords,description,model_url,model_scale,built_in,active) VALUES
       ('轴承','轴承,bearing','滚动轴承通用示意模型','/models/categories/bearing.glb',1,1,1),
       ('断路器','断路器,空开,breaker,mcb','小型断路器通用示意模型','/models/categories/circuit-breaker.glb',1,1,1),
       ('阀门/电磁阀','阀门,电磁阀,valve','阀体与手轮通用示意模型','/models/categories/valve.glb',1,1,1),
       ('传感器/开关','传感器,接近开关,光电开关,sensor,switch','圆柱传感器通用示意模型','/models/categories/sensor.glb',1,1,1)
       ON DUPLICATE KEY UPDATE name=VALUES(name)`);
-    let categoryModelColumnAdded = false;
     if (await tableExists('parts') && !(await columnExists('parts', 'category_model_id'))) {
       await conn.query(`ALTER TABLE parts ADD COLUMN category_model_id BIGINT UNSIGNED DEFAULT NULL AFTER model_scale`);
-      categoryModelColumnAdded = true;
-    }
-    // 首次升级时把现有常见备件关联到内置类别模型；已由管理员设置的关联绝不覆盖。
-    if (categoryModelColumnAdded) {
-      await conn.query(`UPDATE parts p
-        JOIN part_category_models cm ON cm.active=1 AND (
-          (cm.name='轴承' AND CONCAT_WS(' ',p.name,p.spec,p.part_type) REGEXP '轴承|bearing') OR
-          (cm.name='断路器' AND CONCAT_WS(' ',p.name,p.spec,p.part_type) REGEXP '断路器|空开|breaker|mcb') OR
-          (cm.name='阀门/电磁阀' AND CONCAT_WS(' ',p.name,p.spec,p.part_type) REGEXP '阀门|电磁阀|valve') OR
-          (cm.name='传感器/开关' AND CONCAT_WS(' ',p.name,p.spec,p.part_type) REGEXP '传感器|接近开关|光电开关|sensor|switch')
-        )
-        SET p.category_model_id=cm.id
-        WHERE p.category_model_id IS NULL`);
     }
 
     if (await tableExists('inventory') && !(await columnExists('inventory', 'unit_override'))) {

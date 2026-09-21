@@ -49,6 +49,20 @@ function toShelf(row) {
     },
     levels: Math.max(Number(row.defaultLevels) || 1, Number(row.maxLayer) || 0),
     maxSlot: Number(row.maxSlot) || 0,
+    slotCapacity: {
+      1: {
+        1: Number(row.side1Layer1Slots) || 0,
+        2: Number(row.side1Layer2Slots) || 0,
+        3: Number(row.side1Layer3Slots) || 0,
+        4: Number(row.side1Layer4Slots) || 0
+      },
+      2: {
+        1: Number(row.side2Layer1Slots) || 0,
+        2: Number(row.side2Layer2Slots) || 0,
+        3: Number(row.side2Layer3Slots) || 0,
+        4: Number(row.side2Layer4Slots) || 0
+      }
+    },
     partsCount: Number(row.partsCount) || 0,
     lowStockCount: Number(row.lowStockCount) || 0,
     sortOrder: Number(row.sortOrder) || 0

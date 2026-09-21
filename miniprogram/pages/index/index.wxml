@@ -94,6 +94,7 @@
     </view>
   </view>
 
+  <view class="load-error" wx:if="{{loadError}}"><text>{{filteredParts.length ? '数据未更新，当前保留上次结果' : '备件加载失败，请重试'}}</text><button bindtap="retryParts">重新加载</button></view>
   <view class="result-bar">
     <view>
       <text class="result-title">备件列表</text>
@@ -146,13 +147,13 @@
       </view>
     </view>
 
-    <view class="pagination-state" wx:if="{{filteredParts.length}}">
+    <view class="pagination-state" wx:if="{{filteredParts.length && !loadError}}">
       <text wx:if="{{isLoadingMore}}">正在加载下一页...</text>
       <text wx:elif="{{hasMoreData}}">继续上滑加载更多</text>
       <text wx:else>已显示全部 {{totalCount}} 项</text>
     </view>
 
-    <view class="empty" wx:if="{{filteredParts.length === 0}}">
+    <view class="empty" wx:if="{{!loadError && filteredParts.length === 0}}">
       <text class="empty-title">{{searchKeyword ? '没有找到匹配备件' : '暂无备件数据'}}</text>
       <text class="empty-desc">{{searchKeyword ? '可尝试缩短关键词或重置筛选条件' : '新增备件后会显示在这里'}}</text>
       <button class="empty-reset" wx:if="{{searchKeyword || activeFilterCount}}" bindtap="resetAll">清除查询条件</button>

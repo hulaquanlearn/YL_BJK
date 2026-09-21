@@ -3,9 +3,9 @@
     <view class="hero-top">
       <view>
         <text class="hero-title">备件与设备助手</text>
-        <text class="hero-desc">自动识别问题类型，库存查询不等待大模型</text>
+        <text class="hero-desc">查库存、找库位、查故障资料</text>
       </view>
-      <text class="smart-badge">智能分流</text>
+      
     </view>
     <view class="scope-row">
       <text>实时库存</text>
@@ -23,10 +23,14 @@
       bindinput="handleInput"
     ></textarea>
     <view class="input-footer">
-      <text class="scope-tip">系统会自动判断库存、维修或范围外问题</text>
+      <text class="scope-tip">输入名称、编码或故障现象</text>
       <text class="clear-history" wx:if="{{resultType || messages.length}}" bindtap="clearChatHistory">清空</text>
     </view>
   </view>
+
+  <button class="query-btn" bindtap="callAi" loading="{{isLoading}}" disabled="{{isLoading}}">
+    {{isLoading ? '正在识别并查询...' : '智能查询'}}
+  </button>
 
   <view class="suggestions">
     <text class="suggestion-title">库存查询示例</text>
@@ -55,9 +59,7 @@
     </scroll-view>
   </view>
 
-  <button class="query-btn" bindtap="callAi" loading="{{isLoading}}" disabled="{{isLoading}}">
-    {{isLoading ? '正在识别并查询...' : '智能查询'}}
-  </button>
+
 
   <view class="result-card" wx:if="{{resultType}}">
     <view class="result-heading">
@@ -116,5 +118,7 @@
     <text class="safety-note" wx:if="{{resultType === 'maintenance'}}">
       涉及停机、带电、高处或受限空间作业时，请以现场安全规程和专业人员判断为准。
     </text>
+    <view class="evidence-list" wx:if="{{resultEvidence.length}}"><text class="evidence-heading">回答依据 · 点击查看</text><button wx:for="{{resultEvidence}}" wx:key="citation" data-index="{{index}}" bindtap="viewEvidence"><text>{{item.typeLabel}} · {{item.title}}</text><text class="evidence-excerpt">{{item.excerpt}}</text></button></view>
+    <text class="evidence-empty" wx:if="{{resultType === 'maintenance' && !resultEvidence.length}}">本次未返回系统内检索依据，请核对后使用。</text>
   </view>
 </view>

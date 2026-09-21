@@ -1,28 +1,5 @@
 <template>
   <div class="warehouse-page">
-    <section class="warehouse-hero">
-      <div>
-        <span class="eyebrow">DIGITAL WAREHOUSE · 实时库位</span>
-        <h2>备件库 3D 导航</h2>
-        <p>搜索备件后，模型会定位到对应货架，并标出东/西侧、层数和货位。</p>
-      </div>
-      <div class="hero-actions">
-        <el-button :loading="loading" @click="loadLayout"><el-icon><Refresh /></el-icon>刷新布局</el-button>
-        <el-button @click="toggleFullscreen"><el-icon><FullScreen /></el-icon>全屏查看</el-button>
-        <el-button-group>
-          <el-button :type="displayMode === '3d' ? 'primary' : ''" @click="displayMode='3d'">3D立体</el-button>
-          <el-button :type="displayMode === '2d' ? 'primary' : ''" @click="displayMode='2d'">2D平面</el-button>
-        </el-button-group>
-      </div>
-    </section>
-
-    <section class="warehouse-metrics">
-      <article><span>实体货架</span><strong>{{ numberedCount }}</strong><small>已编号并关联库位</small></article>
-      <article><span>待命名货架</span><strong>{{ unnamedCount }}</strong><small>管理员可编辑名称与编号</small></article>
-      <article><span>货架备件</span><strong>{{ formatNumber(totalParts) }}</strong><small>当前布局关联条目</small></article>
-      <article class="is-alert"><span>低库存</span><strong>{{ formatNumber(totalLowStock) }}</strong><small>点击货架可查看明细</small></article>
-    </section>
-
     <section class="control-panel panel">
       <div class="locator-field">
         <label>快速定位备件</label>
@@ -32,6 +9,7 @@
           remote
           clearable
           reserve-keyword
+          popper-class="warehouse-part-options"
           :remote-method="searchParts"
           :loading="partSearching"
           placeholder="输入物料编码、名称、规格或六位库位码"
@@ -40,7 +18,7 @@
           @clear="clearPart"
         >
           <el-option v-for="part in partOptions" :key="part._id" :value="part._id" :label="part.materialDesc || part.materialCode">
-            <div class="part-option">
+            <div class="part-option" :title="`${part.materialDesc || part.materialCode} · ${compactLocation(part)}`">
               <span><strong>{{ part.materialDesc || '未命名备件' }}</strong><small>{{ part.materialCode }} · {{ part.spec || '未填写规格' }}</small></span>
               <em>{{ compactLocation(part) }}</em>
             </div>
@@ -75,7 +53,8 @@
         <div class="model-toolbar">
           <div class="model-title">
             <strong>{{ layout?.room?.name || '原粮车间备件库' }}</strong>
-            <span>{{ displayMode==='3d' ? '按住左键拖动旋转 · 滚轮缩放 · 点击货架查看' : '平面图适合快速确认货架相对位置与入口方向' }}</span>
+            <template v-if="displayMode==='3d'"><span class="desktop-scene-help">左键拖动旋转 · Ctrl+滚轮缩放 · 右键拖动平移 · 双击复位</span><span class="touch-scene-help">单指旋转 · 双指缩放、平移 · 点击货架查看</span></template>
+            <span v-else>平面图适合快速确认货架相对位置与入口方向</span>
           </div>
           <div v-if="isFullscreen" class="fullscreen-locator">
             <el-select
@@ -94,22 +73,31 @@
             </el-select>
           </div>
           <div class="model-actions">
+            <div class="view-mode-tools">
+              <el-button-group aria-label="库房展示方式">
+                <el-button :type="displayMode === '3d' ? 'primary' : ''" :aria-pressed="displayMode === '3d'" @click="displayMode='3d'">3D立体</el-button>
+                <el-button :type="displayMode === '2d' ? 'primary' : ''" :aria-pressed="displayMode === '2d'" @click="displayMode='2d'">2D平面</el-button>
+              </el-button-group>
+              <el-tooltip content="刷新布局" placement="top">
+                <el-button class="refresh-layout-button" :loading="loading" aria-label="刷新布局" @click="loadLayout"><el-icon v-if="!loading"><Refresh /></el-icon></el-button>
+              </el-tooltip>
+            </div>
             <div class="direction-pill">{{ eastDirectionLabel }}</div>
-            <el-button v-if="canEditCurrentWorkshop" @click="openRoomEditor"><el-icon><Setting /></el-icon>库房设置</el-button>
-            <el-button v-if="displayMode==='3d'" @click="openModelLibrary"><el-icon><Picture /></el-icon>{{ selectedPart ? '配置此备件模型' : '备件模型库' }}</el-button>
             <el-dropdown v-if="displayMode==='3d'" trigger="click" @command="setPartModelMode">
               <el-button><el-icon><Box /></el-icon>{{ partModelModeLabel }}<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="hidden">隐藏备件模型</el-dropdown-item>
                   <el-dropdown-item command="all">展示全部备件</el-dropdown-item>
+                  <el-dropdown-item command="normal">仅展示正常库存</el-dropdown-item>
                   <el-dropdown-item command="low">仅展示低库存</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
             <el-button v-if="displayMode==='3d'" @click="setView(viewMode==='perspective'?'top':'perspective')"><el-icon><View /></el-icon>{{ viewMode==='perspective'?'俯视角':'立体角' }}</el-button>
+            <el-button v-if="displayMode==='3d'" class="touch-reset-button" @click="resetPerspectiveView">复位视角</el-button>
             <el-button class="panel-toggle-button" @click="toggleSidePanel">
-              <el-icon><ArrowLeftBold v-if="sidePanelCollapsed" /><ArrowRightBold v-else /></el-icon>{{ sidePanelCollapsed ? '显示列表' : '放大模型' }}
+              <el-icon><ArrowLeftBold v-if="sidePanelCollapsed" /><ArrowRightBold v-else /></el-icon>{{ sidePanelCollapsed ? '显示列表' : '收起列表' }}
             </el-button>
             <el-button class="fullscreen-button" :type="isFullscreen ? 'primary' : ''" @click="toggleFullscreen">
               <el-icon><FullScreen /></el-icon>{{ isFullscreen ? '退出全屏' : '全屏查看' }}
@@ -123,48 +111,45 @@
             <strong>当前浏览器未启用 3D 图形</strong>
             <span>请在新版 Chrome 或 Edge 中打开；货架列表仍可正常使用。</span>
           </div>
-          <div class="stage-hint">左键拖动旋转 · 滚轮缩放 · 右键拖动平移 · 双击复位</div>
+          <div class="stock-model-legend" aria-label="备件模型颜色说明"><span><i class="normal"></i>库存正常</span><span><i class="low"></i>需要补充</span></div>
         </div>
-        <div v-show="displayMode==='2d'" class="two-stage" :class="{'is-editing': editMode}">
-          <div class="floor-label">北 ←</div><div class="east-label">东 ↑</div><div class="entrance-2d" :style="entrancePlanStyle"><el-icon><Right /></el-icon>入口</div>
-          <button v-for="shelf in visibleShelves" :key="`plan-${shelf.id}`" type="button" class="plan-shelf" :class="{active:selectedShelf?.id===shelf.id,unnamed:shelf.shelfNo==null,dragging:draggingShelf===shelf.id,moved:editMode&&shelf.positionOverridden}" :style="planStyle(shelf)" @click="!editMode && selectShelf(shelf,false)" @mousedown="editMode && startDrag($event,shelf)"><strong>{{ shelf.displayName }}</strong><small>{{ shelf.partsCount }} 条</small></button>
-          <div v-for="sp in stagingPoints" :key="`sp-${sp.id}`" class="plan-staging" :style="stagingStyle(sp)" @click.stop="openStagingDialog(sp)"><span>{{ sp.name }}</span></div>
-          <div v-if="editMode" class="edit-toolbar"><span>拖拽货架调整位置</span><el-button type="success" size="small" @click="openShelfCreator">新增货架</el-button><el-button :loading="layoutSaving" type="primary" size="small" @click="saveLayout">保存布局</el-button><el-button size="small" @click="cancelEdit">取消</el-button></div>
-          <div v-else class="plan-help">按真实相对位置显示；点击货架查看层数与备件<el-button v-if="canEditCurrentWorkshop" link type="primary" size="small" style="margin-left:10px" @click="toggleEditMode">编辑布局</el-button><el-button v-if="canEditCurrentWorkshop" link type="warning" size="small" style="margin-left:6px" @click="openStagingDialog(null)">暂存点</el-button></div>
+        <div v-show="displayMode==='2d'" class="two-stage">
+          <div class="floor-label">现场平面图</div><div class="east-label">{{ eastDirectionLabel }}</div><div class="entrance-2d" :style="entrancePlanStyle"><el-icon><Right /></el-icon>入口</div>
+          <button v-for="shelf in visibleShelves" :key="`plan-${shelf.id}`" type="button" class="plan-shelf" :class="{active:selectedShelf?.id===shelf.id,unnamed:shelf.shelfNo==null}" :style="planStyle(shelf)" @click="selectShelf(shelf,false)"><strong>{{ shelf.displayName }}</strong><small>{{ shelf.partsCount }} 条</small></button>
+          <div v-for="sp in stagingPoints" :key="`sp-${sp.id}`" class="plan-staging" :style="stagingStyle(sp)" :title="sp.description || sp.name"><span>{{ sp.name }}</span></div>
+          <div class="plan-help">按真实相对位置显示；点击货架查看层数与备件。暂存点为历史只读标记。</div>
         </div>
       </article>
 
       <aside v-show="!sidePanelCollapsed" class="shelf-panel panel">
         <header>
-          <div><span>{{ panelMode === 'parts' ? '本架备件' : '货架导航' }}</span><strong>{{ panelMode === 'parts' ? `${displayedShelfParts.length} 条` : `${visibleShelves.length} 组` }}</strong></div>
+          <div><span>{{ panelMode === 'parts' ? '本架备件' : '货架导航' }}</span><strong>{{ panelMode === 'parts' ? shelfPartsCountText : `${visibleShelves.length} 组` }}</strong></div>
           <div class="panel-head-actions">
-            <el-button v-if="selectedShelf && canEditCurrentWorkshop" link type="primary" @click="openShelfEditor(selectedShelf)">
-              <el-icon><EditPen /></el-icon>编辑货架
+            <el-button v-write v-if="displayMode === '3d' && selectedShelf && $showControl(canEditCurrentWorkshop)" link type="primary" @click="openShelfEditor(selectedShelf)">
+              <el-icon><EditPen /></el-icon>标牌设置
             </el-button>
           </div>
         </header>
 
         <div v-if="selectedShelf" class="panel-tabs" role="tablist" aria-label="货架信息视图">
           <button type="button" :class="{ active: panelMode === 'shelves' }" @click="panelMode = 'shelves'">货架导航</button>
-          <button type="button" :class="{ active: panelMode === 'parts' }" @click="panelMode = 'parts'">本架备件 <b>{{ displayedShelfParts.length }}</b></button>
+          <button type="button" :class="{ active: panelMode === 'parts' }" @click="panelMode = 'parts'">本架备件 <b>{{ shelfPartsLoading ? '…' : displayedShelfParts.length }}</b></button>
         </div>
 
-        <div v-if="selectedPart && panelMode === 'parts'" class="located-part is-compact">
+        <div v-if="selectedPart && panelMode === 'parts'" class="located-part">
           <div class="located-icon"><el-icon><LocationFilled /></el-icon></div>
-          <div>
-            <strong>{{ selectedPart.materialDesc || selectedPart.materialCode }}</strong>
-            <small>{{ selectedPart.materialCode }} · {{ selectedPart.spec || '未填写规格' }}</small>
+          <div class="located-identity">
+            <strong :title="selectedPartDisplay.name">{{ selectedPartDisplay.name }}</strong>
+            <div class="located-code"><span>物料编码</span><code>{{ selectedPartDisplay.code }}</code></div>
           </div>
-          <div class="location-path">
-            <b>{{ shelfLabel(selectedPartLocation.shelf) }}</b><i></i>
-            <b>{{ sideText(selectedPartLocation.position) }}</b><i></i>
-            <b>{{ selectedPartLocation.layer || '-' }} 层</b><i></i>
-            <b>{{ padSlot(selectedPartLocation.location) }} 货位</b>
-          </div>
-          <div class="located-actions">
-            <button class="qr-button" type="button" @click="openQr"><el-icon><Link /></el-icon>定位二维码</button>
-            <button class="qr-button model-library-button" type="button" @click="openModelLibrary"><el-icon><Picture /></el-icon>{{ selectedPart.modelUrl ? '更换3D模型' : '上传3D模型' }}</button>
-          </div>
+          <p v-if="selectedPartDisplay.spec" class="located-spec"><span>规格</span>{{ selectedPartDisplay.spec }}</p>
+          <dl class="located-location">
+            <div><dt>货架</dt><dd>{{ selectedLocationSegments.shelf }}</dd></div>
+            <div><dt>侧别</dt><dd>{{ sideText(selectedPartLocation.position) }}</dd></div>
+            <div><dt>层数</dt><dd>{{ selectedLocationSegments.layer }}</dd></div>
+            <div><dt>货位</dt><dd>{{ selectedLocationSegments.slot }}</dd></div>
+          </dl>
+          <button class="located-qr" type="button" @click="openQr"><el-icon><Link /></el-icon>定位二维码</button>
         </div>
 
         <div v-if="selectedShelf && panelMode === 'parts'" class="layer-map">
@@ -231,15 +216,15 @@
       </ol>
     </section>
 
-    <el-dialog v-model="editorVisible" :title="editorMode === 'create' ? '新增货架' : '货架设置'" width="min(680px, 94vw)" destroy-on-close>
+    <el-dialog v-model="editorVisible" title="货架标牌设置" width="min(560px, 94vw)" destroy-on-close>
       <div v-if="editingShelf" class="editor-preview">
         <span class="preview-number">{{ editShelfNoText || '—' }}</span>
         <div><strong>{{ editForm.displayName || (editShelfNoText ? `${editShelfNoText}货架` : '未命名货架') }}</strong><small>{{ editingShelf.workshopGroup }} · {{ editingShelf.partsCount || 0 }} 条备件 · 固定 4 层</small></div>
-        <span class="editor-status">{{ editorMode === 'create' ? '待创建' : '位置不变' }}</span>
+        <span class="editor-status">布局固定</span>
       </div>
       <el-form label-position="top" class="shelf-editor-form">
         <section class="editor-section">
-          <header><strong>基础信息</strong><span>用于货架牌、搜索与库位编码</span></header>
+          <header><strong>标牌信息</strong><span>仅维护名称与编号，不改变位置、尺寸或工段颜色</span></header>
           <div class="editor-basic-grid">
             <el-form-item label="货架名称">
               <el-input v-model="editForm.displayName" maxlength="60" show-word-limit clearable placeholder="例如：减速机专用架" />
@@ -250,54 +235,16 @@
           </div>
           <el-alert v-if="editorRenumbering" title="正在修改已使用货架的编号" description="保存后会同步更新本架全部备件的六位库位码，并写入审计记录。" type="warning" :closable="false" show-icon />
         </section>
-        <section class="editor-section">
-          <header><strong>模型尺寸</strong><span>层数固定为 4 层；最下层为 1 层，最上层为 4 层</span></header>
-          <div class="dimension-grid">
-            <label><span>宽度（米）</span><el-input-number v-model="editForm.width" :min="0.5" :max="10" :step="0.1" :precision="1" /></label>
-            <label><span>深度（米）</span><el-input-number v-model="editForm.depth" :min="0.3" :max="3" :step="0.1" :precision="1" /></label>
-            <label><span>高度（米）</span><el-input-number v-model="editForm.height" :min="1" :max="6" :step="0.1" :precision="1" /></label>
-          </div>
-          <p class="editor-tip">货架在房间中的位置和朝向，请到“2D 编辑布局”中拖动调整。</p>
-        </section>
-        <section v-if="editorMode === 'edit'" class="editor-section danger-zone">
-          <div><strong>删除货架</strong><span>{{ Number(editingShelf?.partsCount) ? `本架仍有 ${editingShelf.partsCount} 条备件，禁止删除` : '仅空货架可删除，删除后不可恢复' }}</span></div>
-          <el-button type="danger" plain :disabled="Number(editingShelf?.partsCount) > 0" @click="removeShelf">删除空货架</el-button>
-        </section>
+        <el-alert title="实体布局已锁定" description="货架位置、朝向、尺寸、增删均由固定布局控制，避免误操作。" type="info" :closable="false" show-icon />
       </el-form>
       <template #footer>
         <el-button @click="editorVisible = false">取消</el-button>
-        <el-button type="primary" :loading="editorSubmitting" @click="submitShelfEdit">{{ editorMode === 'create' ? '创建货架' : '保存修改' }}</el-button>
+        <el-button v-write type="primary" :loading="editorSubmitting" @click="submitShelfEdit">保存标牌</el-button>
       </template>
     </el-dialog>
-    <el-dialog v-model="roomDialog" title="库房空间与入口设置" width="min(620px,94vw)" destroy-on-close>
-      <el-alert title="每个车间可保存独立的房间尺寸、朝向和入口；货架位置仍可在 2D 编辑布局中拖动。" type="info" :closable="false" show-icon />
-      <el-form label-position="top" class="room-form">
-        <el-form-item label="库房名称"><el-input v-model="roomForm.name" maxlength="80" /></el-form-item>
-        <div class="room-grid">
-          <el-form-item label="房间宽度（米）"><el-input-number v-model="roomForm.width" :min="8" :max="80" :step="0.5" /></el-form-item>
-          <el-form-item label="房间深度（米）"><el-input-number v-model="roomForm.depth" :min="8" :max="100" :step="0.5" /></el-form-item>
-          <el-form-item label="房间高度（米）"><el-input-number v-model="roomForm.height" :min="2.4" :max="15" :step="0.1" /></el-form-item>
-          <el-form-item label="模型中的东方向"><el-select v-model="roomForm.eastDirection"><el-option label="画面上方（+Z）" value="+z"/><el-option label="画面下方（-Z）" value="-z"/><el-option label="画面右侧（+X）" value="+x"/><el-option label="画面左侧（-X）" value="-x"/></el-select></el-form-item>
-          <el-form-item label="入口所在墙"><el-select v-model="roomForm.entranceWall"><el-option label="西墙（左侧）" value="west"/><el-option label="东墙（右侧）" value="east"/><el-option label="北墙（上侧）" value="north"/><el-option label="南墙（下侧）" value="south"/></el-select></el-form-item>
-          <el-form-item label="入口中心偏移（米）"><el-input-number v-model="roomForm.entranceOffset" :min="-50" :max="50" :step="0.2" /></el-form-item>
-          <el-form-item label="入口宽度（米）"><el-input-number v-model="roomForm.entranceWidth" :min="0.8" :max="12" :step="0.2" /></el-form-item>
-        </div>
-      </el-form>
-      <template #footer><el-button @click="roomDialog=false">取消</el-button><el-button type="primary" :loading="roomSaving" @click="saveRoom">保存库房设置</el-button></template>
-    </el-dialog>
-
     <el-dialog v-model="qrVisible" title="备件定位二维码" width="min(430px, 92vw)">
       <div class="qr-card"><img v-if="qrDataUrl" :src="qrDataUrl" alt="备件定位二维码" /><div><strong>{{ selectedPart?.materialDesc || selectedPart?.materialCode }}</strong><span>{{ compactLocation(selectedPart) }}</span><small>手机扫码后登录网页即可直接定位到此备件</small></div></div>
       <template #footer><el-button @click="copyLocationLink"><el-icon><CopyDocument /></el-icon>复制定位链接</el-button><el-button type="primary" @click="downloadQr"><el-icon><Download /></el-icon>下载二维码</el-button></template>
-    </el-dialog>
-    <el-dialog v-model="stagingDialog.visible" :title="stagingDialog.editingId ? '编辑暂存点' : '新增暂存点'" width="min(440px,92vw)" destroy-on-close>
-      <el-form label-width="80px" label-position="left">
-        <el-form-item label="名称"><el-input v-model="stagingDialog.name" placeholder="如：暂存区A" maxlength="50" /></el-form-item>
-        <el-form-item label="描述"><el-input v-model="stagingDialog.description" type="textarea" :rows="2" placeholder="可选" maxlength="500" /></el-form-item>
-        <el-form-item label="X坐标"><el-input-number v-model="stagingDialog.positionX" :min="-8.5" :max="8.5" :step="0.5" :precision="1" /></el-form-item>
-        <el-form-item label="Z坐标"><el-input-number v-model="stagingDialog.positionZ" :min="-15.5" :max="15.5" :step="0.5" :precision="1" /></el-form-item>
-      </el-form>
-      <template #footer><el-button v-if="stagingDialog.editingId" type="danger" @click="removeStagingPoint">删除</el-button><el-button @click="stagingDialog.visible=false">取消</el-button><el-button type="primary" @click="saveStagingPoint">保存</el-button></template>
     </el-dialog>
   </div>
 </template>
@@ -309,10 +256,13 @@ import { useRoute, useRouter } from 'vue-router'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { CSS2DObject, CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js'
+import { flattenStockModel, instanceStockModels } from '../utils/stock-model-geometry.mjs'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import QRCode from 'qrcode'
-import { getPart, getParts, getWarehouseLayout, updateWarehouseRoom, createWarehouseShelf, updateWarehouseShelf, updateShelfPosition, resetShelfPosition, updateShelfDimensions, deleteWarehouseShelf, getStagingPoints, createStagingPoint, updateStagingPoint, deleteStagingPoint } from '../api'
+import { getPart, getParts, getWarehouseLayout, updateWarehouseShelf, getStagingPoints } from '../api'
 import { canEditWorkshop } from '../auth'
+import { modelFacingRotation, modelFitScale, slotModelBounds } from '../utils/model-fit.mjs'
+import { resolveEvidenceModel, warehouseModelUrl } from '../utils/evidence-models.mjs'
 import {
   COMMON_SHELF_LEVELS,
   PHYSICAL_ROOM_HALF_DEPTH,
@@ -323,8 +273,10 @@ import {
   partBelongsToShelf,
   resolvePartLocation,
   sideAwareSlotLocalX,
-  sideLocalZ
+  sideLocalZ,
+  slotCapacityForLocation
 } from '../utils/warehouse-location.mjs'
+import { locatedPartDisplay } from '../utils/located-part-display.mjs'
 
 const stage = ref(null)
 const route = useRoute()
@@ -348,33 +300,22 @@ const partSearching = ref(false)
 const shelfParts = ref([])
 const shelfPartsLoading = ref(false)
 const panelMode = ref('shelves')
-const sidePanelCollapsed = ref(false)
+const sidePanelCollapsed = ref(true)
 const viewMode = ref('perspective')
 const displayMode = ref('3d')
 const selectedLayers = ref(Array.from({ length: COMMON_SHELF_LEVELS }, (_, index) => index + 1))
 const isFullscreen = ref(false)
 const webglError = ref(false)
 const editorVisible = ref(false)
-const editorMode = ref('edit')
 const editingShelf = ref(null)
 const editorSubmitting = ref(false)
-const editForm = reactive({ displayName: '', shelfNo: '', width: 4.2, depth: 0.9, height: 3.2, defaultLevels: 4 })
+const editForm = reactive({ displayName: '', shelfNo: '' })
 const qrVisible = ref(false)
 const qrDataUrl = ref('')
-const partModelMode = ref('hidden')
+const partModelMode = ref('all')
 const allLocatedParts = ref([])
-const editMode = ref(false)
-const layoutSaving = ref(false)
-const draggingShelf = ref(null)
-let dragStageRect = null
-let dragStartMouse = null
-let dragStartPos = null
 const canEditCurrentWorkshop = computed(() => canEditWorkshop(workshopCode.value))
 const stagingPoints = ref([])
-const stagingDialog = ref({ visible: false, editingId: null, name: '', description: '', positionX: 0, positionZ: 0 })
-const roomDialog = ref(false)
-const roomSaving = ref(false)
-const roomForm = reactive({ name: '', width: 18, depth: 32, height: 4.2, eastDirection: '+z', entranceWall: 'east', entranceOffset: 11.8, entranceWidth: 2.4 })
 const VENDOR_FILTER = '__VENDOR__'
 
 const workshopGroups = computed(() => [...new Set(shelves.value.map(item => item.workshopGroup).filter(Boolean))])
@@ -386,16 +327,14 @@ const groupFilters = computed(() => {
 const visibleShelves = computed(() => shelves.value.filter(item => shelfMatchesFilter(item, activeGroup.value)))
 const commonShelfLevels = computed(() => COMMON_SHELF_LEVELS)
 const selectedPartLocation = computed(() => resolvePartLocation(selectedPart.value || {}))
+const selectedPartDisplay = computed(() => locatedPartDisplay(selectedPart.value || {}))
 const allLayersSelected = computed(() => selectedLayers.value.length === COMMON_SHELF_LEVELS)
 const displayedShelfParts = computed(() => shelfParts.value.filter(part => selectedLayers.value.includes(Number(resolvePartLocation(part).layer))))
+const shelfPartsCountText = computed(() => shelfPartsLoading.value ? '加载中…' : `${displayedShelfParts.value.length} 条`)
 const layerStats = computed(() => Array.from({ length: COMMON_SHELF_LEVELS }, (_, index) => ({ layer: index + 1, count: shelfParts.value.filter(part => Number(resolvePartLocation(part).layer) === index + 1).length })))
-const numberedCount = computed(() => shelves.value.filter(item => item.shelfNo != null).length)
-const unnamedCount = computed(() => shelves.value.filter(item => item.shelfNo == null || item.displayName === '未命名').length)
-const totalParts = computed(() => shelves.value.reduce((sum, item) => sum + Number(item.partsCount || 0), 0))
-const totalLowStock = computed(() => shelves.value.reduce((sum, item) => sum + Number(item.lowStockCount || 0), 0))
 const editShelfNoText = computed(() => editForm.shelfNo ? `${String(editForm.shelfNo).padStart(2, '0')}号` : '')
-const editorRenumbering = computed(() => editorMode.value === 'edit' && editingShelf.value && String(editForm.shelfNo || '') !== String(editingShelf.value.shelfNo || ''))
-const partModelModeLabel = computed(() => ({ hidden: '隐藏备件', all: '全部备件', low: '低库存' }[partModelMode.value] || '隐藏备件'))
+const editorRenumbering = computed(() => editingShelf.value && String(editForm.shelfNo || '') !== String(editingShelf.value.shelfNo || ''))
+const partModelModeLabel = computed(() => ({ hidden: '隐藏备件', all: '全部备件', normal: '正常库存', low: '低库存' }[partModelMode.value] || '全部备件'))
 const selectedLocationSegments = computed(() => {
   const location = selectedPartLocation.value
   return {
@@ -417,12 +356,13 @@ const entrancePlanStyle = computed(() => {
   const span = ['west', 'east'].includes(wall) ? roomDepth.value : roomWidth.value
   const offset = Number(room.entranceOffset) || 0
   const position = ((span / 2 - offset) / span) * 100
-  if (wall === 'west') return { left: '-3px', top: `${position}%`, transform: 'translateY(-50%)' }
-  if (wall === 'east') return { right: '-3px', left: 'auto', top: `${position}%`, transform: 'translateY(-50%) rotate(180deg)' }
-  if (wall === 'north') return { top: '-3px', left: `${((offset + span / 2) / span) * 100}%`, transform: 'translateX(-50%) rotate(90deg)' }
-  return { bottom: '-3px', top: 'auto', left: `${((offset + span / 2) / span) * 100}%`, transform: 'translateX(-50%) rotate(-90deg)' }
+  // 与 planStyle 一致：俯视图将世界 X、Z 轴反向映射到屏幕。
+  if (wall === 'east') return { left: '-3px', top: `${position}%`, transform: 'translateY(-50%)', '--entrance-arrow': '0deg' }
+  if (wall === 'west') return { right: '-3px', left: 'auto', top: `${position}%`, transform: 'translateY(-50%)', '--entrance-arrow': '180deg' }
+  if (wall === 'north') return { top: '-3px', left: `${position}%`, transform: 'translateX(-50%)', '--entrance-arrow': '90deg' }
+  return { bottom: '-3px', top: 'auto', left: `${position}%`, transform: 'translateX(-50%)', '--entrance-arrow': '-90deg' }
 })
-const eastDirectionLabel = computed(() => ({ '+z': '↑ 东', '-z': '↓ 东', '+x': '→ 东', '-x': '← 东' }[currentRoom.value.eastDirection] || '↑ 东'))
+const eastDirectionLabel = computed(() => ({ '+z': '东 ↑', '-z': '东 ↓', '+x': '东 →', '-x': '东 ←' }[currentRoom.value.eastDirection] || '东 ↑'))
 
 let scene
 let camera
@@ -439,10 +379,52 @@ let partModelsRoot
 let roomRoot
 let cameraAnimation
 let pointerStart = null
+const stagePointers = new Set()
+let multiPointerGesture = false
+let previousStageAspect = null
 let partModelDrawToken = 0
+let partModelsRequestToken = 0
+let partSearchRequestToken = 0
+let shelfPartsRequestToken = 0
 const gltfLoader = new GLTFLoader()
 const customModelCache = new Map()
+const stockMaterialCache = new Map()
 const clickableMeshes = []
+
+function overviewTarget() {
+  return new THREE.Vector3(0, 1.2, 0)
+}
+
+function stageFramingScale(aspect = (stage.value?.clientWidth || 1) / (stage.value?.clientHeight || 1)) {
+  const direction = new THREE.Vector3(-.75,.65,-1.09).normalize()
+  const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),direction).normalize()
+  const up = new THREE.Vector3().crossVectors(direction,right).normalize()
+  const tanV = Math.tan(THREE.MathUtils.degToRad(camera?.fov || 42) / 2)
+  const tanH = tanV * Math.max(.25,aspect)
+  let distance = 0
+  // Fit each room corner to the viewport, including wall and shelf height.
+  for (const x of [-roomWidth.value/2,roomWidth.value/2]) for (const y of [-1.2,4.8]) for (const z of [-roomDepth.value/2,roomDepth.value/2]) {
+    const corner = new THREE.Vector3(x,y,z)
+    distance = Math.max(distance, corner.dot(direction) + Math.max(Math.abs(corner.dot(right))/tanH,Math.abs(corner.dot(up))/tanV))
+  }
+  return distance * 1.1
+}
+
+function overviewCameraPosition(mode, target = overviewTarget()) {
+  const aspect = (stage.value?.clientWidth || 1) / (stage.value?.clientHeight || 1)
+  if (mode === 'top') {
+    const tanV = Math.tan(THREE.MathUtils.degToRad(camera?.fov || 42)/2)
+    return new THREE.Vector3(target.x, Math.max(roomDepth.value/(2*tanV),roomWidth.value/(2*tanV*Math.max(.25,aspect)))*1.1+6,target.z+.01)
+  }
+  return target.clone().add(new THREE.Vector3(-.75,.65,-1.09).normalize().multiplyScalar(stageFramingScale(aspect)))
+}
+
+function eastVector(direction = currentRoom.value.eastDirection) {
+  return {
+    '+x': new THREE.Vector3(1, 0, 0), '-x': new THREE.Vector3(-1, 0, 0),
+    '+z': new THREE.Vector3(0, 0, 1), '-z': new THREE.Vector3(0, 0, -1)
+  }[direction] || new THREE.Vector3(1, 0, 0)
+}
 
 function formatNumber(value) { return Number(value || 0).toLocaleString('zh-CN') }
 function padShelf(value) { return String(value ?? '').padStart(2, '0') }
@@ -485,7 +467,7 @@ function planStyle(shelf) {
   const width = Math.max(Number(shelf.size?.width) || 2.8, 1.6)
   const depth = Math.max(Number(shelf.size?.depth) || 0.75, 0.6)
   return {
-    left: `${((x + roomWidth.value / 2) / roomWidth.value) * 100}%`,
+    left: `${((-x + roomWidth.value / 2) / roomWidth.value) * 100}%`,
     top: `${((roomDepth.value / 2 - z) / roomDepth.value) * 100}%`,
     width: `${Math.max((width / roomWidth.value) * 100, 6)}%`,
     height: `${Math.max((depth / roomDepth.value) * 100, 2.8)}%`,
@@ -522,13 +504,15 @@ async function loadLayout() {
 }
 
 async function searchParts(keyword) {
+  const requestToken = ++partSearchRequestToken
   const value = String(keyword || '').trim()
-  if (!value) { partOptions.value = []; return }
+  if (!value) { partOptions.value = []; partSearching.value = false; return }
   partSearching.value = true
   try {
     const result = await getParts({ page: 1, pageSize: 20, searchKeyword: value, workshopCode: workshopCode.value })
+    if (requestToken !== partSearchRequestToken) return
     partOptions.value = result.data || []
-  } finally { partSearching.value = false }
+  } finally { if (requestToken === partSearchRequestToken) partSearching.value = false }
 }
 
 async function changeWorkshop() {
@@ -551,7 +535,10 @@ function clearPart() {
 }
 
 async function setPartModelMode(mode) {
+  if (!['all','normal','low','hidden'].includes(mode)) return
+  partModelsRequestToken += 1
   partModelMode.value = mode
+  if (markerRoot) disposeChildren(markerRoot)
   if (mode === 'hidden') {
     allLocatedParts.value = []
     if (partModelsRoot) disposeChildren(partModelsRoot)
@@ -561,16 +548,22 @@ async function setPartModelMode(mode) {
 }
 
 async function loadPartModels() {
+  const requestToken = ++partModelsRequestToken
+  const requestedMode = partModelMode.value
+  const requestedWorkshop = workshopCode.value
   const rows = []
   let page = 1
   let total = 0
   do {
-    const result = await getParts({ page, pageSize: 200, workshopCode: workshopCode.value, ...(partModelMode.value === 'low' ? { lowStock: 1 } : {}) })
+    const result = await getParts({ page, pageSize: 200, workshopCode: requestedWorkshop, ...(requestedMode === 'low' ? { lowStock: 1 } : requestedMode === 'normal' ? { stockStatus: 'normal' } : {}) })
+    if (requestToken !== partModelsRequestToken || requestedMode !== partModelMode.value || requestedWorkshop !== workshopCode.value) return
     const items = result.data || []
+    if (!items.length && rows.length < total) throw new Error('备件分页加载不完整，请刷新后重试')
     rows.push(...items)
     total = Number(result.total || items.length)
     page += 1
-  } while (rows.length < total && page <= 20)
+  } while (rows.length < total)
+  if (requestToken !== partModelsRequestToken || requestedMode === 'hidden') return
   allLocatedParts.value = rows.filter(part => /^\d{6}$/.test(String(part.locationCode || '')))
   drawPartModels()
 }
@@ -586,11 +579,23 @@ function modelCategory(part) {
 }
 
 function modelUrlFor(part) {
-  return part.modelUrl || part.categoryModelUrl || ''
+  return warehouseModelUrl(part)
 }
 
 function modelScaleFor(part) {
-  return part.modelUrl ? (part.modelScale || 1) : (part.categoryModelScale || 1)
+  if (resolveEvidenceModel(part)) return 1
+  return part.categoryModelScale || 1
+}
+
+function modelFrontRotationFor(part) {
+  if (resolveEvidenceModel(part)) return 0
+  return Number(part.categoryFrontRotationY) || 0
+}
+
+function hasRenderedLocationModel(part) {
+  if (partModelMode.value === 'hidden') return false
+  const locationCode = String(resolvePartLocation(part).locationCode || '')
+  return Boolean(locationCode) && allLocatedParts.value.some(item => String(resolvePartLocation(item).locationCode || '') === locationCode)
 }
 
 const STOCK_MODEL_COLORS = {
@@ -633,41 +638,34 @@ function loadCustomModel(url) {
   const absoluteUrl = new URL(url, window.location.origin).href
   if (!customModelCache.has(absoluteUrl)) {
     customModelCache.set(absoluteUrl, new Promise((resolve, reject) => {
-      gltfLoader.load(absoluteUrl, gltf => resolve(gltf.scene), undefined, reject)
+      gltfLoader.load(absoluteUrl, gltf => {
+        try { const geometry=flattenStockModel(gltf.scene); resolve(geometry) }
+        catch(error){customModelCache.delete(absoluteUrl);reject(error)}
+        finally { gltf.scene.traverse(node=>{node.geometry?.dispose?.();const materials=Array.isArray(node.material)?node.material:[node.material];materials.forEach(m=>{m?.map?.dispose?.();m?.dispose?.()})}) }
+      }, undefined, error => { customModelCache.delete(absoluteUrl); reject(error) })
     }))
   }
   return customModelCache.get(absoluteUrl)
 }
 
-function cloneCustomModel(template) {
-  const clone = template.clone(true)
-  clone.traverse(node => {
-    if (!node.isMesh) return
-    node.geometry = node.geometry?.clone()
-    node.material = Array.isArray(node.material)
-      ? node.material.map(material => material.clone())
-      : node.material?.clone()
-  })
-  return clone
-}
-
-async function replaceWithCustomModel(anchor, fallback, part, placement, shelf, dimensions, lowStock, drawToken) {
+async function replaceWithCustomModel(anchor, fallback, part, placement, shelf, dimensions, lowStock, drawToken, isCurrent = () => drawToken === partModelDrawToken) {
   const modelUrl = modelUrlFor(part)
   if (!modelUrl) return
   try {
-    const template = await loadCustomModel(modelUrl)
-    if (drawToken !== partModelDrawToken || !anchor.parent) return
-    const model = cloneCustomModel(template)
-    applyStockStatusMaterial(model, lowStock)
+    const geometry = await loadCustomModel(modelUrl)
+    if (!isCurrent() || !anchor.parent) return
+    if(!stockMaterialCache.has(lowStock)) { const colors=stockModelColors(lowStock); stockMaterialCache.set(lowStock,new THREE.MeshStandardMaterial({color:colors.color,emissive:colors.emissive,emissiveIntensity:.34,roughness:.58,metalness:.08})) }
+    const model = new THREE.Mesh(geometry,stockMaterialCache.get(lowStock))
+    model.userData.sharedStockModel=true
+    // The saved category angle makes +Z the model's front. Shelf side 2 faces
+    // the opposite aisle, so rotate it another half turn before fitting.
+    model.rotation.y = modelFacingRotation(modelFrontRotationFor(part), placement.location.position)
+    model.updateMatrixWorld(true)
     const initialBox = new THREE.Box3().setFromObject(model)
     const initialSize = initialBox.getSize(new THREE.Vector3())
-    const modelScale = Math.max(Number(modelScaleFor(part)) || 1, 0.05)
-    const scale = Math.min(
-      dimensions.width / Math.max(initialSize.x, 0.001),
-      dimensions.height / Math.max(initialSize.y, 0.001),
-      dimensions.depth / Math.max(initialSize.z, 0.001)
-    ) * modelScale
-    model.scale.setScalar(scale)
+    const scale = modelFitScale(initialSize, dimensions, modelScaleFor(part))
+    if (!scale) throw new Error('模型尺寸无效')
+    model.scale.multiplyScalar(scale)
     model.updateMatrixWorld(true)
     const fittedBox = new THREE.Box3().setFromObject(model)
     const center = fittedBox.getCenter(new THREE.Vector3())
@@ -680,8 +678,10 @@ async function replaceWithCustomModel(anchor, fallback, part, placement, shelf, 
     fallback.geometry?.dispose()
     fallback.material?.dispose()
     anchor.add(model)
-  } catch {
-    // Keep the generated category model when a custom GLB/GLTF cannot be loaded.
+  } catch (error) {
+    if (!isCurrent() || !anchor.parent) return
+    console.warn(`3D模型加载失败，已使用通用模型：${modelUrl}`, error)
+    // 自包含 GLB 加载失败时保留系统通用模型，避免货位空白。
   }
 }
 
@@ -695,26 +695,24 @@ function drawPartModels() {
     const location = resolvePartLocation(part)
     const shelf = shelves.value.find(item => Number(item.shelfNo) === Number(location.shelf))
     if (!shelf || !shelfMatchesFilter(shelf, activeGroup.value)) continue
-    if (selectedShelf.value) {
-      if (shelf.id !== selectedShelf.value.id) continue
-      if (!selectedLayers.value.includes(Number(location.layer))) continue
-    }
+    // “展示全部/低库存”是全库模式，不应因用户刚刚点击过某个货架或层数而缩小范围。
     const groupKey = `${shelf.id}:${location.position}:${location.layer}:${location.location}`
     const group = groupedParts.get(groupKey)
     if (group) {
       group.parts.push(part)
-      if (part.modelUrl && !group.representative.modelUrl) group.representative = part
-      else if (!modelUrlFor(group.representative) && modelUrlFor(part)) group.representative = part
+      if (!modelUrlFor(group.representative) && modelUrlFor(part)) group.representative = part
+      if (String(part._id) === String(selectedPart.value?._id)) group.representative = part
     } else groupedParts.set(groupKey, { shelf, location, representative: part, parts: [part] })
   }
+  const pendingModels=[]
   for (const group of groupedParts.values()) {
     const { shelf, location } = group
-    const part = group.representative
+    const part = group.parts.find(item => String(item._id) === String(selectedPart.value?._id)) || group.representative
     const placement = getPartMarkerPlacement(shelf, part)
-    const slotWidth = Math.max(shelf.size.width / placement.slots, 0.1)
-    const width = Math.min(Math.max(slotWidth * 0.42, 0.09), 0.42)
-    const height = Math.min(Math.max(placement.layerHeight * 0.26, 0.08), 0.28)
-    const depth = Math.min(Math.max(shelf.size.depth * 0.22, 0.08), 0.22)
+    const { width, height, depth } = slotModelBounds({
+      usableWidth: placement.usableWidth, slots: placement.slots,
+      depth: shelf.size.depth, layerHeight: placement.layerHeight, sideZ: placement.z
+    })
     const low = group.parts.some(item => item.safetyStock != null && Number(item.totalStock) <= Number(item.safetyStock))
     const status = stockModelColors(low)
     const material = new THREE.MeshStandardMaterial({
@@ -731,27 +729,26 @@ function drawPartModels() {
       Math.min(Math.max(placement.z, -shelf.size.depth / 2 + depth / 2 + 0.08), shelf.size.depth / 2 - depth / 2 - 0.08)
     )
     if (model.geometry.type === 'CylinderGeometry') model.rotation.z = Math.PI / 2
+    // Apply the same envelope to fallback geometry (including rotated cylinders).
+    const fallbackBox = new THREE.Box3().setFromObject(model)
+    const fallbackScale = modelFitScale(fallbackBox.getSize(new THREE.Vector3()), { width, height, depth })
+    model.scale.multiplyScalar(fallbackScale || 1)
+    model.updateMatrixWorld(true)
+    const restingBox = new THREE.Box3().setFromObject(model)
+    model.position.y += placement.shelfSurfaceY - restingBox.min.y
     const anchor = new THREE.Group()
     anchor.position.set(shelf.position.x, 0, shelf.position.z)
     anchor.rotation.y = Number(shelf.position.rotationY || 0)
     anchor.add(model)
     partModelsRoot.add(anchor)
-    replaceWithCustomModel(anchor, model, part, placement, shelf, { width, height, depth }, low, drawToken)
+    pendingModels.push(replaceWithCustomModel(anchor, model, part, placement, shelf, { width, height, depth }, low, drawToken))
   }
-}
-
-function openModelLibrary() {
-  router.push({
-    path: '/model-library',
-    query: {
-      workshopCode: workshopCode.value,
-      search: selectedPart.value?.materialCode || ''
-    }
-  })
+  Promise.allSettled(pendingModels).then(()=>{if(drawToken===partModelDrawToken && partModelMode.value!=='hidden')instanceStockModels(partModelsRoot)})
 }
 
 async function locatePart(part) {
   selectedPart.value = part
+  allLocatedParts.value = allLocatedParts.value.map(item => String(item._id) === String(part._id) ? part : item)
   selectedPartId.value = part._id
   if (!partOptions.value.some(item => item._id === part._id)) partOptions.value = [part, ...partOptions.value]
   const location = resolvePartLocation(part)
@@ -770,6 +767,7 @@ async function locatePart(part) {
   const targetLayer = Number(location.layer)
   if (!selectedLayers.value.includes(targetLayer)) selectedLayers.value = [targetLayer]
   drawShelves()
+  drawPartModels()
   drawPartMarker(shelf, part)
   focusPart(shelf, part)
 }
@@ -784,8 +782,14 @@ async function locatePartById(id) {
 }
 
 async function selectShelf(shelf, focus = true, clearLocatedPart = true, resetLayers = true) {
+  const requestToken = ++shelfPartsRequestToken
   selectedShelf.value = shelf
   panelMode.value = 'parts'
+  if (sidePanelCollapsed.value) {
+    sidePanelCollapsed.value = false
+    await nextTick()
+    resizeScene()
+  }
   if (resetLayers) selectAllLayers()
   if (clearLocatedPart && !partBelongsToShelf(selectedPart.value || {}, shelf.shelfNo)) {
     selectedPart.value = null
@@ -794,12 +798,15 @@ async function selectShelf(shelf, focus = true, clearLocatedPart = true, resetLa
   drawShelves()
   if (selectedPart.value && partBelongsToShelf(selectedPart.value, shelf.shelfNo)) drawPartMarker(shelf, selectedPart.value)
   if (focus) focusShelf(shelf)
-  if (shelf.shelfNo == null) { shelfParts.value = []; return }
+  shelfParts.value = []
+  if (shelf.shelfNo == null) { shelfPartsLoading.value = false; return }
   shelfPartsLoading.value = true
   try {
     const result = await getParts({ page: 1, pageSize: 200, shelf: shelf.shelfNo, workshopCode: workshopCode.value })
-    shelfParts.value = result.data || []
-  } finally { shelfPartsLoading.value = false }
+    if (requestToken === shelfPartsRequestToken && selectedShelf.value?.id === shelf.id) shelfParts.value = result.data || []
+  } finally {
+    if (requestToken === shelfPartsRequestToken) shelfPartsLoading.value = false
+  }
 }
 
 function locationLink() {
@@ -843,141 +850,14 @@ function toggleSidePanel() {
   })
 }
 
-function toggleEditMode() {
-  if (editMode.value) { cancelEdit(); return }
-  if (!canEditCurrentWorkshop.value) { ElMessage.warning('当前角色无权编辑此车间'); return }
-  editMode.value = true
-  displayMode.value = '2d'
-  selectedShelf.value = null
-}
 
 function stagingStyle(sp) {
   const x = Number(sp.position?.x) || 0
   const z = Number(sp.position?.z) || 0
   return {
-    left: `${((x + roomWidth.value / 2) / roomWidth.value) * 100}%`,
+    left: `${((-x + roomWidth.value / 2) / roomWidth.value) * 100}%`,
     top: `${((roomDepth.value / 2 - z) / roomDepth.value) * 100}%`
   }
-}
-
-function openRoomEditor() {
-  const room = currentRoom.value
-  Object.assign(roomForm, {
-    name: room.name || '', width: roomWidth.value, depth: roomDepth.value,
-    height: Number(room.height) || 4.2, eastDirection: room.eastDirection || '+z',
-    entranceWall: room.entranceWall || 'west', entranceOffset: Number(room.entranceOffset) || 0,
-    entranceWidth: Number(room.entranceWidth) || 2.6
-  })
-  roomDialog.value = true
-}
-
-async function saveRoom() {
-  roomSaving.value = true
-  try {
-    await updateWarehouseRoom({ workshopCode: workshopCode.value, ...roomForm })
-    ElMessage.success('库房尺寸、朝向和入口已保存')
-    roomDialog.value = false
-    await loadLayout()
-  } finally { roomSaving.value = false }
-}
-
-function openStagingDialog(sp) {
-  if (!canEditCurrentWorkshop.value) { ElMessage.warning('当前角色无权编辑此车间'); return }
-  if (sp) {
-    stagingDialog.value = { visible: true, editingId: sp.id, name: sp.name, description: sp.description || '', positionX: sp.position.x, positionZ: sp.position.z }
-  } else {
-    stagingDialog.value = { visible: true, editingId: null, name: '', description: '', positionX: 0, positionZ: 0 }
-  }
-}
-
-async function saveStagingPoint() {
-  const d = stagingDialog.value
-  if (!d.name.trim()) { ElMessage.warning('请填写暂存点名称'); return }
-  try {
-    const data = { name: d.name.trim(), description: d.description.trim(), positionX: Number(d.positionX) || 0, positionZ: Number(d.positionZ) || 0, workshopCode: workshopCode.value }
-    if (d.editingId) {
-      await updateStagingPoint(d.editingId, data)
-      ElMessage.success('暂存点已更新')
-    } else {
-      await createStagingPoint(data)
-      ElMessage.success('暂存点已创建')
-    }
-    stagingDialog.value.visible = false
-    await loadLayout()
-  } catch (e) { ElMessage.error(e?.response?.data?.msg || '保存失败') }
-}
-
-async function removeStagingPoint() {
-  const id = stagingDialog.value.editingId
-  if (!id) return
-  try {
-    await ElMessageBox.confirm('确认删除此暂存点？', '删除', { type: 'warning' })
-    await deleteStagingPoint(id)
-    ElMessage.success('已删除')
-    stagingDialog.value.visible = false
-    await loadLayout()
-  } catch { /* cancel */ }
-}
-
-function cancelEdit() {
-  editMode.value = false
-  draggingShelf.value = null
-  loadLayout()
-}
-
-async function saveLayout() {
-  const moved = shelves.value.filter(item => item.positionOverridden)
-  if (!moved.length) { ElMessage.info('没有需要保存的布局变更'); editMode.value = false; return }
-  layoutSaving.value = true
-  try {
-    await Promise.all(moved.map(item => updateShelfPosition(item.id, {
-      positionX: item.position.x,
-      positionZ: item.position.z,
-      rotationY: item.position.rotationY || 0
-    })))
-    ElMessage.success(`已保存 ${moved.length} 个货架位置`)
-    editMode.value = false
-  } catch { ElMessage.error('保存失败，请重试') }
-  finally { layoutSaving.value = false }
-}
-
-async function resetShelfLayout(shelf) {
-  try {
-    await resetShelfPosition(shelf.id)
-    ElMessage.success('已恢复默认位置')
-    await loadLayout()
-  } catch { ElMessage.error('恢复失败') }
-}
-
-function startDrag(event, shelf) {
-  if (!editMode.value) return
-  event.preventDefault()
-  const twoStage = event.currentTarget.closest('.two-stage')
-  if (!twoStage) return
-  dragStageRect = twoStage.getBoundingClientRect()
-  dragStartMouse = { x: event.clientX, y: event.clientY }
-  dragStartPos = { x: shelf.position.x, z: shelf.position.z }
-  draggingShelf.value = shelf.id
-  const onMove = e => {
-    if (!dragStageRect || !dragStartMouse) return
-    const item = shelves.value.find(s => s.id === shelf.id)
-    if (!item) return
-    const dx = (e.clientX - dragStartMouse.x) / dragStageRect.width * 18
-    const dz = -(e.clientY - dragStartMouse.y) / dragStageRect.height * (PHYSICAL_ROOM_HALF_DEPTH * 2)
-    item.position = {
-      x: Math.max(-8.5, Math.min(8.5, dragStartPos.x + dx)),
-      z: Math.max(-15.5, Math.min(15.5, dragStartPos.z + dz)),
-      rotationY: item.position.rotationY || 0
-    }
-    item.positionOverridden = true
-  }
-  const onUp = () => {
-    draggingShelf.value = null
-    document.removeEventListener('mousemove', onMove)
-    document.removeEventListener('mouseup', onUp)
-  }
-  document.addEventListener('mousemove', onMove)
-  document.addEventListener('mouseup', onUp)
 }
 
 function initScene() {
@@ -987,12 +867,14 @@ function initScene() {
     scene.background = new THREE.Color(0xf4f5f7)
     scene.fog = new THREE.Fog(0xf4f5f7, 55, 130)
     camera = new THREE.PerspectiveCamera(43, 1, 0.1, 200)
-    camera.position.set(-24, 22, -35)
+    camera.up.set(0, 1, 0)
+    camera.position.copy(overviewCameraPosition('perspective'))
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    const mobileGraphics = window.matchMedia('(max-width: 680px), (pointer: coarse)').matches
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, mobileGraphics ? 1.5 : 2))
     renderer.shadowMap.enabled = true
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.shadowMap.type = THREE.PCFShadowMap
     renderer.outputColorSpace = THREE.SRGBColorSpace
     stage.value.appendChild(renderer.domElement)
 
@@ -1005,19 +887,22 @@ function initScene() {
     controls.dampingFactor = 0.08
     controls.enableRotate = true
     controls.enablePan = true
+    controls.touches.ONE = THREE.TOUCH.ROTATE
+    controls.touches.TWO = THREE.TOUCH.DOLLY_PAN
     controls.rotateSpeed = 0.72
     controls.zoomSpeed = 0.9
     controls.screenSpacePanning = true
     controls.minDistance = 2.1
-    controls.maxDistance = 72
+    controls.maxDistance = Math.max(72, overviewCameraPosition('perspective').distanceTo(overviewTarget()) * 1.4)
     controls.maxPolarAngle = Math.PI / 2.03
-    controls.target.set(0, 1.2, 0)
+    controls.target.copy(overviewTarget())
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0x9aa4b2, 2.2))
     const sun = new THREE.DirectionalLight(0xffffff, 3.1)
     sun.position.set(-8, 18, -12)
     sun.castShadow = true
-    sun.shadow.mapSize.set(2048, 2048)
+    const shadowResolution = mobileGraphics ? 1024 : 2048
+    sun.shadow.mapSize.set(shadowResolution, shadowResolution)
     sun.shadow.camera.left = -16
     sun.shadow.camera.right = 16
     sun.shadow.camera.top = 24
@@ -1037,7 +922,8 @@ function initScene() {
     renderer.domElement.addEventListener('pointercancel', onStagePointerCancel)
     renderer.domElement.addEventListener('contextmenu', preventStageContextMenu)
     renderer.domElement.addEventListener('auxclick', preventStageAuxClick)
-    renderer.domElement.addEventListener('dblclick', () => setView('perspective'))
+    renderer.domElement.addEventListener('wheel', onStageWheel, { capture: true, passive: false })
+    renderer.domElement.addEventListener('dblclick', resetPerspectiveView)
     resizeObserver = new ResizeObserver(resizeScene)
     resizeObserver.observe(stage.value)
     resizeScene()
@@ -1062,6 +948,19 @@ function drawRoom() {
   grid.scale.set(width / Math.max(width, depth), 1, depth / Math.max(width, depth))
   grid.position.y = 0.008
   roomRoot.add(grid)
+  const directionOrigin = new THREE.Vector3(-width / 2 + 1.25, 0.08, -depth / 2 + 1.4)
+  const direction = eastVector()
+  const directionArrow = new THREE.ArrowHelper(direction, directionOrigin, 2.2, 0xc91f2c, 0.5, 0.28)
+  directionArrow.line.material.depthTest = false
+  directionArrow.cone.material.depthTest = false
+  directionArrow.renderOrder = 6
+  roomRoot.add(directionArrow)
+  const eastLabel = document.createElement('div')
+  eastLabel.className = 'east-label-3d'
+  eastLabel.textContent = '东'
+  const eastLabelObject = new CSS2DObject(eastLabel)
+  eastLabelObject.position.copy(directionOrigin).add(direction.clone().multiplyScalar(2.55)).add(new THREE.Vector3(0, 0.18, 0))
+  roomRoot.add(eastLabelObject)
   addRoomWalls(roomRoot)
 }
 
@@ -1174,9 +1073,11 @@ function createShelf(shelf, highlighted, hiddenByFilter) {
   const width = shelf.size.width
   const depth = shelf.size.depth
   const height = shelf.size.height
-  const color = highlighted ? 0xe3a321 : 0x1479c9
-  const frameMaterial = new THREE.MeshStandardMaterial({ color, metalness: 0.34, roughness: 0.42 })
-  const boardMaterial = new THREE.MeshStandardMaterial({ color: highlighted ? 0xffd778 : 0x3b95d2, metalness: 0.26, roughness: 0.58 })
+  // 实体货架统一蓝色，与备件的红/绿库存状态分离；工段颜色留给铭牌和 2D。
+  const frameColor = new THREE.Color(highlighted ? 0x238ed1 : 0x1875b8)
+  const boardColor = new THREE.Color(highlighted ? 0x73bdeb : 0x439ed1)
+  const frameMaterial = new THREE.MeshStandardMaterial({ color: frameColor, metalness: 0.34, roughness: 0.42 })
+  const boardMaterial = new THREE.MeshStandardMaterial({ color: boardColor, metalness: 0.26, roughness: 0.58 })
   const postSize = 0.1
   for (const x of [-width / 2, width / 2]) {
     for (const z of [-depth / 2, depth / 2]) {
@@ -1304,7 +1205,9 @@ function getPartMarkerPlacement(shelf, part) {
   const location = resolvePartLocation(part)
   const levels = COMMON_SHELF_LEVELS
   const layer = Math.min(Math.max(Number(location.layer || 1), 1), levels)
-  const slots = Math.max(Number(shelf.maxSlot || 6), Number(location.location || 1), 1)
+  // 每一侧、每一层的货位号都是独立序列。不能使用整座货架的最大货位号，
+  // 否则货位较少的层只会挤在半截货架上。接口容量和当前已加载备件互为兜底。
+  const slots = slotCapacityForLocation(shelf, part, [...allLocatedParts.value, ...shelfParts.value])
   const slot = Math.min(Math.max(Number(location.location || 1), 1), slots)
   const usableWidth = Math.max(shelf.size.width - 0.82, 0.32)
   const x = sideAwareSlotLocalX(usableWidth, slots, slot, location.position)
@@ -1313,7 +1216,8 @@ function getPartMarkerPlacement(shelf, part) {
   const shelfSurfaceY = layerLocalY(shelf.size.height, levels, layer)
   const y = shelfSurfaceY + markerHeight / 2
   const z = sideLocalZ(shelf.size.depth, location.position)
-  return { location, levels, layer, slots, slot, x, y, z, layerHeight, markerHeight, shelfSurfaceY, usableWidth }
+  const sideDirection = String(location.position) === '2' ? -1 : 1
+  return { location, levels, layer, slots, slot, x, y, z, sideDirection, layerHeight, markerHeight, shelfSurfaceY, usableWidth }
 }
 
 function shelfLocalToWorld(shelf, localPosition) {
@@ -1332,23 +1236,7 @@ function drawPartMarker(shelf, part) {
   markerAnchor.rotation.y = Number(shelf.position.rotationY || 0)
 
   const layerHeight = placement.layerHeight
-  // 全部/低库存模式下目标备件已经存在，点击时只显示定位箭头，避免再叠加
-  // 一套模型产生重影和白色“虚线”。隐藏备件模式才补画一个实体定位模型。
-  if (partModelMode.value === 'hidden') {
-    const slotWidth = placement.usableWidth / placement.slots
-    const markerWidth = Math.min(Math.max(slotWidth * 0.56, 0.12), Math.max(slotWidth - 0.08, 0.12))
-    const markerDepth = Math.min(Math.max(shelf.size.depth * 0.22, 0.12), Math.max(shelf.size.depth - 0.3, 0.12))
-    const low = part.safetyStock != null && Number(part.totalStock) <= Number(part.safetyStock)
-    const status = stockModelColors(low)
-    const locationBlock = new THREE.Mesh(
-      partGeometry(part, markerWidth, placement.markerHeight, markerDepth),
-      new THREE.MeshStandardMaterial({ color: status.color, emissive: status.emissive, emissiveIntensity: 0.34, roughness: 0.58 })
-    )
-    locationBlock.position.set(placement.x, placement.y, placement.z)
-    if (locationBlock.geometry.type === 'CylinderGeometry') locationBlock.rotation.z = Math.PI / 2
-    markerAnchor.add(locationBlock)
-  }
-
+  // Selection adds a locator only; it never bypasses the model visibility filter.
   const pointerMaterial = new THREE.MeshBasicMaterial({ color: 0xffb11b, depthTest: false, depthWrite: false })
   const pointerHead = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.36, 4), pointerMaterial)
   pointerHead.rotation.z = Math.PI
@@ -1374,10 +1262,14 @@ function drawPartMarker(shelf, part) {
   labelObject.position.set(placement.x, markerTop + Math.max(layerHeight * 0.82, 0.66), placement.z)
   markerAnchor.add(labelObject)
   markerRoot.add(markerAnchor)
+
 }
 
 function onStagePointerDown(event) {
-  pointerStart = { x: event.clientX, y: event.clientY, button: event.button, pointerId: event.pointerId }
+  if (!stagePointers.size) multiPointerGesture = false
+  stagePointers.add(event.pointerId)
+  if (stagePointers.size > 1) multiPointerGesture = true
+  if (!multiPointerGesture) pointerStart = { x: event.clientX, y: event.clientY, button: event.button, pointerId: event.pointerId }
   if (event.button === 2) {
     event.preventDefault()
     renderer?.domElement?.setPointerCapture?.(event.pointerId)
@@ -1385,7 +1277,13 @@ function onStagePointerDown(event) {
 }
 
 function onStageClick(event) {
+  stagePointers.delete(event.pointerId)
+  if (multiPointerGesture) {
+    if (!stagePointers.size) { multiPointerGesture = false; pointerStart = null }
+    return
+  }
   if (!renderer || !camera || !stage.value) return
+  if (!pointerStart || pointerStart.pointerId !== event.pointerId) return
   const moved = pointerStart && Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 6
   const button = pointerStart?.button ?? event.button
   pointerStart = null
@@ -1403,7 +1301,9 @@ function onStageClick(event) {
   if (hit?.object?.userData?.shelf) selectShelf(hit.object.userData.shelf, true)
 }
 
-function onStagePointerCancel() {
+function onStagePointerCancel(event) {
+  stagePointers.delete(event.pointerId)
+  if (!stagePointers.size) multiPointerGesture = false
   pointerStart = null
 }
 
@@ -1417,6 +1317,17 @@ function preventStageAuxClick(event) {
   event.stopPropagation()
 }
 
+function onStageWheel(event) {
+  if (!controls || event.ctrlKey) return
+  // 普通滚轮继续滚动页面；只有 Ctrl+滚轮才缩放3D，避免大画布把页面锁住。
+  controls.enableZoom = false
+  queueMicrotask(() => { if (controls) controls.enableZoom = true })
+}
+
+function resetPerspectiveView() {
+  setView('perspective', true)
+}
+
 function focusShelf(shelf) {
   if (!camera || !controls) return
   const target = new THREE.Vector3(shelf.position.x, 1.35, shelf.position.z)
@@ -1424,7 +1335,7 @@ function focusShelf(shelf) {
   camera.up.set(0, isTop ? 0 : 1, isTop ? 1 : 0)
   const destination = isTop
     ? new THREE.Vector3(target.x, 30, target.z + 0.01)
-    : new THREE.Vector3(target.x - 14, 11.2, target.z - 16.5)
+    : target.clone().add(new THREE.Vector3(-14, 9.85, -16.5))
   cameraAnimation = { start: performance.now(), duration: 720, fromPosition: camera.position.clone(), toPosition: destination, fromTarget: controls.target.clone(), toTarget: target }
 }
 
@@ -1437,18 +1348,28 @@ function focusPart(shelf, part) {
   const shelfRotation = Number(shelf.position.rotationY || 0)
   const outward = new THREE.Vector3(0, 0, placement.sideDirection).applyAxisAngle(new THREE.Vector3(0, 1, 0), shelfRotation)
   const tangent = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), shelfRotation)
+  // 镜头放在当前排货架的通道内，并从货位朝货架中心斜看。固定向左偏会让
+  // 01等边缘货位正好被立柱挡住；距离过大又会穿过下一排货架。
+  const aisleDistance = shelf.size.depth * 0.5 + 2.15
+  const centerwardOffset = Math.min(Math.max(-placement.x * 0.58, -1.35), 1.35)
   const destination = isTop
-    ? new THREE.Vector3(target.x, 43, target.z + 0.01)
-    : target.clone().addScaledVector(outward, shelf.size.depth * 0.5 + 4.2).addScaledVector(tangent, -1).add(new THREE.Vector3(0, 2.15, 0))
+    ? new THREE.Vector3(target.x, 30, target.z + 0.01)
+    : target.clone().addScaledVector(outward, aisleDistance).addScaledVector(tangent, centerwardOffset).add(new THREE.Vector3(0, 2.15, 0))
   cameraAnimation = { start: performance.now(), duration: 760, fromPosition: camera.position.clone(), toPosition: destination, fromTarget: controls.target.clone(), toTarget: target }
 }
 
-function setView(mode) {
+function setView(mode, resetTarget = false) {
   viewMode.value = mode
   if (!camera || !controls) return
-  const target = selectedShelf.value ? new THREE.Vector3(selectedShelf.value.position.x, 1.2, selectedShelf.value.position.z) : new THREE.Vector3(0, 1.2, 0)
+  const target = !resetTarget && selectedShelf.value
+    ? new THREE.Vector3(selectedShelf.value.position.x, 1.2, selectedShelf.value.position.z)
+    : overviewTarget()
   camera.up.set(0, mode === 'top' ? 0 : 1, mode === 'top' ? 1 : 0)
-  const destination = mode === 'top' ? new THREE.Vector3(target.x, 45, target.z + 0.01) : new THREE.Vector3(-24, 22, -35)
+  const destination = resetTarget || !selectedShelf.value
+    ? overviewCameraPosition(mode, target)
+    : mode === 'top'
+      ? new THREE.Vector3(target.x, 30, target.z + 0.01)
+      : target.clone().add(new THREE.Vector3(-14, 9.85, -16.5))
   cameraAnimation = { start: performance.now(), duration: 800, fromPosition: camera.position.clone(), toPosition: destination, fromTarget: controls.target.clone(), toTarget: target }
 }
 
@@ -1470,16 +1391,29 @@ function resizeScene() {
   if (!stage.value || !camera || !renderer || !labelRenderer) return
   const width = Math.max(stage.value.clientWidth, 1)
   const height = Math.max(stage.value.clientHeight, 1)
-  camera.aspect = width / height
+  const aspect = width / height
+  if (previousStageAspect && controls) {
+    const ratio = stageFramingScale(aspect) / stageFramingScale(previousStageAspect)
+    camera.position.sub(controls.target).multiplyScalar(ratio).add(controls.target)
+    if (cameraAnimation) {
+      cameraAnimation.fromPosition.sub(cameraAnimation.fromTarget).multiplyScalar(ratio).add(cameraAnimation.fromTarget)
+      cameraAnimation.toPosition.sub(cameraAnimation.toTarget).multiplyScalar(ratio).add(cameraAnimation.toTarget)
+    }
+    controls.maxDistance = Math.max(72, overviewCameraPosition('perspective').distanceTo(overviewTarget()) * 1.4)
+  }
+  previousStageAspect = aspect
+  camera.aspect = aspect
   camera.updateProjectionMatrix()
-  renderer.setSize(width, height, false)
+  renderer.setSize(width, height, true)
   labelRenderer.setSize(width, height)
 }
 
 function disposeChildren(parent) {
   while (parent.children.length) {
-    const child = parent.children.pop()
+    const child = parent.children[parent.children.length - 1]
+    parent.remove(child)
     child.traverse?.(node => {
+      if(node.userData?.sharedStockModel){node.dispose?.();return}
       node.geometry?.dispose?.()
       if (Array.isArray(node.material)) node.material.forEach(material => { material.map?.dispose?.(); material.dispose?.() })
       else { node.material?.map?.dispose?.(); node.material?.dispose?.() }
@@ -1516,28 +1450,12 @@ function handleFullscreenChange() {
 }
 
 function openShelfEditor(shelf) {
-  editorMode.value = 'edit'
   editingShelf.value = shelf
   editForm.displayName = shelf.customName || ''
   editForm.shelfNo = shelf.shelfNo == null ? '' : String(shelf.shelfNo)
-  editForm.width = shelf.size?.width || 4.2
-  editForm.depth = shelf.size?.depth || 0.9
-  editForm.height = shelf.size?.height || 3.2
-  editForm.defaultLevels = shelf.levels || 4
   editorVisible.value = true
 }
 
-function openShelfCreator() {
-  editorMode.value = 'create'
-  editingShelf.value = { workshopGroup: activeGroup.value || workshopOptions.value.find(w => w.code === workshopCode.value)?.name || '未分组' }
-  editForm.displayName = ''
-  editForm.shelfNo = ''
-  editForm.width = 4.2
-  editForm.depth = 0.9
-  editForm.height = 3.2
-  editForm.defaultLevels = 4
-  editorVisible.value = true
-}
 
 function sanitizeShelfNo(value) { editForm.shelfNo = String(value || '').replace(/\D/g, '').slice(0, 2) }
 
@@ -1546,27 +1464,6 @@ async function submitShelfEdit() {
   const nextShelfNo = editForm.shelfNo === '' ? null : Number(editForm.shelfNo)
   if (nextShelfNo !== null && (!Number.isInteger(nextShelfNo) || nextShelfNo < 1 || nextShelfNo > 99)) {
     ElMessage.warning('货架号必须是 1 至 99 的整数')
-    return
-  }
-
-  if (editorMode.value === 'create') {
-    editorSubmitting.value = true
-    try {
-      const result = await createWarehouseShelf({
-        workshopCode: workshopCode.value,
-        shelfNo: nextShelfNo,
-        displayName: editForm.displayName
-      })
-      const shelfId = result.data?.id
-      if (shelfId && (editForm.width !== 4.2 || editForm.depth !== 0.9 || editForm.height !== 3.2 || editForm.defaultLevels !== 4)) {
-        await updateShelfDimensions(shelfId, {
-          width: editForm.width, depth: editForm.depth, height: editForm.height, defaultLevels: editForm.defaultLevels
-        })
-      }
-      ElMessage.success(result.msg || '货架已创建')
-      editorVisible.value = false
-      await loadLayout()
-    } finally { editorSubmitting.value = false }
     return
   }
 
@@ -1586,13 +1483,7 @@ async function submitShelfEdit() {
   editorSubmitting.value = true
   try {
     await updateWarehouseShelf(editingShelf.value.id, { displayName: editForm.displayName, shelfNo: nextShelfNo, confirmRenumber })
-    const dimChanged = editForm.width !== (editingShelf.value.size?.width || 4.2) || editForm.depth !== (editingShelf.value.size?.depth || 0.9) || editForm.height !== (editingShelf.value.size?.height || 3.2) || editForm.defaultLevels !== (editingShelf.value.levels || 4)
-    if (dimChanged) {
-      await updateShelfDimensions(editingShelf.value.id, {
-        width: editForm.width, depth: editForm.depth, height: editForm.height, defaultLevels: editForm.defaultLevels
-      })
-    }
-    ElMessage.success('货架信息已更新')
+    ElMessage.success('货架标牌已更新，实体布局未改变')
     editorVisible.value = false
     await loadLayout()
     const updated = shelves.value.find(item => item.id === editingShelf.value.id)
@@ -1600,25 +1491,8 @@ async function submitShelfEdit() {
   } finally { editorSubmitting.value = false }
 }
 
-async function removeShelf() {
-  if (!editingShelf.value) return
-  try {
-    await ElMessageBox.confirm(
-      `确认删除货架"${editingShelf.value.displayName || editingShelf.value.shelfNo + '号'}"吗？删除后不可恢复。`,
-      '删除货架',
-      { type: 'warning', confirmButtonText: '确认删除', cancelButtonText: '取消' }
-    )
-    await deleteWarehouseShelf(editingShelf.value.id)
-    ElMessage.success('货架已删除')
-    editorVisible.value = false
-    selectedShelf.value = null
-    await loadLayout()
-  } catch { /* cancel */ }
-}
-
 watch(activeGroup, () => { drawShelves(); drawPartModels() })
 watch(selectedLayers, layers => {
-  drawPartModels()
   if (!markerRoot) return
   disposeChildren(markerRoot)
   if (!selectedPart.value || !selectedShelf.value) return
@@ -1628,7 +1502,6 @@ watch(selectedLayers, layers => {
   }
 }, { deep: true })
 watch(displayMode, async mode => {
-  if (mode === '3d' && editMode.value) editMode.value = false
   await nextTick()
   if (mode === '3d') {
     window.setTimeout(resizeScene, 40)
@@ -1645,6 +1518,12 @@ onMounted(async () => {
   if (route.query.partId) await locatePartById(route.query.partId)
 })
 onBeforeUnmount(() => {
+  partModelDrawToken++
+  partModelsRequestToken++
+  for(const value of customModelCache.values())value.then(g=>g.dispose()).catch(()=>{})
+  customModelCache.clear()
+  for(const material of stockMaterialCache.values())material.dispose()
+  stockMaterialCache.clear()
   cancelAnimationFrame(animationFrame)
   resizeObserver?.disconnect()
   document.removeEventListener('fullscreenchange', handleFullscreenChange)
@@ -1654,6 +1533,8 @@ onBeforeUnmount(() => {
   renderer?.domElement?.removeEventListener('pointercancel', onStagePointerCancel)
   renderer?.domElement?.removeEventListener('contextmenu', preventStageContextMenu)
   renderer?.domElement?.removeEventListener('auxclick', preventStageAuxClick)
+  renderer?.domElement?.removeEventListener('wheel', onStageWheel, { capture: true })
+  renderer?.domElement?.removeEventListener('dblclick', resetPerspectiveView)
   controls?.dispose()
   disposeChildren(shelfRoot || new THREE.Group())
   disposeChildren(markerRoot || new THREE.Group())
@@ -1674,17 +1555,7 @@ onBeforeUnmount(() => {
 .warehouse-hero h2 { margin:0;font-size:29px;letter-spacing:.02em; }
 .warehouse-hero p { margin:8px 0 0;color:rgba(255,255,255,.76);font-size:13px; }
 .hero-actions { display:flex;align-items:center;gap:10px; }
-.hero-actions :deep(.el-button:not(.el-button--primary)) { color:#fff;border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.1); }
-.warehouse-metrics { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px; }
-.warehouse-metrics article { position:relative;min-height:112px;padding:18px 20px;border:1px solid #e3e6eb;border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(23,32,51,.04); }
-.warehouse-metrics article::before { content:"";position:absolute;inset:0 auto 0 0;width:4px;border-radius:16px 0 0 16px;background:#d98c92; }
-.warehouse-metrics article:nth-child(2)::before { background:#8792a2; }
-.warehouse-metrics article:nth-child(3)::before { background:#4a9180; }
-.warehouse-metrics article.is-alert::before { background:#e3a321; }
-.warehouse-metrics span,.warehouse-metrics small,.warehouse-metrics strong { display:block; }
-.warehouse-metrics span { color:#687386;font-size:12px;font-weight:700; }
-.warehouse-metrics strong { margin-top:8px;font-size:26px;line-height:1; }
-.warehouse-metrics small { margin-top:7px;color:#9aa2b1;font-size:11px; }
+.hero-actions :deep(.el-button:not(.el-button--primary)) { color:#475569;border-color:#dcdfe6;background:#fff; }
 .control-panel { display:grid;grid-template-columns:minmax(280px,.85fr) minmax(170px,.38fr) minmax(420px,1.35fr);gap:18px;align-items:end;margin-bottom:16px;padding:17px 20px; }
 .control-panel label { display:block;margin-bottom:7px;color:#596274;font-size:11px;font-weight:800; }
 .group-filter { min-width:0; }
@@ -1710,8 +1581,8 @@ onBeforeUnmount(() => {
 .direction-pill { display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #f0c4c7;border-radius:999px;color:var(--crimson);background:#fff7f7;font-size:11px;font-weight:800; }
 .direction-pill span { margin:0;color:var(--crimson);font-size:17px; }
 .three-stage { position:relative;height:680px;overflow:hidden;background:radial-gradient(circle at 50% 20%,#fff 0%,#eff1f3 70%); }
-.three-stage canvas,.three-stage :deep(.label-layer) { position:absolute;inset:0;width:100%;height:100%; }
-.three-stage canvas { cursor:grab;touch-action:none; }.three-stage canvas:active { cursor:grabbing; }
+.three-stage :deep(canvas),.three-stage :deep(.label-layer) { position:absolute;inset:0;width:100%!important;height:100%!important; }
+.three-stage :deep(canvas) { cursor:grab;touch-action:none; }.three-stage :deep(canvas:active) { cursor:grabbing; }
 .three-stage :deep(.label-layer) { pointer-events:none; }
 .three-stage :deep(.part-location-card) { position:relative;min-width:142px;padding:9px 11px;border:1px solid rgba(255,255,255,.86);border-radius:10px;color:#fff;background:linear-gradient(145deg,#087b59,#10a775);box-shadow:0 9px 24px rgba(6,95,67,.32);white-space:nowrap; }
 .three-stage :deep(.part-location-card::after) { content:"";position:absolute;left:50%;bottom:-7px;width:13px;height:13px;border-right:1px solid rgba(255,255,255,.72);border-bottom:1px solid rgba(255,255,255,.72);background:#10a775;transform:translateX(-50%) rotate(45deg); }
@@ -1719,7 +1590,8 @@ onBeforeUnmount(() => {
 .three-stage :deep(.part-location-card span) { color:#ffe29a;font-size:9px;font-weight:900;letter-spacing:.08em; }
 .three-stage :deep(.part-location-card strong) { max-width:210px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;font-size:12px; }
 .three-stage :deep(.part-location-card small) { margin-top:4px;color:#d9fff2;font-size:10px;font-weight:800; }
-.stage-hint { position:absolute;left:16px;bottom:14px;z-index:2;padding:7px 10px;border:1px solid rgba(255,255,255,.65);border-radius:8px;color:#667085;background:rgba(255,255,255,.76);backdrop-filter:blur(8px);font-size:10px;pointer-events:none; }
+.three-stage :deep(.east-label-3d) { min-width:34px;padding:5px 10px;border:2px solid #fff;border-radius:999px;color:#fff;background:#c91f2c;box-shadow:0 5px 14px rgba(143,23,32,.3);font-size:13px;font-weight:900;text-align:center; }
+.stock-model-legend{position:absolute;right:16px;bottom:14px;z-index:2;display:flex;gap:10px;padding:7px 10px;border:1px solid rgba(255,255,255,.7);border-radius:8px;color:#566174;background:rgba(255,255,255,.86);font-size:10px;pointer-events:none}.stock-model-legend span{display:flex;align-items:center;gap:4px}.stock-model-legend i{width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 2px #fff}.stock-model-legend i.normal{background:#19a974}.stock-model-legend i.low{background:#d9222f}
 .stage-loading,.stage-error { position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#6b7280;background:rgba(244,245,247,.92); }
 .stage-loading .el-icon,.stage-error .el-icon { color:var(--crimson);font-size:28px; }.stage-error strong { color:#273244; }.stage-error span { font-size:12px; }
 .shelf-panel { min-width:0;height:742px;display:flex;flex-direction:column;overflow:hidden; }
@@ -1730,14 +1602,14 @@ onBeforeUnmount(() => {
 .panel-tabs button { min-height:34px;border:0;border-radius:8px;color:#6b7483;background:transparent;cursor:pointer;font-size:11px;font-weight:700; }
 .panel-tabs button.active { color:#8f1720;background:#fff;box-shadow:0 2px 8px rgba(23,32,51,.08); }
 .panel-tabs b { display:inline-grid;min-width:18px;height:18px;place-items:center;margin-left:3px;border-radius:9px;color:inherit;background:#f4e6e7;font-size:9px; }
-.located-part { flex:none;display:grid;grid-template-columns:37px minmax(0,1fr);gap:10px;margin:12px 12px 0;padding:13px;border:1px solid #bce7da;border-radius:13px;background:#f2fbf8; }
-.located-part.is-compact { margin-top:10px;padding:10px 12px;grid-template-columns:34px minmax(0,1fr);gap:8px; }
-.located-part.is-compact .located-icon { width:34px;height:34px;border-radius:10px;font-size:17px; }
-.located-part.is-compact .location-path { margin-top:1px;padding-top:8px; }
-.located-icon { width:37px;height:37px;display:grid;place-items:center;border-radius:11px;color:#fff;background:var(--teal);font-size:19px; }
-.located-part span,.located-part strong,.located-part small { display:block; }.located-part span { color:#578578;font-size:9px;font-weight:800; }.located-part strong { margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px; }.located-part small { margin-top:3px;overflow:hidden;text-overflow:ellipsis;color:#71837e;font-size:9px;white-space:nowrap; }
-.location-path { grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:3px;padding-top:10px;border-top:1px dashed #b9ddd3; }
-.location-path b { padding:4px 5px;border-radius:5px;color:#147355;background:#fff;font-size:9px; }.location-path i { width:10px;height:1px;background:#8ecbbb; }
+.located-part { flex:none;display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;margin:12px 12px 0;padding:14px;border:1px solid #c8e6dc;border-left:3px solid #15936e;border-radius:12px;background:#fff; }
+.located-icon { width:34px;height:34px;display:grid;place-items:center;border-radius:10px;color:#168663;background:#eaf7f1;font-size:18px; }
+.located-identity{min-width:0}.located-identity>strong{display:block;color:#182f2a;font-size:13px;line-height:1.55;overflow-wrap:anywhere;white-space:normal}
+.located-code{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;margin-top:5px}.located-code>span{color:#82948d;font-size:10px}.located-code code{color:#526b62;font-size:12px;overflow-wrap:anywhere}
+.located-spec{grid-column:1/-1;margin:0;color:#657b72;font-size:12px;line-height:1.5;overflow-wrap:anywhere}.located-spec>span{margin-right:8px;color:#8a9993;font-size:11px}
+.located-location{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:3px 0 0;padding:10px 0;border-radius:9px;background:#f0f8f4;text-align:center}
+.located-location>div+div{border-left:1px solid #dbeae3}.located-location dt{color:#7c9488;font-size:10px}.located-location dd{margin:4px 0 0;color:#176749;font-size:15px;font-weight:750}
+.located-qr{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:6px 12px;border:1px solid #d7e7df;border-radius:8px;color:#217759;background:#fff;font-size:12px;font-weight:600;cursor:pointer}.located-qr:hover{background:#f0f8f4;border-color:#9dcbb8}.located-qr:focus-visible{outline:2px solid #15936e;outline-offset:2px}
 .selected-shelf-card { flex:none;margin:12px 12px 0;padding:13px;border:1px solid #efd7d9;border-radius:13px;background:#fff8f8; }
 .shelf-card-top { display:flex;align-items:flex-start;justify-content:space-between;gap:12px; }.shelf-card-top > div { min-width:0; }.shelf-card-top > div span,.shelf-card-top > div strong { display:block; }.shelf-card-top > div span { color:#a27478;font-size:9px; }.shelf-card-top > div strong { margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px; }
 .shelf-kind-badge { flex:none;min-width:72px;display:inline-flex!important;align-items:center;justify-content:center;padding:6px 10px;border:1px solid #ded6ee;border-radius:8px;color:#68499a!important;background:#f7f4fc;font-size:10px!important;font-weight:700;line-height:1;white-space:nowrap;word-break:keep-all; }
@@ -1755,9 +1627,6 @@ onBeforeUnmount(() => {
 .dim-row { display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px }
 .dim-row label { font-size:13px;color:#475467;white-space:nowrap }
 .fixed-levels { color:#0f7556;font-size:13px;line-height:1.5;text-align:right; }
-.room-form { margin-top:16px; }
-.room-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px; }
-.room-grid :deep(.el-input-number),.room-grid :deep(.el-select) { width:100%; }
 .three-stage :deep(.entrance-label-3d) { padding:5px 11px;border:1px solid #84d9bd;border-radius:999px;color:#087250;background:rgba(240,253,248,.95);box-shadow:0 5px 14px rgba(8,114,80,.16);font-size:12px;font-weight:800;white-space:nowrap;pointer-events:none; }
 .warehouse-workspace:fullscreen { width:100vw;height:100vh;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;padding:12px;background:#eef0f3; }
 .warehouse-workspace:fullscreen.is-panel-collapsed { grid-template-columns:minmax(0,1fr); }
@@ -1766,17 +1635,14 @@ onBeforeUnmount(() => {
 .warehouse-workspace:fullscreen .model-toolbar { min-height:68px; }
 .warehouse-workspace:fullscreen .shelf-panel { min-width:0; }
 @media (max-width:1280px) { .control-panel { grid-template-columns:1fr 1fr; }.warehouse-workspace { grid-template-columns:minmax(0,1fr) 310px; }.three-stage { height:610px; }.shelf-panel { height:672px; } }
-@media (max-width:980px) { .warehouse-metrics { grid-template-columns:repeat(2,1fr); }.warehouse-workspace { grid-template-columns:1fr; }.three-stage { height:560px; }.shelf-panel { height:auto;max-height:720px; }.shelf-list { max-height:280px; }.code-guide { grid-template-columns:1fr; }.warehouse-workspace:fullscreen { grid-template-columns:minmax(0,1fr) 300px; }.fullscreen-locator { width:240px; }.warehouse-workspace:fullscreen .shelf-panel { height:calc(100vh - 24px);max-height:none; } }
-@media (max-width:680px) { .warehouse-hero { align-items:stretch;flex-direction:column;padding:21px; }.warehouse-hero h2 { font-size:24px; }.hero-actions { justify-content:space-between; }.warehouse-metrics { gap:8px; }.warehouse-metrics article { min-height:100px;padding:15px; }.control-panel { grid-template-columns:1fr;padding:14px; }.three-stage { height:440px; }.warehouse-workspace { gap:12px; }.code-guide { padding:15px; }.code-guide > div { align-items:flex-start;flex-direction:column; }.code-guide ol { grid-template-columns:1fr 1fr; }.location-path { overflow-x:auto;justify-content:flex-start; }.room-grid { grid-template-columns:1fr; } }
-.warehouse-hero{padding:20px 24px}.warehouse-hero h2{font-size:26px}.warehouse-metrics article{min-height:92px;padding:14px 17px}.warehouse-metrics strong{margin-top:6px;font-size:23px}.warehouse-metrics small,.model-title span,.part-option small,.filter-chips button,.stage-hint,.shelf-panel>header>div:first-child span,.panel-tabs button,.located-part span,.located-part small,.location-path b,.shelf-card-top>div span,.selected-shelf-card dt,.selected-shelf-card dd,.shelf-copy strong,.shelf-copy small,.parts-scroll small,.parts-scroll em,.guide-title,.code-guide b,.code-guide li span,.editor-preview small,.editor-tip{font-size:12px}.two-stage{position:relative;height:680px;overflow:hidden;border:12px solid #dfe3e8;background:linear-gradient(#f8fafc,#f1f4f7);box-shadow:inset 0 0 0 2px #fff}.two-stage::before{content:"";position:absolute;inset:0;background-image:linear-gradient(#d9dee633 1px,transparent 1px),linear-gradient(90deg,#d9dee633 1px,transparent 1px);background-size:28px 28px}.plan-shelf{position:absolute;z-index:2;min-width:76px;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 9px;border:2px solid color-mix(in srgb,var(--plan-color) 78%,#172033);border-radius:7px;color:#fff;background:var(--plan-color);box-shadow:0 5px 12px #17203322;cursor:pointer;white-space:nowrap}.plan-shelf:hover,.plan-shelf.active{z-index:4;outline:4px solid #f7bd3c66;filter:brightness(1.08)}.plan-shelf.unnamed{background:#718096}.plan-shelf strong{overflow:hidden;text-overflow:ellipsis;font-size:12px}.plan-shelf small{font-size:12px;opacity:.82}.entrance-2d{position:absolute;z-index:5;display:flex;align-items:center;gap:4px;padding:8px 12px;border-radius:999px;color:#fff;background:#13966c;box-shadow:0 4px 12px rgba(19,150,108,.22);font-size:12px;font-weight:800;white-space:nowrap;transform-origin:center}.floor-label{position:absolute;left:12px;top:8px;z-index:1;color:#7c8795;font-size:12px;font-weight:800}.east-label{position:absolute;right:12px;top:8px;z-index:1;color:#b21f2a;font-size:13px;font-weight:900}.plan-help{position:absolute;left:14px;bottom:12px;z-index:5;padding:7px 10px;border-radius:8px;color:#667085;background:#ffffffdd;font-size:12px}.layer-map{flex:none;margin:10px 12px 0;padding:10px;border:1px solid #e3e7ed;border-radius:12px;background:#f8fafc}.layer-map-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.layer-map-title strong{font-size:12px}.layer-map-title button{border:0;color:#1677ff;background:transparent;cursor:pointer;font-size:12px}.layer-map>button{width:100%;display:grid;grid-template-columns:42px 1fr 45px;gap:8px;align-items:center;margin-top:5px;padding:7px 8px;border:1px solid transparent;border-radius:8px;color:#566174;background:#fff;cursor:pointer;text-align:left}.layer-map>button i{height:5px;border-radius:4px;background:#d8dde5}.layer-map>button.active,.layer-map>button.located{color:#0f7556;border-color:#a9dfd0;background:#eefaf6}.layer-map>button.active i,.layer-map>button.located i{background:#17a378}.layer-map>button strong{text-align:right}.qr-button{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:5px;padding:7px;border:1px dashed #8ccfba;border-radius:8px;color:#0f7556;background:#fff;cursor:pointer;font-size:12px;font-weight:700}.qr-card{display:flex;align-items:center;gap:18px}.qr-card img{width:180px;height:180px;border:1px solid #e3e7ed;border-radius:12px}.qr-card strong,.qr-card span,.qr-card small{display:block}.qr-card span{margin-top:7px;color:#0f7556}.qr-card small{margin-top:8px;color:#758095;line-height:1.7}.warehouse-workspace:fullscreen .two-stage{flex:1;height:auto;min-height:0}@media(max-width:1280px){.two-stage{height:610px}}@media(max-width:980px){.two-stage{height:560px}}@media(max-width:680px){.two-stage{height:440px}.plan-shelf small{display:none}.qr-card{align-items:flex-start;flex-direction:column}.qr-card img{align-self:center}}
-.two-stage.is-editing{border-color:#c91f2c;background:linear-gradient(#fff9f9,#fef0f0)}.two-stage.is-editing .plan-shelf{cursor:grab;transition:none}.plan-shelf.dragging{cursor:grabbing!important;z-index:10;opacity:.92;filter:brightness(1.12)}.plan-shelf.moved{outline:3px dashed #e3a321;outline-offset:2px}.edit-toolbar{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:8;display:flex;align-items:center;gap:10px;padding:9px 16px;border-radius:12px;background:#fff;box-shadow:0 4px 18px rgba(23,32,51,.12)}.edit-toolbar span{color:#687386;font-size:12px;white-space:nowrap}
-.plan-staging{position:absolute;transform:translate(-50%,-50%);z-index:4;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#fef3c7;border:2px solid #f59e0b;color:#92400e;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center;box-shadow:0 2px 8px rgba(245,158,11,.3)}
-.plan-staging:hover{transform:translate(-50%,-50%) scale(1.15);box-shadow:0 4px 12px rgba(245,158,11,.45)}
+@media (max-width:980px) { .warehouse-workspace { grid-template-columns:1fr; }.three-stage { height:560px; }.shelf-panel { height:auto;max-height:720px; }.shelf-list { max-height:280px; }.code-guide { grid-template-columns:1fr; }.warehouse-workspace:fullscreen { grid-template-columns:minmax(0,1fr) 300px; }.fullscreen-locator { width:240px; }.warehouse-workspace:fullscreen .shelf-panel { height:calc(100vh - 24px);max-height:none; } }
+@media (max-width:680px) { .warehouse-hero { align-items:stretch;flex-direction:column;padding:21px; }.warehouse-hero h2 { font-size:24px; }.hero-actions { justify-content:space-between; }.control-panel { grid-template-columns:1fr;padding:14px; }.three-stage { height:440px; }.warehouse-workspace { gap:12px; }.code-guide { padding:15px; }.code-guide > div { align-items:flex-start;flex-direction:column; }.code-guide ol { grid-template-columns:1fr 1fr; }.location-path { overflow-x:auto;justify-content:flex-start; } }
+.warehouse-hero{padding:20px 24px}.warehouse-hero h2{font-size:26px}.two-stage{position:relative;height:680px;overflow:hidden;border:12px solid #dfe3e8;background:linear-gradient(#f8fafc,#f1f4f7);box-shadow:inset 0 0 0 2px #fff}.two-stage::before{content:"";position:absolute;inset:0;background-image:linear-gradient(#d9dee633 1px,transparent 1px),linear-gradient(90deg,#d9dee633 1px,transparent 1px);background-size:28px 28px}.plan-shelf{position:absolute;z-index:2;min-width:76px;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 9px;border:2px solid color-mix(in srgb,var(--plan-color) 78%,#172033);border-radius:7px;color:#fff;background:var(--plan-color);box-shadow:0 5px 12px #17203322;cursor:pointer;white-space:nowrap}.plan-shelf:hover,.plan-shelf.active{z-index:4;outline:4px solid #f7bd3c66;filter:brightness(1.08)}.plan-shelf.unnamed{background:#718096}.plan-shelf strong{overflow:hidden;text-overflow:ellipsis;font-size:12px}.plan-shelf small{font-size:12px;opacity:.82}.entrance-2d{position:absolute;z-index:5;display:flex;align-items:center;gap:4px;padding:8px 12px;border-radius:999px;color:#fff;background:#13966c;box-shadow:0 4px 12px rgba(19,150,108,.22);font-size:12px;font-weight:800;white-space:nowrap;transform-origin:center}.floor-label{position:absolute;left:12px;top:8px;z-index:1;color:#7c8795;font-size:12px;font-weight:800}.east-label{position:absolute;right:12px;top:8px;z-index:1;color:#b21f2a;font-size:13px;font-weight:900}.plan-help{position:absolute;left:14px;bottom:12px;z-index:5;padding:7px 10px;border-radius:8px;color:#667085;background:#ffffffdd;font-size:12px}.layer-map{flex:none;margin:10px 12px 0;padding:10px;border:1px solid #e3e7ed;border-radius:12px;background:#f8fafc}.layer-map-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.layer-map-title strong{font-size:12px}.layer-map-title button{border:0;color:#1677ff;background:transparent;cursor:pointer;font-size:12px}.layer-map>button{width:100%;display:grid;grid-template-columns:42px 1fr 45px;gap:8px;align-items:center;margin-top:5px;padding:7px 8px;border:1px solid transparent;border-radius:8px;color:#566174;background:#fff;cursor:pointer;text-align:left}.layer-map>button i{height:5px;border-radius:4px;background:#d8dde5}.layer-map>button.active,.layer-map>button.located{color:#0f7556;border-color:#a9dfd0;background:#eefaf6}.layer-map>button.active i,.layer-map>button.located i{background:#17a378}.layer-map>button strong{text-align:right}.qr-button{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:5px;padding:7px;border:1px dashed #8ccfba;border-radius:8px;color:#0f7556;background:#fff;cursor:pointer;font-size:12px;font-weight:700}.qr-card{display:flex;align-items:center;gap:18px}.qr-card img{width:180px;height:180px;border:1px solid #e3e7ed;border-radius:12px}.qr-card strong,.qr-card span,.qr-card small{display:block}.qr-card span{margin-top:7px;color:#0f7556}.qr-card small{margin-top:8px;color:#758095;line-height:1.7}.warehouse-workspace:fullscreen .two-stage{flex:1;height:auto;min-height:0}@media(max-width:1280px){.two-stage{height:610px}}@media(max-width:980px){.two-stage{height:560px}}@media(max-width:680px){.two-stage{height:440px}.plan-shelf small{display:none}.qr-card{align-items:flex-start;flex-direction:column}.qr-card img{align-self:center}}
+.entrance-2d .el-icon{transform:rotate(var(--entrance-arrow,0deg))}
+.plan-staging{position:absolute;transform:translate(-50%,-50%);z-index:4;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#fef3c7;border:2px solid #f59e0b;color:#92400e;font-size:10px;font-weight:600;text-align:center;box-shadow:0 2px 8px rgba(245,158,11,.3)}
 .plan-staging span{line-height:1.1;display:block}
 .layer-map-title>div{display:flex;align-items:baseline;gap:7px}.layer-map-title>div small{color:#8791a1;font-size:10px}.layer-map-title>button.active{padding:4px 8px;border-radius:6px;color:#0f7556;background:#e9f8f3}.layer-map>button span b,.layer-map>button span small{display:block}.layer-map>button span b{font-size:12px}.layer-map>button span small{min-height:12px;margin-top:1px;color:#98a1af;font-size:9px}.layer-map>button.located:not(.active){border-color:#f0b62e;box-shadow:inset 3px 0 #f0b62e}.layer-map>button.located:not(.active) i{background:#f0b62e}
 .shelf-editor-form{display:grid;gap:14px}.editor-preview{position:relative;margin-bottom:14px}.editor-status{margin-left:auto;padding:5px 9px;border-radius:999px;color:#0d7558;background:#e8f7f2;font-size:10px;font-weight:800}.editor-section{padding:15px;border:1px solid #e5e8ed;border-radius:12px;background:#fff}.editor-section>header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}.editor-section>header strong{font-size:13px}.editor-section>header span{color:#8a93a3;font-size:10px}.editor-basic-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(150px,.7fr);gap:14px}.editor-basic-grid :deep(.el-form-item){margin-bottom:0}.dimension-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.dimension-grid label{display:grid;gap:7px;color:#687386;font-size:11px}.dimension-grid :deep(.el-input-number){width:100%}.danger-zone{display:flex;align-items:center;justify-content:space-between;gap:16px;border-color:#f6d0d3;background:#fffafa}.danger-zone>div strong,.danger-zone>div span{display:block}.danger-zone>div strong{color:#a61c26;font-size:12px}.danger-zone>div span{margin-top:4px;color:#8d6b6e;font-size:10px}.shelf-editor-form .editor-tip{margin:11px 0 0}
-.located-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.located-actions .qr-button{grid-column:auto;margin-top:2px;padding:7px 5px;font-size:11px}
 .layer-map{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px;padding:9px}
 .layer-map-title{grid-column:1/-1;margin-bottom:1px}
 .layer-map>button{min-width:0;display:grid;grid-template-columns:1fr;gap:3px;margin-top:0;padding:7px 5px;text-align:center}
@@ -1784,4 +1650,54 @@ onBeforeUnmount(() => {
 .layer-map>button span small{min-height:14px;color:#8a93a4;font-size:9px}
 .layer-map>button strong{text-align:center}
 @media(max-width:680px){.editor-basic-grid,.dimension-grid{grid-template-columns:1fr}.editor-section>header{align-items:flex-start;flex-direction:column}.danger-zone{align-items:flex-start;flex-direction:column}}
+:global(.warehouse-part-options .el-select-dropdown__item){height:auto;min-height:60px;line-height:20px;padding:9px 16px}.part-option{display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,32%);gap:12px;line-height:20px}.part-option strong,.part-option small{white-space:nowrap}.part-option em{white-space:normal;overflow-wrap:anywhere;text-align:right;line-height:18px}.model-load-hint{grid-column:1/-1;font-size:12px!important;white-space:normal!important;line-height:1.5;color:#63736d}
+@media(min-width:761px) and (max-width:1100px){.control-panel{grid-template-columns:minmax(0,1fr) 200px}.control-panel>div:last-child{grid-column:1/-1}}
+
+.model-toolbar{flex-wrap:wrap}
+.model-title{flex:1 1 250px;min-width:0}
+.model-actions{flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end;max-width:100%}
+.model-actions>.el-button{margin-left:0}
+.view-mode-tools{display:flex;align-items:center;gap:8px;flex:none}
+.view-mode-tools .el-button-group{display:flex;white-space:nowrap}
+.model-actions .refresh-layout-button{width:32px;padding:0;margin-left:0;flex:none}
+@media(max-width:760px){
+.model-actions .view-mode-tools{grid-column:1/-1;justify-content:space-between}
+.model-actions .refresh-layout-button{width:38px}
+.model-actions .view-mode-tools .el-button-group{flex:1}
+.model-actions .view-mode-tools .el-button-group .el-button{flex:1}
+}
+</style>
+
+<style scoped>
+.model-title .touch-scene-help,.touch-reset-button{display:none}
+@media(max-width:980px){
+  .model-toolbar{flex-wrap:wrap;gap:12px;padding:14px}
+  .model-actions{flex-wrap:wrap;gap:8px;max-width:100%}
+  .model-actions .el-button{margin-left:0}
+  .hero-actions{flex-wrap:wrap}
+  .hero-actions .el-button{margin-left:0}
+}
+@media(max-width:680px){
+  .warehouse-hero{padding:18px;gap:16px}
+  .warehouse-hero h2{font-size:23px}
+  .hero-actions{justify-content:flex-start}
+  .model-title{width:100%}
+  .model-title span{font-size:12px;line-height:1.6}
+  .model-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .model-actions>.el-dropdown,.model-actions>.el-button,.model-actions>.el-dropdown .el-button{width:100%;min-width:0}
+  .model-actions .el-button{min-height:38px;padding:8px}
+  .model-actions .direction-pill{display:none}
+  .model-actions .fullscreen-button{grid-column:1/-1}
+  .model-title .desktop-scene-help{display:none}
+  .model-title .touch-scene-help{display:block}
+  .touch-reset-button{display:inline-flex}
+  .three-stage{height:420px}
+  .warehouse-workspace:fullscreen{display:flex;flex-direction:column;overflow:auto;padding:8px}
+  .warehouse-workspace:fullscreen .model-card{flex:1 0 min(720px,100dvh)}
+  .warehouse-workspace:fullscreen .shelf-panel{flex:none;height:auto;max-height:65dvh}
+  .fullscreen-locator{width:100%;margin:0}
+  .code-display{flex-wrap:wrap}
+}
+@media(pointer:coarse){.model-title .desktop-scene-help{display:none}.model-title .touch-scene-help{display:block}.touch-reset-button{display:inline-flex}}
+.warehouse-hero{padding:0;margin-bottom:10px;background:transparent;box-shadow:none;color:#475569;justify-content:flex-end;border-radius:0}.warehouse-hero::after{display:none}.warehouse-hero>div:first-child{display:none}.warehouse-hero .el-button{background:#fff;border-color:#dcdfe6;color:#475569}.warehouse-hero .el-button--primary{background:#c6000b;color:#fff}.control-panel{padding:12px;gap:12px;grid-template-columns:minmax(260px,.65fr) minmax(160px,.3fr) minmax(460px,1.25fr);align-items:start}.warehouse-workspace:not(:fullscreen) .three-stage,.warehouse-workspace:not(:fullscreen) .two-stage{height:clamp(330px,calc(100vh - 350px),680px)}@media(max-width:760px){.control-panel{grid-template-columns:1fr}.warehouse-hero{flex-direction:row}.warehouse-workspace:not(:fullscreen) .three-stage{height:420px}}
 </style>

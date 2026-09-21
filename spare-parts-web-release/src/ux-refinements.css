@@ -1,0 +1,60 @@
+/* Shared task-focused layout; preserve feature and permission visibility. */
+:root .page-head{margin-bottom:14px;gap:12px;align-items:center}
+:root .page-head h2{font-size:20px}
+:root .metric-card{min-height:96px;padding:14px;border-radius:12px}
+:root .metric-value{font-size:25px;margin:8px 0}
+:root .metric-icon{width:28px;height:28px;font-size:16px}
+:root .metric-note{font-size:12px;line-height:1.5}
+:root .inventory-summary{margin:12px 0 16px;padding:12px 16px;background:#fff;border:1px solid #e6e9ef;border-radius:12px}
+.inventory-summary>summary{cursor:pointer;font-weight:600;line-height:28px}.inventory-summary>summary span{margin-left:18px;font-weight:400;color:#536275}
+:root .inventory-summary .page-head{margin:12px 0}.inventory-summary .metric-grid{margin-bottom:0}
+.mobile-parts{display:none}
+:root .warehouse-hero{min-height:0;padding:8px 0;margin-bottom:12px;background:none;box-shadow:none;color:inherit;justify-content:flex-end}
+:root .warehouse-hero>div:first-child{display:none}
+:root .warehouse-hero .el-button{--el-button-bg-color:#fff;--el-button-text-color:#475569;--el-button-border-color:#dcdfe6}
+:root .warehouse-hero .el-button--primary{--el-button-bg-color:#c6000b;--el-button-text-color:#fff}
+:root .control-panel{padding:14px;gap:14px;margin-bottom:14px}
+:root .replenishment-hero,:root .plc-commandbar{padding:18px 22px;min-height:0;border-radius:14px}
+:root .replenishment-hero h2,:root .plc-commandbar h2{font-size:22px;margin:0 0 6px}
+:root .plc-commandbar .compact-stats{margin-top:10px}
+:root .replenishment-metrics article{padding:14px;min-height:0}
+:root .module-portal .portal-hero{margin:28px auto 24px}
+:root .module-portal .portal-hero h1{font-size:34px;margin:10px 0}
+:root .module-portal .module-card{min-height:270px;padding:24px}
+:root .module-portal .module-card>div:nth-child(2){margin-top:16px}
+:root .module-portal .module-enter{padding-top:18px}
+:root .model-library .category-card{grid-template-columns:120px minmax(0,1fr)}
+:root .model-library .category-copy{padding:12px;min-width:0}
+:root .model-library .category-copy strong{white-space:normal;font-size:15px}
+:root .model-library .category-card dl{display:block;margin:0;padding:8px 12px}
+:root .model-library .category-card dl>div{display:flex;align-items:center;gap:8px}
+:root .model-library .category-image{height:160px}
+:root .model-library .ml-card-img{height:156px}
+:root .model-library .reference-image img{object-fit:contain;padding:8px;box-sizing:border-box}
+.model-pagination{margin:20px 0;justify-content:center;max-width:100%;overflow:auto}
+:root .is-list .knowledge-card{padding:14px 0;min-height:0;gap:8px 16px;grid-template-columns:90px minmax(0,1fr) 150px}
+:root .is-list .knowledge-card footer{font-size:12px;min-width:130px}
+:root .is-list .knowledge-card footer>span{display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-wrap:wrap}
+:root .is-list .knowledge-card footer .el-icon{flex-shrink:0}
+@media(max-width:760px){
+:root .inventory-page .filter-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+:root .inventory-page .filter-field:nth-child(2){grid-column:1/-1;grid-row:1}
+:root .inventory-page .filter-field:nth-child(4){grid-column:1}
+:root .inventory-page .filter-actions{grid-column:2;align-self:end;display:flex;gap:6px}
+:root .inventory-page .filter-actions .el-button{width:auto;flex:1;margin:0;padding:8px}
+:root .inventory-page .filter-panel{padding:12px}
+:root .inventory-summary{padding:8px 12px}
+.inventory-summary>summary span{display:block;margin-left:0;font-size:12px}
+:root .inventory-page .inventory-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+:root .inventory-page .metric-card{padding:10px;min-height:90px}
+:root .inventory-page .metric-value{font-size:18px;overflow-wrap:anywhere}
+:root .inventory-page .metric-icon{display:none}
+:root .inventory-page .desktop-inventory-table{display:none}
+.mobile-parts{display:block}.mobile-part{padding:14px 12px;border-bottom:1px solid #e5e9ef}
+.mobile-part header{display:flex;align-items:flex-start;gap:10px}.mobile-part header strong{flex:1;font-size:15px;overflow-wrap:anywhere}.mobile-part header b{white-space:nowrap;font-size:16px;color:#0f766e}.mobile-part header b.is-low{color:#b4232d}
+.mobile-part p{color:#586579;font-size:12px;margin:8px 0;overflow-wrap:anywhere}.mobile-part footer{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.mobile-part footer .el-button{margin:0;min-height:36px}
+:root .inventory-page .table-toolbar{gap:10px;padding:12px}.inventory-page .table-actions{gap:8px}
+:root .is-list .knowledge-card{grid-template-columns:1fr;gap:7px}:root .is-list .knowledge-card footer{min-width:0}
+:root .module-portal .portal-hero{margin:20px auto}:root .module-portal .module-card{min-height:230px}
+:root .warehouse-hero{padding:0}:root .control-panel{padding:12px}
+}

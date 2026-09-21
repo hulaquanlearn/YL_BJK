@@ -9,7 +9,8 @@ const { pool } = require('../db');
 const { requireRole } = require('../auth');
 const { WORKSHOPS, normalizeWorkshopCode, canWriteWorkshop, assertWorkshopWrite, requireAnyWorkshopEditor } = require('../workshop-scope');
 const { ApiError, asyncHandler, positiveInt } = require('../utils');
-const { cleanText, knowledgePayload, safeExtension } = require('../knowledge-utils');
+const { cleanText, knowledgePayload, safeExtension, normalizeUploadFilename } = require('../knowledge-utils');
+const { extractDocumentText, getDocumentCapabilities, previewDocument } = require('../document-service');
 
 const router = express.Router();
 const uploadDir = config.knowledge.uploadDir;
@@ -42,7 +43,10 @@ const uploadLimiter = rateLimit({
 
 function receiveUpload(req, res, next) {
   upload(req, res, error => {
-    if (!error) return next();
+    if (!error) {
+      if (req.file) req.file.originalname = normalizeUploadFilename(req.file.originalname);
+      return next();
+    }
     if (error.code === 'LIMIT_FILE_SIZE') return next(new ApiError(413, `附件不能超过${Math.round(config.knowledge.maxFileSize / 1024 / 1024)}MB`));
     return next(new ApiError(400, error.message || '附件上传失败'));
   });
@@ -53,7 +57,62 @@ function removeUploadedFile(file) {
   fs.promises.unlink(file.path).catch(() => {});
 }
 
-function toEntry(row) {
+function canManageEntry(row, user) {
+  return user?.role === 'admin' || (['raw_grain','qu_making','brewing'].includes(user?.role) && Number(row?.uploadedBy) === Number(user?.id));
+}
+
+function assertManageEntry(row, user) {
+  if (!canManageEntry(row, user)) throw new ApiError(403, '只能修改自己创建或上传的知识');
+}
+
+const authorizeKnowledgeManage = asyncHandler(async (req, _res, next) => {
+  const id = positiveInt(req.params.id, 0, Number.MAX_SAFE_INTEGER);
+  if (!id) throw new ApiError(400, '知识条目ID无效');
+  const [[item]] = await pool.query(
+    "SELECT uploaded_by AS uploadedBy FROM fermentation_knowledge_entries WHERE id=? AND status='active' LIMIT 1",
+    [id]
+  );
+  if (!item) throw new ApiError(404, '知识条目不存在或已删除');
+  assertManageEntry(item, req.user);
+  next();
+});
+
+function safeOriginalFilename(value, fallback = '') {
+  const normalized = normalizeUploadFilename(value || fallback);
+  const filename = path.basename(normalized).replace(/[\u0000-\u001f<>:"/\\|?*]/g, '_').trim().slice(0, 255);
+  if (!filename) return '';
+  const extension = safeExtension(filename);
+  if (!extension) throw new ApiError(400, '附件名称必须保留可支持的文件扩展名');
+  const fallbackExtension = safeExtension(fallback);
+  if (fallbackExtension && extension !== fallbackExtension) throw new ApiError(400, '只能修正附件名，不能改变文件格式');
+  return filename;
+}
+
+async function buildIndexResult(file, manualText = '') {
+  const supplied = cleanText(manualText, 100000);
+  if (!file) {
+    return { contentText: supplied, indexStatus: supplied ? 'ready' : 'empty', indexMessage: null, indexedAt: supplied ? new Date() : null };
+  }
+  try {
+    const extracted = await extractDocumentText(file.path, file.originalname, 100000);
+    const contentText = cleanText([supplied, extracted].filter(Boolean).join('\n'), 100000);
+    return {
+      contentText,
+      indexStatus: contentText ? 'ready' : 'empty',
+      indexMessage: contentText ? null : '文件可预览，但未提取到可检索文字',
+      indexedAt: new Date()
+    };
+  } catch (error) {
+    return {
+      contentText: supplied,
+      indexStatus: 'failed',
+      indexMessage: cleanText(error?.message || '附件文字提取失败', 500),
+      indexedAt: null
+    };
+  }
+}
+
+function toEntry(row, user) {
   return {
     id: String(row.id),
     workshopCode: row.workshopCode || 'raw_grain',
@@ -70,14 +129,20 @@ function toEntry(row) {
     preventiveAction: row.preventiveAction,
     contentText: row.contentText,
     tags: row.tags ? row.tags.split(',').filter(Boolean) : [],
-    originalFilename: row.originalFilename,
+    originalFilename: normalizeUploadFilename(row.originalFilename),
     mimeType: row.mimeType,
     fileSize: Number(row.fileSize) || 0,
     hasFile: Boolean(row.storedFilename),
     uploadedByName: row.uploadedByName,
     viewCount: Number(row.viewCount) || 0,
     createdAt: row.createdAt,
-    updatedAt: row.updatedAt
+    updatedAt: row.updatedAt,
+    revisionNo: Number(row.revisionNo) || 1,
+    indexStatus: row.indexStatus || (row.storedFilename ? 'pending' : (row.contentText ? 'ready' : 'empty')),
+    indexMessage: row.indexMessage || '',
+    indexedAt: row.indexedAt || null,
+    canEdit: canManageEntry(row, user),
+    canDelete: canManageEntry(row, user)
   };
 }
 
@@ -87,7 +152,8 @@ const ENTRY_SELECT = `
          fault_cause AS faultCause, solution, preventive_action AS preventiveAction,
          content_text AS contentText, tags, original_filename AS originalFilename,
          stored_filename AS storedFilename, mime_type AS mimeType, file_size AS fileSize,
-         uploaded_by_name AS uploadedByName, view_count AS viewCount,
+         uploaded_by AS uploadedBy, uploaded_by_name AS uploadedByName, view_count AS viewCount,
+         revision_no AS revisionNo,index_status AS indexStatus,index_message AS indexMessage,indexed_at AS indexedAt,
          k.created_at AS createdAt, k.updated_at AS updatedAt
   FROM fermentation_knowledge_entries k LEFT JOIN workshops ws ON ws.code=k.workshop_code`;
 
@@ -96,17 +162,63 @@ const ENTRY_LIST_SELECT = `
          equipment_name AS equipmentName, summary,
          LEFT(fault_symptom, 350) AS faultSymptom,
          tags, original_filename AS originalFilename, stored_filename AS storedFilename,
-         mime_type AS mimeType, file_size AS fileSize, uploaded_by_name AS uploadedByName,
-         view_count AS viewCount, k.created_at AS createdAt, k.updated_at AS updatedAt
+         mime_type AS mimeType, file_size AS fileSize, uploaded_by AS uploadedBy, uploaded_by_name AS uploadedByName,
+         view_count AS viewCount,revision_no AS revisionNo,index_status AS indexStatus,index_message AS indexMessage,indexed_at AS indexedAt,
+         k.created_at AS createdAt, k.updated_at AS updatedAt
   FROM fermentation_knowledge_entries k LEFT JOIN workshops ws ON ws.code=k.workshop_code`;
 
-async function requireActiveProcessStage(name, workshopCode) {
+async function requireActiveProcessStage(name, workshopCode, database = pool) {
   if (!name) return;
-  const [rows] = await pool.query(
+  const [rows] = await database.query(
     "SELECT id FROM knowledge_process_stages WHERE name=? AND workshop_code=? AND status='active' LIMIT 1",
     [name, workshopCode]
   );
   if (!rows.length) throw new ApiError(400, '所选工序/区域已停用或不存在，请刷新后重新选择');
+}
+
+async function snapshotEntry(connection, id, revisionNo, user, changeKind, changeSummary) {
+  const [result] = await connection.query(
+    `INSERT INTO knowledge_entry_revisions
+     (entry_id,revision_no,workshop_code,entry_type,title,category,process_stage,equipment_name,summary,
+      fault_symptom,fault_cause,solution,preventive_action,content_text,tags,original_filename,stored_filename,
+      mime_type,file_size,index_status,index_message,indexed_at,change_kind,change_summary,created_by,created_by_name)
+     SELECT id,revision_no,workshop_code,entry_type,title,category,process_stage,equipment_name,summary,
+      fault_symptom,fault_cause,solution,preventive_action,content_text,tags,original_filename,stored_filename,
+      mime_type,file_size,index_status,index_message,indexed_at,?,?,?,?
+     FROM fermentation_knowledge_entries WHERE id=? AND revision_no=?`,
+    [changeKind, cleanText(changeSummary, 500) || null, Number(user?.id) || null,
+      user?.displayName || user?.username || '系统用户', id, revisionNo]
+  );
+  if (!result.affectedRows) throw new ApiError(409, '知识已被其他用户更新，请刷新后重试');
+}
+
+async function sendDocumentPreview(res, fullPath, originalFilename) {
+  let preview;
+  try {
+    preview = await previewDocument(fullPath, originalFilename);
+  } catch (error) {
+    console.error('Document preview failed:', error.message);
+    throw new ApiError(422, error.message || '文件无法生成安全预览');
+  }
+  res.setHeader('Content-Type', preview.contentType || 'application/octet-stream');
+  res.setHeader('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(originalFilename || 'attachment')}`);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Preview-Mode', cleanText(preview.mode || 'direct', 80));
+  if (preview.notice) res.setHeader('X-Preview-Notice', encodeURIComponent(cleanText(preview.notice, 500)));
+  if (String(preview.contentType || '').startsWith('text/html')) {
+    res.setHeader('Content-Security-Policy', "sandbox; default-src 'none'; img-src data: blob:; style-src 'unsafe-inline'; font-src data:");
+  }
+  if (preview.filePath) {
+    const stream = fs.createReadStream(preview.filePath);
+    stream.on('error', error => {
+      console.error('Preview stream failed:', error.message);
+      if (!res.headersSent) res.status(500).json({ success: false, msg: '预览文件读取失败' });
+      else res.destroy(error);
+    });
+    stream.pipe(res);
+    return;
+  }
+  res.send(preview.body ?? '');
 }
 
 router.get('/knowledge/stats', asyncHandler(async (req, res) => {
@@ -145,9 +257,13 @@ router.get('/knowledge/stats', asyncHandler(async (req, res) => {
   });
 }));
 
+router.get('/knowledge/preview-capabilities', requireRole('admin'), asyncHandler(async (_req, res) => {
+  res.json({ success: true, data: await getDocumentCapabilities() });
+}));
+
 router.get('/knowledge/process-stages', asyncHandler(async (req, res) => {
   const workshopCode = normalizeWorkshopCode(req.query.workshopCode, 'raw_grain');
-  const includeDisabled = canWriteWorkshop(req.user, workshopCode) && String(req.query.includeDisabled) === '1';
+  const includeDisabled = (req.user.role === 'viewer' || canWriteWorkshop(req.user, workshopCode)) && String(req.query.includeDisabled) === '1';
   const [rows] = await pool.query(
     `SELECT id,workshop_code AS workshopCode,name,sort_order AS sortOrder,status,created_at AS createdAt,updated_at AS updatedAt,
      (SELECT COUNT(*) FROM fermentation_knowledge_entries k2
@@ -163,7 +279,7 @@ router.get('/knowledge/process-stages', asyncHandler(async (req, res) => {
 
 router.get('/knowledge/tags', asyncHandler(async (req, res) => {
   const workshopCode = normalizeWorkshopCode(req.query.workshopCode, 'raw_grain');
-  const includeDisabled = canWriteWorkshop(req.user, workshopCode) && String(req.query.includeDisabled) === '1';
+  const includeDisabled = (req.user.role === 'viewer' || canWriteWorkshop(req.user, workshopCode)) && String(req.query.includeDisabled) === '1';
   const [rows] = await pool.query(
     `SELECT id, workshop_code AS workshopCode, name, sort_order AS sortOrder, status
      FROM knowledge_tags WHERE workshop_code=? ${includeDisabled ? '' : "AND status='active'"}
@@ -312,7 +428,7 @@ router.get('/knowledge', asyncHandler(async (req, res) => {
   ]);
   const countRow = countResult[0][0] || {};
   const rows = listResult[0];
-  res.json({ success: true, data: rows.map(toEntry), total: Number(countRow.total) || 0, page, pageSize });
+  res.json({ success: true, data: rows.map(row => toEntry(row, req.user)), total: Number(countRow.total) || 0, page, pageSize });
 }));
 
 router.get('/knowledge/:id', asyncHandler(async (req, res) => {
@@ -322,7 +438,190 @@ router.get('/knowledge/:id', asyncHandler(async (req, res) => {
   if (!rows.length) throw new ApiError(404, '知识条目不存在或已删除');
   await pool.query('UPDATE fermentation_knowledge_entries SET view_count=view_count+1 WHERE id=?', [id]);
   rows[0].viewCount = Number(rows[0].viewCount) + 1;
-  res.json({ success: true, data: toEntry(rows[0]) });
+  res.json({ success: true, data: toEntry(rows[0], req.user) });
+}));
+
+router.get('/knowledge/:id/revisions', asyncHandler(async (req, res) => {
+  const id = positiveInt(req.params.id, 0, Number.MAX_SAFE_INTEGER);
+  if (!id) throw new ApiError(400, '知识条目ID无效');
+  const [[entry]] = await pool.query("SELECT id,revision_no AS revisionNo FROM fermentation_knowledge_entries WHERE id=? AND status='active' LIMIT 1", [id]);
+  if (!entry) throw new ApiError(404, '知识条目不存在或已删除');
+  const [rows] = await pool.query(
+    `SELECT revision_no AS revisionNo,title,original_filename AS originalFilename,file_size AS fileSize,
+            index_status AS indexStatus,change_kind AS changeKind,change_summary AS changeSummary,
+            created_by_name AS createdByName,created_at AS createdAt
+     FROM knowledge_entry_revisions WHERE entry_id=? ORDER BY revision_no DESC`,
+    [id]
+  );
+  res.json({
+    success: true,
+    data: rows.map(row => ({
+      ...row,
+      revisionNo: Number(row.revisionNo), fileSize: Number(row.fileSize) || 0,
+      originalFilename: normalizeUploadFilename(row.originalFilename)
+    })),
+    currentRevisionNo: Number(entry.revisionNo) || 1
+  });
+}));
+
+router.get('/knowledge/:id/revisions/:revisionNo', asyncHandler(async (req, res) => {
+  const id = positiveInt(req.params.id, 0, Number.MAX_SAFE_INTEGER);
+  const revisionNo = positiveInt(req.params.revisionNo, 0, Number.MAX_SAFE_INTEGER);
+  const [[active]] = await pool.query("SELECT id FROM fermentation_knowledge_entries WHERE id=? AND status='active' LIMIT 1", [id]);
+  if (!active) throw new ApiError(404, '知识条目不存在或已删除');
+  const [rows] = await pool.query(
+    `SELECT entry_id AS id,revision_no AS revisionNo,workshop_code AS workshopCode,entry_type AS entryType,
+            title,category,process_stage AS processStage,equipment_name AS equipmentName,summary,
+            fault_symptom AS faultSymptom,fault_cause AS faultCause,solution,preventive_action AS preventiveAction,
+            content_text AS contentText,tags,original_filename AS originalFilename,stored_filename AS storedFilename,
+            mime_type AS mimeType,file_size AS fileSize,index_status AS indexStatus,index_message AS indexMessage,
+            indexed_at AS indexedAt,change_kind AS changeKind,change_summary AS changeSummary,
+            created_by_name AS createdByName,created_at AS createdAt
+     FROM knowledge_entry_revisions WHERE entry_id=? AND revision_no=? LIMIT 1`,
+    [id, revisionNo]
+  );
+  if (!rows.length) throw new ApiError(404, '该历史版本不存在');
+  const row = rows[0];
+  res.json({ success: true, data: {
+    ...row, id: String(row.id), revisionNo: Number(row.revisionNo), fileSize: Number(row.fileSize) || 0,
+    tags: row.tags ? row.tags.split(',').filter(Boolean) : [], hasFile: Boolean(row.storedFilename),
+    originalFilename: normalizeUploadFilename(row.originalFilename)
+  } });
+}));
+
+router.put('/knowledge/:id', authorizeKnowledgeManage, uploadLimiter, receiveUpload, asyncHandler(async (req, res) => {
+  const id = positiveInt(req.params.id, 0, Number.MAX_SAFE_INTEGER);
+  if (!id) { removeUploadedFile(req.file); throw new ApiError(400, '知识条目ID无效'); }
+  const payload = knowledgePayload(req.body);
+  const newFileIndex = req.file ? await buildIndexResult(req.file, payload.contentText) : null;
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [[current]] = await connection.query(
+      `SELECT id,workshop_code AS workshopCode,entry_type AS entryType,title,category,process_stage AS processStage,
+              equipment_name AS equipmentName,summary,fault_symptom AS faultSymptom,fault_cause AS faultCause,
+              solution,preventive_action AS preventiveAction,content_text AS contentText,tags,
+              original_filename AS originalFilename,stored_filename AS storedFilename,mime_type AS mimeType,
+              file_size AS fileSize,uploaded_by AS uploadedBy,revision_no AS revisionNo,
+              index_status AS indexStatus,index_message AS indexMessage,indexed_at AS indexedAt
+       FROM fermentation_knowledge_entries WHERE id=? AND status='active' FOR UPDATE`,
+      [id]
+    );
+    if (!current) throw new ApiError(404, '知识条目不存在或已删除');
+    assertManageEntry(current, req.user);
+    const workshopCode = req.user.role === 'admin'
+      ? normalizeWorkshopCode(req.body?.workshopCode, current.workshopCode)
+      : current.workshopCode;
+    if (!payload.title) throw new ApiError(400, '请填写知识标题');
+    if (!payload.category) throw new ApiError(400, '请选择知识分类');
+    if (payload.entryType === 'document' && !req.file && !current.storedFilename) throw new ApiError(400, '资料文档必须保留或上传附件');
+    if (payload.entryType === 'fault' && (!payload.faultSymptom || !payload.solution)) {
+      throw new ApiError(400, '故障知识必须填写故障现象和处理方法');
+    }
+    await requireActiveProcessStage(payload.processStage, workshopCode, connection);
+    const fallbackName = req.file?.originalname || current.originalFilename || '';
+    const requestedName = Object.prototype.hasOwnProperty.call(req.body || {}, 'originalFilename')
+      ? req.body.originalFilename : fallbackName;
+    const originalFilename = fallbackName ? safeOriginalFilename(requestedName, fallbackName) : '';
+    const keepsDerivedText = !req.file && !Object.prototype.hasOwnProperty.call(req.body || {}, 'contentText');
+    const indexResult = newFileIndex || (keepsDerivedText ? {
+      contentText: current.contentText || '', indexStatus: current.indexStatus || 'pending',
+      indexMessage: current.indexMessage || null, indexedAt: current.indexedAt || null
+    } : await buildIndexResult(null, payload.contentText));
+    const nextRevision = (Number(current.revisionNo) || 1) + 1;
+    await snapshotEntry(connection, id, Number(current.revisionNo) || 1, req.user, req.file ? 'replace_attachment' : 'edit', req.body?.changeSummary);
+    await connection.query(
+      `UPDATE fermentation_knowledge_entries SET workshop_code=?,entry_type=?,title=?,category=?,process_stage=?,
+       equipment_name=?,summary=?,fault_symptom=?,fault_cause=?,solution=?,preventive_action=?,content_text=?,tags=?,
+       original_filename=?,stored_filename=?,mime_type=?,file_size=?,revision_no=?,index_status=?,index_message=?,indexed_at=?
+       WHERE id=?`,
+      [workshopCode, payload.entryType, payload.title, payload.category, payload.processStage || null,
+        payload.equipmentName || null, payload.summary || null, payload.faultSymptom || null,
+        payload.faultCause || null, payload.solution || null, payload.preventiveAction || null,
+        indexResult.contentText || null, payload.tags || null, originalFilename || null,
+        req.file?.filename || current.storedFilename || null, req.file?.mimetype || current.mimeType || null,
+        req.file?.size || current.fileSize || null, nextRevision, indexResult.indexStatus,
+        indexResult.indexMessage || null, indexResult.indexedAt || null, id]
+    );
+    await connection.commit();
+    res.json({
+      success: true,
+      msg: indexResult.indexStatus === 'failed' ? '知识已修订，新附件索引可稍后重试' : `知识已修订为 V${nextRevision}`,
+      data: { id: String(id), revisionNo: nextRevision, indexStatus: indexResult.indexStatus }
+    });
+  } catch (error) {
+    await connection.rollback();
+    removeUploadedFile(req.file);
+    throw error;
+  } finally { connection.release(); }
+}));
+
+router.post('/knowledge/:id/reindex', asyncHandler(async (req, res) => {
+  const id = positiveInt(req.params.id, 0, Number.MAX_SAFE_INTEGER);
+  const [[item]] = await pool.query(
+    `SELECT id,uploaded_by AS uploadedBy,stored_filename AS storedFilename,original_filename AS originalFilename,
+            content_text AS contentText,revision_no AS revisionNo
+     FROM fermentation_knowledge_entries WHERE id=? AND status='active' LIMIT 1`, [id]
+  );
+  if (!item) throw new ApiError(404, '知识条目不存在或已删除');
+  assertManageEntry(item, req.user);
+  let result;
+  if (!item.storedFilename) result = await buildIndexResult(null, item.contentText);
+  else {
+    const fullPath = path.resolve(uploadDir, item.storedFilename);
+    if (path.dirname(fullPath) !== path.resolve(uploadDir) || !fs.existsSync(fullPath)) {
+      result = { contentText: item.contentText || '', indexStatus: 'failed', indexMessage: '附件文件不存在', indexedAt: null };
+    } else result = await buildIndexResult({ path: fullPath, originalname: item.originalFilename }, '');
+  }
+  const [updated] = await pool.query(
+    `UPDATE fermentation_knowledge_entries SET content_text=?,index_status=?,index_message=?,indexed_at=?
+     WHERE id=? AND revision_no=?`,
+    [result.indexStatus === 'failed' ? (item.contentText || null) : (result.contentText || null),
+      result.indexStatus, result.indexMessage || null, result.indexedAt || null, id, item.revisionNo]
+  );
+  if (!updated.affectedRows) throw new ApiError(409, '知识在重建索引时被修订，请刷新后重试');
+  res.json({
+    success: true,
+    msg: result.indexStatus === 'ready' ? '附件全文索引已更新' : (result.indexStatus === 'empty' ? '附件中未提取到可检索文字' : '索引更新失败，可在补齐转换/OCR依赖后重试'),
+    data: { indexStatus: result.indexStatus, indexMessage: result.indexMessage || '' }
+  });
+}));
+
+router.post('/knowledge/:id/revisions/:revisionNo/restore', asyncHandler(async (req, res) => {
+  const id = positiveInt(req.params.id, 0, Number.MAX_SAFE_INTEGER);
+  const revisionNo = positiveInt(req.params.revisionNo, 0, Number.MAX_SAFE_INTEGER);
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [[current]] = await connection.query(
+      `SELECT id,uploaded_by AS uploadedBy,revision_no AS revisionNo FROM fermentation_knowledge_entries
+       WHERE id=? AND status='active' FOR UPDATE`, [id]
+    );
+    if (!current) throw new ApiError(404, '知识条目不存在或已删除');
+    assertManageEntry(current, req.user);
+    const [[revision]] = await connection.query(
+      `SELECT * FROM knowledge_entry_revisions WHERE entry_id=? AND revision_no=? LIMIT 1`, [id, revisionNo]
+    );
+    if (!revision) throw new ApiError(404, '该历史版本不存在');
+    const nextRevision = (Number(current.revisionNo) || 1) + 1;
+    await snapshotEntry(connection, id, Number(current.revisionNo) || 1, req.user, 'restore', `恢复 V${revisionNo} 前的快照`);
+    await connection.query(
+      `UPDATE fermentation_knowledge_entries SET workshop_code=?,entry_type=?,title=?,category=?,process_stage=?,
+       equipment_name=?,summary=?,fault_symptom=?,fault_cause=?,solution=?,preventive_action=?,content_text=?,tags=?,
+       original_filename=?,stored_filename=?,mime_type=?,file_size=?,revision_no=?,index_status=?,index_message=?,indexed_at=?
+       WHERE id=?`,
+      [revision.workshop_code, revision.entry_type, revision.title, revision.category, revision.process_stage,
+        revision.equipment_name, revision.summary, revision.fault_symptom, revision.fault_cause, revision.solution,
+        revision.preventive_action, revision.content_text, revision.tags, revision.original_filename,
+        revision.stored_filename, revision.mime_type, revision.file_size, nextRevision, revision.index_status,
+        revision.index_message, revision.indexed_at, id]
+    );
+    await connection.commit();
+    res.json({ success: true, msg: `已将 V${revisionNo} 恢复为当前 V${nextRevision}`, data: { revisionNo: nextRevision } });
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally { connection.release(); }
 }));
 
 router.post('/knowledge', requireAnyWorkshopEditor, uploadLimiter, receiveUpload, asyncHandler(async (req, res) => {
@@ -338,26 +637,27 @@ router.post('/knowledge', requireAnyWorkshopEditor, uploadLimiter, receiveUpload
     }
     await requireActiveProcessStage(payload.processStage, workshopCode);
 
-    let extractedText = payload.contentText;
-    if (req.file && ['.txt', '.md', '.csv'].includes(safeExtension(req.file.originalname)) && req.file.size <= 1024 * 1024) {
-      const fileText = await fs.promises.readFile(req.file.path, 'utf8').catch(() => '');
-      extractedText = cleanText([extractedText, fileText].filter(Boolean).join('\n'), 50000);
-    }
+    const indexResult = await buildIndexResult(req.file, payload.contentText);
 
     const [result] = await pool.query(
       `INSERT INTO fermentation_knowledge_entries
        (workshop_code,entry_type,title,category,process_stage,equipment_name,summary,fault_symptom,fault_cause,
         solution,preventive_action,content_text,tags,original_filename,stored_filename,mime_type,file_size,
-        uploaded_by,uploaded_by_name)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        uploaded_by,uploaded_by_name,revision_no,index_status,index_message,indexed_at)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [workshopCode, payload.entryType, payload.title, payload.category, payload.processStage || null,
         payload.equipmentName || null, payload.summary || null, payload.faultSymptom || null,
         payload.faultCause || null, payload.solution || null, payload.preventiveAction || null,
-        extractedText || null, payload.tags || null, req.file?.originalname || null,
+        indexResult.contentText || null, payload.tags || null, req.file?.originalname || null,
         req.file?.filename || null, req.file?.mimetype || null, req.file?.size || null,
-        Number(req.user.id) || null, req.user.displayName || req.user.username]
+        Number(req.user.id) || null, req.user.displayName || req.user.username,
+        1, indexResult.indexStatus, indexResult.indexMessage, indexResult.indexedAt]
     );
-    res.status(201).json({ success: true, msg: '知识已提交', data: { id: String(result.insertId) } });
+    res.status(201).json({
+      success: true,
+      msg: indexResult.indexStatus === 'failed' ? '知识已保存，附件全文索引可稍后重试' : '知识已提交',
+      data: { id: String(result.insertId), indexStatus: indexResult.indexStatus }
+    });
   } catch (error) {
     removeUploadedFile(req.file);
     throw error;
@@ -373,8 +673,8 @@ router.get('/knowledge/:id/download', asyncHandler(async (req, res) => {
   const item = rows[0];
   if (!item?.storedFilename) throw new ApiError(404, '该知识条目没有可下载附件');
   const fullPath = path.resolve(uploadDir, item.storedFilename);
-  if (path.dirname(fullPath) !== uploadDir || !fs.existsSync(fullPath)) throw new ApiError(404, '附件文件不存在');
-  res.download(fullPath, item.originalFilename);
+  if (path.dirname(fullPath) !== path.resolve(uploadDir) || !fs.existsSync(fullPath)) throw new ApiError(404, '附件文件不存在');
+  res.download(fullPath, normalizeUploadFilename(item.originalFilename) || 'attachment');
 }));
 
 router.get('/knowledge/:id/preview', asyncHandler(async (req, res) => {
@@ -386,45 +686,46 @@ router.get('/knowledge/:id/preview', asyncHandler(async (req, res) => {
   const item = rows[0];
   if (!item?.storedFilename) throw new ApiError(404, '该知识条目没有可预览附件');
   const fullPath = path.resolve(uploadDir, item.storedFilename);
-  if (path.dirname(fullPath) !== uploadDir || !fs.existsSync(fullPath)) throw new ApiError(404, '附件文件不存在');
-  const extension = safeExtension(item.originalFilename);
-  const inlineTypes = {
-    '.pdf': 'application/pdf', '.txt': 'text/plain; charset=utf-8', '.md': 'text/plain; charset=utf-8',
-    '.csv': 'text/plain; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
-    '.gif': 'image/gif', '.webp': 'image/webp'
-  };
-  const contentType = inlineTypes[extension];
-  if (!contentType) throw new ApiError(415, '该格式暂不支持浏览器内直接预览，请下载后打开');
-  res.setHeader('Content-Type', contentType);
-  res.setHeader('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(item.originalFilename || `attachment${extension}`)}`);
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  fs.createReadStream(fullPath).pipe(res);
+  if (path.dirname(fullPath) !== path.resolve(uploadDir) || !fs.existsSync(fullPath)) throw new ApiError(404, '附件文件不存在');
+  const originalFilename = normalizeUploadFilename(item.originalFilename);
+  await sendDocumentPreview(res, fullPath, originalFilename);
 }));
 
-router.delete('/knowledge/:id', requireRole('admin'), asyncHandler(async (req, res) => {
+router.delete('/knowledge/:id', asyncHandler(async (req, res) => {
   const id = positiveInt(req.params.id, 0, Number.MAX_SAFE_INTEGER);
   const connection = await pool.getConnection();
-  let storedFilename = '';
+  let storedFilenames = [];
   try {
     await connection.beginTransaction();
-    const [[item]] = await connection.query('SELECT stored_filename AS storedFilename FROM fermentation_knowledge_entries WHERE id=? FOR UPDATE', [id]);
+    const [[item]] = await connection.query('SELECT stored_filename AS storedFilename, uploaded_by AS uploadedBy FROM fermentation_knowledge_entries WHERE id=? FOR UPDATE', [id]);
     if (!item) throw new ApiError(404, '知识条目不存在');
-    storedFilename = item.storedFilename || '';
+    if (req.user.role !== 'admin' && Number(item.uploadedBy) !== Number(req.user.id)) {
+      throw new ApiError(403, '只能删除自己创建或上传的知识');
+    }
+    const [revisionFiles] = await connection.query(
+      'SELECT stored_filename AS storedFilename FROM knowledge_entry_revisions WHERE entry_id=? AND stored_filename IS NOT NULL',
+      [id]
+    );
+    storedFilenames = [...new Set([item.storedFilename, ...revisionFiles.map(row => row.storedFilename)].filter(Boolean))];
     await connection.query('DELETE FROM fermentation_knowledge_entries WHERE id=?', [id]);
     await connection.commit();
   } catch (error) {
     await connection.rollback();
     throw error;
   } finally { connection.release(); }
-  if (storedFilename) {
+  const cleanupWarnings = [];
+  for (const storedFilename of storedFilenames) {
     const root = path.resolve(uploadDir);
     const fullPath = path.resolve(root, storedFilename);
-    if (path.dirname(fullPath) !== root) throw new ApiError(500, '附件路径校验失败');
-    await fs.promises.unlink(fullPath).catch(error => {
-      if (error.code !== 'ENOENT') throw error;
-    });
+    if (path.dirname(fullPath) !== root) { cleanupWarnings.push(storedFilename); continue; }
+    try { await fs.promises.unlink(fullPath); }
+    catch (error) { if (error.code !== 'ENOENT') cleanupWarnings.push(storedFilename); }
   }
-  res.json({ success: true, msg: '知识条目及服务器附件已彻底删除' });
+  res.json({
+    success: true,
+    msg: cleanupWarnings.length ? '知识条目已删除，个别历史附件需管理员清理' : '知识条目及历史附件已彻底删除',
+    data: { cleanupWarnings }
+  });
 }));
 
 module.exports = router;

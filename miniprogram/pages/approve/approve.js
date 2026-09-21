@@ -48,17 +48,23 @@ Page({
   data: {
     approveList: [],
     isLoading: true,
-    processingOrderId: ''
+    processingOrderId: '',
+    page: 1,
+    pageSize: 20,
+    total: 0,
+    hasMore: false
   },
 
   onLoad() {
-    if (!auth.requireLogin({ admin: true })) return;
+    if (!auth.requireLogin()) return;
     this.loadApproveList();
   },
 
-  loadApproveList() {
+  loadApproveList(append = false) {
+    if(append && this.data.isLoading) return;
+    const page=append?this.data.page+1:1;
     this.setData({ isLoading: true });
-    api.getInventoryOrders({ status: '待审批', limit: 200 })
+    return api.getInventoryOrders({ status: '待审批', page, pageSize: this.data.pageSize })
       .then(res => {
         const handleApproveList = (res.data || []).map(order => {
           const formatCreateTime = formatDateTime(order.createTime);
@@ -85,7 +91,10 @@ Page({
         });
 
         this.setData({
-          approveList: handleApproveList,
+          approveList: append ? [...this.data.approveList,...handleApproveList] : handleApproveList,
+          page,
+          total: Number(res.total)||0,
+          hasMore: page*this.data.pageSize<Number(res.total),
           isLoading: false
         });
       })
@@ -96,7 +105,10 @@ Page({
       });
   },
 
+  loadMore(){if(this.data.hasMore&&!this.data.isLoading)this.loadApproveList(true);},
+
   handleApprove(orderId, status) {
+    if (!auth.requireWrite(auth.isAdmin())) return;
     if (!orderId || !status) {
       wx.showToast({ title: '盘点单ID无效', icon: 'none' });
       return;
@@ -123,6 +135,7 @@ Page({
   },
 
   async updateApproveStatus(orderId, status) {
+    if (!auth.requireWrite(auth.isAdmin())) return;
     try {
       if (!orderId) {
         throw new Error('盘点单ID无效');

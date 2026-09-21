@@ -2,19 +2,19 @@ export const COMMON_SHELF_LEVELS = 4
 export const VENDOR_SIGN_COLOR = '#1d4ed8'
 export const PHYSICAL_ROOM_HALF_WIDTH = 9
 export const PHYSICAL_ROOM_HALF_DEPTH = 16
-export const PHYSICAL_ROW_GAP_Z = 2.4
+export const PHYSICAL_ROW_GAP_Z = 3.4
 
 // 原粮库按现场平面图固定为：01-14 双列、15-20 单列，北侧三组待命名货架。
 // 这里恢复现场确认过的旧版尺寸与坐标；自定义拖拽过的位置仍以数据库为准。
-const CENTRAL_SHELF_WIDTH = 4.2
-const SINGLE_SHELF_WIDTH = 3.6
-const UNNAMED_SHELF_WIDTH = 3.8
-const CENTRAL_LEFT_X = -2.3
-const CENTRAL_RIGHT_X = 2.3
-const SINGLE_COLUMN_X = -6.4
-const FIRST_ROW_Z = -7.2
-const SINGLE_ROW_Z = [-7.2, -4.8, -2.4, 0.6, 3, 5.4]
-const UNNAMED_ROW_Z = 9.6
+const CENTRAL_SHELF_WIDTH = 4.9
+const SINGLE_SHELF_WIDTH = 4.9
+const UNNAMED_SHELF_WIDTH = 4.9
+const CENTRAL_LEFT_X = -1.25
+const CENTRAL_RIGHT_X = -6.35
+const SINGLE_COLUMN_X = 6.35
+const FIRST_ROW_Z = -10.5
+const SINGLE_ROW_Z = [-10.5, -7.1, -3.7, -0.3, 3.1, 6.5]
+const UNNAMED_ROW_Z = 13.4
 
 export function resolvePartLocation(part = {}) {
   const code = String(part.locationCode || '').trim()
@@ -64,6 +64,19 @@ export function sideLocalZ(depth, position, offset = 0.18) {
   return sideDirection * insideOffset
 }
 
+export function slotCapacityForLocation(shelf = {}, part = {}, observedParts = []) {
+  const location = resolvePartLocation(part)
+  const configured = Number(shelf?.slotCapacity?.[String(location.position)]?.[Number(location.layer)]) || 0
+  const observed = observedParts.reduce((maximum, item) => {
+    const candidate = resolvePartLocation(item)
+    if (Number(candidate.shelf) !== Number(location.shelf)) return maximum
+    if (String(candidate.position) !== String(location.position)) return maximum
+    if (Number(candidate.layer) !== Number(location.layer)) return maximum
+    return Math.max(maximum, Number(candidate.location) || 0)
+  }, 0)
+  return Math.max(configured, observed, Number(location.location) || 0, 1)
+}
+
 export function layerLocalY(height, levels, layer) {
   const safeHeight = Math.max(Number(height) || 0, 0)
   const safeLevels = Math.max(Number(levels) || 1, 1)
@@ -110,7 +123,7 @@ export function applyPhysicalShelfLayout(shelf, workshopCode = shelf?.workshopCo
       }[shelf.layoutKey]
       if (unnamedIndex !== undefined) {
         placement = {
-          x: [-4.8, 0, 4.8][unnamedIndex],
+          x: [6.35, 1.25, -3.85][unnamedIndex],
           z: UNNAMED_ROW_Z
         }
         physicalWidth = UNNAMED_SHELF_WIDTH

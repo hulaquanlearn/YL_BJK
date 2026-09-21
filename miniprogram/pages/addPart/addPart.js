@@ -386,6 +386,7 @@ Page({
   },
 
   async submitAdd() {
+    if (!auth.requireWrite()) return;
     const { part, selectedArea, selectedShelf, selectedLayer } = this.data;
     
     if (!part.materialDesc || !part.materialDesc.trim()) {

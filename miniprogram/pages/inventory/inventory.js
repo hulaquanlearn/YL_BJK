@@ -18,7 +18,7 @@ Page({
     filterParams: {},
     todayPendingPartIds: [],
     todayCompletedPartIds: [],
-    isReadOnly: false,
+    isReadOnly: false, isViewer: false,
     canSubmitCount: 0,
     editableCount: 0,
     checkedCount: 0,
@@ -34,7 +34,7 @@ Page({
   onLoad(options) {
     if (!auth.requireLogin()) return;
     const currentUser = auth.getUser();
-    this.setData({ inventoryUser: currentUser?.displayName || currentUser?.username || '' });
+    this.setData({ inventoryUser: currentUser?.displayName || currentUser?.username || '', isViewer: auth.isViewer() });
     const filterParams = {
       workshop: decodeURIComponent(options.workshop || '全部'),
       shelf: decodeURIComponent(options.shelf || '全部'),
@@ -165,6 +165,7 @@ Page({
   },
 
   setCheckStatus(e) {
+    if (!auth.requireWrite()) return;
     const index = Number(e.currentTarget.dataset.index);
     const status = e.currentTarget.dataset.status;
     const inventoryList = [...this.data.inventoryList];
@@ -176,6 +177,7 @@ Page({
   },
 
   markAllNormal() {
+    if (!auth.requireWrite()) return;
     if (!this.data.uncheckedCount) return;
     wx.showModal({
       title: '确认批量核对',
@@ -193,6 +195,7 @@ Page({
   },
 
   completeInventory() {
+    if (!auth.requireWrite()) return;
     if (this.data.isLoading || this.data.isSubmitting) return;
     if (this.data.uncheckedCount > 0) {
       wx.showToast({ title: `还有${this.data.uncheckedCount}条未核对`, icon: 'none' });
@@ -252,6 +255,7 @@ Page({
   },
 
   async submitInventoryToApprove() {
+    if (!auth.requireWrite()) return;
     if (this.data.isSubmitting) return;
     const inventoryUser = this.data.inventoryUser.trim();
     if (!inventoryUser) {

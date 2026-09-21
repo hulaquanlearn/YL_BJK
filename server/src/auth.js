@@ -3,6 +3,17 @@ const config = require('./config');
 const { pool } = require('./db');
 const { ApiError, asyncHandler } = require('./utils');
 const { workshopForRole } = require('./workshop-scope');
+const ASSET_COOKIE = 'spare_parts_asset_session';
+function assetCookieOptions(path) {
+  return { httpOnly:true, secure:config.env==='production', sameSite:'strict', path };
+}
+function setAssetCookie(req, res) {
+  const token = String(req.get('authorization') || '').replace(/^Bearer\s+/i, '');
+  if (/^[A-Za-z0-9_-]{40,100}$/.test(token)) {
+    for (const path of ['/uploads','/models']) res.cookie(ASSET_COOKIE, token, assetCookieOptions(path));
+  }
+}
+function clearAssetCookie(res) { for (const path of ['/uploads','/models']) res.clearCookie(ASSET_COOKIE, assetCookieOptions(path)); }
 
 function publicUser(row) {
   return {
@@ -51,6 +62,17 @@ const requireAuth = asyncHandler(async (req, _res, next) => {
   next();
 });
 
+function requireAssetAuth(req, res, next) {
+  if (!['GET','HEAD'].includes(req.method)) return next(new ApiError(405, '资源仅供读取'));
+  // Cookies are accepted only for read-only uploaded assets, never for API writes.
+  if (!req.get('authorization')) {
+    const value = String(req.get('cookie') || '').split(';').map(item => item.trim())
+      .find(item => item.startsWith(ASSET_COOKIE + '='))?.slice(ASSET_COOKIE.length + 1);
+    if (value) req.headers.authorization = `Bearer ${value}`;
+  }
+  return requireAuth(req, res, next);
+}
+
 function requireRole(...roles) {
   return (req, _res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
@@ -68,4 +90,4 @@ function assertAuthConfig() {
   }
 }
 
-module.exports = { publicUser, createSession, requireAuth, requireRole, assertAuthConfig };
+module.exports = { publicUser, createSession, requireAuth, requireRole, assertAuthConfig, requireAssetAuth, setAssetCookie, clearAssetCookie };

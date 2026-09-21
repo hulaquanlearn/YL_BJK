@@ -1,6 +1,17 @@
 # 备件管理可视化网页
 
-这是配套 `spare-parts-api` 的 Vue 3 管理网页，包含账号登录、用户/管理员权限、库存总览、低库存预警、出入库、盘点创建、审批、密码修改和账号管理。
+当前已交付版本为 V1.7.1（2026-09-12），包含本轮体验改善，尚未部署上线。版本、交付与验证状态以仓库根 README 为准。正式部署只阅读对应部署包内说明，下方构建命令仅用于完整源码环境。
+
+这是配套 spare-parts-api 的 Vue 3 工作台，提供备件管理、3D 库位、模型库、设备关系、盘点审批和工程知识等页面；车间人员保留现有功能入口，业务写操作提示权限不足。
+
+本轮完成库存搜索前置、手机卡片、3D 取景、模型分页和知识列表精简。构建成功，71 项本地回归通过；未部署线上，小程序真机验收待完成。详见仓库根 README 与 output/ux-improvements-20260912/改善验证.md。
+
+## 3D 模型资源
+
+- `public/models/categories/`：44个分类GLB示意模型（4个原有 + 40个2026-09-05新增），每个新增模型配有AI生成的预览JPG。覆盖轴承、断路器、阀门、传感器、接触器、变频器、继电器、电机、PLC模块等46种备件类型。
+- `public/models/reference-20260904/`：7个精细参考GLB模型，每个配有PNG预览图。
+- 生成脚本：`tools/generate-category-models.mjs`（原有4个）、`tools/generate-reference-models.mjs`（7个参考）、`tools/generate-extra-category-models.mjs`（40个新增）。
+- 汇总目录：`output/all-models/`（categories/ + reference/）。
 
 ## 本地构建
 

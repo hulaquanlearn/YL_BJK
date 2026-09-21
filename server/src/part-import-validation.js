@@ -7,13 +7,27 @@ function text(value) {
 function duplicateLocationErrors(records, existingOccupants = []) {
   const errors = [];
   const fileLocations = new Map();
+  const textLocations = new Map();
 
   for (const record of records) {
     const locationCode = text(record.locationCode);
-    if (!locationCode) continue;
+    if (!locationCode) {
+      const key = JSON.stringify([text(record.materialCode),text(record.warehouseAreaName),text(record.locationNote)]);
+      const rows = textLocations.get(key) || [];
+      rows.push(record); textLocations.set(key, rows);
+      continue;
+    }
     const rows = fileLocations.get(locationCode) || [];
     rows.push(record);
     fileLocations.set(locationCode, rows);
+  }
+
+  for (const rows of textLocations.values()) {
+    if (rows.length < 2) continue;
+    const rowNumbers = rows.map(item => item.sourceRow).join('、');
+    for (const record of rows) errors.push({ row: record.sourceRow, field: '存放位置',
+      reason: `同物料、同货区和同文字位置在第${rowNumbers}行重复`,
+      suggestion: '同一位置只保留一行；若为不同存放点，请填写不同的位置说明' });
   }
 
   for (const [locationCode, rows] of fileLocations) {

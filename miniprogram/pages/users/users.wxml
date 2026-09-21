@@ -9,11 +9,13 @@
     <view class="user-card" wx:for="{{users}}" wx:key="id">
       <view class="user-main">
         <view class="avatar">{{item.initial}}</view>
-        <view class="user-info"><text class="user-name">{{item.displayName}}</text><text class="user-meta">{{item.username}} · {{item.role === 'admin' ? '管理员' : '普通用户'}}</text></view>
-        <switch checked="{{item.enabled}}" color="#C6000B" data-id="{{item.id}}" bindchange="toggleEnabled" />
+        <view class="user-info"><text class="user-name">{{item.displayName}}</text><text class="user-meta">{{item.username}} · {{item.roleLabel}}</text></view>
+        <view wx:if="{{isViewer}}" class="readonly-switch {{item.enabled ? 'is-enabled' : ''}}" catchtap="denyWrite" aria-label="{{item.enabled ? '账号已启用' : '账号已停用'}}"><view class="switch-knob" /></view>
+        <switch wx:else checked="{{item.enabled}}" color="#C6000B" data-id="{{item.id}}" bindchange="toggleEnabled" />
       </view>
       <view class="action-row">
-        <picker range="{{roles}}" value="{{item.role === 'admin' ? 1 : 0}}" data-id="{{item.id}}" bindchange="changeRole"><view class="action-btn">修改角色</view></picker>
+        <view wx:if="{{isViewer}}" class="action-btn" bindtap="denyWrite">修改角色</view>
+        <picker wx:else range="{{roles}}" value="{{item.roleIndex}}" data-id="{{item.id}}" bindchange="changeRole"><view class="action-btn">修改角色</view></picker>
         <view class="action-btn danger" data-id="{{item.id}}" bindtap="openReset">重置密码</view>
       </view>
     </view>
@@ -24,8 +26,8 @@
       <text class="modal-title">新增账号</text>
       <input class="input" placeholder="用户名：小写字母、数字或下划线" value="{{newUser.username}}" data-field="username" bindinput="onNewInput" />
       <input class="input" placeholder="姓名" value="{{newUser.displayName}}" data-field="displayName" bindinput="onNewInput" />
-      <input class="input" password placeholder="初始密码：至少10位，含字母和数字" value="{{newUser.password}}" data-field="password" bindinput="onNewInput" />
-      <picker range="{{roles}}" value="{{newUser.role === 'admin' ? 1 : 0}}" bindchange="onNewRole"><view class="picker-input">角色：{{newUser.role === 'admin' ? '管理员' : '普通用户'}}</view></picker>
+      <input class="input" password placeholder="初始密码：含大小写字母及数字" value="{{newUser.password}}" data-field="password" bindinput="onNewInput" />
+      <picker range="{{roles}}" value="{{newRoleIndex}}" bindchange="onNewRole"><view class="picker-input">角色：{{roles[newRoleIndex]}}</view></picker>
       <view class="modal-actions"><button class="cancel" bindtap="closeCreate">取消</button><button class="confirm" loading="{{submitting}}" bindtap="createUser">创建</button></view>
     </view>
   </view>
@@ -34,7 +36,7 @@
     <view class="modal" catchtap="noop">
       <text class="modal-title">重置 {{resetUser.displayName}} 的密码</text>
       <text class="modal-tip">重置后，该账号现有登录会立即失效。</text>
-      <input class="input" password placeholder="新密码：至少10位，含字母和数字" value="{{resetPassword}}" bindinput="onResetInput" />
+      <input class="input" password placeholder="新密码：含大小写字母及数字" value="{{resetPassword}}" bindinput="onResetInput" />
       <view class="modal-actions"><button class="cancel" bindtap="closeReset">取消</button><button class="confirm" loading="{{submitting}}" bindtap="confirmReset">确认重置</button></view>
     </view>
   </view>

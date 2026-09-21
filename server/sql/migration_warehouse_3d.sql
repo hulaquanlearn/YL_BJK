@@ -48,30 +48,30 @@ INSERT INTO warehouse_shelves
 SELECT seed.* FROM (
   SELECT 'shelf-01' AS layout_key, 1 AS shelf_no, NULL AS display_name,
          '蒸糠工段' AS workshop_group, '4150_D' AS warehouse_code, 0 AS is_vendor,
-         -2.30 AS position_x, -7.20 AS position_z, 0 AS rotation_y,
-         4.20 AS width, 0.90 AS depth, 3.20 AS height, 6 AS default_levels, 1 AS sort_order UNION ALL
-  SELECT 'shelf-02', 2, NULL, '蒸糠工段', '4150_D', 0,  2.30, -7.20, 0, 4.20, 0.90, 3.20, 6, 2 UNION ALL
-  SELECT 'shelf-03', 3, NULL, '蒸糠工段', '4150_D', 1, -2.30, -4.80, 0, 4.20, 0.90, 3.20, 6, 3 UNION ALL
-  SELECT 'shelf-04', 4, NULL, '破曲工段', '4150_C', 0,  2.30, -4.80, 0, 4.20, 0.90, 3.20, 6, 4 UNION ALL
-  SELECT 'shelf-05', 5, NULL, '破曲工段', '4150_C', 0, -2.30, -2.40, 0, 4.20, 0.90, 3.20, 6, 5 UNION ALL
-  SELECT 'shelf-06', 6, NULL, '破曲工段', '4150_C', 1,  2.30, -2.40, 0, 4.20, 0.90, 3.20, 6, 6 UNION ALL
-  SELECT 'shelf-07', 7, NULL, '五粮工段', '4150_B', 0, -2.30,  0.00, 0, 4.20, 0.90, 3.20, 6, 7 UNION ALL
-  SELECT 'shelf-08', 8, NULL, '五粮工段', '4150_B', 0,  2.30,  0.00, 0, 4.20, 0.90, 3.20, 6, 8 UNION ALL
-  SELECT 'shelf-09', 9, NULL, '五粮工段', '4150_B', 0, -2.30,  2.40, 0, 4.20, 0.90, 3.20, 6, 9 UNION ALL
-  SELECT 'shelf-10', 10, NULL, '五粮工段', '4150_B', 0,  2.30,  2.40, 0, 4.20, 0.90, 3.20, 6, 10 UNION ALL
-  SELECT 'shelf-11', 11, NULL, '五粮工段', '4150_B', 0, -2.30,  4.80, 0, 4.20, 0.90, 3.20, 6, 11 UNION ALL
-  SELECT 'shelf-12', 12, NULL, '输送工段', '4150_A', 1,  2.30,  4.80, 0, 4.20, 0.90, 3.20, 6, 12 UNION ALL
-  SELECT 'shelf-13', 13, NULL, '输送工段', '4150_A', 1, -2.30,  7.20, 0, 4.20, 0.90, 3.20, 6, 13 UNION ALL
-  SELECT 'shelf-14', 14, NULL, '输送工段', '4150_A', 1,  2.30,  7.20, 0, 4.20, 0.90, 3.20, 6, 14 UNION ALL
-  SELECT 'shelf-15', 15, NULL, '输送工段', '4150_A', 0, -6.40, -7.20, 0, 3.60, 0.90, 3.20, 6, 15 UNION ALL
-  SELECT 'shelf-16', 16, NULL, '输送工段', '4150_A', 0, -6.40, -4.80, 0, 3.60, 0.90, 3.20, 6, 16 UNION ALL
-  SELECT 'shelf-17', 17, NULL, '输送工段', '4150_A', 0, -6.40, -2.40, 0, 3.60, 0.90, 3.20, 6, 17 UNION ALL
-  SELECT 'shelf-18', 18, NULL, '输送工段', '4150_A', 0, -6.40,  0.60, 0, 3.60, 0.90, 3.20, 6, 18 UNION ALL
-  SELECT 'shelf-19', 19, NULL, '输送工段', '4150_A', 0, -6.40,  3.00, 0, 3.60, 0.90, 3.20, 6, 19 UNION ALL
-  SELECT 'shelf-20', 20, NULL, '输送工段', '4150_A', 0, -6.40,  5.40, 0, 3.60, 0.90, 3.20, 6, 20 UNION ALL
-  SELECT 'unnamed-01', NULL, '未命名', '未命名区域', 'UNASSIGNED', 0, -4.80,  9.60, 0, 3.80, 0.90, 3.20, 6, 101 UNION ALL
-  SELECT 'unnamed-02', NULL, '未命名', '未命名区域', 'UNASSIGNED', 0,  0.00,  9.60, 0, 3.80, 0.90, 3.20, 6, 102 UNION ALL
-  SELECT 'unnamed-03', NULL, '未命名', '未命名区域', 'UNASSIGNED', 0,  4.80,  9.60, 0, 3.80, 0.90, 3.20, 6, 103
+         -1.25 AS position_x, -10.50 AS position_z, 0 AS rotation_y,
+         4.90 AS width, 0.90 AS depth, 3.20 AS height, 4 AS default_levels, 1 AS sort_order UNION ALL
+  SELECT 'shelf-02', 2, NULL, '蒸糠工段', '4150_D', 0, -6.35, -10.50, 0, 4.90, 0.90, 3.20, 4, 2 UNION ALL
+  SELECT 'shelf-03', 3, NULL, '蒸糠工段', '4150_D', 1, -1.25,  -7.10, 0, 4.90, 0.90, 3.20, 4, 3 UNION ALL
+  SELECT 'shelf-04', 4, NULL, '破曲工段', '4150_C', 0, -6.35,  -7.10, 0, 4.90, 0.90, 3.20, 4, 4 UNION ALL
+  SELECT 'shelf-05', 5, NULL, '破曲工段', '4150_C', 0, -1.25,  -3.70, 0, 4.90, 0.90, 3.20, 4, 5 UNION ALL
+  SELECT 'shelf-06', 6, NULL, '破曲工段', '4150_C', 1, -6.35,  -3.70, 0, 4.90, 0.90, 3.20, 4, 6 UNION ALL
+  SELECT 'shelf-07', 7, NULL, '五粮工段', '4150_B', 0, -1.25,  -0.30, 0, 4.90, 0.90, 3.20, 4, 7 UNION ALL
+  SELECT 'shelf-08', 8, NULL, '五粮工段', '4150_B', 0, -6.35,  -0.30, 0, 4.90, 0.90, 3.20, 4, 8 UNION ALL
+  SELECT 'shelf-09', 9, NULL, '五粮工段', '4150_B', 0, -1.25,   3.10, 0, 4.90, 0.90, 3.20, 4, 9 UNION ALL
+  SELECT 'shelf-10', 10, NULL, '五粮工段', '4150_B', 0, -6.35,  3.10, 0, 4.90, 0.90, 3.20, 4, 10 UNION ALL
+  SELECT 'shelf-11', 11, NULL, '五粮工段', '4150_B', 0, -1.25,  6.50, 0, 4.90, 0.90, 3.20, 4, 11 UNION ALL
+  SELECT 'shelf-12', 12, NULL, '输送工段', '4150_A', 1, -6.35,  6.50, 0, 4.90, 0.90, 3.20, 4, 12 UNION ALL
+  SELECT 'shelf-13', 13, NULL, '输送工段', '4150_A', 1, -1.25,  9.90, 0, 4.90, 0.90, 3.20, 4, 13 UNION ALL
+  SELECT 'shelf-14', 14, NULL, '输送工段', '4150_A', 1, -6.35,  9.90, 0, 4.90, 0.90, 3.20, 4, 14 UNION ALL
+  SELECT 'shelf-15', 15, NULL, '输送工段', '4150_A', 0,  6.35, -10.50, 0, 4.90, 0.90, 3.20, 4, 15 UNION ALL
+  SELECT 'shelf-16', 16, NULL, '输送工段', '4150_A', 0,  6.35,  -7.10, 0, 4.90, 0.90, 3.20, 4, 16 UNION ALL
+  SELECT 'shelf-17', 17, NULL, '输送工段', '4150_A', 0,  6.35,  -3.70, 0, 4.90, 0.90, 3.20, 4, 17 UNION ALL
+  SELECT 'shelf-18', 18, NULL, '输送工段', '4150_A', 0,  6.35,  -0.30, 0, 4.90, 0.90, 3.20, 4, 18 UNION ALL
+  SELECT 'shelf-19', 19, NULL, '输送工段', '4150_A', 0,  6.35,   3.10, 0, 4.90, 0.90, 3.20, 4, 19 UNION ALL
+  SELECT 'shelf-20', 20, NULL, '输送工段', '4150_A', 0,  6.35,   6.50, 0, 4.90, 0.90, 3.20, 4, 20 UNION ALL
+  SELECT 'unnamed-01', NULL, '未命名', '未命名区域', 'UNASSIGNED', 0,  6.35, 13.40, 0, 4.90, 0.90, 3.20, 4, 101 UNION ALL
+  SELECT 'unnamed-02', NULL, '未命名', '未命名区域', 'UNASSIGNED', 0,  1.25, 13.40, 0, 4.90, 0.90, 3.20, 4, 102 UNION ALL
+  SELECT 'unnamed-03', NULL, '未命名', '未命名区域', 'UNASSIGNED', 0, -3.85, 13.40, 0, 4.90, 0.90, 3.20, 4, 103
 ) AS seed
 LEFT JOIN warehouse_shelves existing ON existing.layout_key = seed.layout_key
 WHERE existing.id IS NULL;

@@ -2,7 +2,7 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const { pool } = require('../db');
 const { ApiError, asyncHandler } = require('../utils');
-const { publicUser, createSession, requireAuth } = require('../auth');
+const { publicUser, createSession, requireAuth, setAssetCookie, clearAssetCookie } = require('../auth');
 const { validatePassword } = require('../password-policy');
 const { hashPassword, verifyPassword } = require('../password');
 
@@ -31,15 +31,18 @@ router.post('/login', loginLimiter, asyncHandler(async (req, res) => {
 
   await pool.query('UPDATE app_users SET last_login_at = NOW() WHERE id = ?', [user.id]);
   const token = await createSession(user.id);
+  setAssetCookie({get:()=>`Bearer ${token}`}, res);
   res.json({ success: true, data: { token, user: publicUser(user) } });
 }));
 
 router.get('/me', requireAuth, (req, res) => {
+  setAssetCookie(req, res);
   res.json({ success: true, data: { user: req.user } });
 });
 
 router.post('/logout', requireAuth, asyncHandler(async (req, res) => {
   await pool.query('DELETE FROM app_sessions WHERE id = ?', [req.sessionId]);
+  clearAssetCookie(res);
   res.json({ success: true, msg: '已退出登录' });
 }));
 
@@ -62,6 +65,7 @@ router.post('/change-password', requireAuth, asyncHandler(async (req, res) => {
     await connection.rollback();
     throw error;
   } finally { connection.release(); }
+  clearAssetCookie(res);
   res.json({ success: true, msg: '密码修改成功，请重新登录' });
 }));
 

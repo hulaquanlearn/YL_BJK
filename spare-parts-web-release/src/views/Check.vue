@@ -7,14 +7,14 @@
       </div>
       <div class="head-actions">
         <el-button :loading="loading" @click="load"><el-icon><Refresh /></el-icon>刷新</el-button>
-        <el-button v-if="canCreate" type="primary" @click="openCreate"><el-icon><Plus /></el-icon>新建盘点</el-button>
+        <el-button v-write v-if="$showControl(canCreate)" type="primary" @click="openCreate"><el-icon><Plus /></el-icon>新建盘点</el-button>
       </div>
     </div>
 
     <section class="metric-grid">
       <button type="button" class="metric-card is-clickable check-metric-button" @click="setStatus('')">
         <div class="metric-top"><span>全部任务</span><span class="metric-icon"><el-icon><Files /></el-icon></span></div>
-        <div class="metric-value">{{ list.length }}</div>
+        <div class="metric-value">{{ orderSummary.total }}</div>
         <div class="metric-note">当前筛选范围内的盘点单</div>
       </button>
       <button type="button" class="metric-card is-pending is-clickable check-metric-button" @click="setStatus('待审批')">
@@ -35,16 +35,16 @@
     </section>
 
     <section class="panel filter-panel">
-      <div class="filter-row" style="grid-template-columns:minmax(160px,.7fr) minmax(180px,.7fr) minmax(210px,.8fr) 1fr auto">
+      <div class="filter-row check-filter-row">
         <div class="filter-field">
           <label>所属车间</label>
-          <el-select v-model="query.workshopCode" clearable placeholder="全部车间" style="width:100%" @change="load">
+          <el-select v-model="query.workshopCode" clearable placeholder="全部车间" style="width:100%" @change="searchOrders">
             <el-option v-for="item in workshopOptions" :key="item.code" :label="item.name" :value="item.code" />
           </el-select>
         </div>
         <div class="filter-field">
           <label>审批状态</label>
-          <el-select v-model="query.status" clearable placeholder="全部状态" style="width:100%" @change="load">
+          <el-select v-model="query.status" clearable placeholder="全部状态" style="width:100%" @change="searchOrders">
             <el-option label="待审批" value="待审批" />
             <el-option label="已通过" value="已通过" />
             <el-option label="已驳回" value="已驳回" />
@@ -52,21 +52,21 @@
         </div>
         <div class="filter-field">
           <label>盘点日期</label>
-          <el-date-picker v-model="query.date" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" clearable style="width:100%" @change="load" />
+          <el-date-picker v-model="query.date" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" clearable style="width:100%" @change="searchOrders" />
         </div>
-        <div></div>
         <div class="filter-actions">
           <el-button @click="resetFilters">重置</el-button>
-          <el-button type="primary" :loading="loading" @click="load">查询</el-button>
+          <el-button type="primary" :loading="loading" @click="searchOrders">查询</el-button>
         </div>
       </div>
     </section>
 
     <section class="panel table-panel">
       <div class="table-toolbar">
-        <div><strong>盘点单记录</strong><span class="result-count">共 {{ list.length }} 条</span></div>
+        <div><strong>盘点单记录</strong><span class="result-count">共 {{ orderTotal }} 条</span></div>
         <span style="color:#8a93a4;font-size:12px">单据按创建时间倒序</span>
       </div>
+      <p class="mobile-table-hint">左右滑动表格，查看完整字段和操作</p>
       <el-table :data="list" v-loading="loading" row-key="_id" empty-text="暂无盘点单">
         <el-table-column label="盘点单号" min-width="205" fixed="left">
           <template #default="{ row }">
@@ -91,13 +91,14 @@
         <el-table-column label="操作" width="190" align="right" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="viewDetail(row)">详情</el-button>
-            <template v-if="isAdmin && row.approveStatus === '待审批'">
-              <el-button link type="success" :loading="processingId===row._id" @click="approve(row, '已通过')">通过</el-button>
-              <el-button link type="danger" :loading="processingId===row._id" @click="approve(row, '已驳回')">驳回</el-button>
+            <template v-if="$showControl(isAdmin) && row.approveStatus === '待审批'">
+              <el-button v-write link type="success" :loading="processingId===row._id" @click="approve(row, '已通过')">通过</el-button>
+              <el-button v-write link type="danger" :loading="processingId===row._id" @click="approve(row, '已驳回')">驳回</el-button>
             </template>
           </template>
         </el-table-column>
       </el-table>
+      <div class="pagination-bar"><span>第 {{ query.page }} 页</span><el-pagination v-model:current-page="query.page" v-model:page-size="query.pageSize" :total="orderTotal" :page-sizes="[20,50,100]" layout="total, sizes, prev, pager, next" @current-change="load" @size-change="searchOrders" /></div>
     </section>
 
     <el-drawer v-model="detailVisible" title="盘点单详情" size="min(760px, 94vw)">
@@ -196,7 +197,7 @@
       <template #footer>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%">
           <span style="color:#697386;font-size:12px">提交后相关备件将暂停出入库，直至审批完成。</span>
-          <div><el-button @click="createVisible=false">取消</el-button><el-button type="primary" :loading="submitting" @click="submitOrder">提交盘点单</el-button></div>
+          <div><el-button @click="createVisible=false">取消</el-button><el-button v-write type="primary" :loading="submitting" @click="submitOrder">提交盘点单</el-button></div>
         </div>
       </template>
     </el-dialog>
@@ -214,7 +215,9 @@ const route = useRoute()
 const router = useRouter()
 const loading = ref(false)
 const list = ref([])
-const query = reactive({ status: typeof route.query.status === 'string' ? route.query.status : '', workshopCode: typeof route.query.workshopCode === 'string' ? route.query.workshopCode : '', date: '', limit: 200 })
+const query = reactive({ status: typeof route.query.status === 'string' ? route.query.status : '', workshopCode: typeof route.query.workshopCode === 'string' ? route.query.workshopCode : '', date: '', page: 1, pageSize: 20 })
+const orderTotal=ref(0),orderSummary=reactive({total:0,pending:0,approved:0,rejected:0})
+let orderRequest=0
 const detailVisible = ref(false)
 const detail = ref(null)
 const processingId = ref('')
@@ -255,18 +258,24 @@ function today() {
   return new Date(date.getTime() - offset).toISOString().slice(0, 10)
 }
 function statusTag(status) { return status === '已通过' ? 'success' : status === '已驳回' ? 'danger' : 'warning' }
-function statusCount(status) { return list.value.filter(item => item.approveStatus === status).length }
+function statusCount(status) { return orderSummary[({'待审批':'pending','已通过':'approved','已驳回':'rejected'})[status]] || 0 }
 function formatTime(value) { return value ? String(value).replace('T', ' ').slice(0, 16) : '-' }
 function workshopName(code) { return workshopOptions.find(item => item.code === code)?.name || '原粮车间' }
-function setStatus(status) { query.status = status; load() }
-function resetFilters() { query.status = ''; query.workshopCode = ''; query.date = ''; router.replace({ query: {} }); load() }
+function searchOrders(){query.page=1;load()}
+function setStatus(status) { query.status = status; searchOrders() }
+function resetFilters() { query.status = ''; query.workshopCode = ''; query.date = ''; router.replace({ query: {} }); searchOrders() }
 
 async function load() {
+  const request=++orderRequest
   loading.value = true
   try {
     const result = await getInventoryOrders({ ...query })
+    if(request!==orderRequest)return
     list.value = result.data || []
-  } finally { loading.value = false }
+    orderTotal.value=Number(result.total)||0
+    Object.assign(orderSummary,result.summary||{})
+    if(!list.value.length&&orderTotal.value>0&&query.page>1){query.page=Math.ceil(orderTotal.value/query.pageSize);await load()}
+  } finally { if(request===orderRequest)loading.value = false }
 }
 
 async function viewDetail(row) {
@@ -427,6 +436,9 @@ onMounted(load)
 
 <style scoped>
 .check-metric-button{width:100%;color:inherit;font:inherit;text-align:left}
+.check-filter-row{grid-template-columns:repeat(3,minmax(0,1fr)) auto}
+@media(max-width:1100px){.check-filter-row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.check-filter-row{grid-template-columns:1fr}}
 .check-create-meta-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .inventory-scope-segmented{width:auto;min-width:330px}
 :deep(.inventory-scope-segmented .el-segmented__item){min-width:106px}

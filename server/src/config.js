@@ -22,6 +22,7 @@ module.exports = {
     charset: process.env.DB_CHARSET || 'utf8mb4'
   },
   openclaw: {
+    contextTransferEnabled: process.env.AI_CONTEXT_TRANSFER_ENABLED === 'true',
     apiUrl: process.env.OPENCLAW_API_URL || 'http://127.0.0.1:14504/v1/chat/completions',
     token: process.env.OPENCLAW_GATEWAY_TOKEN || '',
     model: process.env.OPENCLAW_MODEL || 'openclaw/spare-parts-chat',

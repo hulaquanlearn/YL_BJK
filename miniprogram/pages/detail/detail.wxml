@@ -52,7 +52,7 @@
     </view>
   </view>
 
-  <view class="card" wx:if="{{isAdmin}}">
+  <view class="card" wx:if="{{canEditPart || isViewer}}">
     <view class="card-header">库存调整</view>
     <view class="operation-reason">
       <text class="operation-label">操作原因：</text>
@@ -106,5 +106,5 @@
     <view class="remark-content">{{part.remark}}</view>
   </view>
 
-  <button class="archive-btn" wx:if="{{isAdmin}}" bindtap="archivePart">停用该备件记录</button>
+  <button class="archive-btn" wx:if="{{canEditPart || isViewer}}" bindtap="archivePart">停用该备件记录</button>
 </view>

@@ -1,5 +1,15 @@
 # 备件管理 API 部署
 
+## V1.7.0 升级优先说明
+
+以部署包根目录 `DEPLOY_V1.7.0.md` 为准；本节优先于下方历史首次部署说明。从 V1.5.0 / V1.6.0 升级无需新增 SQL；V1.4.1 需补 migration_v1_5_0.sql，V1.4.0 先补 migration_v1_4_1.sql 再补 migration_v1_5_0.sql。不得重放已应用迁移、旧布局或历史业务数据。先备份并停止 API，升级前后端后再启动。
+
+V1.7.0：车间人员可见操作入口但写入仍返回403；GET /api/users 和 /roles 可读，账号列表仅返回基本字段。业务资源与数据不公开、不缓存；按账号及 IP 限流，默认禁止 AI 业务内容外传。Nginx 必须覆盖 X-Forwarded-For，API 和 web 均仅监听127.0.0.1。包内附完整部署与验证步骤。
+
+V1.6.0 新增 POST /api/part-category-model-matches/preview 与 /apply：前者生成当前物料的候选预览，后者每批最多 500 条，锁定并重新验证权限、匹配快照和模型文件后写入类别关联。已有人工关联不覆盖。查看范围沿用全部车间，车间管理员只能变更本车间独占物料，只读账号不能使用该编辑流程。模型文件默认从相邻 web/dist 读取；非标准部署可将 MODEL_ASSETS_DIR 配置为含 models/ 子目录的静态根目录。
+
+完整 Office 阅读需要 LibreOffice、Poppler、Tesseract 与 Bubblewrap，运行 `node scripts/check-document-service.js --require-full` 检查。缺依赖时是明确标注的兼容降级，不代表原件完整还原。文档原件继续鉴权读取；备件图片、上传模型及包内 models 也须经 API 鉴权读取，禁止使用 Nginx 静态 alias 绕过。完整能力与限制见包内 `docs/DOCUMENT_PREVIEW_V1.4.0.md`。
+
 目标服务器：`49.234.185.199`，项目目录：`/opt/spare-parts/server`。
 
 服务器已经存在 `spare_parts` 数据库及正式数据。不要运行整库建表、不要重新导入 Excel、不要删除或覆盖现有表。
@@ -13,7 +23,7 @@ API 直接使用服务器现有结构：
 - `warehouses`：货区字典
 - `categories`：品牌分类
 
-首次部署或本次更新后执行增量迁移（脚本可安全重复执行）：
+以下总迁移只供从更早版本迁入的历史部署核对参考，不用于 V1.3.2 → V1.4.0 常规升级。先确认旧迁移历史及备份，不因脚本名含 all 就直接重跑：
 
 ```bash
 cd /opt/spare-parts/server
@@ -50,6 +60,8 @@ mysql -u spareparts -p spare_parts < sql/migration_all.sql
 - 管理员出入库必须填写原因；服务端在同一事务中更新库存并写入 `stock_movements`。
 - `GET /api/parts/:id/movements` 返回最近库存流水，普通用户可查看、不能修改。
 - 删除接口已改为逻辑停用：只将 `inventory.active`（以及无其他启用库位时的 `parts.active`）设为0，不物理删除历史数据。
+- `PATCH /api/parts/:id` 用于维护备件与所在车间库存配置，不直接修改库存数量；车间账号只能修改所属车间，总管理员可修改全部车间。共用物料的全局主信息仅总管理员可改，车间账号仍可维护本车间单位、库位、安全库存、最高储备和单价。
+- `DELETE /api/parts/:id` 在库存不为0、存在待审批盘点或仍关联设备型号时返回409及具体原因；通过后仅逻辑停用，库存流水不会删除。
 - 库存不为0或存在待审批盘点单时仍禁止停用。
 
 ## 统计口径
@@ -125,7 +137,7 @@ npm run create-admin
 
 ## OpenClaw
 
-`POST /api/ai/chat` 在调用 OpenClaw 前会先做话题白名单校验。只允许简单问候，以及原粮车间设备维修、保养、巡检、故障处理、备件和库存管理相关问题；股票、天气、旅游、娱乐等无关问题会由 API 直接拒绝，不会转发给 OpenClaw。服务端系统提示词还会再次限制回答范围，形成两层防护。
+`POST /api/ai/chat` 在调用 OpenClaw 前会先做话题白名单校验。只允许简单问候，以及各车间设备维修、保养、巡检、故障处理、工程资料、备件和库存管理相关问题；股票、天气、旅游、娱乐等无关问题会由 API 直接拒绝，不会转发给 OpenClaw。每次提问会先从工程知识、备件库存和设备型号关系中检索证据，再把有限证据交给 OpenClaw；没有直接依据时必须明确说明，不能编造参数、库存或故障结论。服务端系统提示词还会再次限制回答范围，形成两层防护。
 
 在 OpenClaw 配置中启用 Chat Completions：
 
@@ -189,7 +201,16 @@ ss -lntp | grep ':14504'
 
 ## 智能工程中心附件与程序解析
 
-智能工程中心与备件管理共用统一账号。车间角色只能上传和维护所属车间资料；总管理员可彻底删除知识记录及其服务器附件。知识删除不是“下架”，删除后数据库记录和对应物理文件均不保留。
+智能工程中心与备件管理共用统一账号。车间角色只能向所属车间上传资料；总管理员可彻底删除任意知识，其他可编辑账号只能删除自己创建或上传的知识，其余知识只能查看。知识删除不是“下架”，删除后数据库记录和对应物理文件均不保留。
+
+允许上传的 PDF、Word、Excel、PowerPoint、文本和常用图片均支持登录后的站内阅读。`.docx/.xlsx/.pptx` 生成带基础版式的安全 HTML；旧版 `.doc/.xls/.ppt` 采用文字或表格优先的兼容预览，复杂动画、宏和精确排版不会执行。上传时会抽取 Office 文本写入知识检索字段，浏览器误解码的中文文件名会在页面与下载响应中修复。
+
+## 设备型号与备件关系
+
+- 页面和接口只按“车间 + 设备型号”维护常用备件，不要求用户输入具体设备编码；数据库内部编码由服务端自动生成，仅用于兼容旧表唯一约束，不对用户展示。
+- 统一模板列为 `设备型号、物料编码、单台用量、所属工段、备注`。设备型号必填，物料编码选填；仅填写型号会创建型号，填写物料编码时同时建立关系。
+- 导入先调用 `/api/equipment/import-preview` 整批校验，存在任一问题时不写入；`/api/equipment/import-error-report` 返回带错误原因和修改建议的修正台账。
+- 型号详情支持手工关联和解除备件关系。所有账号可查看；总管理员可修改全部车间，车间账号只能修改所属车间。
 
 生产环境必须配置持久化附件目录：
 
@@ -231,11 +252,12 @@ npm run export:knowledge -- --output=/opt/spare-parts/output/spare-parts-knowled
 
 ## 备件与类别模型
 
-- `parts.model_url` 是具体备件的专用模型，优先级最高；`parts.category_model_id` 关联可复用的 `part_category_models`。
+- `parts.model_url` 是保留供回滚的历史字段，当前 API 不再启用专用模型；`parts.category_model_id` 关联可复用的 `part_category_models`。
 - 执行 `sql/migration_part_category_models_20260831.sql` 后，四个初始类别模型会登记到数据库，并为现有常见备件完成首次关联。
 - `/api/parts/batch-model` 和 `/api/parts/batch-category-model` 会逐个校验备件所属车间，单次最多处理500个备件。
 - `/api/part-category-models` 的查询对登录账号开放；新增、修改、替换和删除只允许 `admin`。
 - 用户上传的类别模型保存在 `PART_MODELS_UPLOAD_DIR`（生产建议 `/opt/spare-parts/uploads/part-models`），必须与数据库一起备份；部署包不携带该目录。
+- 2026-09-05新增40个程序化生成的分类GLB模型（`tools/generate-extra-category-models.mjs`），覆盖接触器、变频器、继电器、软启动器、皮带轮、联轴器、编码器、电机、PLC模块、仪表、制动电阻、辅助触头、开关按钮、接线箱、链条、气缸、刮板、软连接、滤网、紧定套、网络交换机、气动元件、RGV部件、齿轮链轮、料位计、密封件、管接头、离合器、电缆、制动器、电源、条码扫描器、风机、电动缸、5G CPE、熔断器、消声器、HMI触摸屏、控制板、减速机。每个模型配有AI生成的真实感预览JPG。连同原有4个分类模型和7个参考模型共51个GLB覆盖46种备件类型。全部汇总在 `output/all-models/` 目录，可通过API手动上传或部署时放入 `public/models/categories/`。
 
 ## 安装与 PM2
 
@@ -277,7 +299,7 @@ curl http://127.0.0.1:3000/api/health
 curl https://czsdsg.cn/api/health
 ```
 
-除 `/api/health` 和 `/api/auth/login` 外，其他接口必须在无令牌时返回401。登录后使用 `Authorization: Bearer <token>` 验证查询；普通用户调用新增、删除、出入库、审批和账号管理接口必须返回403，管理员调用才允许继续。
+除 `/api/health` 和 `/api/auth/login` 外，其他接口必须在无令牌时返回401。登录后使用 `Authorization: Bearer <token>` 验证查询；`viewer` 调用新增、编辑、删除、出入库、审批和账号管理接口必须返回403；车间账号只能修改所属车间，总管理员可修改全部车间并负责审批和账号管理。
 
 确认新明细表已就绪：
 
@@ -286,3 +308,5 @@ mysql -u spareparts -p -D spare_parts -e 'SHOW CREATE TABLE inventory_order_item
 ```
 
 验证查询返回数据后，再测试新增、出入库、盘点和审批。不要直接在正式库中测试删除接口。
+
+V1.5.0 角色列表：管理员访问 GET /api/users/roles。viewer 显示“车间人员（只读）”。只读角色即使是知识原作者，也不能修订或删除；问答查询仍可使用。程序解析助手协议 2 支持续租、释放和租约令牌校验，旧助手须升级。

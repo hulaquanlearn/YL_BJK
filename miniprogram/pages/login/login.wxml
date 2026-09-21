@@ -13,7 +13,7 @@
     <view class="field-group">
       <text class="field-label">密码</text>
       <view class="password-row">
-        <input class="field-input password-input" value="{{password}}" password="{{!showPassword}}" placeholder="请输入密码" maxlength="72" bindinput="onPasswordInput" confirm-type="done" bindconfirm="submitLogin" />
+        <input class="field-input password-input" value="{{password}}" password="{{!showPassword}}" placeholder="请输入密码" bindinput="onPasswordInput" confirm-type="done" bindconfirm="submitLogin" />
         <text class="password-toggle" bindtap="togglePassword">{{showPassword ? '隐藏' : '显示'}}</text>
       </view>
     </view>
