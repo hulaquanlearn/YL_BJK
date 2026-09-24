@@ -22,7 +22,9 @@ function publicUser(row) {
     displayName: row.display_name,
     role: row.role,
     enabled: Boolean(row.enabled),
-    workshopCode: workshopForRole(row.role)
+    workshopCode: workshopForRole(row.role) || row.staff_workshop_code || null,
+    staffWorkshopCode: row.staff_workshop_code || null,
+    staffPosition: row.staff_position || null
   };
 }
 
@@ -48,7 +50,8 @@ const requireAuth = asyncHandler(async (req, _res, next) => {
   if (!match) throw new ApiError(401, '请先登录');
 
   const [rows] = await pool.query(
-    `SELECT u.id, u.username, u.display_name, u.role, u.enabled, s.id AS session_id
+    `SELECT u.id, u.username, u.display_name, u.role, u.staff_workshop_code, u.staff_position,
+            u.enabled, s.id AS session_id
      FROM app_sessions s
      INNER JOIN app_users u ON u.id = s.user_id
      WHERE s.token_hash = ? AND s.expires_at > NOW()

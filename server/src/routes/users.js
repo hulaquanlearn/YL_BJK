@@ -5,6 +5,7 @@ const { requireRole } = require('../auth');
 const { validateUsername, validatePassword, validateDisplayName } = require('../password-policy');
 const { hashPassword } = require('../password');
 const { WORKSHOPS, ROLE_LABELS } = require('../workshop-scope');
+const { normalizeStaffIdentity } = require('../staff-identity');
 
 const router = express.Router();
 router.use((req,res,next) => {
@@ -16,13 +17,16 @@ router.get('/roles', (_req, res) => res.json({success:true,data:Object.entries(R
 
 router.get('/', asyncHandler(async (req, res) => {
   const [rows] = await pool.query(
-    `SELECT id, username, display_name AS displayName, role, enabled,
+    `SELECT id, username, display_name AS displayName, role,
+            staff_workshop_code AS staffWorkshopCode, staff_position AS staffPosition, enabled,
             last_login_at AS lastLoginAt, created_at AS createdAt
      FROM app_users ORDER BY role = 'admin' DESC, username ASC`
   );
   res.json({ success: true, data: rows.map(row => req.user.role === 'viewer'
-    ? { id:String(row.id), username:row.username, displayName:row.displayName, role:row.role, enabled:Boolean(row.enabled) }
-    : { ...row, id:String(row.id), enabled:Boolean(row.enabled) }) });
+    ? { id:String(row.id), username:row.username, displayName:row.displayName, role:row.role,
+      staffWorkshopCode:row.staffWorkshopCode || null, staffPosition:row.staffPosition || null, enabled:Boolean(row.enabled) }
+    : { ...row, staffWorkshopCode:row.staffWorkshopCode || null, staffPosition:row.staffPosition || null,
+      id:String(row.id), enabled:Boolean(row.enabled) }) });
 }));
 
 router.post('/', asyncHandler(async (req, res) => {
@@ -31,12 +35,13 @@ router.post('/', asyncHandler(async (req, res) => {
   const displayName = validateDisplayName(req.body?.displayName);
   const role = String(req.body?.role || 'viewer');
   if (!ALLOWED_ROLES.has(role)) throw new ApiError(400, '角色无效');
+  const identity = normalizeStaffIdentity(role, req.body?.staffWorkshopCode, req.body?.staffPosition, { required: role === 'viewer' });
   const passwordHash = await hashPassword(password);
   try {
     const [result] = await pool.query(
-      `INSERT INTO app_users (username, password_hash, display_name, role)
-       VALUES (?, ?, ?, ?)`,
-      [username, passwordHash, displayName, role]
+      `INSERT INTO app_users (username, password_hash, display_name, role, staff_workshop_code, staff_position)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [username, passwordHash, displayName, role, identity.staffWorkshopCode, identity.staffPosition]
     );
     res.status(201).json({ success: true, msg: '账号创建成功', data: { id: String(result.insertId) } });
   } catch (error) {
@@ -50,6 +55,9 @@ router.patch('/:id', asyncHandler(async (req, res) => {
   if (!Number.isInteger(id) || id < 1) throw new ApiError(400, '账号ID无效');
   const updates = [];
   const params = [];
+  const [existingRows] = await pool.query('SELECT role, staff_workshop_code, staff_position FROM app_users WHERE id=? LIMIT 1', [id]);
+  if (!existingRows.length) throw new ApiError(404, '账号不存在');
+  const existing = existingRows[0];
   if (req.body?.displayName !== undefined) {
     updates.push('display_name = ?');
     params.push(validateDisplayName(req.body.displayName));
@@ -59,6 +67,15 @@ router.patch('/:id', asyncHandler(async (req, res) => {
     if (String(id) === String(req.user.id) && req.body.role !== 'admin') throw new ApiError(400, '不能取消自己的管理员权限');
     updates.push('role = ?');
     params.push(req.body.role);
+  }
+  if (req.body?.role !== undefined || req.body?.staffWorkshopCode !== undefined || req.body?.staffPosition !== undefined) {
+    const nextRole = req.body?.role ?? existing.role;
+    const identity = normalizeStaffIdentity(nextRole,
+      req.body?.staffWorkshopCode !== undefined ? req.body.staffWorkshopCode : existing.staff_workshop_code,
+      req.body?.staffPosition !== undefined ? req.body.staffPosition : existing.staff_position,
+      { required: nextRole === 'viewer' });
+    updates.push('staff_workshop_code = ?', 'staff_position = ?');
+    params.push(identity.staffWorkshopCode, identity.staffPosition);
   }
   if (req.body?.enabled !== undefined) {
     const enabled = Boolean(req.body.enabled);

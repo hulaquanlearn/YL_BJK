@@ -4,7 +4,7 @@ import { getMe } from '../api'
 
 const routes = [
   { path: '/work', name: 'WorkAssessment', component: () => import('../views/WorkAssessment.vue'), meta: { module: 'work', title: '组长履职考评', description: '工作填报、每周考评与复核' } },
-  { path: '/inspection-notices', name: 'InspectionNotices', component: () => import('../views/InspectionNotices.vue'), meta: { module: 'work', editor: true, title: '检查通报整理', description: '上传群聊截图，核对问题与图片，导出检查通报' } },
+  { path: '/inspection-notices', name: 'InspectionNotices', component: () => import('../views/InspectionNoticeAccess.vue'), meta: { module: 'work', inspection: true, title: '检查通报', description: '查看原粮车间检查通报与现场问题' } },
   { path: '/login', name: 'Login', component: () => import('../views/Login.vue'), meta: { public: true, title: '账号登录' } },
   { path: '/', redirect: '/portal' },
   { path: '/portal', name: 'Portal', component: () => import('../views/Portal.vue'), meta: { portal: true, title: '业务板块' } },
@@ -38,8 +38,8 @@ router.beforeEach(async to => {
   if (to.meta.public) return getToken() && getUser() ? '/portal' : true
   if (!getToken() || !getUser()) return { path: '/login', query: { redirect: to.fullPath } }
   if (to.meta.admin && getUser()?.role !== 'admin') return '/portal'
-  if (to.meta.editor && !['admin', 'raw_grain'].includes(getUser()?.role)) return '/portal'
-  if (to.path === '/work' && !['admin', 'qu_making', 'viewer'].includes(getUser()?.role)) return '/portal'
+  if (to.meta.inspection && !(['admin','raw_grain'].includes(getUser()?.role) || (getUser()?.role==='viewer' && getUser()?.staffWorkshopCode==='raw_grain'))) return '/portal'
+  if (to.path === '/work' && !(['admin', 'qu_making'].includes(getUser()?.role) || (getUser()?.role==='viewer' && (!getUser()?.staffWorkshopCode || getUser()?.staffWorkshopCode==='qu_making')))) return '/portal'
   return true
 })
 

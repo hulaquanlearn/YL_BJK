@@ -3,3 +3,6 @@ page{background:#f4f5f7}.page-wrap{padding:28rpx}.head-card,.user-card{border-ra
 .readonly-switch.is-enabled { background: #c6000b; }
 .switch-knob { width: 48rpx; height: 48rpx; border-radius: 50%; background: #fff; box-shadow: 0 2rpx 4rpx rgba(0,0,0,.12); }
 .readonly-switch.is-enabled .switch-knob { margin-left: 40rpx; }
+.add-btn,.modal-actions button{display:flex;align-items:center;justify-content:center;line-height:1.2;padding-top:0;padding-bottom:0}
+.action-row>.action-btn{flex:1}
+.modal{max-height:calc(100vh - 72rpx);overflow-y:auto}

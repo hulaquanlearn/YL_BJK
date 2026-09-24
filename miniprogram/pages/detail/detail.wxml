@@ -52,7 +52,7 @@
     </view>
   </view>
 
-  <view class="card" wx:if="{{canEditPart || isViewer}}">
+  <view class="card" wx:if="{{canEditPart}}">
     <view class="card-header">库存调整</view>
     <view class="operation-reason">
       <text class="operation-label">操作原因：</text>
@@ -98,7 +98,7 @@
 
   <view class="card permission-note" wx:else>
     <view class="card-header">权限说明</view>
-    <view class="remark-content">普通用户可查看库存信息，出入库操作仅限管理员。</view>
+    <view class="remark-content">当前账号可查看库存信息，出入库操作需备件编辑权限。</view>
   </view>
 
   <view class="card">
@@ -106,5 +106,5 @@
     <view class="remark-content">{{part.remark}}</view>
   </view>
 
-  <button class="archive-btn" wx:if="{{canEditPart || isViewer}}" bindtap="archivePart">停用该备件记录</button>
+  <button class="archive-btn" wx:if="{{canEditPart}}" bindtap="archivePart">停用该备件记录</button>
 </view>

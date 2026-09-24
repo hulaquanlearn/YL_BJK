@@ -67,7 +67,8 @@ test('inventory supports scoped part creation, editable xlsx import and filtered
 })
 
 test('mini program restores scoped spare-part creation for workshop editors', () => {
-  assert.match(miniHome, /wx:if="\{\{canEditParts \|\| isViewer\}\}"/)
+  assert.match(miniHome, /wx:if="\{\{canEditParts\}\}"/)
+  assert.match(miniHome, /wx:elif="\{\{isViewer\}\}"/)
   assert.match(miniHomeScript, /canEditParts: auth\.canEditAnyWorkshop\(\)/)
   assert.match(miniAuth, /function canEditAnyWorkshop/)
   assert.match(miniAuth, /options\.editor/)

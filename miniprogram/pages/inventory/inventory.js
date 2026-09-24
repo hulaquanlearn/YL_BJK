@@ -43,7 +43,7 @@ Page({
     };
     this.setData({
       filterParams,
-      isReadOnly: filterParams.status === '已盘点'
+      isReadOnly: filterParams.status === '已盘点' || auth.isViewer()
     }, async () => {
       await this.getTodayInventoryData();
       await this.loadInventoryData();

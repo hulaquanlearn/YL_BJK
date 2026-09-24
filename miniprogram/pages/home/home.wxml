@@ -14,13 +14,18 @@
       </view>
       <view class="quick-item" bindtap="gotoFilter">
         <view class="quick-icon icon-green"><image src="/images/icons/备件盘点.png"></image></view>
-        <text class="quick-title">去盘点</text>
-        <text class="quick-desc">按货区盘点</text>
+        <text class="quick-title">{{isViewer ? '看盘点' : '去盘点'}}</text>
+        <text class="quick-desc">{{isViewer ? '查看盘点记录' : '按货区盘点'}}</text>
       </view>
-      <view class="quick-item" bindtap="gotoAddPart" wx:if="{{canEditParts || isViewer}}">
+      <view class="quick-item" bindtap="gotoAddPart" wx:if="{{canEditParts}}">
         <view class="quick-icon icon-orange"><image src="/images/icons/新增备件.png"></image></view>
         <text class="quick-title">新增备件</text>
         <text class="quick-desc">录入新物料</text>
+      </view>
+      <view class="quick-item" bindtap="gotoPartStats" wx:elif="{{isViewer}}">
+        <view class="quick-icon icon-orange"><image src="/images/icons/备件统计.png"></image></view>
+        <text class="quick-title">库存统计</text>
+        <text class="quick-desc">查看库存分布</text>
       </view>
       <view class="quick-item" bindtap="gotoaiAgent">
         <view class="quick-icon icon-purple"><image src="/images/icons/AI咨询.png"></image></view>
@@ -108,7 +113,7 @@
       </view>
       <view class="tool-item" bindtap="gotoApprove" wx:if="{{isAdmin || isViewer}}">
         <view class="tool-icon"><image src="/images/icons/盘点审批.png"></image></view>
-        <view class="tool-content"><text class="tool-title">盘点审批</text><text class="tool-desc">处理盘点差异与库存调整</text></view>
+        <view class="tool-content"><text class="tool-title">{{isViewer ? '盘点单查看' : '盘点审批'}}</text><text class="tool-desc">{{isViewer ? '查看待审批盘点单' : '处理盘点差异与库存调整'}}</text></view>
         <text class="tool-badge" wx:if="{{dashboard.pendingApproval > 0}}">{{dashboard.pendingApproval > 99 ? '99+' : dashboard.pendingApproval}}</text>
         <text class="tool-arrow">›</text>
       </view>

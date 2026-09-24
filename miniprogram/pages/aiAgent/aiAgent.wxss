@@ -46,8 +46,11 @@
   box-shadow: 0 6rpx 20rpx rgba(31,42,55,.04);
 }
 .input-box {
+  display: block;
   width: 100%;
-  min-height: 190rpx;
+  height: 206rpx;
+  min-height: 206rpx;
+  box-sizing: border-box;
   color: #2d3744;
   font-size: 28rpx;
   line-height: 1.65;
@@ -60,7 +63,8 @@
   border-top: 1rpx solid #edf0f3;
 }
 .scope-tip { color: #7d8692; font-size: 22rpx; }
-.clear-history { color: #a81720; font-size: 22rpx; }
+.input-count { margin-left: auto; color: #8e97a2; font-size: 22rpx; }
+.clear-history { margin-left: 16rpx; color: #a81720; font-size: 22rpx; }
 
 .suggestions { margin: 20rpx 0; }
 .suggestion-title { display: block; margin-bottom: 10rpx; color: #747e8a; font-size: 22rpx; }
@@ -83,14 +87,20 @@
 }
 
 .query-btn {
+  display: flex;
+  width: 100%;
   height: 86rpx;
   min-height: 86rpx;
+  margin: 20rpx 0 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
   border-radius: 17rpx;
   color: #fff;
   background: #c6000b;
   font-size: 29rpx;
   font-weight: 700;
-  line-height: 86rpx;
+  line-height: 1.2;
   box-shadow: 0 8rpx 18rpx rgba(198,0,11,.2);
 }
 .query-btn[disabled] { color: rgba(255,255,255,.82); background: #d27a80; box-shadow: none; }

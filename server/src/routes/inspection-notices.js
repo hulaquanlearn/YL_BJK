@@ -17,10 +17,15 @@ const activeVision=new Set();
 const workshopQuotaBytes=20*1024*1024*1024;
 const ok=(res,data)=>res.json({success:true,data});
 const editor=user=>user?.role==='admin'||user?.role==='raw_grain';
-function requireEditor(req,_res,next){return editor(req.user)?next():next(new ApiError(403,'检查通报由原粮车间授权人员或系统管理员整理'));}
-router.use(requireEditor);
+const reader=user=>editor(user)||(user?.role==='viewer'&&user?.staffWorkshopCode==='raw_grain');
+function requireAccess(req,_res,next){
+  if(!reader(req.user))return next(new ApiError(403,'检查通报仅供原粮车间人员或系统管理员查看'));
+  if(!['GET','HEAD'].includes(req.method)&&!editor(req.user))return next(new ApiError(403,'当前账号只能查看和导出检查通报'));
+  next();
+}
+router.use(requireAccess);
 function scopeForCreate(user,value){const fixed=workshopForRole(user.role);if(fixed)return fixed;const code=normalizeWorkshopCode(value||'raw_grain');if(code!=='raw_grain')throw new ApiError(400,'检查通报当前只面向原粮车间');return code;}
-function assertScope(user,report){if(report.workshop_code!=='raw_grain'||(user.role!=='admin'&&workshopForRole(user.role)!==report.workshop_code))throw new ApiError(403,'检查通报仅供原粮车间授权人员访问');}
+function assertScope(user,report){if(report.workshop_code!=='raw_grain'||(user.role!=='admin'&&(workshopForRole(user.role)||user.staffWorkshopCode)!==report.workshop_code))throw new ApiError(403,'检查通报仅供原粮车间授权人员访问');}
 async function getReport(db,reportId,actor,lock=false){const [rows]=await db.query(`SELECT * FROM inspection_notices WHERE id=?${lock?' FOR UPDATE':''}`,[I.integer(reportId)]);const row=rows[0];if(!row)throw new ApiError(404,'通报不存在');assertScope(actor,row);return {...row,header:I.header(parseJson(row.header_json,{})),issues:parseJson(row.issues_json,[])};}
 async function getSources(db,reportId,{withImage=false}={}){const fields=withImage?'*':'id,notice_id,filename,mime,sha256,width,height,status,error_message,duplicate_of,reviewed,created_at,updated_at';const [rows]=await db.query(`SELECT ${fields} FROM inspection_sources WHERE notice_id=? ORDER BY id`,[reportId]);return rows;}
 async function tx(fn){const db=await pool.getConnection();try{await db.beginTransaction();const value=await fn(db);await db.commit();return value}catch(error){await db.rollback();throw error}finally{db.release()}}
@@ -33,7 +38,7 @@ function aiState(){if(!businessAiAllowed(config.openclaw))return {enabled:false,
 
 router.get('/capability',(_req,res)=>ok(res,{...aiState(),limits:I.LIMITS}));
 router.get('/reports',asyncHandler(async(req,res)=>{
-  const code=req.user.role==='admin'?normalizeWorkshopCode(req.query.workshopCode,'raw_grain'):workshopForRole(req.user.role);
+  const code=req.user.role==='admin'?normalizeWorkshopCode(req.query.workshopCode,'raw_grain'):(workshopForRole(req.user.role)||req.user.staffWorkshopCode);
   if(code!=='raw_grain')throw new ApiError(400,'检查通报当前仅适用于原粮车间');
   const page=Number(req.query.page||1),pageSize=Number(req.query.pageSize||20);
   if(!Number.isSafeInteger(page)||page<1||page>100000||!Number.isSafeInteger(pageSize)||pageSize<1||pageSize>100)throw new ApiError(400,'分页参数无效');
@@ -75,7 +80,7 @@ router.patch('/reports/:id/lifecycle',asyncHandler(async(req,res)=>{const result
   await event(db,{...report,revision:report.revision+1},req.user,'lifecycle',{retentionUntil:until||null,archived});
   return {revision:report.revision+1,retentionUntil:until||null,archived};
 });ok(res,result);}));
-router.get('/storage',asyncHandler(async(req,res)=>{const code=req.user.role==='admin'?normalizeWorkshopCode(req.query.workshopCode,'raw_grain'):workshopForRole(req.user.role);if(code!=='raw_grain')throw new ApiError(400,'检查通报当前仅适用于原粮车间');const [[row]]=await pool.query('SELECT COUNT(DISTINCT n.id) AS reports,COALESCE(SUM(s.byte_size),0) AS source_bytes,COUNT(s.id) AS sources FROM inspection_notices n LEFT JOIN inspection_sources s ON s.notice_id=n.id WHERE n.workshop_code=?',[code]);ok(res,{...row,quotaBytes:workshopQuotaBytes,note:'原图保存在受权限保护的数据库中；到期不自动删除，归档仅从常用列表收起。'});}));
+router.get('/storage',asyncHandler(async(req,res)=>{const code=req.user.role==='admin'?normalizeWorkshopCode(req.query.workshopCode,'raw_grain'):(workshopForRole(req.user.role)||req.user.staffWorkshopCode);if(code!=='raw_grain')throw new ApiError(400,'检查通报当前仅适用于原粮车间');const [[row]]=await pool.query('SELECT COUNT(DISTINCT n.id) AS reports,COALESCE(SUM(s.byte_size),0) AS source_bytes,COUNT(s.id) AS sources FROM inspection_notices n LEFT JOIN inspection_sources s ON s.notice_id=n.id WHERE n.workshop_code=?',[code]);ok(res,{...row,quotaBytes:workshopQuotaBytes,note:'原图保存在受权限保护的数据库中；到期不自动删除，归档仅从常用列表收起。'});}));
 router.patch('/reports/:id',asyncHandler(async(req,res)=>{const result=await tx(async db=>{const report=await getReport(db,req.params.id,req.user,true);if(report.revision!==Number(req.body.revision))throw new ApiError(409,'通报已被更新，请先刷新并核对改动');const sources=await getSources(db,report.id),allowed=new Set(sources.map(row=>Number(row.id)));const issues=I.issues(req.body.issues,allowed,report.issues),head=I.header(req.body.header);await db.query('UPDATE inspection_notices SET header_json=?,issues_json=?,revision=revision+1 WHERE id=?',[JSON.stringify(head),JSON.stringify(issues),report.id]);await event(db,{...report,revision:report.revision+1},req.user,'edited',{issueCount:issues.length,confirmedCount:issues.filter(row=>row.reviewStatus==='confirmed').length},report);return {revision:report.revision+1,issues}});ok(res,result);}));
 const upload=multer({storage:multer.memoryStorage(),limits:{files:I.LIMITS.perUpload,fileSize:I.LIMITS.fileBytes,parts:I.LIMITS.perUpload+1}}).array('screenshots',I.LIMITS.perUpload);
 function uploaded(req,res,next){upload(req,res,error=>error?next(new ApiError(400,`每次最多${I.LIMITS.perUpload}张 JPG/PNG 截图，单张不超过6MB`)):next());}

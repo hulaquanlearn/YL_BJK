@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 const utils=require('../src/utils'),W=require('../src/work-assessment');
 function routes(query,options={}){
-  const handlers=new Map(),router={};for(const verb of ['get','post','delete'])router[verb]=(url,...chain)=>handlers.set(`${verb} ${url}`,chain.at(-1));
+  const handlers=new Map(),router={use(){}};for(const verb of ['get','post','delete'])router[verb]=(url,...chain)=>handlers.set(`${verb} ${url}`,chain.at(-1));
   const guardedQuery=(sql,...args)=>sql.startsWith('SELECT workshop_code FROM work_reviewers')&&!options.reviewerScope?Promise.resolve([[]]):query(sql,...args);
   const db={query:guardedQuery,beginTransaction:async()=>{},commit:async()=>{},rollback:async()=>{},release(){}};
   const multer=()=>({single:()=>()=>{}});multer.memoryStorage=()=>({});
@@ -54,6 +54,13 @@ test('authorized shift leader remains staff and can review only the qu-making wo
 test('viewer without shift leader grant cannot review a group leader',async()=>{
   const h=routes(async sql=>sql.includes('FROM work_members')?[[member]]:[[]]);
   await assert.rejects(()=>h.get('post /review')({user:viewer,body:{userId:10,week:'2026-09-21'}},{}),{status:403});
+});
+test('work assignments reject staff from another workshop or the wrong position',async()=>{
+  const manager={id:'30',role:'qu_making'};
+  const otherWorkshop=routes(async sql=>sql.startsWith('SELECT role,staff_workshop_code')?[[{role:'viewer',staff_workshop_code:'raw_grain',staff_position:'shift_leader'}]]:[[]]);
+  await assert.rejects(()=>otherWorkshop.get('post /reviewers')({user:manager,body:{workshop:'qu_making',userId:20,active:true}},{}),{status:403});
+  const wrongPosition=routes(async sql=>sql.startsWith('SELECT id,role,staff_workshop_code')?[[{role:'viewer',staff_workshop_code:'qu_making',staff_position:'shift_leader'}]]:[[]]);
+  await assert.rejects(()=>wrongPosition.get('post /members')({user:manager,body:{workshop:'qu_making',userId:20,floor:1}},{}),{status:400});
 });
 test('manager cannot review self or other workshop',async()=>{
   const h=routes(async()=>[[member]]).get('post /review');

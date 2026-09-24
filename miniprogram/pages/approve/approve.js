@@ -52,11 +52,13 @@ Page({
     page: 1,
     pageSize: 20,
     total: 0,
-    hasMore: false
+    hasMore: false,
+    isViewer: false
   },
 
   onLoad() {
     if (!auth.requireLogin()) return;
+    this.setData({ isViewer: auth.isViewer() });
     this.loadApproveList();
   },
 

@@ -21,7 +21,8 @@ router.post('/login', loginLimiter, asyncHandler(async (req, res) => {
   if (!username || !password) throw new ApiError(400, '请输入用户名和密码');
 
   const [rows] = await pool.query(
-    `SELECT id, username, password_hash, display_name, role, enabled, token_version
+    `SELECT id, username, password_hash, display_name, role, staff_workshop_code, staff_position,
+            enabled, token_version
      FROM app_users WHERE username = ? LIMIT 1`,
     [username]
   );

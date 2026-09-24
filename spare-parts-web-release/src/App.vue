@@ -21,8 +21,8 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="/portal"><el-icon><Grid /></el-icon>数字工作台</el-dropdown-item>
-                <el-dropdown-item v-if="canUseWork || canEditNotice" :command="canUseWork?'/work':'/inspection-notices'"><el-icon><DocumentChecked /></el-icon>工作管理中心</el-dropdown-item>
-                <el-dropdown-item v-if="canEditNotice" command="/inspection-notices"><el-icon><Document /></el-icon>检查通报整理</el-dropdown-item>
+                <el-dropdown-item v-if="canUseWork || canViewNotice" :command="canUseWork?'/work':'/inspection-notices'"><el-icon><DocumentChecked /></el-icon>工作管理中心</el-dropdown-item>
+                <el-dropdown-item v-if="canViewNotice" command="/inspection-notices"><el-icon><Document /></el-icon>检查通报</el-dropdown-item>
                 <el-dropdown-item command="/inventory"><el-icon><Box /></el-icon>备件管理中心</el-dropdown-item>
                 <el-dropdown-item command="/knowledge"><el-icon><Reading /></el-icon>智能工程中心</el-dropdown-item>
               </el-dropdown-menu>
@@ -41,7 +41,7 @@
       </header>
 
       <nav class="section-nav" aria-label="功能导航">
-        <template v-if="isWork"><router-link v-if="canUseWork" to="/work"><el-icon><DocumentChecked /></el-icon>制曲 · 组长履职考评</router-link><router-link v-if="canEditNotice" to="/inspection-notices"><el-icon><Document /></el-icon>原粮 · 检查通报整理</router-link></template>
+        <template v-if="isWork"><router-link v-if="canUseWork" to="/work"><el-icon><DocumentChecked /></el-icon>制曲 · 组长履职考评</router-link><router-link v-if="canViewNotice" to="/inspection-notices"><el-icon><Document /></el-icon>原粮 · 检查通报</router-link></template>
         <template v-else-if="isKnowledge">
           <router-link to="/knowledge"><el-icon><Collection /></el-icon>工程知识</router-link>
           <router-link to="/plc-analysis"><el-icon><Cpu /></el-icon>程序智能分析</router-link>
@@ -80,9 +80,11 @@ const health = ref('checking')
 const user = ref(getUser())
 const isAdmin = computed(() => user.value?.role === 'admin')
 const workRole=ref('')
-const canEditNotice=computed(()=>['admin','raw_grain'].includes(user.value?.role))
+const canViewNotice=computed(()=>['admin','raw_grain'].includes(user.value?.role)||(user.value?.role==='viewer'&&user.value?.staffWorkshopCode==='raw_grain'))
 const canUseWork=computed(()=>['admin','qu_making'].includes(user.value?.role)||Boolean(workRole.value))
-const roleLabel = computed(() => ({
+const roleLabel = computed(() => user.value?.role === 'viewer' && user.value?.staffPosition && user.value?.staffWorkshopCode
+  ? `${({ raw_grain: '原粮车间', qu_making: '制曲车间', brewing: '酿酒车间' })[user.value.staffWorkshopCode] || '车间'}${({ group_leader: '组长', shift_leader: '班长' })[user.value.staffPosition] || '人员'}（备件只读）`
+  : ({
   admin: '总管理员',
   raw_grain: '原粮车间管理员',
   qu_making: '制曲车间管理员',
@@ -109,9 +111,9 @@ async function handleAccountCommand(command) {
   router.replace('/login')
 }
 
-watch(() => route.fullPath, async () => { user.value = getUser();if(user.value?.role==='viewer'){try{const r=await work.get('/context');workRole.value=r.data.workRole||''}catch{workRole.value=''}}else workRole.value='' })
+watch(() => route.fullPath, async () => { user.value = getUser();if(user.value?.role==='viewer'&&(!user.value.staffWorkshopCode||user.value.staffWorkshopCode==='qu_making')){try{const r=await work.get('/context');workRole.value=r.data.workRole||''}catch{workRole.value=''}}else workRole.value='' })
 onMounted(async () => {
-  if(user.value?.role==='viewer'){try{const r=await work.get('/context');workRole.value=r.data.workRole||''}catch{workRole.value=''}}
+  if(user.value?.role==='viewer'&&(!user.value.staffWorkshopCode||user.value.staffWorkshopCode==='qu_making')){try{const r=await work.get('/context');workRole.value=r.data.workRole||''}catch{workRole.value=''}}
   try {
     const result = await getHealth()
     health.value = result.success && result.database === 'connected' ? 'online' : 'offline'

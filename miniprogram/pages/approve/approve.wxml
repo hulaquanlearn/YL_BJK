@@ -63,11 +63,11 @@
         </view>
       </view>
       
-      <view class="operate-wrap" wx:if="{{item._id}}">
+      <view class="operate-wrap" wx:if="{{!isViewer && item._id}}">
         <button class="reject-btn" bindtap="rejectOrder" data-id="{{item._id}}" disabled="{{processingOrderId}}">驳回</button>
         <button class="pass-btn" bindtap="passOrder" data-id="{{item._id}}" disabled="{{processingOrderId}}">通过</button>
       </view>
-      <view class="no-permission" wx:else>
+      <view class="no-permission" wx:elif="{{!item._id}}">
         <text>盘点单ID无效，无法操作</text>
       </view>
     </view>

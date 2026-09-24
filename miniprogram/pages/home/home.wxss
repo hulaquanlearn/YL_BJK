@@ -10,10 +10,10 @@
   justify-content: space-between;
 }
 .workbench > .section:first-child { margin-top: 0; }
-.dashboard-heading { margin-top: 30rpx; padding: 0 4rpx; gap: 12rpx; flex-wrap: wrap; }
-.dashboard-refresh { gap: 12rpx; }
+.dashboard-heading { margin-top: 30rpx; padding: 0 4rpx; gap: 12rpx; flex-wrap: nowrap; }
+.dashboard-refresh { margin-left: auto; gap: 12rpx; flex: none; }
 .update-time { color: #6f7885; font-size: 22rpx; white-space: nowrap; }
-.refresh-button { margin: 0; padding: 8rpx 14rpx; min-width: 80rpx; color: #b4232d; background: transparent; font-size: 24rpx; line-height: 36rpx; }
+.refresh-button { display: flex; height: 56rpx; margin: 0; padding: 0 14rpx; min-width: 80rpx; align-items: center; justify-content: center; color: #b4232d; background: transparent; font-size: 24rpx; line-height: 1.2; }
 .refresh-button::after { border: 0; }
 .refresh-button[disabled] { color: #9199a4; background: transparent; }
 

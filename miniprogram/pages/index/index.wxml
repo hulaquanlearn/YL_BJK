@@ -1,9 +1,4 @@
 <view class="container">
-  <view class="page-intro">
-    <text class="page-intro-title">查找备件</text>
-    <text class="page-intro-desc">按名称、编码、规格型号或库位快速定位</text>
-  </view>
-
   <view class="search-row">
     <view class="search-container">
       <input
@@ -45,13 +40,12 @@
   <view class="filter-panel" wx:if="{{isFilterExpanded}}">
     <view class="filter-panel-head">
       <text>选择筛选条件</text>
-      <text class="filter-reset" wx:if="{{activeFilterCount}}" bindtap="resetFilters">全部重置</text>
+      <text class="filter-close" bindtap="toggleFilters">×</text>
     </view>
 
     <view class="filter-line">
       <text class="filter-label">货区</text>
-      <scroll-view class="filter-scroll" scroll-x enhanced show-scrollbar="{{false}}">
-        <view class="tag-row">
+      <view class="filter-options">
           <view
             class="tag {{selectedArea === item.name ? 'active' : ''}}"
             wx:for="{{areas}}"
@@ -59,13 +53,12 @@
             bindtap="chooseArea"
             data-name="{{item.name}}"
           >{{item.name}}</view>
-        </view>
-      </scroll-view>
+      </view>
     </view>
 
     <view class="filter-line" wx:if="{{selectedArea !== '全部'}}">
       <text class="filter-label">货架</text>
-      <scroll-view class="filter-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <scroll-view class="filter-scroll" scroll-y enhanced show-scrollbar="{{false}}">
         <view class="tag-row">
           <view
             class="tag {{selectedShelfNo === item ? 'active' : ''}}"
@@ -80,7 +73,7 @@
 
     <view class="filter-line" wx:if="{{selectedShelfNo !== '全部' && selectedArea !== '全部'}}">
       <text class="filter-label">层数</text>
-      <scroll-view class="filter-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <scroll-view class="filter-scroll" scroll-y enhanced show-scrollbar="{{false}}">
         <view class="tag-row">
           <view
             class="tag {{selectedLayer === item ? 'active' : ''}}"
@@ -91,6 +84,10 @@
           >{{item}}</view>
         </view>
       </scroll-view>
+    </view>
+    <view class="filter-actions">
+      <button class="filter-reset-button" bindtap="resetFilters">重置</button>
+      <button class="filter-apply-button" bindtap="applyFilters">确定</button>
     </view>
   </view>
 

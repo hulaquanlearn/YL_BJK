@@ -44,6 +44,9 @@ Page({
     selectedShelfNo: '全部',
     layerList: ['全部'],
     selectedLayer: '全部',
+    appliedArea: '全部',
+    appliedShelfNo: '全部',
+    appliedLayer: '全部',
     sortTypes: ['名称顺序', '库存从少到多', '库存从多到少', '编码升序', '编码降序'],
     sortIndex: 0,
     filteredParts: [],
@@ -120,9 +123,9 @@ Page({
 
   refreshFilterMeta() {
     const selected = [];
-    if (this.data.selectedArea !== '全部') selected.push(this.data.selectedArea);
-    if (this.data.selectedShelfNo !== '全部') selected.push(`${this.data.selectedShelfNo}货架`);
-    if (this.data.selectedLayer !== '全部') selected.push(this.data.selectedLayer);
+    if (this.data.appliedArea !== '全部') selected.push(this.data.appliedArea);
+    if (this.data.appliedShelfNo !== '全部') selected.push(`${this.data.appliedShelfNo}货架`);
+    if (this.data.appliedLayer !== '全部') selected.push(this.data.appliedLayer);
     this.setData({
       activeFilterCount: selected.length,
       filterSummary: selected.length ? selected.join(' · ') : '全部货区'
@@ -130,7 +133,18 @@ Page({
   },
 
   toggleFilters() {
-    this.setData({ isFilterExpanded: !this.data.isFilterExpanded });
+    if (this.data.isFilterExpanded) {
+      this.setData({
+        selectedArea: this.data.appliedArea,
+        selectedShelfNo: this.data.appliedShelfNo,
+        selectedLayer: this.data.appliedLayer,
+        shelfNoList: ['全部', ...(this.data.shelfMap[this.data.appliedArea] || [])],
+        layerList: ['全部', ...(this.data.layerMap[this.data.appliedArea]?.[this.data.appliedShelfNo] || [])],
+        isFilterExpanded: false
+      });
+      return;
+    }
+    this.setData({ isFilterExpanded: true });
   },
 
   chooseArea(e) {
@@ -141,11 +155,6 @@ Page({
       shelfNoList: ['全部', ...(this.data.shelfMap[areaName] || [])],
       selectedLayer: '全部',
       layerList: ['全部'],
-      currentPage: 1,
-      hasMoreData: true
-    }, () => {
-      this.refreshFilterMeta();
-      this.loadParts({ page: 1 });
     });
   },
 
@@ -156,22 +165,12 @@ Page({
       selectedShelfNo: shelfNo,
       selectedLayer: '全部',
       layerList: ['全部', ...layers],
-      currentPage: 1,
-      hasMoreData: true
-    }, () => {
-      this.refreshFilterMeta();
-      this.loadParts({ page: 1 });
     });
   },
 
   chooseLayer(e) {
     this.setData({
-      selectedLayer: e.currentTarget.dataset.layer,
-      currentPage: 1,
-      hasMoreData: true
-    }, () => {
-      this.refreshFilterMeta();
-      this.loadParts({ page: 1 });
+      selectedLayer: e.currentTarget.dataset.layer
     });
   },
 
@@ -203,7 +202,16 @@ Page({
       selectedShelfNo: '全部',
       shelfNoList: ['全部'],
       selectedLayer: '全部',
-      layerList: ['全部'],
+      layerList: ['全部']
+    });
+  },
+
+  applyFilters() {
+    this.setData({
+      appliedArea: this.data.selectedArea,
+      appliedShelfNo: this.data.selectedShelfNo,
+      appliedLayer: this.data.selectedLayer,
+      isFilterExpanded: false,
       currentPage: 1,
       hasMoreData: true
     }, () => {
@@ -219,6 +227,9 @@ Page({
       selectedShelfNo: '全部',
       shelfNoList: ['全部'],
       selectedLayer: '全部',
+      appliedArea: '全部',
+      appliedShelfNo: '全部',
+      appliedLayer: '全部',
       layerList: ['全部'],
       currentPage: 1,
       hasMoreData: true
@@ -237,16 +248,16 @@ Page({
       searchKeyword: this.data.searchKeyword.trim()
     };
     if (this.data.lowStockOnly) params.lowStock = '1';
-    if (this.data.selectedArea !== '全部') params.warehouseAreaName = this.data.selectedArea;
-    if (this.data.selectedShelfNo !== '全部') {
-      params.shelf = this.data.selectedShelfNo === '未指定'
+    if (this.data.appliedArea !== '全部') params.warehouseAreaName = this.data.appliedArea;
+    if (this.data.appliedShelfNo !== '全部') {
+      params.shelf = this.data.appliedShelfNo === '未指定'
         ? '__EMPTY__'
-        : String(this.data.selectedShelfNo).replace('号', '');
+        : String(this.data.appliedShelfNo).replace('号', '');
     }
-    if (this.data.selectedLayer !== '全部') {
-      params.layer = this.data.selectedLayer === '未指定'
+    if (this.data.appliedLayer !== '全部') {
+      params.layer = this.data.appliedLayer === '未指定'
         ? '__EMPTY__'
-        : String(this.data.selectedLayer).replace('层', '');
+        : String(this.data.appliedLayer).replace('层', '');
     }
     return params;
   },

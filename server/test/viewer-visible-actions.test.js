@@ -15,7 +15,7 @@ test('viewer reads account roles and basic list, while all account and business 
   const server=app.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
   try{
     const response=await fetch(base+'/users');assert.equal(response.status,200);
-    assert.deepEqual((await response.json()).data,[{id:'1',username:'test',displayName:'测试账号',role:'admin',enabled:true}]);
+    assert.deepEqual((await response.json()).data,[{id:'1',username:'test',displayName:'测试账号',role:'admin',staffWorkshopCode:null,staffPosition:null,enabled:true}]);
     assert.equal((await fetch(base+'/users/roles')).status,200);
     const before=queries;
     for(const [method,url] of [['POST','/users'],['PATCH','/users/1'],['POST','/users/1/reset-password'],['POST','/parts'],['PATCH','/parts/1'],['DELETE','/parts/1'],['POST','/inventory-orders/1/approve'],['PUT','/knowledge/1'],['POST','/plc/projects'],['POST','/part-category-model-matches/apply']]){

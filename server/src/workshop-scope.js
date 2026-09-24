@@ -8,7 +8,7 @@ const WORKSHOPS = Object.freeze([
 
 const WORKSHOP_CODES = new Set(WORKSHOPS.map(item => item.code));
 const EDIT_ROLES = new Set(['admin', 'raw_grain', 'qu_making', 'brewing']);
-const ROLE_LABELS = Object.freeze({admin:'系统管理员',raw_grain:'原粮车间管理员',qu_making:'制曲车间管理员',brewing:'酿酒车间管理员',viewer:'车间人员（备件只读）'});
+const ROLE_LABELS = Object.freeze({admin:'系统管理员',raw_grain:'原粮车间管理员',qu_making:'制曲车间管理员',brewing:'酿酒车间管理员',viewer:'车间人员（班长 / 组长，备件只读）'});
 
 function enforceReadOnly(req, _res, next) {
   if (['GET','HEAD','OPTIONS'].includes(req.method) || EDIT_ROLES.has(req.user?.role)) return next();

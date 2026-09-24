@@ -7,6 +7,9 @@ const W = require('../work-assessment');
 const config = require('../config');
 const { businessAiAllowed } = require('../data-protection');
 const router = express.Router();
+router.use((req,_res,next)=>req.user?.role!=='admin'&&req.user?.role!=='qu_making'&&
+  !(req.user?.role==='viewer'&&(!req.user.staffWorkshopCode||req.user.staffWorkshopCode==='qu_making'))
+  ?next(new ApiError(403,'组长履职考评仅供制曲车间授权人员使用')):next());
 const ok = (res, data) => res.json({ success: true, data });
 const id = v => { const n = Number(v); if (!Number.isSafeInteger(n) || n < 1) throw new ApiError(400, '编号无效'); return n; };
 const decode = row => row && ({ ...row, payload: parseJson(row.payload, {}), rules_json: parseJson(row.rules_json, null), result_json: parseJson(row.result_json, null) });
@@ -17,6 +20,7 @@ async function member(db, userId) {
 }
 async function reviewerScope(user){
   if(user.role!=='viewer')return null;
+  if((user.staffWorkshopCode&&user.staffWorkshopCode!=='qu_making')||(user.staffPosition&&user.staffPosition!=='shift_leader'))return null;
   const [rows]=await pool.query('SELECT workshop_code FROM work_reviewers WHERE user_id=? AND active=1',[user.id]);
   return rows[0]?.workshop_code==='qu_making'?'qu_making':null;
 }
@@ -70,7 +74,7 @@ router.get('/context', asyncHandler(async (req, res) => {
   ok(res,{members,users,isManager,canConfigure,workRole:scope&&req.user.role==='viewer'?'shift_leader':members.some(row=>String(row.user_id)===String(req.user.id))?'group_leader':null,scope,userId:req.user.id,duties:W.duties.entries});
 }));
 router.get('/reviewers',asyncHandler(async(req,res)=>{const workshop=normalizeWorkshopCode(req.query.workshop);if(!workshop)throw new ApiError(400,'请选择车间');manage(req.user,workshop);const [rows]=await pool.query('SELECT r.user_id,r.workshop_code,r.active,u.display_name AS name FROM work_reviewers r JOIN app_users u ON u.id=r.user_id WHERE r.workshop_code=? ORDER BY u.display_name',[workshop]);ok(res,rows);}));
-router.post('/reviewers',asyncHandler(async(req,res)=>{const workshop=normalizeWorkshopCode(req.body.workshop);if(workshop!=='qu_making')throw new ApiError(400,'班长复核授权当前仅适用于制曲车间');manage(req.user,workshop);const userId=id(req.body.userId),active=req.body.active===true?1:0;await transaction(async db=>{const [users]=await db.query('SELECT role FROM app_users WHERE id=? AND enabled=1 FOR UPDATE',[userId]);if(users[0]?.role!=='viewer')throw new ApiError(400,'班长应使用车间人员账号，不能赋予管理层角色');if(active){const [memberRows]=await db.query('SELECT user_id FROM work_members WHERE user_id=? AND active=1',[userId]);if(memberRows.length)throw new ApiError(409,'该账号已是组长填报人员，请先核对职责，不能同时兼任本人考评的班长');}await db.query('INSERT INTO work_reviewers(user_id,workshop_code,active,assigned_by) VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE workshop_code=VALUES(workshop_code),active=VALUES(active),assigned_by=VALUES(assigned_by)',[userId,workshop,active,req.user.id]);});ok(res,true);}));
+router.post('/reviewers',asyncHandler(async(req,res)=>{const workshop=normalizeWorkshopCode(req.body.workshop);if(workshop!=='qu_making')throw new ApiError(400,'班长复核授权当前仅适用于制曲车间');manage(req.user,workshop);const userId=id(req.body.userId),active=req.body.active===true?1:0;await transaction(async db=>{const [users]=await db.query('SELECT role,staff_workshop_code,staff_position FROM app_users WHERE id=? AND enabled=1 FOR UPDATE',[userId]);if(users[0]?.role!=='viewer')throw new ApiError(400,'班长应使用车间人员账号，不能赋予管理层角色');if(users[0].staff_workshop_code&&users[0].staff_workshop_code!=='qu_making')throw new ApiError(403,'只能授权制曲车间人员');if(users[0].staff_position&&users[0].staff_position!=='shift_leader')throw new ApiError(400,'班长复核须使用班长岗位账号');if(active){const [memberRows]=await db.query('SELECT user_id FROM work_members WHERE user_id=? AND active=1',[userId]);if(memberRows.length)throw new ApiError(409,'该账号已是组长填报人员，请先核对职责，不能同时兼任本人考评的班长');}await db.query('INSERT INTO work_reviewers(user_id,workshop_code,active,assigned_by) VALUES(?,?,?,?) ON DUPLICATE KEY UPDATE workshop_code=VALUES(workshop_code),active=VALUES(active),assigned_by=VALUES(assigned_by)',[userId,workshop,active,req.user.id]);});ok(res,true);}));
 router.post('/members', asyncHandler(async (req, res) => {
   const workshop = normalizeWorkshopCode(req.body.workshop);
   if (!workshop) throw new ApiError(400, '请选择车间');
@@ -79,8 +83,10 @@ router.post('/members', asyncHandler(async (req, res) => {
   const userId = id(req.body.userId), floor = W.num(req.body.floor, 1, 5);
   if (!Number.isInteger(floor)) throw new ApiError(400, '楼层无效');
   await transaction(async db => {
-    const [users] = await db.query('SELECT id,role FROM app_users WHERE id=? AND enabled=1 FOR UPDATE', [userId]);
+    const [users] = await db.query('SELECT id,role,staff_workshop_code,staff_position FROM app_users WHERE id=? AND enabled=1 FOR UPDATE', [userId]);
     if (users[0]?.role !== 'viewer') throw new ApiError(400, '组长应使用车间人员账号，不能赋予管理层角色');
+    if (users[0].staff_workshop_code && users[0].staff_workshop_code !== 'qu_making') throw new ApiError(403, '只能配置制曲车间人员');
+    if (users[0].staff_position && users[0].staff_position !== 'group_leader') throw new ApiError(400, '组长填报须使用组长岗位账号');
     const [reviewers]=await db.query('SELECT user_id FROM work_reviewers WHERE user_id=? AND active=1',[userId]);
     if(reviewers.length)throw new ApiError(409,'该账号已是班长复核人员，不能同时作为组长填报人员');
     const [old] = await db.query('SELECT * FROM work_members WHERE user_id=? FOR UPDATE', [userId]);

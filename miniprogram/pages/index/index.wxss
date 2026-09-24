@@ -6,12 +6,6 @@
   background: #f4f6f8;
 }
 
-.page-intro { margin-bottom: 20rpx; }
-.page-intro-title,
-.page-intro-desc { display: block; }
-.page-intro-title { font-size: 38rpx; font-weight: 750; }
-.page-intro-desc { margin-top: 7rpx; color: #7b8490; font-size: 24rpx; }
-
 .search-row {
   display: flex;
   margin-bottom: 18rpx;
@@ -48,17 +42,20 @@
 }
 
 .search-submit {
+  display: flex;
   width: 112rpx;
   height: 76rpx;
   min-height: 76rpx;
   margin: 0;
   padding: 0;
+  align-items: center;
+  justify-content: center;
   border-radius: 18rpx;
   color: #fff;
   background: #c6000b;
   font-size: 26rpx;
   font-weight: 650;
-  line-height: 76rpx;
+  line-height: 1.2;
 }
 
 .search-submit::after,
@@ -83,7 +80,7 @@
 .filter-toolbar {
   display: flex;
   margin-bottom: 14rpx;
-  padding: 18rpx 20rpx;
+  padding: 14rpx 18rpx;
   align-items: center;
   border: 1rpx solid #e7eaee;
   border-radius: 18rpx;
@@ -92,12 +89,11 @@
 }
 
 .filter-main {
-  display: grid;
+  display: flex;
   min-width: 0;
   flex: 1;
-  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 12rpx;
+  gap: 10rpx;
 }
 
 .filter-title-row { display: flex; align-items: center; gap: 7rpx; }
@@ -113,19 +109,21 @@
   text-align: center;
 }
 .filter-summary {
+  min-width: 0;
+  flex: 1;
   overflow: hidden;
   color: #7c8591;
   font-size: 23rpx;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.filter-toggle { color: #9f1820; font-size: 22rpx; }
+.filter-toggle { flex: none; color: #9f1820; font-size: 22rpx; }
 
 .sort-compact {
   display: flex;
   width: 176rpx;
-  margin-left: 18rpx;
-  padding-left: 18rpx;
+  margin-left: 12rpx;
+  padding-left: 12rpx;
   flex-direction: column;
   border-left: 1rpx solid #edf0f3;
 }
@@ -155,32 +153,35 @@
   font-size: 24rpx;
   font-weight: 650;
 }
-.filter-reset { color: #b31822; font-size: 22rpx; font-weight: 500; }
+.filter-close { color: #8c96a3; font-size: 34rpx; line-height: 1; }
 .filter-line {
-  display: flex;
+  display: block;
   min-width: 0;
   padding: 12rpx 0;
   align-items: center;
   border-top: 1rpx solid #f0f2f4;
 }
 .filter-label {
-  width: 72rpx;
-  flex: 0 0 72rpx;
+  display: block;
+  margin-bottom: 12rpx;
   color: #717b87;
   font-size: 23rpx;
 }
-.filter-scroll { min-width: 0; flex: 1; white-space: nowrap; }
-.tag-row { display: inline-flex; padding-right: 16rpx; gap: 10rpx; }
+.filter-options, .tag-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10rpx; }
+.filter-scroll { width: 100%; max-height: 300rpx; }
 .tag {
-  display: inline-block;
-  min-width: 72rpx;
-  padding: 11rpx 18rpx;
+  display: flex;
+  min-height: 62rpx;
+  min-width: 0;
+  padding: 10rpx 12rpx;
+  align-items: center;
+  justify-content: center;
   border: 1rpx solid #e3e7eb;
-  border-radius: 24rpx;
+  border-radius: 12rpx;
   color: #606a76;
   background: #f8f9fa;
   font-size: 22rpx;
-  line-height: 1.2;
+  line-height: 1.3;
   text-align: center;
 }
 .tag.active {
@@ -189,6 +190,10 @@
   background: #fff0f1;
   font-weight: 650;
 }
+.filter-actions { display: flex; gap: 12rpx; margin-top: 16rpx; }
+.filter-actions button { display: flex; height: 68rpx; min-height: 68rpx; margin: 0; padding: 0; flex: 1; align-items: center; justify-content: center; border-radius: 12rpx; font-size: 25rpx; line-height: 1.2; }
+.filter-reset-button { color: #4b5563; background: #f0f2f5; }
+.filter-apply-button { color: #fff; background: #c6000b; }
 
 .result-bar {
   display: flex;

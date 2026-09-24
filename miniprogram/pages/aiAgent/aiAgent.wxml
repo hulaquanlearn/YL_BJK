@@ -18,12 +18,14 @@
     <textarea
       class="input-box"
       maxlength="500"
+      show-confirm-bar="{{false}}"
       placeholder="输入物料编码、备件名称、库位，或描述设备故障现象"
       value="{{userQuestion}}"
       bindinput="handleInput"
     ></textarea>
     <view class="input-footer">
       <text class="scope-tip">输入名称、编码或故障现象</text>
+      <text class="input-count">{{userQuestion.length}}/500</text>
       <text class="clear-history" wx:if="{{resultType || messages.length}}" bindtap="clearChatHistory">清空</text>
     </view>
   </view>

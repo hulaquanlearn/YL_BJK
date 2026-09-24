@@ -40,6 +40,12 @@ async function tableExists(tableName) {
 async function ensureSchema() {
   const conn = await pool.getConnection();
   try {
+    if (!(await columnExists('app_users', 'staff_workshop_code'))) {
+      await conn.query('ALTER TABLE app_users ADD COLUMN staff_workshop_code VARCHAR(30) NULL AFTER role');
+    }
+    if (!(await columnExists('app_users', 'staff_position'))) {
+      await conn.query('ALTER TABLE app_users ADD COLUMN staff_position VARCHAR(30) NULL AFTER staff_workshop_code');
+    }
     const workSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_assessment_20260923.sql'), 'utf8');
     for (const statement of workSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
     const inspectionSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_inspection_notice_20260924.sql'), 'utf8');
