@@ -8,12 +8,6 @@
       </el-dropdown>
     </header>
 
-    <section class="portal-hero">
-      
-      <p>工作空间</p>
-      <h1>从这里开始工作</h1>
-    </section>
-
     <section class="module-grid">
       <article class="module-card spare-card">
         <div class="module-card-top"><span class="module-icon"><el-icon><Box /></el-icon></span><span class="module-status">库存与现场</span></div>
@@ -37,26 +31,38 @@
           <router-link to="/plc-analysis"><el-icon><Cpu /></el-icon><span>程序智能分析</span><el-icon><ArrowRight /></el-icon></router-link>
         </nav>
       </article>
+      <article class="module-card work-card">
+        <div class="module-card-top"><span class="module-icon"><el-icon><DocumentChecked /></el-icon></span><span class="module-status">填报与考评</span></div>
+        <div><h2>工作管理中心</h2><p>制曲车间履职填报与考评，原粮车间检查通报整理。</p></div>
+        <router-link v-if="canUseWork || canEditNotice" class="module-enter" :to="canUseWork?'/work':'/inspection-notices'">进入工作管理 <el-icon><Right /></el-icon></router-link>
+        <p v-else class="module-unavailable">当前账号尚未分配工作管理职责</p>
+        <nav v-if="canUseWork || canEditNotice" class="workspace-links" aria-label="工作管理常用功能"><router-link v-if="canUseWork" to="/work"><el-icon><DocumentChecked /></el-icon><span>制曲 · 组长履职考评{{ workRole==='shift_leader'?'（班长复核）':'' }}</span><el-icon><ArrowRight /></el-icon></router-link><router-link v-if="canEditNotice" to="/inspection-notices"><el-icon><DocumentChecked /></el-icon><span>原粮 · 检查通报整理</span><el-icon><ArrowRight /></el-icon></router-link></nav>
+      </article>
     </section>
   </main>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { logout } from '../api'
 import { clearSession, getUser } from '../auth'
+import { work } from '../api/work'
 
 const router = useRouter()
 const user = getUser()
+const canEditNotice = ['admin', 'raw_grain'].includes(user?.role)
+const workRole=ref('')
+const canUseWork = computed(() => ['admin', 'qu_making'].includes(user?.role) || Boolean(workRole.value))
+onMounted(async()=>{if(user?.role!=='viewer')return;try{const response=await work.get('/context');workRole.value=response.data.workRole||''}catch{workRole.value=''}})
 const initial = computed(() => user?.displayName?.slice(0, 1) || '用')
 const roleLabel = computed(() => ({
   admin: '总管理员',
   raw_grain: '原粮车间',
   qu_making: '制曲车间',
   brewing: '酿酒车间',
-  viewer: '车间人员（只读）'
+  viewer: workRole.value==='shift_leader'?'制曲车间班长':workRole.value==='group_leader'?'制曲车间组长':'车间人员'
 }[user?.role] || '只读用户'))
 
 async function handleAccountCommand(command) {
@@ -86,9 +92,13 @@ async function handleAccountCommand(command) {
 .workbench .module-grid{width:min(1160px,100%);padding:0 28px;box-sizing:border-box;gap:24px}
 .workbench .module-card{--accent:#bd182a;--soft:#fff2f3;min-height:0;padding:28px;border:1px solid #e1e6ec;border-top:4px solid var(--accent);border-radius:16px;background:#fff;color:#1d2939;box-shadow:0 6px 20px #1d293906;transition:none}
 .workbench .knowledge-card{--accent:#087f7b;--soft:#edf9f7}.workbench .module-card:before{display:none}.workbench .module-card:hover{transform:none;background:#fff;border-color:#e1e6ec;border-top-color:var(--accent)}
+.workbench .work-card{--accent:#535aa2;--soft:#f0f1fb}
 .workbench .module-card-top{justify-content:flex-start;gap:12px}.workbench .module-icon{width:48px;height:48px;background:var(--soft);border:0;border-radius:14px;font-size:25px}.workbench .module-status{color:#667085;font-size:13px}
 .workbench .module-card>div:nth-child(2){margin-top:22px}.workbench .module-card h2{margin:0 0 10px;font-size:25px}.workbench .module-card p{min-height:0;color:#667085;font-size:14px;line-height:1.8}
 .workbench .module-enter{justify-content:space-between;margin-top:26px;padding:13px 16px;border-radius:9px;background:var(--accent);color:#fff;text-decoration:none}.workbench .module-enter:hover{filter:brightness(.94)}
 .workspace-links{display:grid;margin-top:22px;border-top:1px solid #edf0f3;padding-top:10px}.workspace-links a{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 10px;border-radius:8px;color:#475467;text-decoration:none;font-size:14px}.workspace-links a span{flex:1}.workspace-links a:hover{background:var(--soft);color:var(--accent)}.workspace-links a>.el-icon:last-child{font-size:12px;color:#98a2b3}.workbench a:focus-visible,.workbench button:focus-visible{outline:3px solid #4b83bd;outline-offset:3px}
 @media(max-width:760px){.workbench{padding-bottom:28px}.workbench .portal-header{padding:16px}.workbench .portal-hero{margin:28px auto 20px;padding:0 16px}.workbench .portal-hero h1{font-size:24px}.workbench .module-grid{padding:0 16px;gap:18px}.workbench .module-card{padding:22px}.workbench .module-card h2{font-size:23px}.workbench .module-enter{margin-top:20px}.workspace-links{margin-top:16px}}
+.workbench .module-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:1360px}@media(max-width:980px){.workbench .module-grid{grid-template-columns:1fr}}
+.workbench .module-grid{padding-top:44px}
+.module-unavailable{margin-top:26px!important;color:#667085!important}
 </style>

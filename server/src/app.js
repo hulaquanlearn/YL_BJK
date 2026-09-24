@@ -28,6 +28,9 @@ app.use(cors({ origin: false }));
 app.use(privateResponse);
 const accessLimits = createAccessLimits();
 app.use(accessLimits.ip);
+// Inspection reports can contain 200 reviewed, long text entries. Keep the larger
+// JSON limit scoped to this authenticated feature instead of raising every API route.
+app.use('/api/inspection-notices', requireAuth, express.json({ limit: '4mb' }));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.text({ type: 'text/plain', limit: '8kb' }));
 // All uploaded and bundled model/reference assets require a live session.
@@ -60,6 +63,10 @@ app.use('/api', requireAuth);
 app.use('/api', accessLimits.account, accessLimits.hourly);
 app.use('/api', (req, res, next) => /\/(download|preview|import-template|export)$/.test(req.path)
   ? accessLimits.download(req, res, next) : next());
+// Separate scoped workflow: assigned staff can write their own work records only.
+// Inventory's viewer restrictions remain unchanged.
+app.use('/api/work', require('./routes/work'));
+app.use('/api/inspection-notices', require('./routes/inspection-notices'));
 app.use('/api', enforceReadOnly);
 app.use('/api/users', usersRouter);
 app.use('/api', partsRouter);

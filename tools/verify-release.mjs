@@ -75,7 +75,36 @@ if(!files.has(folder+'/plc-agent/Start-ProgramAnalysisAgent.ps1'))throw new Erro
 const deployNames=[...files.keys()].filter(n=>/\/DEPLOY_V\d+\.\d+\.\d+\.md$/.test(n))
 if(deployNames.length!==1)throw new Error('Missing/duplicate deployment guide')
 if(!files.has(folder+'/README.md'))throw new Error('Missing package README')
+const releaseVersion=files.get(folder+'/VERSION')?.toString('utf8').trim()
+if(['V1.9.0','V1.9.1','V1.9.2','V1.9.3','V1.9.4'].includes(releaseVersion)){
+  for(const required of ['server/src/routes/work.js','server/src/work-assessment.js','server/src/work-export.js','server/sql/migration_work_assessment_20260923.sql']){
+    if(!files.has(folder+'/'+required))throw new Error('Missing work-assessment release file '+required)
+  }
+  if(![...files.keys()].some(n=>/\/web-dist\/assets\/WorkAssessment-[^/]+\.js$/.test(n)))throw new Error('Missing compiled work-assessment page')
+  if(!files.get(folder+'/server/src/app.js').toString('utf8').includes("app.use('/api/work'"))throw new Error('Work routes not mounted')
+  if(!files.get(folder+'/server/src/db.js').toString('utf8').includes('migration_work_assessment_20260923.sql'))throw new Error('Missing incremental schema startup')
+  if(['V1.9.2','V1.9.3','V1.9.4'].includes(releaseVersion)){
+    for(const required of ['server/src/work-duties.js','server/src/production-report-export.js'])if(!files.has(folder+'/'+required))throw new Error('Missing cadence/production-report implementation '+required)
+    if(!files.get(folder+'/server/package.json').toString('utf8').includes('"docx"'))throw new Error('Missing Word export dependency')
+    if(!files.get(folder+'/server/src/routes/work.js').toString('utf8').includes("/records/:id/production-report"))throw new Error('Missing production report export route')
+  }
+  if(['V1.9.3','V1.9.4'].includes(releaseVersion)){
+    const route=files.get(folder+'/server/src/routes/work.js').toString('utf8')
+    if(!route.includes("router.post('/suggest'")||!route.includes('ai_suggested'))throw new Error('Missing local OpenClaw scoring suggestion route')
+    const page=[...files.entries()].find(([name])=>/\/web-dist\/assets\/WorkAssessment-[^/]+\.js$/.test(name))?.[1]?.toString('utf8')||''
+    if(!page.includes('岗位任职职责评分智能体'))throw new Error('Missing role-duty scoring interface')
+  }
+  if(releaseVersion==='V1.9.4'){
+    for(const required of ['server/src/routes/inspection-notices.js','server/src/inspection-notice.js','server/src/inspection-vision.js','server/src/inspection-export.js','server/sql/migration_inspection_notice_20260924.sql','docs/LOCAL_AUDIT_REMEDIATION_20260924.md','QA_V1.9.4.md'])if(!files.has(folder+'/'+required))throw new Error('Missing audit/inspection release file '+required)
+    const app=files.get(folder+'/server/src/app.js').toString('utf8')
+    const db=files.get(folder+'/server/src/db.js').toString('utf8')
+    if(!app.includes("/api/inspection-notices")||!db.includes('migration_inspection_notice_20260924.sql'))throw new Error('Inspection routes/schema not mounted')
+    if(![...files.keys()].some(n=>/\/web-dist\/assets\/InspectionNotices-[^/]+\.js$/.test(n)))throw new Error('Missing compiled inspection page')
+    if(!files.get(folder+'/server/src/routes/work.js').toString('utf8').includes("router.post('/reviewers'"))throw new Error('Missing staff reviewer authorization')
+  }
+  for(const name of ['server/package.json','web-runtime/package.json'])if(JSON.parse(files.get(folder+'/'+name)).version!==releaseVersion.slice(1))throw new Error('Release version mismatch '+name)
+}
 const deployGuide=files.get(deployNames[0]).toString('utf8')
 for(const file of ['server.js','package.json','package-lock.json'])if(!files.has(folder+'/web-runtime/'+file))throw new Error('Missing web runtime '+file)
-if(!deployGuide.includes('web-dist/ /opt/spare-parts/web/dist/')||!deployGuide.includes('test -f /opt/spare-parts/web/dist/index.html'))throw new Error('Deployment guide must name the web dist target and preflight check')
+if(!deployGuide.includes('web-dist/')||!deployGuide.includes('/opt/spare-parts/web/dist/')||!deployGuide.includes('test -f /opt/spare-parts/web/dist/index.html'))throw new Error('Deployment guide must name the web dist source, target, and preflight check')
 console.log(JSON.stringify({archive,files:files.size,referenceModels:models.length,referencePhotos:photos.length,categoryModels:fs.readdirSync(sourceAssetDir).filter(n=>n.endsWith('.glb')).length,categoryPhotos:fs.readdirSync(sourceAssetDir).filter(n=>n.endsWith('.jpg')).length,sha256:archiveHash,outerChecksumVerified:true,result:'all hashes and current sources match'},null,2))

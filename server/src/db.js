@@ -40,6 +40,21 @@ async function tableExists(tableName) {
 async function ensureSchema() {
   const conn = await pool.getConnection();
   try {
+    const workSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_assessment_20260923.sql'), 'utf8');
+    for (const statement of workSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
+    const inspectionSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_inspection_notice_20260924.sql'), 'utf8');
+    for (const statement of inspectionSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
+    const [inspectionSizeColumns] = await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='inspection_sources' AND COLUMN_NAME='byte_size'`);
+    if (!Number(inspectionSizeColumns[0].cnt)) {
+      await conn.query('ALTER TABLE inspection_sources ADD COLUMN byte_size INT NOT NULL DEFAULT 0 AFTER image');
+      await conn.query('UPDATE inspection_sources SET byte_size=OCTET_LENGTH(image) WHERE byte_size=0');
+    }
+    for(const [name,definition] of [['retention_until','DATE DEFAULT NULL'],['archived_at','DATETIME DEFAULT NULL']]){
+      const [columns]=await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='inspection_notices' AND COLUMN_NAME=?`,[name]);
+      if(!Number(columns[0].cnt))await conn.query(`ALTER TABLE inspection_notices ADD COLUMN ${name} ${definition}`);
+    }
+    const [workPhotoColumns] = await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='work_photos' AND COLUMN_NAME='task_key'`);
+    if (!Number(workPhotoColumns[0].cnt)) await conn.query('ALTER TABLE work_photos ADD COLUMN task_key VARCHAR(80) DEFAULT NULL AFTER mime');
     await conn.query(`CREATE TABLE IF NOT EXISTS workshops (
       code VARCHAR(30) NOT NULL,
       name VARCHAR(50) NOT NULL,

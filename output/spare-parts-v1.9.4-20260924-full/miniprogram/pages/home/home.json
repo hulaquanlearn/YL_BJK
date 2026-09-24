@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "备件管理系统", 
+  "navigationBarBackgroundColor": "#C6000B",  
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
+}

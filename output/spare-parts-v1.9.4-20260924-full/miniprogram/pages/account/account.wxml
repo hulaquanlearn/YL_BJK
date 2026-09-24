@@ -1,0 +1,25 @@
+<view class="page-wrap">
+  <view class="profile-card">
+    <view class="avatar">{{userInitial}}</view>
+    <view class="profile-main">
+      <text class="profile-name">{{user.displayName}}</text>
+      <text class="profile-meta">{{user.username}} · {{roleLabel}}</text>
+    </view>
+    <text class="role-badge {{isAdmin ? 'admin' : ''}}">{{roleLabel}}</text>
+  </view>
+
+  <view class="menu-card" wx:if="{{isAdmin || isViewer}}">
+    <view class="menu-item" bindtap="gotoUsers"><view><text class="menu-title">账号管理</text><text class="menu-desc">创建账号、分配角色和重置密码</text></view><text class="arrow">›</text></view>
+  </view>
+
+  <view class="form-card">
+    <text class="section-title">修改密码</text>
+    <text class="section-tip">新密码需包含大写字母、小写字母和数字，无需特殊符号。</text>
+    <input class="input" password placeholder="原密码" value="{{oldPassword}}" data-field="oldPassword" bindinput="onInput" />
+    <input class="input" password placeholder="新密码" value="{{newPassword}}" data-field="newPassword" bindinput="onInput" />
+    <input class="input" password placeholder="再次输入新密码" value="{{confirmPassword}}" data-field="confirmPassword" bindinput="onInput" />
+    <button class="primary-btn" loading="{{submitting}}" disabled="{{submitting}}" bindtap="changePassword">确认修改</button>
+  </view>
+
+  <button class="logout-btn" bindtap="logout">退出登录</button>
+</view>

@@ -35,9 +35,9 @@ foreach ($file in @('server.js', 'package.json', 'package-lock.json')) {
 }
 if (Test-Path -LiteralPath (Join-Path $root 'docs')) {
   New-Item -ItemType Directory -Path (Join-Path $package 'docs') | Out-Null
-  # Only ship maintained operational references; exclude ledger and internal audit records.
+  # Ship maintained operational references and this release's audit evidence; exclude unrelated ledgers.
   Get-ChildItem -LiteralPath (Join-Path $root 'docs') -File |
-    Where-Object { $_.Name -in @('DOCUMENT_PREVIEW_V1.4.0.md', 'KNOWLEDGE_PLC_DESIGN_REFERENCES.md', 'OPENCLAW_MODEL_MATCHING.md', 'PLC_ANALYSIS_VERIFICATION_20260920.md') } |
+    Where-Object { $_.Name -in @('DOCUMENT_PREVIEW_V1.4.0.md', 'KNOWLEDGE_PLC_DESIGN_REFERENCES.md', 'OPENCLAW_MODEL_MATCHING.md', 'PLC_ANALYSIS_VERIFICATION_20260920.md', 'LOCAL_AUDIT_REMEDIATION_20260924.md') } |
     Copy-Item -Destination (Join-Path $package 'docs')
 }
 New-Item -ItemType Directory -Path (Join-Path $package 'plc-agent') | Out-Null

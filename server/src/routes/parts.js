@@ -710,7 +710,8 @@ router.get('/replenishment', asyncHandler(async (req, res) => {
               SUM(CASE WHEN ${MAX_STOCK_SQL} IS NULL THEN 1 ELSE 0 END) AS missingTarget,
               COALESCE(SUM(CASE WHEN ${MAX_STOCK_SQL} IS NOT NULL AND ${PRICE_SQL} IS NOT NULL
                 THEN GREATEST(${MAX_STOCK_SQL} - i.quantity, 0) * ${PRICE_SQL}
-                ELSE 0 END), 0) AS estimatedAmount
+                ELSE 0 END), 0) AS estimatedAmount,
+              COALESCE(SUM(CASE WHEN ${PRICE_SQL} IS NOT NULL THEN i.quantity * ${PRICE_SQL} ELSE 0 END), 0) AS stockAmount
        ${baseFrom} ${where.sql}`,
       where.params
     ),
@@ -743,6 +744,7 @@ router.get('/replenishment', asyncHandler(async (req, res) => {
       zeroStock: Number(summary.zeroStock) || 0,
       missingTarget: Number(summary.missingTarget) || 0,
       estimatedAmount: Number(summary.estimatedAmount) || 0,
+      stockAmount: Number(summary.stockAmount) || 0,
       suggestedUnitTotals: formatUnitTotals(suggestedUnitRows)
     }
   });

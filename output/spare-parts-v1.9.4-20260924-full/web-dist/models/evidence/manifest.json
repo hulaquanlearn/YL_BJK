@@ -1,0 +1,82 @@
+[
+  {
+    "id": "meanwell-ndr-240-24",
+    "level": "low",
+    "file": "meanwell-ndr-240-24-low.glb",
+    "bytes": 9952,
+    "triangles": 60,
+    "sha256": "db13ccb8f8383d8dacb396664255472ab3114fd887992a676092899ecc54bc60"
+  },
+  {
+    "id": "meanwell-ndr-240-24",
+    "level": "detail",
+    "file": "meanwell-ndr-240-24-detail.glb",
+    "bytes": 672556,
+    "triangles": 6552,
+    "sha256": "a7dc1635650f09b11eb968135ad326e5ba946b3bc0f9770950dcd86efe39407c"
+  },
+  {
+    "id": "meanwell-ndr-480-24",
+    "level": "low",
+    "file": "meanwell-ndr-480-24-low.glb",
+    "bytes": 9908,
+    "triangles": 60,
+    "sha256": "47199c580d3264cb6b18f60cd61ef5bfe3ca2b4579e88f7f7798767916fb7f2f"
+  },
+  {
+    "id": "meanwell-ndr-480-24",
+    "level": "detail",
+    "file": "meanwell-ndr-480-24-detail.glb",
+    "bytes": 999232,
+    "triangles": 9720,
+    "sha256": "145e59ad5cd7448d6bee2747dbeba0ab0ec787087ea4ef5fa36f813d59606e04"
+  },
+  {
+    "id": "skf-6006-2z",
+    "level": "low",
+    "file": "skf-6006-2z-low.glb",
+    "bytes": 8244,
+    "triangles": 256,
+    "sha256": "3336743510861c836a14b59e1d1da0aeb9332ef8589014d7741c8733b101c2d2"
+  },
+  {
+    "id": "skf-6006-2z",
+    "level": "detail",
+    "file": "skf-6006-2z-detail.glb",
+    "bytes": 104724,
+    "triangles": 4096,
+    "sha256": "95e51e942ff66eb85297f823ed084148ee531e4d0edffa0621a5091c0be9bc71"
+  },
+  {
+    "id": "skf-6003-2rsh",
+    "level": "low",
+    "file": "skf-6003-2rsh-low.glb",
+    "bytes": 8264,
+    "triangles": 256,
+    "sha256": "7e994add4ddbdce82ffc8cb701d7a1d4d7b0110a736ce3234ac19eed6c565642"
+  },
+  {
+    "id": "skf-6003-2rsh",
+    "level": "detail",
+    "file": "skf-6003-2rsh-detail.glb",
+    "bytes": 104720,
+    "triangles": 4096,
+    "sha256": "478f6d58ddc5e90c239454d7ab26a01326a4295655bfd6c6399cf134765690c8"
+  },
+  {
+    "id": "skf-61802",
+    "level": "low",
+    "file": "skf-61802-low.glb",
+    "bytes": 20084,
+    "triangles": 1312,
+    "sha256": "b5f50b3db4d1ac1f1473750dbb9c122b53064609b295a93869e370a1fc6ea1f0"
+  },
+  {
+    "id": "skf-61802",
+    "level": "detail",
+    "file": "skf-61802-detail.glb",
+    "bytes": 62184,
+    "triangles": 4928,
+    "sha256": "a501146e466a8ccd6ca62c1e7bcba9b2c1bb5528a65d29ce97fcf2b898e6a91d"
+  }
+]

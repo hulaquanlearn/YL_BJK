@@ -26,6 +26,7 @@ module.exports = {
     apiUrl: process.env.OPENCLAW_API_URL || 'http://127.0.0.1:14504/v1/chat/completions',
     token: process.env.OPENCLAW_GATEWAY_TOKEN || '',
     model: process.env.OPENCLAW_MODEL || 'openclaw/spare-parts-chat',
+    visionModel: process.env.OPENCLAW_VISION_MODEL || '',
     timeoutMs: numberFromEnv('OPENCLAW_TIMEOUT_MS', 120000)
   },
   knowledge: {

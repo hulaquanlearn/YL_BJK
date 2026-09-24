@@ -15,21 +15,24 @@ test('inventory navigation roundtrips all six filters and explicitly clears an e
   assert.equal(inventoryScope({workshopCode:['raw_grain'],page:'6'}).workshopCode,'')
 })
 
-test('inventory dialog and statistics share the scope breakdown without unit truncation',()=>{
+test('inventory overview and its breakdown dialog stay on inventory, not statistics',()=>{
   const inventory=read('../src/views/Inventory.vue'),stats=read('../src/views/Statistics.vue')
-  assert.match(inventory,/v-model="typeBreakdownVisible"/)
-  assert.match(inventory,/dashboard.scopeBreakdown/)
-  assert.match(inventory,/formatNumber\(dashboard.missingReorderPoint\)/)
-  assert.match(inventory,/v-for="item in dashboard.unitTotals/)
-  assert.doesNotMatch(inventory,/units\.slice\(0,\s*3\)/)
+  assert.match(inventory,/inventory-summary/)
+  assert.match(inventory,/typeBreakdownVisible/)
+  assert.match(inventory,/getDashboard/)
+  assert.match(inventory,/备件种类与价值分布/)
+  assert.match(inventory,/function showLowStock\(\) \{ query\.lowStock = '1'; query\.stockStatus = '';/)
+  assert.doesNotMatch(stats,/typeBreakdownVisible|备件种类与价值分布|data\.summary\.pendingApproval/)
+  assert.match(stats,/data\.scopeBreakdown/)
   assert.match(stats,/scopeBreakdown\.flatMap/)
   assert.match(stats,/v-if="loadError"/)
-  assert.match(stats,/ref="typeEl"/)
-  assert.match(stats,/hasTypeValue/)
-  assert.match(stats,/extra.activeOnly='1'/)
+  assert.match(stats,/ref="healthEl"/)
+  assert.match(stats,/操作统计周期/)
+  assert.match(stats,/if\(path==='\/movements'\)/)
+  assert.doesNotMatch(stats,/<h2>备件统计<\/h2>/)
+  assert.ok(stats.indexOf('statistics-filters') < stats.indexOf('statistics-charts'))
   assert.match(stats,/is-fullscreen/)
 })
-
 test('changing replenishment filters explicitly clears remembered selections',()=>{
   const source=read('../src/views/Replenishment.vue')
   assert.match(source,/reserve-selection/)
@@ -41,15 +44,15 @@ test('changing replenishment filters explicitly clears remembered selections',()
 test('data quality preserves all inventory filters, clears stale area and watches route changes',async()=>{
   const source=read('../src/views/DataQuality.vue')
   const initial={workshopCode:'brewing',warehouseAreaName:'一货区',partType:'质保件',searchKeyword:'轴承',stockStatus:'zero',lowStock:'1',issue:'missing_reorder_point'}
-  const route={query:initial},requests=[],navigations=[]
+  const route={query:initial},requests=[]
   let routeChanged
   const context={
     reactive:value=>value,ref:value=>({value}),computed:fn=>({get value(){return fn()}}),onMounted(){},watch:(_source,fn)=>{routeChanged=fn},
-    useRoute:()=>route,useRouter:()=>({push:value=>navigations.push(value)}),inventoryScope,inventoryRouteQuery,
+    useRoute:()=>route,inventoryScope,
     getDataQuality:async query=>{requests.push({...query});return {data:[],total:0}},updatePartConfig:async()=>{},canEditWorkshop:()=>false,ElMessage:{success(){}}
   }
   const script=source.match(/<script setup>([\s\S]*?)<\/script>/)[1].replace(/^import .+$/gm,'')
-  vm.runInNewContext(`${script}\nglobalThis.subject={query,load,workshopChanged,clearInheritedScope,goInventory,inheritedScopeLabel}`,context)
+  vm.runInNewContext(`${script}\nglobalThis.subject={query,load,workshopChanged,clearInheritedScope,inheritedScopeLabel}`,context)
   const {subject}=context
   await subject.load()
   assert.deepEqual(inventoryScope(requests[0]),inventoryScope(initial))
@@ -59,7 +62,6 @@ test('data quality preserves all inventory filters, clears stale area and watche
   assert.equal(requests.at(-1).warehouseAreaName,'')
   route.query={workshopCode:'qu_making',warehouseAreaName:'制曲库',partType:'易损件',issue:'missing_price'};routeChanged()
   assert.equal(requests.at(-1).warehouseAreaName,'制曲库');assert.equal(requests.at(-1).issueType,'missing_price')
-  subject.goInventory();assert.equal(navigations[0].query.scope,'1');assert.equal(navigations[0].query.partType,'易损件')
   subject.clearInheritedScope();assert.equal(requests.at(-1).partType,'');assert.equal(requests.at(-1).warehouseAreaName,'')
   assert.equal(requests.at(-1).workshopCode,'qu_making')
 })

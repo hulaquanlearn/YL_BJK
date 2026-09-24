@@ -35,70 +35,31 @@
         </div>
       </div>
     </section>
-    <details class="inventory-summary" open><summary>库存概况 <span>{{ formatNumber(dashboard.partTypes) }} 种 · 低库存 {{ formatNumber(dashboard.lowStock) }} 条</span></summary>
-    <div class="page-head">
-      <div>
-        <span class="summary-scope">当前筛选范围</span>
-        
+    <details class="inventory-summary" open>
+      <summary>库存概况 <span>{{ formatNumber(dashboard.partTypes) }} 种 · 低库存 {{ formatNumber(dashboard.lowStock) }} 条</span></summary>
+      <div class="page-head">
+        <div><span class="summary-scope">当前筛选范围</span></div>
+        <div class="head-actions"><el-button :loading="loading" @click="refreshAll"><el-icon><Refresh /></el-icon>刷新数据</el-button></div>
       </div>
-      <div class="head-actions">
-        <el-button :loading="loading" @click="refreshAll">
-          <el-icon><Refresh /></el-icon>刷新数据
-        </el-button>
-      </div>
-    </div>
-
-    <section class="metric-grid inventory-metric-grid" aria-label="库存指标">
-      <button type="button" class="metric-card is-parts is-clickable" @click="typeBreakdownVisible=true">
-        <div class="metric-top"><span>备件种类</span><span class="metric-icon"><el-icon><Tickets /></el-icon></span></div>
-        <div class="metric-value">{{ formatNumber(dashboard.partTypes) }}</div>
-        <div class="metric-note">当前筛选 · 点击查看类型构成</div>
-      </button>
-      <button type="button" class="metric-card is-stock is-clickable" @click="goStatistics()">
-        <div class="metric-top"><span>库存总量</span><span class="metric-icon"><el-icon><Box /></el-icon></span></div>
-        <div class="metric-unit-list" :title="unitSummary"><span v-for="item in dashboard.unitTotals" :key="item.unit"><strong>{{ formatNumber(item.total) }}</strong>{{ item.unit }}</span><span v-if="!dashboard.unitTotals.length">暂无库存</span></div>
-        <div class="metric-note">不同单位分别统计，不混合相加</div>
-      </button>
-      <button type="button" class="metric-card is-value is-clickable" @click="goStatistics()">
-        <div class="metric-top"><span>{{dashboard.missingPrice?'已知库存价值':'库存总价值'}}</span><span class="metric-icon"><el-icon><Money /></el-icon></span></div>
-        <div class="metric-value">{{ formatCurrency(dashboard.totalValue) }}</div>
-        <div class="metric-note">库存 × 不含税单价<span v-if="dashboard.missingPrice"> · {{ dashboard.missingPrice }} 条缺价格</span></div>
-      </button>
-      <button v-if="dashboard.lowStock || query.lowStock" type="button" class="metric-card is-alert is-clickable" @click="showLowStock">
-        <div class="metric-top"><span>低库存预警</span><span class="metric-icon"><el-icon><Warning /></el-icon></span></div>
-        <div class="metric-value">{{ formatNumber(dashboard.lowStock) }}</div>
-        <div class="metric-note">已配置订购点且库存达到或低于订购点</div>
-      </button>
-      <button v-if="dashboard.missingReorderPoint" type="button" class="metric-card is-quality is-clickable" @click="goScoped('/data-quality', { issue:'missing_reorder_point' })">
-        <div class="metric-top"><span>订购点未配置</span><span class="metric-icon"><el-icon><CircleClose /></el-icon></span></div>
-        <div class="metric-value">{{ formatNumber(dashboard.missingReorderPoint) }}</div>
-        <div class="metric-note">含零库存记录 · 未配置记录不参与低库存判断</div>
-      </button>
-      <button v-if="dashboard.pendingApproval" type="button" class="metric-card is-pending is-clickable" @click="goScoped('/check', { status:'待审批' })">
-        <div class="metric-top"><span>待审批盘点</span><span class="metric-icon"><el-icon><DocumentChecked /></el-icon></span></div>
-        <div class="metric-value">{{ formatNumber(dashboard.pendingApproval) }}</div>
-        <div class="metric-note">点击进入盘点审批</div>
-      </button>
-    </section>
-
+      <section class="metric-grid inventory-metric-grid" aria-label="库存指标">
+        <button type="button" class="metric-card is-parts is-clickable" @click="typeBreakdownVisible=true"><div class="metric-top"><span>备件种类</span><span class="metric-icon"><el-icon><Tickets /></el-icon></span></div><div class="metric-value">{{ formatNumber(dashboard.partTypes) }}</div><div class="metric-note">当前筛选 · 点击查看类型构成</div></button>
+        <button type="button" class="metric-card is-stock is-clickable" @click="goStatistics()"><div class="metric-top"><span>库存总量</span><span class="metric-icon"><el-icon><Box /></el-icon></span></div><div class="metric-unit-list" :title="unitSummary"><span v-for="item in dashboard.unitTotals" :key="item.unit"><strong>{{ formatNumber(item.total) }}</strong>{{ item.unit }}</span><span v-if="!dashboard.unitTotals.length">暂无库存</span></div><div class="metric-note">不同单位分别统计，不混合相加</div></button>
+        <button type="button" class="metric-card is-value is-clickable" @click="goStatistics()"><div class="metric-top"><span>{{dashboard.missingPrice?'已知库存价值':'库存总价值'}}</span><span class="metric-icon"><el-icon><Money /></el-icon></span></div><div class="metric-value">{{ formatCurrency(dashboard.totalValue) }}</div><div class="metric-note">库存 × 不含税单价<span v-if="dashboard.missingPrice"> · {{ dashboard.missingPrice }} 条缺价格</span></div></button>
+        <button v-if="dashboard.lowStock || query.lowStock" type="button" class="metric-card is-alert is-clickable" @click="showLowStock"><div class="metric-top"><span>低库存预警</span><span class="metric-icon"><el-icon><Warning /></el-icon></span></div><div class="metric-value">{{ formatNumber(dashboard.lowStock) }}</div><div class="metric-note">已配置订购点且库存达到或低于订购点</div></button>
+        <button v-if="dashboard.missingReorderPoint" type="button" class="metric-card is-quality is-clickable" @click="goScoped('/data-quality', { issue:'missing_reorder_point' })"><div class="metric-top"><span>订购点未配置</span><span class="metric-icon"><el-icon><CircleClose /></el-icon></span></div><div class="metric-value">{{ formatNumber(dashboard.missingReorderPoint) }}</div><div class="metric-note">含零库存记录 · 未配置记录不参与低库存判断</div></button>
+        <button v-if="dashboard.pendingApproval" type="button" class="metric-card is-pending is-clickable" @click="goScoped('/check', { status:'待审批' })"><div class="metric-top"><span>待审批盘点</span><span class="metric-icon"><el-icon><DocumentChecked /></el-icon></span></div><div class="metric-value">{{ formatNumber(dashboard.pendingApproval) }}</div><div class="metric-note">点击进入盘点审批</div></button>
+      </section>
     </details>
     <el-dialog v-model="typeBreakdownVisible" title="备件种类与价值分布" width="min(1240px,96vw)" align-center>
       <p class="scope-dialog-note">按当前筛选统计各车间、货区；数量按单位列出，价值按库存 × 不含税单价计算。相同备件出现在多个货区时，货区种类数不能直接相加。</p>
       <div class="scope-dialog-total"><strong>共 {{ formatNumber(dashboard.partTypes) }} 种</strong><span>已知库存价值 {{ formatCurrency(dashboard.totalValue) }}</span><span v-if="dashboard.missingPrice">{{ dashboard.missingPrice }} 条未填写价格</span></div>
       <el-table class="scope-breakdown-table" :data="dashboard.scopeBreakdown || []" stripe max-height="58vh" empty-text="当前筛选没有库存">
-        <el-table-column prop="workshopName" label="车间" width="110" fixed />
-        <el-table-column prop="warehouseAreaName" label="货区" min-width="120" fixed />
-        <el-table-column v-for="type in ['易损件','质保件']" :key="type" :label="type">
-          <el-table-column label="种类" width="75"><template #default="{row}">{{ scopeType(row,type).partTypes || 0 }}</template></el-table-column>
-          <el-table-column label="库存数量" min-width="155"><template #default="{row}">{{ quantities(scopeType(row,type).unitTotals) }}</template></el-table-column>
-          <el-table-column label="库存价值" min-width="150"><template #default="{row}">{{ formatCurrency(scopeType(row,type).totalValue) }}<small v-if="scopeType(row,type).missingPrice" class="scope-missing">{{ scopeType(row,type).missingPrice }} 条缺价格</small></template></el-table-column>
-        </el-table-column>
+        <el-table-column prop="workshopName" label="车间" width="110" fixed/><el-table-column prop="warehouseAreaName" label="货区" min-width="120" fixed/>
+        <el-table-column v-for="type in ['易损件','质保件']" :key="type" :label="type"><el-table-column label="种类" width="75"><template #default="{row}">{{ scopeType(row,type).partTypes || 0 }}</template></el-table-column><el-table-column label="库存数量" min-width="155"><template #default="{row}">{{ quantities(scopeType(row,type).unitTotals) }}</template></el-table-column><el-table-column label="库存价值" min-width="150"><template #default="{row}">{{ formatCurrency(scopeType(row,type).totalValue) }}<small v-if="scopeType(row,type).missingPrice" class="scope-missing">{{ scopeType(row,type).missingPrice }} 条缺价格</small></template></el-table-column></el-table-column>
         <el-table-column label="合计价值" min-width="145"><template #default="{row}">{{ formatCurrency(row.totalValue) }}</template></el-table-column>
       </el-table>
       <template #footer><el-button @click="typeBreakdownVisible=false">关闭</el-button><el-button type="primary" @click="goStatistics()">查看统计大屏</el-button></template>
     </el-dialog>
-
-
 
     <section class="panel table-panel">
       <div class="table-toolbar">
@@ -107,20 +68,25 @@
           <span class="result-count">共 {{ total }} 条</span>
         </div>
         <div class="table-actions">
-          <el-button v-write v-if="$showControl(canEditAny)" size="small" :loading="exporting" :disabled="!total || loading" @click="exportCurrent">导出当前结果</el-button>
-          <template v-if="selectedRows.length">
-            <span class="selection-count" aria-live="polite">已选 {{ selectedRows.length }} 条</span>
-            <el-dropdown v-write trigger="click" @command="command=>command==='stock'?openBatch():openBatchDelete()">
-              <el-button size="small">批量操作<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button>
-              <template #dropdown><el-dropdown-menu><el-dropdown-item command="stock">批量出入库</el-dropdown-item><el-dropdown-item command="delete">批量删除</el-dropdown-item></el-dropdown-menu></template>
-            </el-dropdown>
-            <el-button size="small" text @click="clearSelection">取消选择</el-button>
-          </template>
           <el-button v-write v-if="$showControl(canEditAny)" type="primary" size="small" @click="openCreate"><el-icon><Plus /></el-icon>新增备件</el-button>
           <el-button v-write v-if="$showControl(canEditAny)" type="success" plain size="small" @click="openImport"><el-icon><Upload /></el-icon>导入备件</el-button>
+          <el-button v-write v-if="$showControl(canEditAny)" size="small" :loading="exporting" :disabled="!total || loading" @click="exportCurrent">导出当前结果</el-button>
           <el-button v-if="query.lowStock" type="danger" plain size="small" @click="clearLowStock">退出预警筛选</el-button>
           <el-popover placement="bottom-end" :width="220" trigger="click"><template #reference><el-button size="small"><el-icon><Grid /></el-icon>自定义列</el-button></template><div class="column-picker"><strong>显示字段</strong><el-checkbox-group v-model="visibleColumns"><el-checkbox v-for="item in columnOptions" :key="item.value" :value="item.value">{{ item.label }}</el-checkbox></el-checkbox-group></div></el-popover>
         </div>
+      </div>
+
+      <div v-if="selectedRows.length" class="selection-toolbar">
+        <el-checkbox :model-value="allFilteredSelected" :indeterminate="!allFilteredSelected" aria-label="选择当前页全部" @change="toggleCurrentPage" />
+        <span class="selection-count" aria-live="polite">已选 {{ selectedRows.length }} 条</span>
+        <button v-if="total > list.length && !allFilteredSelected" type="button" class="select-filtered-link" :disabled="selectingAll || loading" @click="selectAllFiltered">选择全部 {{ total }} 条筛选结果</button>
+        <span v-else-if="allFilteredSelected" class="all-selected-label">已选全部筛选结果</span>
+        <span class="selection-toolbar-spacer" />
+        <el-dropdown v-write trigger="click" @command="command=>command==='stock'?openBatch():openBatchDelete()">
+          <el-button size="small">批量操作<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button>
+          <template #dropdown><el-dropdown-menu><el-dropdown-item command="stock">批量出入库</el-dropdown-item><el-dropdown-item command="delete">批量删除</el-dropdown-item></el-dropdown-menu></template>
+        </el-dropdown>
+        <el-button size="small" text @click="clearSelection">取消选择</el-button>
       </div>
 
       <div class="mobile-parts" v-loading="loading">
@@ -131,15 +97,7 @@
         </article><el-empty v-if="!loading&&!list.length" description="没有找到符合条件的备件"/>
       </div>
       <el-table class="desktop-inventory-table" ref="inventoryTable" :data="list" v-loading="loading" row-key="_id" empty-text="没有找到符合条件的备件" @selection-change="onSelectionChange">
-        <el-table-column v-if="$showControl(canEditAny)" type="selection" width="180" reserve-selection :selectable="row=>$showControl(canEditWorkshop(row.workshopCode))">
-          <template #header>
-            <div class="selection-header">
-              <el-checkbox :model-value="pageSelected" :indeterminate="pageIndeterminate" @change="toggleCurrentPage" />
-              <button v-if="total > list.length && !allFilteredSelected" type="button" class="select-filtered-link" :disabled="selectingAll || loading" @click.stop="selectAllFiltered">选择全部 {{ total }} 条筛选结果</button>
-              <span v-else-if="allFilteredSelected" class="all-selected-label">已选全部</span>
-            </div>
-          </template>
-        </el-table-column>
+        <el-table-column v-if="$showControl(canEditAny)" type="selection" width="48" reserve-selection :selectable="row=>$showControl(canEditWorkshop(row.workshopCode))" />
         <el-table-column label="名称" min-width="230" fixed="left">
           <template #default="{ row }">
             <strong class="material-name-cell" :title="row.materialDesc">{{ row.materialDesc || '未命名备件' }}</strong>
@@ -377,7 +335,7 @@ const total = ref(0)
 const areas = ref([])
 const partTypes = ref([])
 const workshops = ref([])
-const dashboard = ref({ partTypes: 0, inventoryRecords: 0, totalStock: 0, totalValue: 0, lowStock: 0, missingReorderPoint:0, unconfiguredStock: 0, pendingApproval: 0, unitTotals: [] })
+const dashboard = ref({ partTypes:0, inventoryRecords:0, totalStock:0, totalValue:0, lowStock:0, missingPrice:0, missingReorderPoint:0, pendingApproval:0, unitTotals:[], scopeBreakdown:[] })
 const hasRouteScope = route.query.scope || INVENTORY_SCOPE_KEYS.some(key => route.query[key] !== undefined)
 const savedQuery = hasRouteScope ? {} : readStored('spare-parts-inventory-filters', {})
 const routeWorkshop = ['raw_grain','qu_making','brewing'].includes(String(route.query.workshopCode || '')) ? String(route.query.workshopCode) : ''
@@ -460,11 +418,8 @@ const currentReasonOptions = computed(() => movementReasons.value[stockForm.type
 const batchReasonOptions = computed(() => movementReasons.value[batchForm.type] || [])
 const createUsesArea = computed(() => createForm.workshopCode !== 'qu_making')
 const editUsesArea = computed(() => editForm.workshopCode !== 'qu_making')
-const unitSummary = computed(() => {
-  const totals = dashboard.value.unitTotals || []
-  if (!totals.length) return '库存数量按单位独立统计'
-  return totals.map(item => `${formatNumber(item.total)}${item.unit}`).join('、')
-})
+const unitSummary = computed(() => (dashboard.value.unitTotals||[]).map(item=>`${formatNumber(item.total)}${item.unit}`).join('、') || '库存数量按单位独立统计')
+
 
 function formatNumber(value) { return new Intl.NumberFormat('zh-CN',{maximumFractionDigits:4}).format(Number(value) || 0) }
 function formatCurrency(value) { return new Intl.NumberFormat('zh-CN',{style:'currency',currency:'CNY',maximumFractionDigits:2}).format(Number(value)||0) }
@@ -499,19 +454,19 @@ async function load() {
   }
 }
 
-async function loadDashboard() {
-  const token=++dashboardToken
-  const result = await getDashboard({ ...query })
-  if(token!==dashboardToken)return
-  dashboard.value = result.data?.dashboard || dashboard.value
-}
-let dashboardToken=0
-
 async function loadFilters() {
   const result = await getFilters({ workshopCode: query.workshopCode || undefined })
   areas.value = result.data?.areas || []
   partTypes.value = result.data?.partTypes || []
   workshops.value = result.data?.workshops || []
+}
+
+let dashboardToken=0
+async function loadDashboard() {
+  const token=++dashboardToken
+  const result=await getDashboard({...query})
+  if(token!==dashboardToken)return
+  dashboard.value=result.data?.dashboard||dashboard.value
 }
 
 async function loadOperationOptions() {
@@ -524,15 +479,16 @@ async function refreshAll() {
   await Promise.allSettled([load(), loadDashboard(), loadFilters()])
 }
 
-function search() { query.page = 1; clearSelection(); Promise.allSettled([load(), loadDashboard(), loadFilters()]) }
+function search() { if (query.stockStatus) query.lowStock = undefined; query.page = 1; clearSelection(); Promise.allSettled([load(), loadDashboard(), loadFilters()]) }
 function workshopChanged(){ query.warehouseAreaName=''; search() }
 function resetFilters() {
   Object.assign(query, { page: 1, searchKeyword: '', workshopCode: '', warehouseAreaName: '', partType: '', stockStatus: '', sort: 'name', lowStock: undefined })
   clearSelection()
   Promise.allSettled([load(), loadDashboard(), loadFilters()])
 }
-function showLowStock() { query.lowStock = '1'; query.sort = 'stockAsc'; search() }
+function showLowStock() { query.lowStock = '1'; query.stockStatus = ''; query.sort = 'stockAsc'; search() }
 function clearLowStock() { query.lowStock = undefined; query.sort = 'name'; search() }
+function goStatistics(partType) { goScoped('/statistics',partType?{partType}:{}) }
 function openDetail(row) {
   currentPart.value = row
   detailVisible.value = true
@@ -540,7 +496,6 @@ function openDetail(row) {
 async function openLinkedPart(){const id=route.query.inventoryId;if(typeof id!=='string'||!/^\d+$/.test(id))return;try{const result=await getPart(id);if(result.data)openDetail(result.data)}catch{ElMessage.warning('引用的库存记录不存在或已停用')}}
 function locate3d(row) { router.push({ path: '/warehouse-3d', query: { partId: row._id, workshopCode: row.workshopCode } }) }
 function goScoped(path, extra={}) { router.push({ path, query: inventoryRouteQuery(query,extra) }) }
-function goStatistics(partType) { goScoped('/statistics',partType?{partType}:{}) }
 function goReplenishment() { goScoped('/replenishment') }
 
 function defaultEditableWorkshop() {
@@ -666,7 +621,7 @@ async function submitStock() {
     await updateStock(stockPart.value._id, { ...stockForm })
     ElMessage.success(`${action}完成`)
     stockVisible.value = false
-    await Promise.all([load(), loadDashboard()])
+    await Promise.all([load(),loadDashboard()])
   } finally { stockSubmitting.value = false }
 }
 
@@ -688,7 +643,7 @@ async function submitBatch() {
     ElMessage.success('批量库存操作已完成')
     batchVisible.value = false
     clearSelection()
-    await Promise.all([load(), loadDashboard()])
+    await Promise.all([load(),loadDashboard()])
   } finally { batchSubmitting.value = false }
 }
 
@@ -705,10 +660,9 @@ onMounted(() => Promise.allSettled([refreshAll(), loadOperationOptions(),openLin
 </script>
 
 <style scoped>
-.table-toolbar{gap:12px;flex-wrap:wrap}.table-actions .el-button+.el-button{margin-left:0}.selection-count{color:var(--primary);font-size:12px;white-space:nowrap}.table-actions{margin-left:auto}
-.selection-header{display:flex;align-items:center;gap:6px;white-space:nowrap}.select-filtered-link{border:0;background:transparent;color:var(--primary);cursor:pointer;font-size:12px;padding:0}.select-filtered-link:disabled{cursor:not-allowed;opacity:.55}.all-selected-label{color:var(--success,#198754);font-size:12px}
+.table-toolbar{gap:12px;flex-wrap:wrap}.table-actions .el-button+.el-button{margin-left:0}.selection-count{color:var(--primary);font-size:12px;white-space:nowrap}.table-actions{margin-left:auto}.selection-toolbar{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 16px;background:#eef6ff;border-top:1px solid #d8eaff;border-bottom:1px solid #d8eaff}.selection-toolbar-spacer{flex:1}.selection-toolbar .el-button+.el-button{margin-left:0}
+.select-filtered-link{border:0;background:transparent;color:var(--primary);cursor:pointer;font-size:12px;padding:0 4px}.select-filtered-link:disabled{cursor:not-allowed;opacity:.55}.all-selected-label{color:var(--success,#198754);font-size:12px}
 
-.metric-unit-list{display:flex;flex-wrap:wrap;gap:5px 12px;margin:12px 0;line-height:1.5}.metric-unit-list span{white-space:nowrap;font-size:13px}.metric-unit-list strong{margin-right:3px;font-size:20px}.scope-dialog-note{color:#667085;line-height:1.7;font-size:13px}.scope-dialog-total{display:flex;gap:20px;flex-wrap:wrap;padding:12px 0 18px}.scope-dialog-total strong{color:#9d1822}.scope-missing{display:block;color:#b45309;margin-top:4px}
 .inventory-selection-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;background:var(--brand-soft);border-bottom:1px solid var(--line)}.inventory-selection-bar strong{font-size:13px}.inventory-selection-bar strong span{font-size:12px;font-weight:400;color:var(--muted)}.inventory-selection-bar>div{display:flex;flex-wrap:wrap;gap:6px}.inventory-selection-bar .el-button+.el-button{margin-left:0}.delete-summary{line-height:1.7}.deletion-allowed{color:var(--success)}.deletion-blocked{color:var(--danger);white-space:normal}.inventory-detail-dialog .detail-card{width:100%;max-height:84vh;box-shadow:none;border:0}.detail-card-footer{flex-wrap:wrap}:global(.inventory-detail-dialog){display:block;max-height:84vh;padding:0;border-radius:20px;overflow:hidden}:global(.inventory-detail-dialog .el-dialog__header){padding:0;height:0;overflow:hidden}:global(.inventory-detail-dialog .el-dialog__body){padding:0}@media(max-width:680px){.inventory-selection-bar{align-items:flex-start;flex-direction:column}.part-form-grid{grid-template-columns:1fr}.part-form-grid .span-2{grid-column:auto}}
 .inventory-metric-grid{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}.metric-card:is(button){width:100%;color:inherit;font:inherit;text-align:left;cursor:pointer}.metric-card.is-quality{border-top-color:#7a8798}.metric-card.is-quality .metric-icon{color:#536171;background:#f1f3f5}.filter-row{grid-template-columns:minmax(135px,.7fr) minmax(300px,1.65fr) minmax(175px,.85fr) minmax(165px,.8fr) auto;align-items:end}.filter-actions{display:flex;gap:8px;white-space:nowrap}.table-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.column-picker strong{display:block;margin-bottom:8px}.column-picker .el-checkbox-group{display:grid}.stock-meta-grid,.part-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.part-form-grid{margin-top:16px}.part-form-grid .span-2{grid-column:1/-1}.detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.table-filter-head{display:flex;align-items:center;gap:5px}.table-filter-head.is-center{justify-content:center}.header-filter-button{display:inline-grid;place-items:center;padding:2px;border:0;background:transparent;color:#a0a8b5;cursor:pointer}.header-filter-button:hover,.header-filter-button.active{color:var(--primary)}
 .material-name-cell{display:block;overflow:visible;white-space:normal;overflow-wrap:anywhere;word-break:break-word;color:var(--ink);font-size:13px;line-height:1.55}.material-code-cell{display:block;color:#667085;background:transparent;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;white-space:normal;overflow-wrap:anywhere}.material-cell{min-width:0;overflow:hidden;display:flex;align-items:center;gap:8px}.material-cell strong{display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);font-size:13px;flex:1;min-width:0}.material-cell span{display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:11px;flex-shrink:0;max-width:130px}.spec-cell{display:block;color:#4b5563;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.location-cell{display:inline-flex;align-items:center;gap:6px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}.stock-number{font-size:15px;font-weight:800}.stock-number.is-low{color:var(--danger)}
@@ -717,6 +671,7 @@ onMounted(() => Promise.allSettled([refreshAll(), loadOperationOptions(),openLin
 @media(max-width:1250px){.filter-row{grid-template-columns:repeat(2,minmax(0,1fr))}.filter-actions{grid-column:span 2;justify-content:flex-end}}@media(max-width:680px){.inventory-metric-grid{grid-template-columns:1fr}.filter-row{grid-template-columns:1fr}.filter-actions{grid-column:auto}.stock-meta-grid{grid-template-columns:1fr}.detail-actions .el-button{flex:1}.import-workshop-row{grid-template-columns:1fr}}
 .inventory-type-links{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}.inventory-type-links button{padding:8px 12px;border:1px solid #e0e5ed;border-radius:8px;color:#334155;background:#fff;cursor:pointer;font:inherit;font-size:13px}.inventory-type-links span{margin-left:8px;color:#a51c26}.inventory-type-links button:hover{border-color:#a51c26}
 :deep(.scope-breakdown-table .cell){white-space:normal;overflow-wrap:anywhere;line-height:1.6}
+.scope-dialog-note{margin:0;color:#667085;line-height:1.7;font-size:13px}.scope-dialog-total{display:flex;gap:20px;flex-wrap:wrap;padding:12px 0 18px;color:#667085;font-size:13px}.scope-dialog-total strong{color:#9d1822}.scope-missing{display:block;margin-top:4px;color:#b45309}
 
 .detail-card .detail-heading{flex:1;min-width:0}
 .detail-card .detail-heading h2{font-size:19px;line-height:1.5;overflow-wrap:anywhere}
@@ -740,4 +695,5 @@ onMounted(() => Promise.allSettled([refreshAll(), loadOperationOptions(),openLin
 .summary-scope{font-size:12px;color:var(--muted)}
 .material-name-cell,.spec-cell{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;line-height:1.6}
 .spec-cell{font-weight:400;font-size:13px}
+.metric-unit-list{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:baseline;margin:12px 0}.metric-unit-list>span{white-space:nowrap}.metric-unit-list strong{font-size:24px;margin-right:4px}
 </style>

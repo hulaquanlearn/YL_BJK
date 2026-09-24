@@ -1,0 +1,43 @@
+{
+  "name": "spare-parts-api",
+  "version": "1.9.4",
+  "private": true,
+  "description": "备件管理小程序的 MySQL REST API",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "test": "node --test",
+    "create-admin": "node scripts/create-admin.js",
+    "export:knowledge": "node scripts/export-dify-knowledge.js",
+    "import:qu-making:check": "node scripts/import-qu-making-ledger.js",
+    "import:qu-making": "node scripts/import-qu-making-ledger.js --apply",
+    "import:new-data:check": "node scripts/import-new-data.js",
+    "import:new-data": "node scripts/import-new-data.js --apply"
+  },
+  "engines": {
+    "node": "^22.13.0 || >=24.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "docx": "^9.7.1",
+    "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "multer": "^2.4.0",
+    "mysql2": "^3.11.5",
+    "officeparser": "^7.8.0",
+    "read-excel-file": "^9.3.10",
+    "sanitize-html": "^2.17.7",
+    "sharp": "^0.35.4",
+    "word-extractor": "^1.0.4",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "overrides": {
+    "qs": "^6.16.0",
+    "pdfjs-dist": "^6.2.108",
+    "uuid": "^11.1.1"
+  }
+}

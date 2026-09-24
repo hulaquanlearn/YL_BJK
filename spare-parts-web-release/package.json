@@ -1,6 +1,6 @@
 {
   "name": "spare-parts-web",
-  "version": "1.8.0",
+  "version": "1.9.4",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 8502",
     "build": "vite build",
