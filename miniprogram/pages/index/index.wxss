@@ -63,6 +63,8 @@
 
 .low-stock-banner {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
   margin-bottom: 18rpx;
   padding: 18rpx 22rpx;
   align-items: center;
@@ -78,64 +80,66 @@
 .low-stock-desc { color: #b17a50; font-size: 21rpx; font-weight: 400; }
 
 .filter-toolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10rpx;
   margin-bottom: 14rpx;
-  padding: 14rpx 18rpx;
-  align-items: center;
-  border: 1rpx solid #e7eaee;
-  border-radius: 18rpx;
-  background: #fff;
-  box-shadow: 0 5rpx 18rpx rgba(31, 41, 55, .04);
 }
+.filter-toolbar picker { display: block; min-width: 0; width: 100%; }
 
 .filter-main {
   display: flex;
   min-width: 0;
-  flex: 1;
+  height: 76rpx;
+  padding: 0 18rpx;
+  box-sizing: border-box;
   align-items: center;
-  gap: 10rpx;
+  gap: 5rpx;
+  border: 1rpx solid #ead5d7;
+  border-radius: 15rpx;
+  background: #fff;
 }
 
-.filter-title-row { display: flex; align-items: center; gap: 7rpx; }
-.filter-title { font-size: 26rpx; font-weight: 700; }
+.filter-title { flex: none; color: #ac1720; font-size: 23rpx; font-weight: 650; }
 .filter-count {
-  width: 30rpx;
-  height: 30rpx;
-  border-radius: 15rpx;
-  color: #fff;
-  background: #c6000b;
-  font-size: 19rpx;
-  line-height: 30rpx;
-  text-align: center;
+  flex: none;
+  color: #ad2830;
+  font-size: 21rpx;
 }
 .filter-summary {
   min-width: 0;
   flex: 1;
   overflow: hidden;
-  color: #7c8591;
+  color: #a51721;
   font-size: 23rpx;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.filter-toggle { flex: none; color: #9f1820; font-size: 22rpx; }
+.filter-toggle { flex: none; color: #ad2830; font-size: 20rpx; }
 
 .sort-compact {
   display: flex;
-  width: 176rpx;
-  margin-left: 12rpx;
-  padding-left: 12rpx;
-  flex-direction: column;
-  border-left: 1rpx solid #edf0f3;
+  min-width: 0;
+  height: 76rpx;
+  padding: 0 18rpx;
+  box-sizing: border-box;
+  align-items: center;
+  gap: 5rpx;
+  border: 1rpx solid #e3e7ec;
+  border-radius: 15rpx;
+  background: #fff;
 }
-.sort-caption { color: #929aa4; font-size: 19rpx; }
+.sort-caption { flex: none; color: #687586; font-size: 23rpx; }
 .sort-current {
-  margin-top: 4rpx;
+  min-width: 0;
+  flex: 1;
   overflow: hidden;
   color: #394452;
-  font-size: 22rpx;
+  font-size: 23rpx;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.sort-toggle { flex: none; color: #8c98a6; font-size: 20rpx; }
 
 .filter-panel {
   margin-bottom: 18rpx;
@@ -238,6 +242,8 @@
   text-align: right;
 }
 .stock-badge.normal { color: #177b55; background: #eaf8f2; }
+.stock-badge.unconfigured { color: #596579; background: #edf0f5; }
+.show-all-stock { flex-shrink: 0; margin: 0; padding: 0 16rpx; font-size: 22rpx; line-height: 2.4; color: #8b4816; background: #fff; }
 .stock-badge.low { color: #b16400; background: #fff4da; }
 .stock-badge.zero { color: #b51b25; background: #ffebed; }
 .stock-status,

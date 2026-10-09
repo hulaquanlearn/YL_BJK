@@ -1,33 +1,22 @@
 <template>
   <div>
-    <div class="page-head">
-      <div>
-        <h2>盘点任务</h2>
-        <p>盘点提交后冻结相关库存，审批通过才会同步实盘数量。</p>
-      </div>
-      <div class="head-actions">
-        <el-button :loading="loading" @click="load"><el-icon><Refresh /></el-icon>刷新</el-button>
-        <el-button v-write v-if="$showControl(canCreate)" type="primary" @click="openCreate"><el-icon><Plus /></el-icon>新建盘点</el-button>
-      </div>
-    </div>
-
     <section class="metric-grid">
-      <button type="button" class="metric-card is-clickable check-metric-button" @click="setStatus('')">
+      <button type="button" class="metric-card is-clickable check-metric-button" :class="{selected:query.status===''}" :aria-pressed="query.status===''" @click="setStatus('')">
         <div class="metric-top"><span>全部任务</span><span class="metric-icon"><el-icon><Files /></el-icon></span></div>
         <div class="metric-value">{{ orderSummary.total }}</div>
         <div class="metric-note">当前筛选范围内的盘点单</div>
       </button>
-      <button type="button" class="metric-card is-pending is-clickable check-metric-button" @click="setStatus('待审批')">
+      <button type="button" class="metric-card is-pending is-clickable check-metric-button" :class="{selected:query.status==='待审批'}" :aria-pressed="query.status==='待审批'" @click="setStatus('待审批')">
         <div class="metric-top"><span>待审批</span><span class="metric-icon"><el-icon><Clock /></el-icon></span></div>
         <div class="metric-value">{{ statusCount('待审批') }}</div>
         <div class="metric-note">需要及时核对处理</div>
       </button>
-      <button type="button" class="metric-card is-clickable check-metric-button" @click="setStatus('已通过')">
+      <button type="button" class="metric-card is-clickable check-metric-button" :class="{selected:query.status==='已通过'}" :aria-pressed="query.status==='已通过'" @click="setStatus('已通过')">
         <div class="metric-top"><span>已通过</span><span class="metric-icon" style="color:#15803d;background:#ecfdf3"><el-icon><CircleCheck /></el-icon></span></div>
         <div class="metric-value">{{ statusCount('已通过') }}</div>
         <div class="metric-note">库存已完成同步</div>
       </button>
-      <button type="button" class="metric-card is-alert is-clickable check-metric-button" @click="setStatus('已驳回')">
+      <button type="button" class="metric-card is-alert is-clickable check-metric-button" :class="{selected:query.status==='已驳回'}" :aria-pressed="query.status==='已驳回'" @click="setStatus('已驳回')">
         <div class="metric-top"><span>已驳回</span><span class="metric-icon"><el-icon><CircleClose /></el-icon></span></div>
         <div class="metric-value">{{ statusCount('已驳回') }}</div>
         <div class="metric-note">可重新发起盘点</div>
@@ -38,19 +27,11 @@
       <div class="filter-row check-filter-row">
         <div class="filter-field">
           <label>所属车间</label>
-          <el-select v-model="query.workshopCode" clearable placeholder="全部车间" style="width:100%" @change="searchOrders">
+          <el-select v-model="query.workshopCode" :disabled="!isAdmin" :clearable="isAdmin" placeholder="全部车间" style="width:100%" @change="searchOrders">
             <el-option v-for="item in workshopOptions" :key="item.code" :label="item.name" :value="item.code" />
           </el-select>
         </div>
-        <div class="filter-field">
-          <label>审批状态</label>
-          <el-select v-model="query.status" clearable placeholder="全部状态" style="width:100%" @change="searchOrders">
-            <el-option label="待审批" value="待审批" />
-            <el-option label="已通过" value="已通过" />
-            <el-option label="已驳回" value="已驳回" />
-          </el-select>
-        </div>
-        <div class="filter-field">
+<div class="filter-field">
           <label>盘点日期</label>
           <el-date-picker v-model="query.date" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" clearable style="width:100%" @change="searchOrders" />
         </div>
@@ -64,7 +45,10 @@
     <section class="panel table-panel">
       <div class="table-toolbar">
         <div><strong>盘点单记录</strong><span class="result-count">共 {{ orderTotal }} 条</span></div>
-        <span style="color:#8a93a4;font-size:12px">单据按创建时间倒序</span>
+        <div class="head-actions">
+          
+          <el-button type="primary" @click="openCreate"><el-icon><Plus /></el-icon>新建盘点</el-button>
+        </div>
       </div>
       <p class="mobile-table-hint">左右滑动表格，查看完整字段和操作</p>
       <el-table :data="list" v-loading="loading" row-key="_id" empty-text="暂无盘点单">
@@ -91,7 +75,7 @@
         <el-table-column label="操作" width="190" align="right" fixed="right">
           <template #default="{ row }">
             <el-button link type="primary" @click="viewDetail(row)">详情</el-button>
-            <template v-if="$showControl(isAdmin) && row.approveStatus === '待审批'">
+            <template v-if="canApproveRow(row) && row.approveStatus === '待审批'">
               <el-button v-write link type="success" :loading="processingId===row._id" @click="approve(row, '已通过')">通过</el-button>
               <el-button v-write link type="danger" :loading="processingId===row._id" @click="approve(row, '已驳回')">驳回</el-button>
             </template>
@@ -167,7 +151,7 @@
               <el-option v-for="shelf in shelfOptions" :key="shelf.value" :label="shelf.label" :value="shelf.value" />
             </el-select>
             <el-input v-model="partKeyword" clearable placeholder="搜索编码或名称" style="width:240px" @keyup.enter="loadCandidates" @clear="loadCandidates">
-              <template #append><el-button :loading="candidateLoading" @click="loadCandidates"><el-icon><Search /></el-icon></el-button></template>
+              <template #append><el-button aria-label="搜索盘点备件" title="搜索盘点备件" :loading="candidateLoading" @click="loadCandidates"><el-icon><Search /></el-icon></el-button></template>
             </el-input>
           </div>
         </div>
@@ -196,8 +180,8 @@
 
       <template #footer>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%">
-          <span style="color:#697386;font-size:12px">提交后相关备件将暂停出入库，直至审批完成。</span>
-          <div><el-button @click="createVisible=false">取消</el-button><el-button v-write type="primary" :loading="submitting" @click="submitOrder">提交盘点单</el-button></div>
+          <span style="color:#697386;font-size:12px">提交后相关备件将暂停出入库，审批通过后才同步实盘数量。</span>
+          <div><el-button @click="createVisible=false">取消</el-button><el-button type="primary" :loading="submitting" @click="submitOrder">提交盘点单</el-button></div>
         </div>
       </template>
     </el-dialog>
@@ -205,7 +189,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, reactive, ref } from 'vue'
+import { collectParts } from '../utils/collect-parts.mjs'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { approveInventoryOrder, createInventoryOrder, getFilters, getInventoryOrder, getInventoryOrders, getParts } from '../api'
@@ -224,6 +209,7 @@ const processingId = ref('')
 const createVisible = ref(false)
 const submitting = ref(false)
 const candidateLoading = ref(false)
+let candidateRequest=0
 const candidates = ref([])
 const selectedParts = ref([])
 const partKeyword = ref('')
@@ -245,7 +231,8 @@ const shelfOptions = computed(() => {
 const form = reactive({ workshopCode: '', inventoryUser: '', inventoryDate: today(), inventoryRemark: '', scopeType: 'all' })
 const currentUser = getUser()
 const isAdmin = currentUser?.role === 'admin'
-const canCreate = canEditAnyWorkshop()
+const canCreate = canEditAnyWorkshop() || (currentUser?.role === 'viewer' && Boolean(userWorkshopCode()))
+if (!isAdmin) query.workshopCode = userWorkshopCode()
 const workshopOptions = [
   { code: 'raw_grain', name: '原粮车间' },
   { code: 'qu_making', name: '制曲车间' },
@@ -263,7 +250,8 @@ function formatTime(value) { return value ? String(value).replace('T', ' ').slic
 function workshopName(code) { return workshopOptions.find(item => item.code === code)?.name || '原粮车间' }
 function searchOrders(){query.page=1;load()}
 function setStatus(status) { query.status = status; searchOrders() }
-function resetFilters() { query.status = ''; query.workshopCode = ''; query.date = ''; router.replace({ query: {} }); searchOrders() }
+function resetFilters() { query.status = ''; query.workshopCode = isAdmin ? '' : userWorkshopCode(); query.date = ''; router.replace({ query: {} }); searchOrders() }
+function canApproveRow(row) { return isAdmin || (currentUser?.role !== 'viewer' && userWorkshopCode() === row.workshopCode) }
 
 async function load() {
   const request=++orderRequest
@@ -294,6 +282,7 @@ function actualFor(row) {
 }
 
 async function approve(row, status) {
+  if (!canApproveRow(row)) return ElMessage.warning('只能审批所属车间的盘点单')
   const action = status === '已通过' ? '通过' : '驳回'
   let remark = ''
   try {
@@ -346,14 +335,17 @@ function scopeChanged() {
 }
 
 async function loadCandidates() {
+  const request=++candidateRequest
   candidateLoading.value = true
+  candidates.value=[]
   try {
     const params = { page: 1, pageSize: 200, searchKeyword: partKeyword.value, sort: 'name', workshopCode: form.workshopCode }
     if (form.scopeType === 'area' && partArea.value) params.warehouseAreaName = partArea.value
     if (form.scopeType === 'shelf' && partShelf.value.length === 1) params.shelf = partShelf.value[0]
-    const result = await getParts(params)
-    candidates.value = (result.data || []).filter(item => item.inventoryStatus !== '待审批' && (form.scopeType !== 'shelf' || !partShelf.value.length || partShelf.value.includes(Number(item.shelf))))
-  } finally { candidateLoading.value = false }
+    const rows = await collectParts(getParts,params,()=>request===candidateRequest)
+    if(!rows)return
+    candidates.value = rows.filter(item => item.inventoryStatus !== '待审批' && (form.scopeType !== 'shelf' || !partShelf.value.length || partShelf.value.includes(Number(item.shelf))))
+  } catch(error) { if(request===candidateRequest && !error?.response)ElMessage.error(error.message||'备件加载失败，请重试') } finally { if(request===candidateRequest)candidateLoading.value = false }
 }
 async function loadScopeOptions() {
   try {
@@ -381,6 +373,7 @@ function removePart(id) { selectedParts.value = selectedParts.value.filter(item 
 function candidateLocation(row) { return [row.warehouseAreaName, row.locationCode || (row.shelf != null ? `${row.shelf}号架` : '')].filter(Boolean).join(' · ') || '-' }
 
 async function submitOrder() {
+  if (!canCreate) return ElMessage.warning('当前账号没有盘点权限')
   if (!form.inventoryUser.trim()) return ElMessage.warning('请填写盘点人')
   if (!form.inventoryDate) return ElMessage.warning('请选择盘点日期')
   if (!selectedParts.value.length) return ElMessage.warning('请至少选择一项备件')
@@ -432,6 +425,7 @@ async function submitOrder() {
 }
 
 onMounted(load)
+onBeforeUnmount(()=>{candidateRequest++;orderRequest++})
 </script>
 
 <style scoped>

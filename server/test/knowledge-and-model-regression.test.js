@@ -38,16 +38,16 @@ test('ordinary parts responses use category models and retire dedicated model wr
   assert.match(partsRoute, /router\.get\('\/part-model-library'/);
 });
 
-test('category models are persistent resources with admin CRUD and scoped batch assignment', () => {
+test('named models replace legacy category CRUD and support scoped batch assignment', () => {
   assert.match(db, /CREATE TABLE IF NOT EXISTS part_category_models/);
   assert.match(db, /category_model_id/);
   assert.match(partsRoute, /cm\.model_url AS categoryModelUrl/);
-  assert.match(partsRoute, /router\.get\('\/part-category-models'/);
-  assert.match(partsRoute, /router\.post\('\/part-category-models', requireRole\('admin'\)/);
-  assert.match(partsRoute, /router\.put\('\/part-category-models\/:id', requireRole\('admin'\)/);
-  assert.match(partsRoute, /router\.delete\('\/part-category-models\/:id', requireRole\('admin'\)/);
+  assert.match(partsRoute, /router\.get\('\/part-models'/);
+  assert.match(partsRoute, /router\.post\('\/part-models', requireAnyWorkshopEditor/);
+  assert.match(partsRoute, /router\.put\('\/part-models\/:id', requireAnyWorkshopEditor/);
+  assert.match(partsRoute, /router\.delete\('\/part-models\/:id', requireAnyWorkshopEditor/);
   assert.match(partsRoute, /status\(410\)/);
-  assert.match(partsRoute, /router\.post\('\/parts\/batch-category-model', requireAnyWorkshopEditor/);
+  assert.match(partsRoute, /router\.post\('\/parts\/batch-model', requireAnyWorkshopEditor/);
   assert.match(partsRoute, /withPartAssetWrite\(pool, req.user, partIds/);
   assert.match(partsRoute, /async function assertValidGlb/);
   assert.match(partsRoute, /GLB文件无效/);

@@ -14,7 +14,7 @@ const row = cells => new TableRow({ children: cells });
 function createProductionReport({ record, leader, workshop, floor, check, createdAt = new Date() }) {
   const data = check.productionReport || {};
   const issueRows = (data.issues || []).flatMap((issue, index) => [
-    row([cell(index === 0 ? '问题分析' : `问题 ${index + 1}`, { header: true }), cell(issue.category), cell(issue.description, { span: 3 })]),
+    row([cell(issue.category, { header: true }), cell(issue.description, { span: 4 })]),
     ...(issue.delay ? [row([cell('耽误总时长', { header: true }), cell(issue.delay, { span: 4 })])] : []),
   ]);
   const measureText = (data.measures || []).map((item, index) => `${index + 1}. ${item}`).join('\n');
@@ -28,8 +28,9 @@ function createProductionReport({ record, leader, workshop, floor, check, create
       row([cell('AGV数量', { header: true }), cell(data.agvCount), cell('下线车号', { header: true }), cell(data.vehicleNo), cell('')]),
       row([cell('维修进度', { span: 5, header: true })]),
       row([cell(data.repairProgress, { span: 5 })]),
+      row([cell('问题分析(设备/人员/其他)', {span:5,center:true,header:true})]),
       ...issueRows,
-      row([cell('改进措施', { span: 5, header: true })]),
+      row([cell('改进措施', { span: 5, header: true, center:true })]),
       row([cell(measureText, { span: 5 })]),
       row([cell('填报人', { header: true }), cell(leader), cell('车间 / 楼层', { header: true }), cell(`${workshop} · ${floor}楼`), cell('')]),
       row([cell('填报日期', { header: true }), cell(String(record.record_date).slice(0, 10), { span: 4 })]),

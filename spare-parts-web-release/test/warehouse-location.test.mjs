@@ -48,16 +48,16 @@ test('falls back to discrete location fields when no six-digit code exists', () 
   })
 })
 
-test('matches the supplied room drawing and keeps four physical levels', () => {
+test('keeps the numbered layout and entrance-side clearance with four physical levels', () => {
   const shelf1 = applyPhysicalShelfLayout({ shelfNo: 1, layoutKey: 'shelf-01', position: {}, size: {} })
   const shelf2 = applyPhysicalShelfLayout({ shelfNo: 2, layoutKey: 'shelf-02', position: {}, size: {} })
   const shelf15 = applyPhysicalShelfLayout({ shelfNo: 15, layoutKey: 'shelf-15', position: {}, size: {} })
   const unnamed = applyPhysicalShelfLayout({ shelfNo: null, layoutKey: 'unnamed-03', position: {}, size: {} })
 
-  assert.deepEqual(shelf1.position, { x: -1.25, z: -10.5, rotationY: 0 })
-  assert.deepEqual(shelf2.position, { x: -6.35, z: -10.5, rotationY: 0 })
-  assert.deepEqual(shelf15.position, { x: 6.35, z: -10.5, rotationY: 0 })
-  assert.deepEqual(unnamed.position, { x: -3.85, z: 13.4, rotationY: 0 })
+  assert.deepEqual(shelf1.position, { x: -1.65, z: -12.9, rotationY: 0 })
+  assert.deepEqual(shelf2.position, { x: -6.75, z: -12.9, rotationY: 0 })
+  assert.deepEqual(shelf15.position, { x: 6.75, z: -12.9, rotationY: 0 })
+  assert.deepEqual(unnamed.position, { x: -3.85, z: 14.6, rotationY: 0 })
   assert.equal(shelf1.levels, COMMON_SHELF_LEVELS)
   assert.equal(shelf1.size.width, 4.9)
   assert.equal(shelf15.size.width, 4.9)
@@ -76,12 +76,12 @@ test('keeps a wide viewing aisle between front and back shelf rows', () => {
   const firstRow = applyPhysicalShelfLayout({ shelfNo: 1, layoutKey: 'shelf-01', position: {}, size: {} })
   const secondRow = applyPhysicalShelfLayout({ shelfNo: 3, layoutKey: 'shelf-03', position: {}, size: {} })
   assert.ok(Math.abs((secondRow.position.z - firstRow.position.z) - PHYSICAL_ROW_GAP_Z) < 1e-9)
-  assert.equal(PHYSICAL_ROW_GAP_Z, 3.4)
+  assert.equal(PHYSICAL_ROW_GAP_Z, 3.8)
 })
 
 test('keeps a physical rack in place after an administrator renumbers it', () => {
   const shelf = applyPhysicalShelfLayout({ shelfNo: 21, layoutKey: 'shelf-01', position: { x: 99, z: 99 }, size: {} })
-  assert.deepEqual(shelf.position, { x: -1.25, z: -10.5, rotationY: 0 })
+  assert.deepEqual(shelf.position, { x: -1.65, z: -12.9, rotationY: 0 })
 })
 
 test('does not apply the raw-grain floor plan to another workshop', () => {

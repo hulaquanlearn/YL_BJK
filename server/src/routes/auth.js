@@ -15,6 +15,12 @@ const loginLimiter = rateLimit({
   message: { success: false, msg: '登录尝试过多，请15分钟后再试' }
 });
 
+const passwordChangeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, limit: 8, standardHeaders: true, legacyHeaders: false,
+  keyGenerator: req => String(req.user.id),
+  message: { success: false, msg: '密码验证尝试过多，请15分钟后再试' }
+});
+
 router.post('/login', loginLimiter, asyncHandler(async (req, res) => {
   const username = String(req.body?.username || '').trim().toLowerCase();
   const password = String(req.body?.password || '');
@@ -47,7 +53,7 @@ router.post('/logout', requireAuth, asyncHandler(async (req, res) => {
   res.json({ success: true, msg: '已退出登录' });
 }));
 
-router.post('/change-password', requireAuth, asyncHandler(async (req, res) => {
+router.post('/change-password', requireAuth, passwordChangeLimiter, asyncHandler(async (req, res) => {
   const oldPassword = String(req.body?.oldPassword || '');
   const newPassword = validatePassword(req.body?.newPassword);
   const [rows] = await pool.query('SELECT password_hash FROM app_users WHERE id = ? LIMIT 1', [req.user.id]);

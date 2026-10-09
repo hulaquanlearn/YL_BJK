@@ -172,18 +172,21 @@
   display: flex;
 }
 
-.step-back-btn { height: 88rpx; flex: 0 0 180rpx; margin: 0 14rpx 0 0; border: 1rpx solid #d8dde4; border-radius: 14rpx; color: #5f6875; background: #fff; font-size: 28rpx; line-height: 88rpx; }
+.step-back-btn { display: flex; height: 88rpx; flex: 0 0 180rpx; margin: 0 14rpx 0 0; padding: 0; align-items: center; justify-content: center; border: 1rpx solid #d8dde4; border-radius: 14rpx; color: #5f6875; background: #fff; font-size: 28rpx; line-height: 1.2; }
 
 .submit-btn {
+  display: flex;
   width: auto;
   flex: 1;
   height: 88rpx;
   margin: 0;
   padding: 0;
+  align-items: center;
+  justify-content: center;
   color: #fff;
   font-size: 30rpx;
   font-weight: 700;
-  line-height: 88rpx;
+  line-height: 1.2;
   background: #c6000b;
   border-radius: 14rpx;
   box-shadow: 0 8rpx 18rpx rgba(198, 0, 11, 0.2);

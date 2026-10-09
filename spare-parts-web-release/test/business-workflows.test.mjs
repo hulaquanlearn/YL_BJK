@@ -95,7 +95,8 @@ test('mini AI never sums unlike units and preserves returned evidence',async()=>
 test('mini editing controls follow scoped workshop permission, not global admin',()=>{
   const js=read('../../miniprogram/pages/detail/detail.js'),view=read('../../miniprogram/pages/detail/detail.wxml')
   assert.match(js,/canEditPart: auth.canEditWorkshop\(part.workshopCode\)/)
-  assert.match(view,/wx:if="\{\{canEditPart\}\}"/)
+  assert.doesNotMatch(view,/wx:if="\{\{canEditPart\}\}"/)
+  assert.match(js,/auth\.requireWrite\(auth\.canEditWorkshop/ )
   assert.doesNotMatch(view,/canEditPart \|\| isViewer/)
   assert.doesNotMatch(js,/if \(!auth.isAdmin\(\)\) \{[\s\S]{0,100}出入库/)
 })

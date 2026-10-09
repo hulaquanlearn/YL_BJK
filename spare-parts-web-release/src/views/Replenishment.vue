@@ -26,7 +26,7 @@
     </section>
 
     <section class="panel replenish-table">
-      <div class="table-toolbar"><div><strong>待补货备件</strong><span class="result-count">共 {{ total }} 条</span></div><div class="replenishment-table-tools"><span class="formula-tip">建议量 = 最高储备 − 当前库存</span><el-button class="refresh-list-button" text :loading="loading" aria-label="刷新清单" title="刷新清单" @click="search"><el-icon><Refresh /></el-icon></el-button></div></div>
+      <div class="table-toolbar"><div><strong>待补货备件</strong><span class="result-count">共 {{ total }} 条</span></div><div class="replenishment-table-tools"><span class="formula-tip">建议量 = 最高储备 − 当前库存</span></div></div>
       <el-table ref="tableRef" :data="list" v-loading="loading" row-key="_id" empty-text="当前没有低库存备件" @selection-change="selectedRows = $event">
         <el-table-column type="selection" width="48" reserve-selection />
         <el-table-column label="风险" width="90" align="center"><template #default="{ row }"><el-tag :type="riskTag(row.riskLevel)" effect="dark" round>{{ riskLabel(row.riskLevel) }}</el-tag></template></el-table-column>

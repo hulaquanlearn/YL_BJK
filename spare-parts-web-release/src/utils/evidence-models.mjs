@@ -55,6 +55,7 @@ export function unsafeCategory(part) {
   return false
 }
 
+// Explicit ledger binding is authoritative; no descriptor-based fallback.
 export function warehouseModelUrl(part) {
-  return resolveEvidenceModel(part)?.lowUrl || (unsafeCategory(part) ? '' : String(part?.categoryModelUrl || '').trim())
+  return String(part?.categoryModelUrl || '').trim()
 }

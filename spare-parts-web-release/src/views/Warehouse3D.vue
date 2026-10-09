@@ -52,7 +52,9 @@
       <article class="model-card panel">
         <div class="model-toolbar">
           <div class="model-title">
-            <strong>{{ layout?.room?.name || '原粮车间备件库' }}</strong>
+            <div class="model-title-heading"><strong>{{ layout?.room?.name || '原粮车间备件库' }}</strong>              <el-tooltip content="刷新布局" placement="top">
+                <el-button class="refresh-layout-button" :loading="loading" aria-label="刷新布局" @click="loadLayout"><el-icon v-if="!loading"><Refresh /></el-icon><span>刷新</span></el-button>
+              </el-tooltip></div>
             <template v-if="displayMode==='3d'"><span class="desktop-scene-help">左键拖动旋转 · Ctrl+滚轮缩放 · 右键拖动平移 · 双击复位</span><span class="touch-scene-help">单指旋转 · 双指缩放、平移 · 点击货架查看</span></template>
             <span v-else>平面图适合快速确认货架相对位置与入口方向</span>
           </div>
@@ -78,11 +80,8 @@
                 <el-button :type="displayMode === '3d' ? 'primary' : ''" :aria-pressed="displayMode === '3d'" @click="displayMode='3d'">3D立体</el-button>
                 <el-button :type="displayMode === '2d' ? 'primary' : ''" :aria-pressed="displayMode === '2d'" @click="displayMode='2d'">2D平面</el-button>
               </el-button-group>
-              <el-tooltip content="刷新布局" placement="top">
-                <el-button class="refresh-layout-button" :loading="loading" aria-label="刷新布局" @click="loadLayout"><el-icon v-if="!loading"><Refresh /></el-icon></el-button>
-              </el-tooltip>
+
             </div>
-            <div class="direction-pill">{{ eastDirectionLabel }}</div>
             <el-dropdown v-if="displayMode==='3d'" trigger="click" @command="setPartModelMode">
               <el-button><el-icon><Box /></el-icon>{{ partModelModeLabel }}<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button>
               <template #dropdown>
@@ -117,15 +116,15 @@
           <div class="floor-label">现场平面图</div><div class="east-label">{{ eastDirectionLabel }}</div><div class="entrance-2d" :style="entrancePlanStyle"><el-icon><Right /></el-icon>入口</div>
           <button v-for="shelf in visibleShelves" :key="`plan-${shelf.id}`" type="button" class="plan-shelf" :class="{active:selectedShelf?.id===shelf.id,unnamed:shelf.shelfNo==null}" :style="planStyle(shelf)" @click="selectShelf(shelf,false)"><strong>{{ shelf.displayName }}</strong><small>{{ shelf.partsCount }} 条</small></button>
           <div v-for="sp in stagingPoints" :key="`sp-${sp.id}`" class="plan-staging" :style="stagingStyle(sp)" :title="sp.description || sp.name"><span>{{ sp.name }}</span></div>
-          <div class="plan-help">按真实相对位置显示；点击货架查看层数与备件。暂存点为历史只读标记。</div>
         </div>
+        <p v-if="displayMode==='2d'" class="plan-help">按真实相对位置显示；点击货架查看层数与备件。暂存点为历史只读标记。</p>
       </article>
 
       <aside v-show="!sidePanelCollapsed" class="shelf-panel panel">
         <header>
           <div><span>{{ panelMode === 'parts' ? '本架备件' : '货架导航' }}</span><strong>{{ panelMode === 'parts' ? shelfPartsCountText : `${visibleShelves.length} 组` }}</strong></div>
           <div class="panel-head-actions">
-            <el-button v-write v-if="displayMode === '3d' && selectedShelf && $showControl(canEditCurrentWorkshop)" link type="primary" @click="openShelfEditor(selectedShelf)">
+            <el-button v-write="canEditCurrentWorkshop" v-if="displayMode === '3d' && selectedShelf && $showControl(canEditCurrentWorkshop)" link type="primary" @click="openShelfEditor(selectedShelf)">
               <el-icon><EditPen /></el-icon>标牌设置
             </el-button>
           </div>
@@ -197,7 +196,8 @@
               <span><strong>{{ part.materialDesc || part.materialCode }}</strong><small>{{ part.materialCode }} · {{ compactLocation(part) }}</small></span>
               <em>{{ part.totalStock }} {{ part.unit || '个' }}</em>
             </button>
-            <el-empty v-if="!shelfPartsLoading && !displayedShelfParts.length" :image-size="58" description="当前层暂无备件记录" />
+            <p v-if="shelfPartsError" role="alert">{{shelfPartsError}} <button @click="selectShelf(selectedShelf,false,false,false)">重试</button></p>
+            <el-empty v-if="!shelfPartsLoading && !shelfPartsError && !displayedShelfParts.length" :image-size="58" description="当前层暂无备件记录" />
           </div>
         </div>
       </aside>
@@ -249,9 +249,13 @@
   </div>
 </template>
 
+<style scoped>
+.warehouse-page .plan-shelf.active{color:#583a00;background:#ffd65a;border-color:#bf8600;outline:4px solid #f7bd3c88;filter:none}.warehouse-page .shelf-list button.active{color:#694500;background:#fff2bc;box-shadow:inset 3px 0 #e9a700}.warehouse-page .selected-shelf-card{border-color:#e8c161;background:#fffae7}
+</style>
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { collectParts } from '../utils/collect-parts.mjs'
 import { useRoute, useRouter } from 'vue-router'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -262,7 +266,7 @@ import QRCode from 'qrcode'
 import { getPart, getParts, getWarehouseLayout, updateWarehouseShelf, getStagingPoints } from '../api'
 import { canEditWorkshop } from '../auth'
 import { modelFacingRotation, modelFitScale, slotModelBounds } from '../utils/model-fit.mjs'
-import { resolveEvidenceModel, warehouseModelUrl } from '../utils/evidence-models.mjs'
+import { warehouseModelUrl } from '../utils/evidence-models.mjs'
 import {
   COMMON_SHELF_LEVELS,
   PHYSICAL_ROOM_HALF_DEPTH,
@@ -299,6 +303,7 @@ const partOptions = ref([])
 const partSearching = ref(false)
 const shelfParts = ref([])
 const shelfPartsLoading = ref(false)
+const shelfPartsError = ref('')
 const panelMode = ref('shelves')
 const sidePanelCollapsed = ref(true)
 const viewMode = ref('perspective')
@@ -348,7 +353,19 @@ const currentRoom = computed(() => layout.value?.room || {
   name: '备件库', width: PHYSICAL_ROOM_HALF_WIDTH * 2, depth: PHYSICAL_ROOM_HALF_DEPTH * 2,
   height: 4.2, eastDirection: '+z', entranceWall: 'east', entranceOffset: 11.8, entranceWidth: 2.4
 })
-const roomWidth = computed(() => Math.max(Number(currentRoom.value.width) || 19, 8))
+const roomWidth = computed(() => {
+  const configuredWidth = Math.max(Number(currentRoom.value.width) || 19, 8)
+  if (workshopCode.value !== 'raw_grain') return configuredWidth
+  // Display padding follows the widened aisle; stored room dimensions stay intact.
+  const halfSpan = shelves.value.reduce((span, shelf) => {
+    const angle = Number(shelf.position?.rotationY) || 0
+    const halfWidth = (Math.abs(Math.cos(angle)) * Number(shelf.size?.width || 4.9)
+      + Math.abs(Math.sin(angle)) * Number(shelf.size?.depth || 0.9)) / 2
+    return Math.max(span, Math.abs(Number(shelf.position?.x) || 0) + halfWidth)
+  }, 0)
+  const requiredWidth = (halfSpan + 0.5) * 2
+  return Math.max(configuredWidth, Math.ceil(requiredWidth * 10) / 10)
+})
 const roomDepth = computed(() => Math.max(Number(currentRoom.value.depth) || 34, 8))
 const entrancePlanStyle = computed(() => {
   const room = currentRoom.value
@@ -519,6 +536,7 @@ async function changeWorkshop() {
   selectedShelf.value = null
   clearPart()
   shelfParts.value = []
+  shelfPartsError.value = ''
   await loadLayout()
 }
 
@@ -583,12 +601,10 @@ function modelUrlFor(part) {
 }
 
 function modelScaleFor(part) {
-  if (resolveEvidenceModel(part)) return 1
   return part.categoryModelScale || 1
 }
 
 function modelFrontRotationFor(part) {
-  if (resolveEvidenceModel(part)) return 0
   return Number(part.categoryFrontRotationY) || 0
 }
 
@@ -623,15 +639,8 @@ function applyStockStatusMaterial(object, lowStock) {
 }
 
 function partGeometry(part, width, height, depth) {
-  const category = modelCategory(part)
-  const text = `${category} ${part.materialDesc || ''} ${part.spec || ''}`.toLowerCase()
-  if (/轴承|bearing/.test(text)) return new THREE.CylinderGeometry(Math.min(height, depth) * 0.38, Math.min(height, depth) * 0.38, Math.max(width * 0.42, 0.08), 16)
-  if (/电机|motor|减速机/.test(text)) return new THREE.CylinderGeometry(Math.min(height, depth) * 0.3, Math.min(height, depth) * 0.3, Math.max(width * 0.58, 0.16), 14)
-  if (/泵|pump/.test(text)) return new THREE.CylinderGeometry(Math.min(height, depth) * 0.34, Math.min(height, depth) * 0.42, Math.max(width * 0.48, 0.12), 12)
-  if (/密封|o型圈|seal/.test(text)) return new THREE.CylinderGeometry(Math.min(height, depth) * 0.34, Math.min(height, depth) * 0.34, Math.max(width * 0.16, 0.05), 16)
-  if (/断路器|空开|breaker|mcb/.test(text)) return new THREE.BoxGeometry(width * 0.62, height * 0.9, depth * 0.5)
-  if (/阀|传感器|开关|继电器|接触器/.test(text)) return new THREE.BoxGeometry(width * 0.58, height * 0.58, depth * 0.58)
-  return new THREE.BoxGeometry(width, height, depth)
+  // A neutral inventory marker is not a guessed spare-part model.
+  return new THREE.BoxGeometry(width * .45, height * .45, depth * .45)
 }
 
 function loadCustomModel(url) {
@@ -680,8 +689,8 @@ async function replaceWithCustomModel(anchor, fallback, part, placement, shelf, 
     anchor.add(model)
   } catch (error) {
     if (!isCurrent() || !anchor.parent) return
-    console.warn(`3D模型加载失败，已使用通用模型：${modelUrl}`, error)
-    // 自包含 GLB 加载失败时保留系统通用模型，避免货位空白。
+    console.warn(`3D模型加载失败，保留库存占位标记：${modelUrl}`, error)
+    // 自包含 GLB 加载失败时保留中性库存占位标记，避免货位空白。
   }
 }
 
@@ -799,11 +808,14 @@ async function selectShelf(shelf, focus = true, clearLocatedPart = true, resetLa
   if (selectedPart.value && partBelongsToShelf(selectedPart.value, shelf.shelfNo)) drawPartMarker(shelf, selectedPart.value)
   if (focus) focusShelf(shelf)
   shelfParts.value = []
+  shelfPartsError.value = ''
   if (shelf.shelfNo == null) { shelfPartsLoading.value = false; return }
   shelfPartsLoading.value = true
   try {
-    const result = await getParts({ page: 1, pageSize: 200, shelf: shelf.shelfNo, workshopCode: workshopCode.value })
-    if (requestToken === shelfPartsRequestToken && selectedShelf.value?.id === shelf.id) shelfParts.value = result.data || []
+    const rows = await collectParts(getParts, { shelf: shelf.shelfNo, workshopCode: workshopCode.value, sort:'codeAsc' }, () => requestToken === shelfPartsRequestToken && selectedShelf.value?.id === shelf.id)
+    if(rows)shelfParts.value=rows
+  } catch(error) {
+    if(requestToken===shelfPartsRequestToken)shelfPartsError.value=error?.message||'货架备件加载失败，请重试'
   } finally {
     if (requestToken === shelfPartsRequestToken) shelfPartsLoading.value = false
   }
@@ -948,7 +960,9 @@ function drawRoom() {
   grid.scale.set(width / Math.max(width, depth), 1, depth / Math.max(width, depth))
   grid.position.y = 0.008
   roomRoot.add(grid)
-  const directionOrigin = new THREE.Vector3(-width / 2 + 1.25, 0.08, -depth / 2 + 1.4)
+  const rawGrainDirection = workshopCode.value === 'raw_grain'
+  // Keep the direction cue on clear floor behind the first row of racks.
+  const directionOrigin = new THREE.Vector3(-width / 2 + 1.25, 0.08, -depth / 2 + (rawGrainDirection ? 0.3 : 1.4))
   const direction = eastVector()
   const directionArrow = new THREE.ArrowHelper(direction, directionOrigin, 2.2, 0xc91f2c, 0.5, 0.28)
   directionArrow.line.material.depthTest = false
@@ -959,7 +973,7 @@ function drawRoom() {
   eastLabel.className = 'east-label-3d'
   eastLabel.textContent = '东'
   const eastLabelObject = new CSS2DObject(eastLabel)
-  eastLabelObject.position.copy(directionOrigin).add(direction.clone().multiplyScalar(2.55)).add(new THREE.Vector3(0, 0.18, 0))
+  eastLabelObject.position.copy(directionOrigin).add(direction.clone().multiplyScalar(rawGrainDirection ? 1.3 : 2.55)).add(new THREE.Vector3(0, 0.18, 0))
   roomRoot.add(eastLabelObject)
   addRoomWalls(roomRoot)
 }
@@ -1073,9 +1087,9 @@ function createShelf(shelf, highlighted, hiddenByFilter) {
   const width = shelf.size.width
   const depth = shelf.size.depth
   const height = shelf.size.height
-  // 实体货架统一蓝色，与备件的红/绿库存状态分离；工段颜色留给铭牌和 2D。
-  const frameColor = new THREE.Color(highlighted ? 0x238ed1 : 0x1875b8)
-  const boardColor = new THREE.Color(highlighted ? 0x73bdeb : 0x439ed1)
+  // 未选货架保持蓝色；选中或定位的货架用黄色，与备件红/绿库存状态区分。
+  const frameColor = new THREE.Color(highlighted ? 0xf5b51b : 0x1875b8)
+  const boardColor = new THREE.Color(highlighted ? 0xffd65a : 0x439ed1)
   const frameMaterial = new THREE.MeshStandardMaterial({ color: frameColor, metalness: 0.34, roughness: 0.42 })
   const boardMaterial = new THREE.MeshStandardMaterial({ color: boardColor, metalness: 0.26, roughness: 0.58 })
   const postSize = 0.1
@@ -1578,8 +1592,6 @@ onBeforeUnmount(() => {
 .model-actions { flex:none;display:flex;align-items:center;gap:9px; }
 .fullscreen-locator { width:min(390px,34vw);margin-left:auto; }
 .fullscreen-button { white-space:nowrap; }
-.direction-pill { display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #f0c4c7;border-radius:999px;color:var(--crimson);background:#fff7f7;font-size:11px;font-weight:800; }
-.direction-pill span { margin:0;color:var(--crimson);font-size:17px; }
 .three-stage { position:relative;height:680px;overflow:hidden;background:radial-gradient(circle at 50% 20%,#fff 0%,#eff1f3 70%); }
 .three-stage :deep(canvas),.three-stage :deep(.label-layer) { position:absolute;inset:0;width:100%!important;height:100%!important; }
 .three-stage :deep(canvas) { cursor:grab;touch-action:none; }.three-stage :deep(canvas:active) { cursor:grabbing; }
@@ -1686,7 +1698,6 @@ onBeforeUnmount(() => {
   .model-actions{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
   .model-actions>.el-dropdown,.model-actions>.el-button,.model-actions>.el-dropdown .el-button{width:100%;min-width:0}
   .model-actions .el-button{min-height:38px;padding:8px}
-  .model-actions .direction-pill{display:none}
   .model-actions .fullscreen-button{grid-column:1/-1}
   .model-title .desktop-scene-help{display:none}
   .model-title .touch-scene-help{display:block}
@@ -1700,4 +1711,23 @@ onBeforeUnmount(() => {
 }
 @media(pointer:coarse){.model-title .desktop-scene-help{display:none}.model-title .touch-scene-help{display:block}.touch-reset-button{display:inline-flex}}
 .warehouse-hero{padding:0;margin-bottom:10px;background:transparent;box-shadow:none;color:#475569;justify-content:flex-end;border-radius:0}.warehouse-hero::after{display:none}.warehouse-hero>div:first-child{display:none}.warehouse-hero .el-button{background:#fff;border-color:#dcdfe6;color:#475569}.warehouse-hero .el-button--primary{background:#c6000b;color:#fff}.control-panel{padding:12px;gap:12px;grid-template-columns:minmax(260px,.65fr) minmax(160px,.3fr) minmax(460px,1.25fr);align-items:start}.warehouse-workspace:not(:fullscreen) .three-stage,.warehouse-workspace:not(:fullscreen) .two-stage{height:clamp(330px,calc(100vh - 350px),680px)}@media(max-width:760px){.control-panel{grid-template-columns:1fr}.warehouse-hero{flex-direction:row}.warehouse-workspace:not(:fullscreen) .three-stage{height:420px}}
+</style>
+
+<style scoped>
+.model-title-heading{display:flex;align-items:center;gap:8px}
+:global(#app) .model-title-heading .refresh-layout-button{width:auto;min-width:60px;height:32px;min-height:32px;padding:0 8px;margin-left:0;font-size:12px;border-radius:6px}
+@media(max-width:760px){
+  .model-title-heading{justify-content:space-between;width:100%}
+  :global(#app) .model-title-heading .refresh-layout-button{height:36px;min-height:36px}
+  .model-actions .view-mode-tools{display:block}
+  .model-actions .view-mode-tools .el-button-group::before,.model-actions .view-mode-tools .el-button-group::after{display:none;content:none}
+  .model-actions .view-mode-tools .el-button-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+  .model-actions .el-button{height:40px;min-height:40px}
+  .model-actions .view-mode-tools .el-button-group .el-button{width:100%;margin:0;border-radius:8px!important}
+  .model-actions .view-mode-tools .el-button-group .el-button:not(:first-child){border-left-color:var(--el-border-color)}
+}
+</style>
+
+<style scoped>
+.warehouse-page .plan-help{position:static;margin:10px 12px;line-height:1.6;background:#f4f6f9;overflow-wrap:anywhere}.entrance-2d,.floor-label,.east-label{pointer-events:none}
 </style>

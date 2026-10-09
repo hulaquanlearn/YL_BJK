@@ -16,7 +16,7 @@ const report={id:1,workshop_code:'raw_grain',revision:0,header_json:{title:'检�
 const actor={id:2,role:'raw_grain'};
 const capture=()=>{let value;return {res:{json(body){value=body;return body}},value:()=>value}};
 
-test('only managers can use inspection routes; another workshop cannot read source bytes',async()=>{
+test('only managers can use inspection routes; other-workshop staff cannot read source bytes',async()=>{
   let sourceRead=false;
   const {handlers,middleware}=harness(async sql=>{
     if(sql.startsWith('SELECT * FROM inspection_notices'))return [[report]];
@@ -27,7 +27,7 @@ test('only managers can use inspection routes; another workshop cannot read sour
   assert.equal(denial.status,403);
   let allowed;middleware[0]({user:actor},null,error=>allowed=error);
   assert.equal(allowed,undefined);
-  await assert.rejects(()=>handlers.get('get /reports/:id/sources/:sourceId/image')({user:{id:3,role:'qu_making'},params:{id:'1',sourceId:'11'}},{}),{status:403});
+  await assert.rejects(()=>handlers.get('get /reports/:id/sources/:sourceId/image')({user:{id:3,role:'viewer',staffWorkshopCode:'qu_making'},params:{id:'1',sourceId:'11'}},{}),{status:403});
   assert.equal(sourceRead,false);
 });
 
@@ -88,6 +88,26 @@ test('vision unavailable reports a real failure and preserves previous issues',a
   assert.equal(result.value().data.available,false);
   assert.match(result.value().data.reason,/无法处理图片请求/);
   assert.equal(status,'failed');assert.equal(issueUpdate,false);
+});
+
+test('empty vision result is a failed source, not a successful blank notice',async()=>{
+  const image=await sharp({create:{width:200,height:200,channels:3,background:'#69a'}}).png().toBuffer();
+  let status='pending',marker,savedIssues=false;
+  const config={openclaw:{contextTransferEnabled:true,apiUrl:'http://127.0.0.1:14504/v1/chat/completions',token:'test-token',visionModel:'test-vision',timeoutMs:1000}};
+  const {handlers}=harness(async(sql,args)=>{
+    if(sql.startsWith('SELECT * FROM inspection_notices'))return [[report]];
+    if(sql.startsWith('SELECT id,notice_id,filename'))return [[{id:11,status,duplicate_of:null}]];
+    if(sql.includes('SELECT id,status')&&sql.includes('inspection_sources'))return [[{id:11,status,error_message:marker}]];
+    if(sql.startsWith("UPDATE inspection_sources SET status='processing")){status='processing';marker=args[0];return [{}]}
+    if(sql.startsWith('SELECT id,image'))return [[{id:11,image}]];
+    if(sql.startsWith("UPDATE inspection_sources SET status='failed")){status='failed';return [{}]}
+    if(sql.startsWith('UPDATE inspection_notices SET issues_json'))savedIssues=true;
+    throw Error('Unexpected SQL '+sql);
+  },{config,fetch:async()=>({ok:true,json:async()=>({choices:[{message:{content:'{"issues":[]}'}}]})})});
+  const reply=capture();await handlers.get('post /reports/:id/analyze')({user:actor,params:{id:'1'},body:{sourceIds:[11]}},reply.res);
+  assert.equal(reply.value().data.available,false);
+  assert.match(reply.value().data.reason,/没有识别出可核对的问题/);
+  assert.equal(status,'failed');assert.equal(savedIssues,false);
 });
 
 test('vision timeout also aborts a stalled response body and leaves no appended issues',async()=>{

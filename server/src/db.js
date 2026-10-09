@@ -1,5 +1,6 @@
 const mysql = require('mysql2/promise');
 const config = require('./config');
+const { ensureModelCatalog } = require('./model-catalog-schema');
 
 const pool = mysql.createPool({
   ...config.mysql,
@@ -48,6 +49,14 @@ async function ensureSchema() {
     }
     const workSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_assessment_20260923.sql'), 'utf8');
     for (const statement of workSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
+    const scoreSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_score_jobs_20260928.sql'), 'utf8');
+    for (const statement of scoreSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
+    const teamSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_teams_20260928.sql'), 'utf8');
+    for (const statement of teamSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
+    const flowSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_flow_20260929.sql'), 'utf8');
+    for (const statement of flowSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
+    const documentSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_documents_20260930.sql'), 'utf8');
+    for (const statement of documentSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
     const inspectionSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_inspection_notice_20260924.sql'), 'utf8');
     for (const statement of inspectionSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
     const [inspectionSizeColumns] = await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='inspection_sources' AND COLUMN_NAME='byte_size'`);
@@ -249,17 +258,12 @@ async function ensureSchema() {
     if (!(await columnExists('part_category_models', 'front_rotation_y'))) {
       await conn.query('ALTER TABLE part_category_models ADD COLUMN front_rotation_y DECIMAL(9,6) NOT NULL DEFAULT 0');
     }
-    const [[modelCount]] = await conn.query('SELECT COUNT(*) AS total FROM part_category_models');
-    // Only seed an empty catalog. A rename or soft deletion must survive restarts.
-    if (!Number(modelCount.total)) await conn.query(`INSERT INTO part_category_models (name,keywords,description,model_url,model_scale,built_in,active) VALUES
-      ('轴承','轴承,bearing','滚动轴承通用示意模型','/models/categories/bearing.glb',1,1,1),
-      ('断路器','断路器,空开,breaker,mcb','小型断路器通用示意模型','/models/categories/circuit-breaker.glb',1,1,1),
-      ('阀门/电磁阀','阀门,电磁阀,valve','阀体与手轮通用示意模型','/models/categories/valve.glb',1,1,1),
-      ('传感器/开关','传感器,接近开关,光电开关,sensor,switch','圆柱传感器通用示意模型','/models/categories/sensor.glb',1,1,1)
-      ON DUPLICATE KEY UPDATE name=VALUES(name)`);
+    // Legacy catalog remains available for recovery only; never reseed it.
     if (await tableExists('parts') && !(await columnExists('parts', 'category_model_id'))) {
       await conn.query(`ALTER TABLE parts ADD COLUMN category_model_id BIGINT UNSIGNED DEFAULT NULL AFTER model_scale`);
     }
+
+    if (await tableExists('parts')) await ensureModelCatalog(conn);
 
     if (await tableExists('inventory') && !(await columnExists('inventory', 'unit_override'))) {
       await conn.query(`ALTER TABLE inventory ADD COLUMN unit_override VARCHAR(30) DEFAULT NULL AFTER in_transit`);

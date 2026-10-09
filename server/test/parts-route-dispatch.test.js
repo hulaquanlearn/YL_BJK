@@ -26,14 +26,14 @@ test('real Express dispatch downloads the template and fences viewer writes befo
     assert.equal(bytes.subarray(0,2).toString(),'PK');
     assert.ok(!queries.some(q=>q.params?.includes('import-template')));
     const before=queries.length;
-    for(const [method,url] of [['POST','/parts'],['PATCH','/parts/1'],['DELETE','/parts/1'],['POST','/parts/batch-category-model']]){
+    for(const [method,url] of [['POST','/parts'],['PATCH','/parts/1'],['DELETE','/parts/1'],['POST','/parts/batch-model']]){
       const result=await fetch(base+url,{method,headers:{'x-test-role':'viewer'}});
       assert.equal(result.status,403);
     }
     assert.equal(queries.length,before,'read-only rejection precedes database access');
     const invalidImage=await fetch(base+'/parts/not-an-id/image',{method:'DELETE'});
     assert.equal(invalidImage.status,400);
-    const invalidCategory=await fetch(base+'/parts/batch-category-model',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({partIds:[1],categoryModelId:'not-an-id'})});
+    const invalidCategory=await fetch(base+'/parts/batch-model',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({partIds:[1],modelId:'not-an-id'})});
     assert.equal(invalidCategory.status,400);
     assert.equal(queries.length,before,'invalid resource IDs never default to record one');
     const retired=await fetch(base+'/parts/1/model',{method:'POST'});

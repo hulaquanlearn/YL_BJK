@@ -35,4 +35,4 @@
 .low-location { margin-top: 6rpx; color: #858e9a; font-size: 23rpx; }
 .replenish-tip { display: block; margin-top: 7rpx; color: #9b5b13; font-size: 23rpx; }
 .low-stock { flex: none; padding: 8rpx 14rpx; border-radius: 18rpx; color: #b54b0d; background: #fff0e2; font-size: 23rpx; font-weight: 650; }
-.export-btn { height: 88rpx; border-radius: 16rpx; color: #fff; background: #c6000b; font-size: 29rpx; font-weight: 700; line-height: 88rpx; }
+.export-btn { display: flex; height: 88rpx; margin: 0; padding: 0; align-items: center; justify-content: center; border-radius: 16rpx; color: #fff; background: #c6000b; font-size: 29rpx; font-weight: 700; line-height: 1.2; }

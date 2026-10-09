@@ -76,15 +76,16 @@ const blank={title:'酿造四部五区综合检查--周通报',checkTime:'',chec
     await desktop.locator('.source-card').nth(3).waitFor();assert.equal(report.sources.length,4);
     await desktop.getByRole('button',{name:'＋ 手工新增'}).click();
     const issue=desktop.locator('.issue-card').first();
+    await issue.locator('.issue-problem textarea').fill('三楼3振动循环风旁边标识牌脱落');
+    await issue.locator('.issue-extra summary').click();
     await issue.locator('.issue-fields input').first().fill('五粮破碎工段');
-    await issue.locator('.issue-fields textarea').first().fill('三楼3振动循环风旁边标识牌脱落');
     await issue.locator('.attach-actions select').selectOption('11');
     await issue.getByRole('button',{name:'从截图选照片'}).click();
     await desktop.getByRole('dialog',{name:'调整现场照片裁切'}).waitFor();
     await desktop.screenshot({path:path.join(out,'desktop-crop.png'),fullPage:true});
     await desktop.getByRole('button',{name:'确认裁切'}).click();
     await issue.getByText('问题图片（1）').waitFor();
-    await issue.getByText('我已核对该问题、建议措辞和配图').locator('input').check();
+    await issue.getByText('我已核对这条问题描述和配图').locator('input').check();
     await desktop.getByRole('button',{name:'保存修改'}).click();
     await desktop.getByText('已保存到服务器').waitFor();
     assert.equal(report.issues[0].photos[0].sourceId,11);

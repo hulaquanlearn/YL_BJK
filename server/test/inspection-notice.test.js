@@ -11,6 +11,32 @@ const raw = (problem, sourceIds, photos=[]) => ({
   categorySuggestion: '现场管理', rectificationSuggestion: '及时处理'
 });
 
+test('photo-and-text chat screenshot produces ordered problems and never fills rectification', () => {
+  const problems=[
+    '五粮破碎三楼3振动循环风旁边标识牌脱落。',
+    '五粮破碎四楼集气室内地面过脏。',
+    '五粮破碎四楼东楼梯口消防栓旁边有蜘蛛网。',
+    '五粮破碎五楼东门旁边配电室上方积尘较多。',
+    '三楼连廊五粮发料平台55-012支撑架损坏了，及时更换。',
+    '破曲工段三楼北楼梯间安全出口标志脱落。'
+  ];
+  const rows=I.parseAi(JSON.stringify({issues:problems.map((problem,index)=>({
+    problem,rawText:problem,sourceIds:[7],photos:[{sourceId:7,tileId:index<3?'7-0':'7-1',rect:{x:.1,y:.1+index%3*.25,w:.35,h:.2}}],
+    pairingReason:'现场照片与随后描述的位置一致',rectificationSuggestion:'模型越权填写的建议',remarks:'扣分'
+  }))}),[7],[],new Set([7]),[7],[{tileId:'7-0',sourceId:7,top:0,height:1600,sourceHeight:2788},{tileId:'7-1',sourceId:7,top:1400,height:1388,sourceHeight:2788}]);
+  assert.deepEqual(rows.map(row=>row.problem),problems);
+  assert.deepEqual(rows.map(row=>row.photos.length),[1,1,1,1,1,1]);
+  assert.ok(rows.every(row=>row.reviewStatus==='pending'&&row.rectification===''&&row.category===''&&row.remarks===''));
+});
+
+test('vision prompt focuses on problem text and photos while keeping uncertain pairs for review',()=>{
+  const prompt=V.problemPrompt({requested:[7],contextIds:[],existing:[]});
+  assert.match(prompt,/每条问题可有多张照片/);
+  assert.match(prompt,/发送人只作辅助/);
+  assert.match(prompt,/不得输出类别、整改意见、备注/);
+  assert.match(V.systemPrompt,/不写整改意见/);
+});
+
 test('interleaved people and cross-screenshot photos stay reviewable', () => {
   const result = I.parseAi(JSON.stringify({issues:[
     {...raw('三楼振动循环风旁标识牌脱落', [2,4], [{sourceId:4,rect:{x:.1,y:.1,w:.5,h:.5}}]), pairingReason:'设备编号、位置与引用回复一致'},
@@ -20,7 +46,7 @@ test('interleaved people and cross-screenshot photos stay reviewable', () => {
   assert.deepEqual(result[0].sourceIds,[2,4]);
   assert.equal(result[0].photos[0].sourceId,4);
   assert.equal(result[0].reviewStatus,'pending');
-  assert.equal(result[0].category,'现场管理');
+  assert.equal(result[0].category,'');
   assert.equal(result[1].problem,'');
   assert.match(result[1].missingInfo,/没有问题说明/);
   assert.equal(result[1].origin,'ai');

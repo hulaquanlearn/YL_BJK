@@ -10,7 +10,13 @@ test('production route chain protects business APIs and uploaded assets, revokes
  pool.query=async sql=>{queries++;if(sql.includes('FROM app_sessions'))return [[{id:91,username:'synthetic',display_name:'Test',role:'viewer',enabled:enabled?1:0,session_id:2}]];throw new Error('Unexpected business access')};
  const {server,base}=await listen(require('../src/app'));
  try{
-  for(const url of ['/models/reference-20260904/manifest.json','/models/categories/motor.glb','/api/parts','/api/users','/api/part-model-library','/api/knowledge/1/download','/api/knowledge/1/preview','/api/plc/projects/1','/uploads/part-images/private.jpg','/uploads/part-models/private.glb']){const res=await fetch(base+url);assert.equal(res.status,401,url);assert.match(res.headers.get('cache-control'),/no-store/)}
+  for(const url of ['/models/reference-20260904/manifest.json','/models/categories/motor.glb','/api/parts','/api/users','/api/part-model-library','/api/knowledge/1/download','/api/knowledge/1/preview','/uploads/part-images/private.jpg','/uploads/part-models/private.glb']){const res=await fetch(base+url);assert.equal(res.status,401,url);assert.match(res.headers.get('cache-control'),/no-store/)}
+  for(const url of ['/api/plc/projects/1','/api/program-agent/jobs']){
+    for(const method of ['GET','POST']){
+      const res=await fetch(base+url,{method});assert.equal(res.status,410,url);
+      assert.match((await res.json()).msg,/已停用/);assert.match(res.headers.get('cache-control'),/no-store/);
+    }
+  }
   assert.equal(queries,0,'anonymous requests must stop before DB access');
   const token='A'.repeat(43),cookie=`spare_parts_asset_session=${token}`,headers={Authorization:`Bearer ${token}`};
   assert.equal((await fetch(base+'/api/users',{headers:{cookie}})).status,401,'asset cookie must not authorize APIs');

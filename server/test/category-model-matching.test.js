@@ -104,7 +104,7 @@ test('batch input rejects duplicates, malformed IDs, empty and oversized request
   assert.equal(state.queries.length,0);
 });
 
-test('real Express matching routes enforce viewer protection and return persisted association results',async()=>{
+test('retired keyword-matching routes reject writes without touching the database',async()=>{
   const {db,state}=database();const saved={query:pool.query,getConnection:pool.getConnection};
   pool.query=db.query;pool.getConnection=db.getConnection;
   const app=express();app.use(express.json());
@@ -116,11 +116,9 @@ test('real Express matching routes enforce viewer protection and return persiste
   try{
     for(const route of ['preview','apply'])assert.equal((await post(route,{},'viewer')).status,403);
     assert.equal(state.queries.length,0);
-    const preview=await post('preview',{partIds:[1,2]});assert.equal(preview.status,200);
-    const plans=(await preview.json()).data;
-    const applied=await post('apply',{items:selection(plans)});assert.equal(applied.status,200);
-    assert.equal((await applied.json()).data.affected,2);
-    assert.deepEqual(state.parts.map(p=>p.categoryModelId),[1,1]);
+    for(const route of ['preview','apply'])assert.equal((await post(route,{partIds:[1,2]})).status,410);
+    assert.equal(state.queries.length,0);
+    assert.equal(state.updates,0);
   }finally{Object.assign(pool,saved);await new Promise(resolve=>server.close(resolve))}
 });
 

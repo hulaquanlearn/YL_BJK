@@ -1,14 +1,14 @@
 const api = require('../../services/api.js');
 const auth = require('../../services/auth.js');
 const { getPasswordError } = require('../../services/password-policy.js');
-const roleLabels={"admin":"系统管理员","raw_grain":"原粮车间管理员","qu_making":"制曲车间管理员","brewing":"酿酒车间管理员","viewer":"车间人员（岗位待分配，备件只读）"};
+const roleLabels={"admin":"系统管理员","raw_grain":"原粮车间管理员","qu_making":"制曲车间管理员","brewing":"酿酒车间管理员","viewer":"车间人员（岗位待分配）"};
 const workshopLabels={raw_grain:'原粮车间',qu_making:'制曲车间',brewing:'酿酒车间'};
 const positionLabels={group_leader:'组长',shift_leader:'班长'};
 function accountRoleLabel(user) {
   if (user?.role === 'viewer' && user.staffPosition && user.staffWorkshopCode) {
-    return `${workshopLabels[user.staffWorkshopCode] || '车间'}${positionLabels[user.staffPosition] || '人员'}（备件只读）`;
+    return `${workshopLabels[user.staffWorkshopCode] || '车间'}${positionLabels[user.staffPosition] || '人员'}`;
   }
-  return roleLabels[user?.role] || '车间人员（只读）';
+  return roleLabels[user?.role] || '车间人员';
 }
 
 Page({
@@ -21,7 +21,7 @@ Page({
   },
 
   onInput(e) { this.setData({ [e.currentTarget.dataset.field]: e.detail.value }); },
-  gotoUsers() { wx.navigateTo({ url: '/pages/users/users' }); },
+  gotoUsers() { if (!auth.requireWrite(auth.canEditAnyWorkshop())) return; wx.navigateTo({ url: '/pages/users/users' }); },
 
   async changePassword() {
     const { oldPassword, newPassword, confirmPassword } = this.data;

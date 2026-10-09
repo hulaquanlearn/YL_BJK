@@ -87,9 +87,12 @@ page {
 
 /* 确定筛选按钮 */
 .confirm-btn {
+  display: flex;
   width: calc(100% - 60rpx);
   margin: 30rpx;
   padding: 28rpx 0;
+  align-items: center;
+  justify-content: center;
   background: linear-gradient(90deg, #1677ff, #0958d9);
   color: #fff;
   font-size: 32rpx;

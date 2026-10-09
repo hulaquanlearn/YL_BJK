@@ -1,6 +1,5 @@
 import { pinyin } from 'pinyin-pro'
 
-const collator = new Intl.Collator('en', { sensitivity:'base', numeric:true })
 const normalize = value => String(value || '').normalize('NFKC').trim().toLowerCase()
 
 export function prepareCategoryCatalog(rows = []) {
@@ -9,7 +8,7 @@ export function prepareCategoryCatalog(rows = []) {
     const romanized = pinyin(name, { toneType:'none', type:'array', nonZh:'consecutive' }).join('')
     const initials = pinyin(name, { pattern:'first', toneType:'none', type:'array', nonZh:'consecutive' }).join('')
     return { ...item, searchText:normalize(`${item.name} ${item.keywords || ''} ${item.description || ''} ${romanized} ${initials}`), sortText:romanized }
-  }).sort((a,b)=>collator.compare(a.sortText,b.sortText) || collator.compare(a.name,b.name) || Number(a.id)-Number(b.id))
+  }).sort((a,b)=>Number(a.id)-Number(b.id))
 }
 
 export function searchCategoryCatalog(rows, text) {

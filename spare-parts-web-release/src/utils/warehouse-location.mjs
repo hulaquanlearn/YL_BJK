@@ -2,19 +2,24 @@ export const COMMON_SHELF_LEVELS = 4
 export const VENDOR_SIGN_COLOR = '#1d4ed8'
 export const PHYSICAL_ROOM_HALF_WIDTH = 9
 export const PHYSICAL_ROOM_HALF_DEPTH = 16
-export const PHYSICAL_ROW_GAP_Z = 3.4
+export const PHYSICAL_ROW_GAP_Z = 3.8
 
 // 原粮库按现场平面图固定为：01-14 双列、15-20 单列，北侧三组待命名货架。
-// 这里恢复现场确认过的旧版尺寸与坐标；自定义拖拽过的位置仍以数据库为准。
+// 编号货架整体左移、待命名货架右移以留出入口通道；人工位置仍以数据库为准。
 const CENTRAL_SHELF_WIDTH = 4.9
 const SINGLE_SHELF_WIDTH = 4.9
 const UNNAMED_SHELF_WIDTH = 4.9
-const CENTRAL_LEFT_X = -1.25
-const CENTRAL_RIGHT_X = -6.35
-const SINGLE_COLUMN_X = 6.35
-const FIRST_ROW_Z = -10.5
-const SINGLE_ROW_Z = [-10.5, -7.1, -3.7, -0.3, 3.1, 6.5]
-const UNNAMED_ROW_Z = 13.4
+// Widen the longitudinal aisle by 0.8 m without changing paired rack spacing.
+const CENTRAL_LEFT_X = -1.65
+const CENTRAL_RIGHT_X = -6.75
+const SINGLE_COLUMN_X = 6.75
+// Keep the numbered group's centre at the previously shifted position.
+// Expand the aligned rows on both sides, retaining clearance at the entrance.
+const NUMBERED_GROUP_CENTER_Z = -1.5
+const numberedRowZ = row => Math.round((NUMBERED_GROUP_CENTER_Z + (row - 3) * PHYSICAL_ROW_GAP_Z) * 100) / 100
+// +z is screen-right in the default perspective. Keep the row inside the room
+// while widening clearance from the entrance opening (z=10.6..13.0).
+const UNNAMED_ROW_Z = 14.6
 
 export function resolvePartLocation(part = {}) {
   const code = String(part.locationCode || '').trim()
@@ -106,13 +111,13 @@ export function applyPhysicalShelfLayout(shelf, workshopCode = shelf?.workshopCo
       const row = Math.floor((physicalShelfNo - 1) / 2)
       placement = {
         x: physicalShelfNo % 2 === 1 ? CENTRAL_LEFT_X : CENTRAL_RIGHT_X,
-        z: FIRST_ROW_Z + row * PHYSICAL_ROW_GAP_Z
+        z: numberedRowZ(row)
       }
       physicalWidth = CENTRAL_SHELF_WIDTH
     } else if (Number.isInteger(physicalShelfNo) && physicalShelfNo >= 15 && physicalShelfNo <= 20) {
       placement = {
         x: SINGLE_COLUMN_X,
-        z: SINGLE_ROW_Z[physicalShelfNo - 15]
+        z: numberedRowZ(physicalShelfNo - 15)
       }
       physicalWidth = SINGLE_SHELF_WIDTH
     } else {

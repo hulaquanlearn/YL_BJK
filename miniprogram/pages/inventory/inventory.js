@@ -18,7 +18,7 @@ Page({
     filterParams: {},
     todayPendingPartIds: [],
     todayCompletedPartIds: [],
-    isReadOnly: false, isViewer: false,
+    isReadOnly: false, isViewer: false, canSubmitInventory: false,
     canSubmitCount: 0,
     editableCount: 0,
     checkedCount: 0,
@@ -34,7 +34,8 @@ Page({
   onLoad(options) {
     if (!auth.requireLogin()) return;
     const currentUser = auth.getUser();
-    this.setData({ inventoryUser: currentUser?.displayName || currentUser?.username || '', isViewer: auth.isViewer() });
+    this.setData({ inventoryUser: currentUser?.displayName || currentUser?.username || '',
+      isViewer: auth.isViewer(), canSubmitInventory: auth.canSubmitInventory() });
     const filterParams = {
       workshop: decodeURIComponent(options.workshop || '全部'),
       shelf: decodeURIComponent(options.shelf || '全部'),
@@ -43,7 +44,7 @@ Page({
     };
     this.setData({
       filterParams,
-      isReadOnly: filterParams.status === '已盘点' || auth.isViewer()
+      isReadOnly: filterParams.status === '已盘点' || !auth.canSubmitInventory()
     }, async () => {
       await this.getTodayInventoryData();
       await this.loadInventoryData();
@@ -86,6 +87,7 @@ Page({
   buildQueryParams(page) {
     const { workshop, shelf, layer, status } = this.data.filterParams;
     const params = { page, pageSize: 200, sort: 'codeAsc' };
+    if (!auth.isAdmin() && auth.userWorkshopCode()) params.workshopCode = auth.userWorkshopCode();
     if (workshop !== '全部') params.warehouseAreaName = workshop;
     if (shelf !== '全部') params.shelf = shelf === '未指定' ? '__EMPTY__' : shelf.replace('号', '');
     if (layer !== '全部') params.layer = layer === '未指定' ? '__EMPTY__' : layer.replace('层', '');
@@ -165,7 +167,7 @@ Page({
   },
 
   setCheckStatus(e) {
-    if (!auth.requireWrite()) return;
+    if (!auth.requireInventorySubmit()) return;
     const index = Number(e.currentTarget.dataset.index);
     const status = e.currentTarget.dataset.status;
     const inventoryList = [...this.data.inventoryList];
@@ -177,7 +179,7 @@ Page({
   },
 
   markAllNormal() {
-    if (!auth.requireWrite()) return;
+    if (!auth.requireInventorySubmit()) return;
     if (!this.data.uncheckedCount) return;
     wx.showModal({
       title: '确认批量核对',
@@ -195,7 +197,7 @@ Page({
   },
 
   completeInventory() {
-    if (!auth.requireWrite()) return;
+    if (!auth.requireInventorySubmit()) return;
     if (this.data.isLoading || this.data.isSubmitting) return;
     if (this.data.uncheckedCount > 0) {
       wx.showToast({ title: `还有${this.data.uncheckedCount}条未核对`, icon: 'none' });
@@ -255,7 +257,7 @@ Page({
   },
 
   async submitInventoryToApprove() {
-    if (!auth.requireWrite()) return;
+    if (!auth.requireInventorySubmit()) return;
     if (this.data.isSubmitting) return;
     const inventoryUser = this.data.inventoryUser.trim();
     if (!inventoryUser) {

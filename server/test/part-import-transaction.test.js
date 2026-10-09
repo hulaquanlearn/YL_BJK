@@ -32,7 +32,7 @@ function fixture(records, { pending = false, shared = false } = {}) {
     router: { post(_path, ...chain) { handler = chain.at(-1); } },
     requireAnyWorkshopEditor() {}, partLedgerUpload() {}, asyncHandler: fn => fn,
     normalizeWorkshopCode: value => value || 'raw_grain', assertWorkshopWrite() {},
-    parsePartLedger: async () => ({ records, errors: [] }), validatePartLedgerLocations: async () => [],
+    parsePartLedger: async () => ({ records, errors: [] }), validatePartLedgerLocations: async () => [], validateLedgerModels: async () => [],
     pool: { getConnection: async () => connection }, ApiError, changedSharedDescriptors,
     findPendingInventoryOrder: async () => pending ? { id: 1 } : null,
     crypto: require('node:crypto')

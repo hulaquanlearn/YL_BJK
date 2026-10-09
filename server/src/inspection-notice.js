@@ -65,14 +65,20 @@ function parseAi(content,sourceIds,existing,sourceIdSet,freshIds=sourceIds,tiles
   if(!Array.isArray(parsed.issues)||parsed.issues.length>60)throw new ApiError(502,'识图结果缺少可核对的问题列表');
   const tileCounts=new Map();for(const tile of tiles)tileCounts.set(tile.sourceId,(tileCounts.get(tile.sourceId)||0)+1);
   const selected=new Set(sourceIds),rows=parsed.issues.map(item=>{
-    const photos=(Array.isArray(item.photos)?item.photos:[]).filter(photo=>photo.tileId||!tiles.length||tileCounts.get(Number(photo.sourceId))===1).map(photo=>mapTilePhoto(photo,tiles));
-    const skipped=(Array.isArray(item.photos)?item.photos.length:0)-photos.length;
+    const candidatePhotos=Array.isArray(item.photos)?item.photos:[];
+    const photos=[];
+    for(const photo of candidatePhotos){
+      if(!photo.tileId&&tiles.length&&tileCounts.get(Number(photo.sourceId))!==1)continue;
+      try{const mapped=mapTilePhoto(photo,tiles);photos.push({sourceId:integer(mapped.sourceId),rect:rect(mapped.rect)});}catch{/* Keep the problem for review when a proposed crop is unusable. */}
+    }
+    const skipped=candidatePhotos.length-photos.length;
+    const linkedSources=[...new Set([...(Array.isArray(item.sourceIds)?item.sourceIds:[]),...candidatePhotos.map(photo=>photo.sourceId)].map(integer))];
     return issue({
     id:crypto.randomUUID(),origin:'ai',reviewStatus:'pending',segment:item.segment,location:item.location,
     equipment:item.equipment,problem:item.problem,rawText:item.rawText,
-    category:item.categorySuggestion||item.category,rectification:item.rectificationSuggestion||item.rectification,
-    pairingReason:item.pairingReason,missingInfo:[item.missingInfo,skipped?'分段照片缺少编号，未自动裁切；请从原图人工配图':''].filter(Boolean).join('；'),duplicateHint:item.duplicateHint,
-    sourceIds:item.sourceIds||[],photos,remarks:''
+    category:'',rectification:'',
+    pairingReason:item.pairingReason,missingInfo:[item.missingInfo,skipped?'有照片无法可靠定位裁切范围，请从原图人工配图':''].filter(Boolean).join('；'),duplicateHint:item.duplicateHint,
+    sourceIds:linkedSources,photos,remarks:''
   },sourceIdSet)});
   if(rows.some(row=>!row.sourceIds.length&&!row.photos.length))throw new ApiError(502,'识图结果缺少原截图引用，请仅重试失败截图');
   if(rows.some(row=>[...row.sourceIds,...row.photos.map(photo=>photo.sourceId)].some(sourceId=>!selected.has(sourceId))))throw new ApiError(502,'识图结果引用了本次以外的截图');

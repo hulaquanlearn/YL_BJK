@@ -1,4 +1,9 @@
-export const PERMISSION_MESSAGE = '权限不足：车间人员仅可查看，不能新增、修改、删除或提交业务数据。'
+export const PERMISSION_MESSAGE = '当前账号没有此操作权限；车间管理员仅能修改所属车间的数据。'
+export function canSubmitInventoryRequest(method, url, workshopCode) {
+  return String(method || '').toUpperCase() === 'POST'
+    && String(url || '').split('?')[0] === '/inventory-orders'
+    && Boolean(workshopCode)
+}
 export function isBusinessWrite(method, url) {
   if (['GET','HEAD','OPTIONS'].includes(String(method || 'GET').toUpperCase())) return false
   const pathname=String(url || '').split('?')[0]
@@ -11,9 +16,10 @@ export function isBusinessWrite(method, url) {
 export function createWritePermissionDirective(isReadOnly, notify) {
   const listeners = new WeakMap()
   return {
-    mounted(element) {
+    mounted(element, binding = {}) {
+      element.__writeAllowed = binding.value
       const block = event => {
-        if (!isReadOnly()) return
+        if (!isReadOnly() && element.__writeAllowed !== false) return
         if (event.type === 'keydown' && !['Enter', ' ', 'Backspace', 'Delete', 'ArrowUp', 'ArrowDown'].includes(event.key)) return
         event.preventDefault()
         event.stopImmediatePropagation()
@@ -26,6 +32,7 @@ export function createWritePermissionDirective(isReadOnly, notify) {
       element.setAttribute('data-write-action', '')
       listeners.set(element, block)
     },
+    updated(element, binding = {}) { element.__writeAllowed = binding.value },
     unmounted(element) {
       element.removeEventListener('click', listeners.get(element), { capture: true })
       element.removeEventListener('drop', listeners.get(element), { capture: true })

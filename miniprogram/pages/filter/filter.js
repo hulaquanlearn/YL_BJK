@@ -40,7 +40,7 @@ Page({
   // 从服务器 API 加载筛选数据
   loadFilterOptions() {
     this.setData({ isLoading: true });
-    api.getFilters().then(res => {
+    api.getFilters(auth.isAdmin() ? {} : { workshopCode: auth.userWorkshopCode() }).then(res => {
       if (res.success) {
         let { areas, shelfMap, layerMap } = res.data;
         

@@ -35,12 +35,10 @@
         </div>
       </div>
     </section>
-    <details class="inventory-summary" open>
-      <summary>库存概况 <span>{{ formatNumber(dashboard.partTypes) }} 种 · 低库存 {{ formatNumber(dashboard.lowStock) }} 条</span></summary>
-      <div class="page-head">
-        <div><span class="summary-scope">当前筛选范围</span></div>
-        <div class="head-actions"><el-button :loading="loading" @click="refreshAll"><el-icon><Refresh /></el-icon>刷新数据</el-button></div>
-      </div>
+    <div v-if="loadError" class="inventory-load-error panel" role="alert"><strong>库存列表加载失败</strong><span>{{loadError}}；当前显示的数据可能未更新。</span><el-button :disabled="loading" @click="refreshAll">重新加载</el-button></div>
+    <details class="inventory-summary" :open="overviewOpen" @toggle="overviewOpen=$event.target.open">
+      <summary>库存概况 <span>{{ formatNumber(dashboard.partTypes) }} 种 · 低库存 {{ formatNumber(dashboard.lowStock) }} 条</span><el-button class="summary-refresh" :loading="loading" aria-label="刷新库存概况和列表" title="刷新库存概况和列表" @click.stop="refreshAll"><el-icon v-if="!loading"><Refresh /></el-icon><span>刷新</span></el-button></summary>
+      
       <section class="metric-grid inventory-metric-grid" aria-label="库存指标">
         <button type="button" class="metric-card is-parts is-clickable" @click="typeBreakdownVisible=true"><div class="metric-top"><span>备件种类</span><span class="metric-icon"><el-icon><Tickets /></el-icon></span></div><div class="metric-value">{{ formatNumber(dashboard.partTypes) }}</div><div class="metric-note">当前筛选 · 点击查看类型构成</div></button>
         <button type="button" class="metric-card is-stock is-clickable" @click="goStatistics()"><div class="metric-top"><span>库存总量</span><span class="metric-icon"><el-icon><Box /></el-icon></span></div><div class="metric-unit-list" :title="unitSummary"><span v-for="item in dashboard.unitTotals" :key="item.unit"><strong>{{ formatNumber(item.total) }}</strong>{{ item.unit }}</span><span v-if="!dashboard.unitTotals.length">暂无库存</span></div><div class="metric-note">不同单位分别统计，不混合相加</div></button>
@@ -66,11 +64,12 @@
         <div>
           <strong>{{ query.lowStock ? '低库存备件' : '库存明细' }}</strong>
           <span class="result-count">共 {{ total }} 条</span>
+          <el-tag v-if="query.stockStatus" class="active-stock-filter" type="danger" closable @close="query.stockStatus='';search()">库存状态：{{stockStatusLabel}}</el-tag>
         </div>
         <div class="table-actions">
-          <el-button v-write v-if="$showControl(canEditAny)" type="primary" size="small" @click="openCreate"><el-icon><Plus /></el-icon>新增备件</el-button>
-          <el-button v-write v-if="$showControl(canEditAny)" type="success" plain size="small" @click="openImport"><el-icon><Upload /></el-icon>导入备件</el-button>
-          <el-button v-write v-if="$showControl(canEditAny)" size="small" :loading="exporting" :disabled="!total || loading" @click="exportCurrent">导出当前结果</el-button>
+          <el-button v-write="canEditAny" v-if="$showControl(canEditAny)" type="primary" size="small" @click="openCreate"><el-icon><Plus /></el-icon>新增备件</el-button>
+          <el-button v-write="canEditAny" v-if="$showControl(canEditAny)" type="success" plain size="small" @click="openImport"><el-icon><Upload /></el-icon>导入备件</el-button>
+          <el-button v-write="canEditAny" v-if="$showControl(canEditAny)" size="small" :loading="exporting" :disabled="!total || loading" @click="exportCurrent">导出当前结果</el-button>
           <el-button v-if="query.lowStock" type="danger" plain size="small" @click="clearLowStock">退出预警筛选</el-button>
           <el-popover placement="bottom-end" :width="220" trigger="click"><template #reference><el-button size="small"><el-icon><Grid /></el-icon>自定义列</el-button></template><div class="column-picker"><strong>显示字段</strong><el-checkbox-group v-model="visibleColumns"><el-checkbox v-for="item in columnOptions" :key="item.value" :value="item.value">{{ item.label }}</el-checkbox></el-checkbox-group></div></el-popover>
         </div>
@@ -91,13 +90,13 @@
 
       <div class="mobile-parts" v-loading="loading">
         <article v-for="row in list" :key="row._id" class="mobile-part">
-          <header><el-checkbox v-if="$showControl(canEditAny)" :aria-label="'选择 '+row.materialDesc" :model-value="selectedRows.some(item=>item._id===row._id)" @change="value=>inventoryTable?.toggleRowSelection(row,value)"/><strong>{{ row.materialDesc || '未命名备件' }}</strong><b :class="{'is-low':isLow(row)}">{{ row.totalStock }} {{ row.unit || '个' }}</b></header>
+          <header><el-checkbox v-if="$showControl(canEditAny)" :disabled="!canEditWorkshop(row.workshopCode)" :aria-label="'选择 '+row.materialDesc" :model-value="selectedRows.some(item=>item._id===row._id)" @change="value=>inventoryTable?.toggleRowSelection(row,value)"/><strong>{{ row.materialDesc || '未命名备件' }}</strong><b :class="{'is-low':isLow(row)}">{{ row.totalStock }} {{ row.unit || '个' }}</b></header>
           <p>{{ row.materialCode }} · {{ row.spec || '规格未填写' }}</p><p>{{ locationText(row) }}</p>
-          <footer><el-tag :type="inventoryHealth(row).type" size="small">{{ inventoryHealth(row).label }}</el-tag><el-button link @click="openDetail(row)">详情</el-button><el-button link @click="locate3d(row)">3D定位</el-button><el-button v-write v-if="$showControl(canEditWorkshop(row.workshopCode))" link :disabled="!$showControl(false) && row.inventoryStatus === '待审批'" @click="openStock(row)">出入库</el-button></footer>
+          <footer><el-tag :type="inventoryHealth(row).type" size="small">{{ inventoryHealth(row).label }}</el-tag><el-button link @click="openDetail(row)">详情</el-button><el-button link @click="locate3d(row)">3D定位</el-button><el-button v-write="canEditWorkshop(row.workshopCode)" v-if="$showControl(canEditWorkshop(row.workshopCode))" link :disabled="canEditWorkshop(row.workshopCode) && row.inventoryStatus === '待审批'" @click="openStock(row)">出入库</el-button></footer>
         </article><el-empty v-if="!loading&&!list.length" description="没有找到符合条件的备件"/>
       </div>
       <el-table class="desktop-inventory-table" ref="inventoryTable" :data="list" v-loading="loading" row-key="_id" empty-text="没有找到符合条件的备件" @selection-change="onSelectionChange">
-        <el-table-column v-if="$showControl(canEditAny)" type="selection" width="48" reserve-selection :selectable="row=>$showControl(canEditWorkshop(row.workshopCode))" />
+        <el-table-column v-if="$showControl(canEditAny)" type="selection" width="48" reserve-selection :selectable="row=>canEditWorkshop(row.workshopCode)" />
         <el-table-column label="名称" min-width="230" fixed="left">
           <template #default="{ row }">
             <strong class="material-name-cell" :title="row.materialDesc">{{ row.materialDesc || '未命名备件' }}</strong>
@@ -106,6 +105,7 @@
         <el-table-column prop="materialCode" label="物料编码" width="138">
           <template #default="{ row }"><code class="material-code-cell">{{ row.materialCode || '-' }}</code></template>
         </el-table-column>
+        <el-table-column v-if="columnVisible('model')" label="绑定模型" min-width="160"><template #default="{row}">{{ row.categoryModelName || '未绑定' }}</template></el-table-column>
         <el-table-column v-if="columnVisible('spec')" prop="spec" label="规格型号" min-width="220" show-overflow-tooltip>
           <template #default="{ row }"><span class="spec-cell">{{ row.spec || '未填写' }}</span></template>
         </el-table-column>
@@ -134,18 +134,18 @@
           <template #default="{ row }">{{ row.reorderPoint ?? '-' }}</template>
         </el-table-column>
         <el-table-column v-if="columnVisible('status')" width="132" align="center">
-          <template #header><div class="table-filter-head is-center"><span>库存状态</span><el-popover trigger="click" placement="bottom" :width="210"><template #reference><button class="header-filter-button" :class="{active:query.stockStatus}" title="筛选库存状态"><el-icon><Filter /></el-icon></button></template><el-select v-model="query.stockStatus" clearable placeholder="全部状态" style="width:100%" @change="search"><el-option label="零库存" value="zero"/><el-option label="需要补充" value="low"/><el-option label="库存正常" value="normal"/><el-option label="订购点未配置" value="unconfigured"/></el-select></el-popover></div></template>
+          <template #header><div class="table-filter-head is-center stock-filter-head"><span>库存状态</span><el-popover trigger="click" placement="bottom" :width="210"><template #reference><button type="button" class="header-filter-button" :class="{active:query.stockStatus}" :aria-label="query.stockStatus?`库存状态已筛选：${stockStatusLabel}`:'筛选库存状态'" :title="query.stockStatus?`已筛选：${stockStatusLabel}，点击更改`:'筛选库存状态'"><el-icon><Filter /></el-icon><span v-if="query.stockStatus" class="selected-filter-label">{{stockStatusLabel}}</span></button></template><el-select v-model="query.stockStatus" clearable placeholder="全部状态" style="width:100%" @change="search"><el-option label="零库存" value="zero"/><el-option label="需要补充" value="low"/><el-option label="库存正常" value="normal"/><el-option label="订购点未配置" value="unconfigured"/></el-select><el-button v-if="query.stockStatus" class="clear-status-filter" link type="primary" @click="query.stockStatus='';search()">清除库存状态筛选</el-button></el-popover></div></template>
           <template #default="{ row }">
             <el-tag :type="inventoryHealth(row).type" effect="light" round size="small">
               {{ inventoryHealth(row).label }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="215" align="right" fixed="right">
+        <el-table-column label="操作" width="235" align="right" fixed="right">
           <template #default="{ row }">
-            <el-button link type="primary" @click="openDetail(row)">详情</el-button>
+            <div class="inventory-row-actions"><el-button link type="primary" @click="openDetail(row)">详情</el-button>
             <el-button link type="primary" @click="locate3d(row)">3D定位</el-button>
-            <el-button v-write v-if="$showControl(canEditWorkshop(row.workshopCode))" link type="primary" :disabled="!$showControl(false) && row.inventoryStatus === '待审批'" @click="openStock(row)">出入库</el-button>
+            <el-button v-write="canEditWorkshop(row.workshopCode)" v-if="$showControl(canEditWorkshop(row.workshopCode))" link type="primary" :disabled="canEditWorkshop(row.workshopCode) && row.inventoryStatus === '待审批'" @click="openStock(row)">出入库</el-button></div>
           </template>
         </el-table-column>
       </el-table>
@@ -165,6 +165,7 @@
     </section>
 
     <el-dialog v-model="detailVisible" title="备件详情" class="inventory-detail-dialog" width="min(900px, 94vw)" :show-close="false" align-center append-to-body>
+      <template #header><div class="inventory-dialog-heading"><h2>备件详情</h2><el-button aria-label="关闭备件详情" @click="detailVisible=false"><el-icon><Close /></el-icon>关闭</el-button></div></template>
           <div v-if="currentPart" class="detail-card">
             <div class="detail-card-body">
               <div class="detail-hero">
@@ -176,9 +177,8 @@
                   <strong>{{ currentPart.totalStock }} {{ currentPart.unit || '个' }}</strong>
                   <span>当前库存</span>
                 </div>
-                <el-button class="detail-close" aria-label="关闭备件详情" circle text @click="detailVisible=false"><el-icon><Close /></el-icon></el-button>
               </div>
-              <PartModelDetail v-if="detailVisible" :part="currentPart" />
+              <PartModelDetail v-if="detailVisible" :part="currentPart" /><el-button v-if="canBindModel(currentPart)" @click="openBinding(currentPart)">绑定 / 更换模型</el-button>
               <div class="drawer-section">
                 <h3>库存与位置</h3>
                 <dl class="detail-fields">
@@ -208,13 +208,18 @@
               </div>
             </div>
             <div class="detail-card-footer">
-              <el-button v-write v-if="$showControl(canEditWorkshop(currentPart.workshopCode))" :disabled="!$showControl(false) && currentPart.inventoryStatus === '待审批'" @click="openEdit(currentPart)">编辑信息</el-button>
-              <el-button v-write v-if="$showControl(canEditWorkshop(currentPart.workshopCode))" type="danger" plain @click="removePart(currentPart)">删除备件</el-button>
+              <el-button v-write="canEditWorkshop(currentPart.workshopCode)" v-if="$showControl(canEditWorkshop(currentPart.workshopCode))" :disabled="canEditWorkshop(currentPart.workshopCode) && currentPart.inventoryStatus === '待审批'" @click="openEdit(currentPart)">编辑信息</el-button>
+              <el-button v-write="canEditWorkshop(currentPart.workshopCode)" v-if="$showControl(canEditWorkshop(currentPart.workshopCode))" type="danger" plain @click="removePart(currentPart)">删除备件</el-button>
               <el-button v-if="isLow(currentPart)" type="danger" plain @click="goReplenishment"><el-icon><ShoppingCartFull /></el-icon>补货</el-button>
             </div>
           </div>
     </el-dialog>
 
+    <el-dialog v-model="bindingVisible" title="绑定备件模型" width="min(680px,94vw)" append-to-body destroy-on-close>
+      <p>{{ bindingTarget?.materialDesc }}</p>
+      <PartModelBinding v-model="bindingId" :workshop-code="bindingTarget?.workshopCode" />
+      <template #footer><el-button @click="bindingVisible=false">取消</el-button><el-button type="primary" :loading="bindingSaving" @click="saveBinding">保存绑定</el-button></template>
+    </el-dialog>
     <el-dialog v-model="createVisible" title="新增备件" width="min(760px, 96vw)" destroy-on-close>
       <el-alert title="所有账号都能查看新增后的备件；只有该车间管理员和总管理员可继续修改。" type="info" :closable="false" show-icon />
       <el-form label-position="top" class="part-form-grid">
@@ -223,6 +228,7 @@
         <el-form-item label="物料名称" required class="span-2"><el-input v-model="createForm.materialDesc" maxlength="300" /></el-form-item>
         <el-form-item label="规格型号"><el-input v-model="createForm.spec" maxlength="180" /></el-form-item>
         <el-form-item label="备件类型"><el-input v-model="createForm.partType" maxlength="80" placeholder="例如：易损件" /></el-form-item>
+        <el-form-item label="绑定模型" class="span-2"><PartModelBinding v-model="createForm.modelId" :workshop-code="createForm.workshopCode" /></el-form-item>
         <el-form-item label="单位"><el-input v-model="createForm.unit" maxlength="20" /></el-form-item>
         <el-form-item label="初始库存"><el-input-number v-model="createForm.totalStock" :min="0" :max="999999999" controls-position="right" style="width:100%" /></el-form-item>
         <el-form-item v-if="createUsesArea" label="货区/仓库名称" required><el-input v-model="createForm.warehouseAreaName" maxlength="100" placeholder="例如：五粮货区" /></el-form-item>
@@ -244,6 +250,7 @@
         <el-form-item label="物料名称" required class="span-2"><el-input v-model="editForm.materialDesc" maxlength="300" /></el-form-item>
         <el-form-item label="规格型号"><el-input v-model="editForm.spec" maxlength="180" /></el-form-item>
         <el-form-item label="备件类型"><el-input v-model="editForm.partType" maxlength="80" /></el-form-item>
+        <el-form-item label="绑定模型" class="span-2"><PartModelBinding v-model="editForm.modelId" :workshop-code="editForm.workshopCode" :disabled="!canBindModel(editTarget)" /></el-form-item>
         <el-form-item label="品牌"><el-input v-model="editForm.brand" maxlength="100" /></el-form-item>
         <el-form-item label="单位"><el-input v-model="editForm.unit" maxlength="20" /></el-form-item>
         <el-form-item v-if="editUsesArea" label="货区/仓库名称" required><el-input v-model="editForm.warehouseAreaName" maxlength="100" /></el-form-item>
@@ -316,20 +323,26 @@
   </div>
 </template>
 
+<style scoped>
+.stock-filter-head{flex-wrap:wrap;gap:6px}.header-filter-button{min-width:28px;min-height:28px;border-radius:5px}.header-filter-button.active{display:inline-flex;gap:5px;align-items:center;padding:4px 7px;border:1px solid var(--primary);background:#fff0f2;color:var(--primary);font-weight:700;box-shadow:0 0 0 1px #bd203512}.header-filter-button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}.selected-filter-label{font-size:12px;white-space:nowrap}.clear-status-filter{margin-top:10px}.inventory-load-error{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;color:#9b2637;background:#fff3f4}.inventory-load-error span{font-size:14px}.inventory-load-error .el-button{margin-left:auto}
+</style>
 <script setup>
 import PartModelDetail from '../components/PartModelDetail.vue'
+import PartModelBinding from '../components/PartModelBinding.vue'
 import { collectFilteredParts } from '../utils/selection.mjs'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
-import { batchDeleteParts, batchUpdateStock, createPart, deletePart, downloadPartsImportErrorReport, downloadPartsImportTemplate, exportParts, getDashboard, getFilters, getMovementReasons, getPart, getParts, importParts, previewPartsImport, updatePart, updateStock } from '../api'
-import { canEditAnyWorkshop, canEditWorkshop, showControl } from '../auth'
+import { batchAssignPartCategoryModel, batchDeleteParts, batchUpdateStock, createPart, deletePart, downloadPartsImportErrorReport, downloadPartsImportTemplate, exportParts, getDashboard, getFilters, getMovementReasons, getPart, getParts, importParts, previewPartsImport, updatePart, updateStock } from '../api'
+import { canEditAnyWorkshop, canEditWorkshop, showControl, getUser } from '../auth'
 import { INVENTORY_SCOPE_KEYS, inventoryScope, inventoryRouteQuery } from '../utils/inventory-scope.mjs'
 
 const router = useRouter()
 const route = useRoute()
 function readStored(key, fallback) { try { const value=JSON.parse(window.localStorage.getItem(key)||'null'); return value ?? fallback } catch { return fallback } }
+const overviewOpen = ref(!window.matchMedia('(max-width:760px)').matches)
 const loading = ref(false)
+const loadError = ref('')
 const list = ref([])
 const total = ref(0)
 const areas = ref([])
@@ -337,9 +350,11 @@ const partTypes = ref([])
 const workshops = ref([])
 const dashboard = ref({ partTypes:0, inventoryRecords:0, totalStock:0, totalValue:0, lowStock:0, missingPrice:0, missingReorderPoint:0, pendingApproval:0, unitTotals:[], scopeBreakdown:[] })
 const hasRouteScope = route.query.scope || INVENTORY_SCOPE_KEYS.some(key => route.query[key] !== undefined)
-const savedQuery = hasRouteScope ? {} : readStored('spare-parts-inventory-filters', {})
+const filterStorageKey = `spare-parts-inventory-filters:${getUser()?.id || 'unknown'}`
+const savedQuery = hasRouteScope ? {} : readStored(filterStorageKey, {})
 const routeWorkshop = ['raw_grain','qu_making','brewing'].includes(String(route.query.workshopCode || '')) ? String(route.query.workshopCode) : ''
 const query = reactive({ page: 1, pageSize: 20, searchKeyword: '', workshopCode: routeWorkshop, warehouseAreaName: '', partType: '', stockStatus: '', sort: 'name', lowStock: undefined, ...savedQuery, ...(hasRouteScope ? inventoryScope(route.query) : {}) })
+const stockStatusLabel = computed(() => ({zero:'零库存',low:'需要补充',normal:'库存正常',unconfigured:'订购点未配置'}[query.stockStatus] || '已筛选'))
 const typeBreakdownVisible = ref(false)
 function scopeType(row,type){ return row.typeSummaries?.find(item=>item.partType===type) || {} }
 function quantities(items=[]){ return items.map(item=>`${formatNumber(item.total)}${item.unit}`).join('、') || '—' }
@@ -354,7 +369,7 @@ const selectedRows = ref([])
 const inventoryTable = ref(null)
 const selectingAll = ref(false)
 const exporting = ref(false)
-const selectablePageRows = computed(() => list.value.filter(row => showControl(canEditWorkshop(row.workshopCode))))
+const selectablePageRows = computed(() => list.value.filter(row => canEditWorkshop(row.workshopCode)))
 const pageSelected = computed(() => selectablePageRows.value.length > 0 && selectablePageRows.value.every(row => selectedRows.value.some(item => item._id === row._id)))
 const pageIndeterminate = computed(() => !pageSelected.value && selectablePageRows.value.some(row => selectedRows.value.some(item => item._id === row._id)))
 const allFilteredSelected = computed(() => total.value > 0 && selectedRows.value.length >= total.value)
@@ -371,7 +386,7 @@ async function selectAllFiltered() {
   const filters = { ...query }
   selectingAll.value = true
   try {
-    const rows = await collectFilteredParts(getParts, filters, row => showControl(canEditWorkshop(row.workshopCode)), () => token === selectAllToken)
+    const rows = await collectFilteredParts(getParts, filters, row => canEditWorkshop(row.workshopCode), () => token === selectAllToken)
     if (!rows) return
     syncingSelection = true
     inventoryTable.value?.clearSelection()
@@ -390,11 +405,15 @@ const batchSubmitting = ref(false)
 const batchRows = ref([])
 const batchForm = reactive({ type: 'out', reasonCode: '', reasonDetail: '', recipient: '' })
 const columnOptions = [
-  { value: 'workshop', label: '所属车间' }, { value: 'partType', label: '备件类型' }, { value: 'spec', label: '规格型号' },
+  { value: 'model', label: '绑定模型' }, { value: 'workshop', label: '所属车间' }, { value: 'partType', label: '备件类型' }, { value: 'spec', label: '规格型号' },
   { value: 'location', label: '货区 / 库位' }, { value: 'reorderPoint', label: '订购点' }, { value: 'status', label: '库存状态' }
 ]
 const visibleColumns = ref(readStored('spare-parts-inventory-columns-v2', ['spec','location','reorderPoint','status']))
 const canEditAny = canEditAnyWorkshop()
+const bindingVisible=ref(false), bindingTarget=ref(null), bindingId=ref(null), bindingSaving=ref(false)
+function canBindModel(row){ if(!row || !canEditAnyWorkshop())return false;const scopes=String(row.assetWorkshopCodes || row.workshopCode || '').split(',').filter(Boolean);return scopes.length>0 && scopes.every(canEditWorkshop) }
+function openBinding(row){if(!canBindModel(row))return;bindingTarget.value=row;bindingId.value=row.categoryModelId ? Number(row.categoryModelId) : null;bindingVisible.value=true}
+async function saveBinding(){bindingSaving.value=true;try{await batchAssignPartCategoryModel({partIds:[bindingTarget.value.partId],categoryModelId:bindingId.value});const result=await getPart(bindingTarget.value._id);currentPart.value=result.data;bindingVisible.value=false;ElMessage.success('模型绑定已保存');await refreshAll()}finally{bindingSaving.value=false}}
 const createVisible = ref(false)
 const createSubmitting = ref(false)
 const importVisible = ref(false)
@@ -406,11 +425,11 @@ const importWorkshopCode = ref('')
 const importFile = ref(null)
 const importPreview = ref(null)
 const importUploadRef = ref(null)
-const createForm = reactive({ workshopCode:'', materialCode:'', materialDesc:'', spec:'', partType:'', unit:'个', totalStock:0, warehouseAreaName:'', locationCode:'', locationNote:'', reorderPoint:null, maxStock:null, price:null, usageDescription:'' })
+const createForm = reactive({ workshopCode:'', materialCode:'', materialDesc:'', modelId:null, spec:'', partType:'', unit:'个', totalStock:0, warehouseAreaName:'', locationCode:'', locationNote:'', reorderPoint:null, maxStock:null, price:null, usageDescription:'' })
 const editVisible = ref(false)
 const editSubmitting = ref(false)
 const editTarget = ref(null)
-const editForm = reactive({ workshopCode:'', materialCode:'', materialDesc:'', spec:'', partType:'', brand:'', unit:'个', warehouseAreaName:'', locationCode:'', locationNote:'', reorderPoint:null, maxStock:null, price:null, usageDescription:'', remark:'' })
+const editForm = reactive({ workshopCode:'', materialCode:'', materialDesc:'', modelId:null, spec:'', partType:'', brand:'', unit:'个', warehouseAreaName:'', locationCode:'', locationNote:'', reorderPoint:null, maxStock:null, price:null, usageDescription:'', remark:'' })
 let listRequestToken = 0
 const editableWorkshops = computed(() => workshops.value.filter(item => canEditWorkshop(item.code)))
 const currentWorkshopName = computed(() => query.workshopCode ? `${workshops.value.find(item => item.code === query.workshopCode)?.name || '当前车间'}的` : '全部车间的')
@@ -444,11 +463,15 @@ function workshopName(code) { return workshops.value.find(item => item.code === 
 async function load() {
   const token = ++listRequestToken
   loading.value = true
+  loadError.value = ''
   try {
     const result = await getParts({ ...query })
     if (token !== listRequestToken) return
     list.value = result.data || []
     total.value = Number(result.total) || 0
+  } catch (error) {
+    if (token === listRequestToken) loadError.value = error.response?.data?.msg || '请检查网络连接后重试'
+    throw error
   } finally {
     if (token === listRequestToken) loading.value = false
   }
@@ -504,7 +527,7 @@ function defaultEditableWorkshop() {
 function openCreate() {
   const workshopCode = defaultEditableWorkshop()
   const workshopName = workshops.value.find(item => item.code === workshopCode)?.name || '车间'
-  Object.assign(createForm, { workshopCode, materialCode:'', materialDesc:'', spec:'', partType:'', unit:'个', totalStock:0, warehouseAreaName:workshopCode==='qu_making'?'':`${workshopName}备件库`, locationCode:'', locationNote:'', reorderPoint:null, maxStock:null, price:null, usageDescription:'' })
+  Object.assign(createForm, { workshopCode, materialCode:'', materialDesc:'', modelId:null, spec:'', partType:'', unit:'个', totalStock:0, warehouseAreaName:workshopCode==='qu_making'?'':`${workshopName}备件库`, locationCode:'', locationNote:'', reorderPoint:null, maxStock:null, price:null, usageDescription:'' })
   createVisible.value = true
 }
 async function submitCreate() {
@@ -512,14 +535,14 @@ async function submitCreate() {
   if (createForm.locationCode && !/^\d{6}$/.test(createForm.locationCode)) return ElMessage.warning('六位库位码必须是6位数字')
   const location = createForm.locationCode ? { shelf:Number(createForm.locationCode.slice(0,2)), position:Number(createForm.locationCode.slice(2,3)), layer:Number(createForm.locationCode.slice(3,4)), location:Number(createForm.locationCode.slice(4,6)), locationType:'shelf' } : { locationType:'free_text', locationNote:createForm.locationNote||'新增时未设置固定库位' }
   createSubmitting.value = true
-  try { await createPart({ ...createForm, ...location }); ElMessage.success('备件已新增'); createVisible.value=false; query.workshopCode=createForm.workshopCode; await refreshAll() } finally { createSubmitting.value=false }
+  try { await createPart({ ...createForm, modelId:createForm.modelId || undefined, ...location }); ElMessage.success('备件已新增'); createVisible.value=false; query.workshopCode=createForm.workshopCode; await refreshAll() } finally { createSubmitting.value=false }
 }
 function openEdit(row) {
   if (!canEditWorkshop(row.workshopCode)) return ElMessage.warning('当前账号只能编辑所属车间备件')
   editTarget.value = row
   Object.assign(editForm, {
     workshopCode:row.workshopCode, materialCode:row.materialCode||'', materialDesc:row.materialDesc||'',
-    spec:row.spec||'', partType:row.partType||'', brand:row.brand||'', unit:row.unit||'个',
+    modelId:row.categoryModelId ? Number(row.categoryModelId) : null, spec:row.spec||'', partType:row.partType||'', brand:row.brand||'', unit:row.unit||'个',
     warehouseAreaName:row.warehouseAreaName||'', locationCode:row.locationType==='free_text'?'':(row.locationCode||''),
     locationNote:row.locationNote||'', reorderPoint:row.reorderPoint ?? null, maxStock:row.maxStock ?? null,
     price:row.price ?? null, usageDescription:row.usageDescription||'', remark:row.remark||''
@@ -647,7 +670,7 @@ async function submitBatch() {
   } finally { batchSubmitting.value = false }
 }
 
-watch(query, value => window.localStorage.setItem('spare-parts-inventory-filters', JSON.stringify({ pageSize: value.pageSize, searchKeyword: value.searchKeyword, workshopCode:value.workshopCode, warehouseAreaName: value.warehouseAreaName, partType:value.partType, stockStatus:value.stockStatus, sort: value.sort, lowStock: value.lowStock })), { deep: true })
+watch(query, value => { try { window.localStorage.setItem(filterStorageKey, JSON.stringify({ pageSize: value.pageSize, searchKeyword: value.searchKeyword, workshopCode:value.workshopCode, warehouseAreaName: value.warehouseAreaName, partType:value.partType, stockStatus:value.stockStatus, sort: value.sort, lowStock: value.lowStock })) } catch {} }, { deep: true })
 watch(visibleColumns, value => window.localStorage.setItem('spare-parts-inventory-columns-v2', JSON.stringify(value)), { deep: true })
 watch(() => stockForm.type, () => { stockForm.reasonCode = '' })
 watch(() => batchForm.type, () => { batchForm.reasonCode = '' })
@@ -663,7 +686,7 @@ onMounted(() => Promise.allSettled([refreshAll(), loadOperationOptions(),openLin
 .table-toolbar{gap:12px;flex-wrap:wrap}.table-actions .el-button+.el-button{margin-left:0}.selection-count{color:var(--primary);font-size:12px;white-space:nowrap}.table-actions{margin-left:auto}.selection-toolbar{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 16px;background:#eef6ff;border-top:1px solid #d8eaff;border-bottom:1px solid #d8eaff}.selection-toolbar-spacer{flex:1}.selection-toolbar .el-button+.el-button{margin-left:0}
 .select-filtered-link{border:0;background:transparent;color:var(--primary);cursor:pointer;font-size:12px;padding:0 4px}.select-filtered-link:disabled{cursor:not-allowed;opacity:.55}.all-selected-label{color:var(--success,#198754);font-size:12px}
 
-.inventory-selection-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;background:var(--brand-soft);border-bottom:1px solid var(--line)}.inventory-selection-bar strong{font-size:13px}.inventory-selection-bar strong span{font-size:12px;font-weight:400;color:var(--muted)}.inventory-selection-bar>div{display:flex;flex-wrap:wrap;gap:6px}.inventory-selection-bar .el-button+.el-button{margin-left:0}.delete-summary{line-height:1.7}.deletion-allowed{color:var(--success)}.deletion-blocked{color:var(--danger);white-space:normal}.inventory-detail-dialog .detail-card{width:100%;max-height:84vh;box-shadow:none;border:0}.detail-card-footer{flex-wrap:wrap}:global(.inventory-detail-dialog){display:block;max-height:84vh;padding:0;border-radius:20px;overflow:hidden}:global(.inventory-detail-dialog .el-dialog__header){padding:0;height:0;overflow:hidden}:global(.inventory-detail-dialog .el-dialog__body){padding:0}@media(max-width:680px){.inventory-selection-bar{align-items:flex-start;flex-direction:column}.part-form-grid{grid-template-columns:1fr}.part-form-grid .span-2{grid-column:auto}}
+.inventory-selection-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;background:var(--brand-soft);border-bottom:1px solid var(--line)}.inventory-selection-bar strong{font-size:13px}.inventory-selection-bar strong span{font-size:12px;font-weight:400;color:var(--muted)}.inventory-selection-bar>div{display:flex;flex-wrap:wrap;gap:6px}.inventory-selection-bar .el-button+.el-button{margin-left:0}.delete-summary{line-height:1.7}.deletion-allowed{color:var(--success)}.deletion-blocked{color:var(--danger);white-space:normal}.inventory-detail-dialog .detail-card{width:100%;max-height:none;box-shadow:none;border:0;border-radius:0;overflow:visible}.detail-card-footer{flex-wrap:wrap}:global(.inventory-detail-dialog){display:flex;flex-direction:column;max-height:calc(100dvh - 40px);padding:0!important;border-radius:16px;overflow:hidden}:global(.inventory-detail-dialog .el-dialog__header){padding:16px 22px!important;height:auto;overflow:visible;margin:0;flex:none}:global(.inventory-detail-dialog .el-dialog__body){padding:0}@media(max-width:680px){.inventory-selection-bar{align-items:flex-start;flex-direction:column}.part-form-grid{grid-template-columns:1fr}.part-form-grid .span-2{grid-column:auto}}
 .inventory-metric-grid{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}.metric-card:is(button){width:100%;color:inherit;font:inherit;text-align:left;cursor:pointer}.metric-card.is-quality{border-top-color:#7a8798}.metric-card.is-quality .metric-icon{color:#536171;background:#f1f3f5}.filter-row{grid-template-columns:minmax(135px,.7fr) minmax(300px,1.65fr) minmax(175px,.85fr) minmax(165px,.8fr) auto;align-items:end}.filter-actions{display:flex;gap:8px;white-space:nowrap}.table-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.column-picker strong{display:block;margin-bottom:8px}.column-picker .el-checkbox-group{display:grid}.stock-meta-grid,.part-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.part-form-grid{margin-top:16px}.part-form-grid .span-2{grid-column:1/-1}.detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.table-filter-head{display:flex;align-items:center;gap:5px}.table-filter-head.is-center{justify-content:center}.header-filter-button{display:inline-grid;place-items:center;padding:2px;border:0;background:transparent;color:#a0a8b5;cursor:pointer}.header-filter-button:hover,.header-filter-button.active{color:var(--primary)}
 .material-name-cell{display:block;overflow:visible;white-space:normal;overflow-wrap:anywhere;word-break:break-word;color:var(--ink);font-size:13px;line-height:1.55}.material-code-cell{display:block;color:#667085;background:transparent;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:11px;white-space:normal;overflow-wrap:anywhere}.material-cell{min-width:0;overflow:hidden;display:flex;align-items:center;gap:8px}.material-cell strong{display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);font-size:13px;flex:1;min-width:0}.material-cell span{display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:11px;flex-shrink:0;max-width:130px}.spec-cell{display:block;color:#4b5563;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.location-cell{display:inline-flex;align-items:center;gap:6px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}.stock-number{font-size:15px;font-weight:800}.stock-number.is-low{color:var(--danger)}
 .import-workshop-row{width:100%;display:grid;grid-template-columns:1fr auto;gap:10px}.field-hint{display:block;margin-top:6px;color:#7c8798}.import-preview{padding:12px;border:1px solid #b7e4ce;border-radius:12px;background:#f0fbf5}.import-preview.has-errors{border-color:#f2c0c4;background:#fff5f5}.import-preview-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
@@ -696,4 +719,4 @@ onMounted(() => Promise.allSettled([refreshAll(), loadOperationOptions(),openLin
 .material-name-cell,.spec-cell{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;line-height:1.6}
 .spec-cell{font-weight:400;font-size:13px}
 .metric-unit-list{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:baseline;margin:12px 0}.metric-unit-list>span{white-space:nowrap}.metric-unit-list strong{font-size:24px;margin-right:4px}
-</style>
+.inventory-dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}.inventory-dialog-heading h2{margin:0;font-size:18px;line-height:1.5}.inventory-dialog-heading .el-button{flex:none}.detail-card-body{overflow:visible}.inventory-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px}:deep(.inventory-row-actions .el-button){margin:0;padding:6px;min-height:32px;white-space:nowrap}</style>

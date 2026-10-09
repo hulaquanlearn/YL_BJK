@@ -35,7 +35,7 @@ Page({
         summary: res.data?.summary || this.data.summary,
         unitTotals: res.data?.unitTotals || [],
         areaStats: res.data?.areaStats || [],
-        lowStockParts,
+        lowStockParts, lowStockPreview:lowStockParts.slice(0,3),
         isLoading: false,
         hasLoaded: true
       });

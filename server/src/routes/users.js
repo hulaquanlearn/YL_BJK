@@ -4,12 +4,12 @@ const { ApiError, asyncHandler } = require('../utils');
 const { requireRole } = require('../auth');
 const { validateUsername, validatePassword, validateDisplayName } = require('../password-policy');
 const { hashPassword } = require('../password');
-const { WORKSHOPS, ROLE_LABELS } = require('../workshop-scope');
+const { WORKSHOPS, ROLE_LABELS, workshopForRole } = require('../workshop-scope');
 const { normalizeStaffIdentity } = require('../staff-identity');
 
 const router = express.Router();
 router.use((req,res,next) => {
-  if (req.user?.role === 'viewer' && ['GET','HEAD'].includes(req.method) && ['/','/roles'].includes(req.path)) return next();
+  if (workshopForRole(req.user?.role)) return next();
   return requireRole('admin')(req,res,next);
 });
 const ALLOWED_ROLES = new Set(['admin', 'viewer', ...WORKSHOPS.map(item => item.role)]);
@@ -20,7 +20,8 @@ router.get('/', asyncHandler(async (req, res) => {
     `SELECT id, username, display_name AS displayName, role,
             staff_workshop_code AS staffWorkshopCode, staff_position AS staffPosition, enabled,
             last_login_at AS lastLoginAt, created_at AS createdAt
-     FROM app_users ORDER BY role = 'admin' DESC, username ASC`
+     FROM app_users ${workshopForRole(req.user.role)?"WHERE role='viewer' AND staff_workshop_code=?":''} ORDER BY role = 'admin' DESC, username ASC`,
+    workshopForRole(req.user.role)?[workshopForRole(req.user.role)]:[]
   );
   res.json({ success: true, data: rows.map(row => req.user.role === 'viewer'
     ? { id:String(row.id), username:row.username, displayName:row.displayName, role:row.role,
@@ -36,6 +37,7 @@ router.post('/', asyncHandler(async (req, res) => {
   const role = String(req.body?.role || 'viewer');
   if (!ALLOWED_ROLES.has(role)) throw new ApiError(400, '角色无效');
   const identity = normalizeStaffIdentity(role, req.body?.staffWorkshopCode, req.body?.staffPosition, { required: role === 'viewer' });
+  if(workshopForRole(req.user.role)&&(role!=='viewer'||identity.staffWorkshopCode!==workshopForRole(req.user.role)))throw new ApiError(403,'只能创建自己车间的班长或组长账号');
   const passwordHash = await hashPassword(password);
   try {
     const [result] = await pool.query(
@@ -58,6 +60,8 @@ router.patch('/:id', asyncHandler(async (req, res) => {
   const [existingRows] = await pool.query('SELECT role, staff_workshop_code, staff_position FROM app_users WHERE id=? LIMIT 1', [id]);
   if (!existingRows.length) throw new ApiError(404, '账号不存在');
   const existing = existingRows[0];
+  const scope=workshopForRole(req.user.role);
+  if(scope&&(existing.role!=='viewer'||existing.staff_workshop_code!==scope||(req.body.role&&req.body.role!=='viewer')||(req.body.staffWorkshopCode&&req.body.staffWorkshopCode!==scope)))throw new ApiError(403,'只能管理自己车间的班长或组长，不能提升权限或转移车间');
   if (req.body?.displayName !== undefined) {
     updates.push('display_name = ?');
     params.push(validateDisplayName(req.body.displayName));
@@ -86,7 +90,7 @@ router.patch('/:id', asyncHandler(async (req, res) => {
   }
   if (!updates.length) throw new ApiError(400, '没有可更新的账号信息');
   params.push(id);
-  const [result] = await pool.query(`UPDATE app_users SET ${updates.join(', ')} WHERE id = ?`, params);
+  const [result] = await pool.query(`UPDATE app_users SET ${updates.join(', ')} WHERE id = ?${scope?" AND role='viewer' AND staff_workshop_code=?":''}`, scope?[...params,scope]:params);
   if (!result.affectedRows) throw new ApiError(404, '账号不存在');
   if (req.body?.enabled === false) await pool.query('DELETE FROM app_sessions WHERE user_id = ?', [id]);
   res.json({ success: true, msg: '账号更新成功' });
@@ -101,8 +105,8 @@ router.post('/:id/reset-password', asyncHandler(async (req, res) => {
   try {
     await connection.beginTransaction();
     const [result] = await connection.query(
-      'UPDATE app_users SET password_hash = ?, token_version = token_version + 1 WHERE id = ?',
-      [passwordHash, id]
+      `UPDATE app_users SET password_hash = ?, token_version = token_version + 1 WHERE id = ?${workshopForRole(req.user.role)?" AND role='viewer' AND staff_workshop_code=?":''}`,
+      [passwordHash, id, ...(workshopForRole(req.user.role)?[workshopForRole(req.user.role)]:[])]
     );
     if (!result.affectedRows) throw new ApiError(404, '账号不存在');
     await connection.query('DELETE FROM app_sessions WHERE user_id = ?', [id]);

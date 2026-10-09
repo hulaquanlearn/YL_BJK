@@ -12,7 +12,8 @@ const { requireRole } = require('../auth');
 const {
   normalizeWorkshopCode,
   assertWorkshopWrite,
-  requireAnyWorkshopEditor
+  inventoryOrderScope,
+  assertInventoryOrderSubmit
 } = require('../workshop-scope');
 
 const router = express.Router();
@@ -51,13 +52,14 @@ function idsFromLegacyOrder(order) {
 router.get('/inventory-orders', asyncHandler(async (req, res) => {
   const conditions = [];
   const params = [];
+  const workshopCode = inventoryOrderScope(req.user, req.query.workshopCode);
+  if (workshopCode) {
+    conditions.push('workshop_code = ?');
+    params.push(workshopCode);
+  }
   if (req.query.date) {
     conditions.push('inventoryDate = ?');
     params.push(req.query.date);
-  }
-  if (req.query.workshopCode) {
-    conditions.push('workshop_code = ?');
-    params.push(normalizeWorkshopCode(req.query.workshopCode));
   }
   const scopeSql = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
   const [[counts]] = await pool.query(`SELECT COUNT(*) AS total,
@@ -79,10 +81,12 @@ router.get('/inventory-orders/:id', asyncHandler(async (req, res) => {
   const orderId = parseInventoryId(req.params.id, '盘点单ID');
   const [rows] = await pool.query('SELECT * FROM inventory_orders WHERE id = ? LIMIT 1', [orderId]);
   if (!rows.length) throw new ApiError(404, '盘点单不存在');
+  inventoryOrderScope(req.user, rows[0].workshop_code || 'raw_grain');
   res.json({ success: true, data: toInventoryOrder(rows[0]) });
 }));
 
-router.post('/inventory-orders', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+router.post('/inventory-orders', asyncHandler(async (req, res) => {
+  inventoryOrderScope(req.user);
   const data = req.body || {};
   const inventoryNo = requireBoundedText(data.inventoryNo || `INV-${Date.now()}`, '盘点单号', 100);
   const inventoryDate = requireDate(data.inventoryDate);
@@ -108,7 +112,7 @@ router.post('/inventory-orders', requireAnyWorkshopEditor, asyncHandler(async (r
       throw new ApiError(400, '一次盘点只能选择同一车间的备件');
     }
     const workshopCode = workshopCodes[0];
-    assertWorkshopWrite(req.user, workshopCode);
+    assertInventoryOrderSubmit(req.user, workshopCode);
 
     const pendingOrder = await findPendingInventoryOrder(connection, normalized.inventoryIds);
     if (pendingOrder) {
@@ -168,7 +172,7 @@ router.post('/inventory-orders', requireAnyWorkshopEditor, asyncHandler(async (r
   }
 }));
 
-router.post('/inventory-orders/:id/approve', requireRole('admin'), asyncHandler(async (req, res) => {
+router.post('/inventory-orders/:id/approve', requireRole('admin', 'raw_grain', 'qu_making', 'brewing'), asyncHandler(async (req, res) => {
   const orderId = parseInventoryId(req.params.id, '盘点单ID');
   const status = req.body?.status;
   if (!['已通过', '已驳回'].includes(status)) throw new ApiError(400, '审批状态无效');
@@ -183,6 +187,7 @@ router.post('/inventory-orders/:id/approve', requireRole('admin'), asyncHandler(
       [orderId]
     );
     if (!initialRows.length) throw new ApiError(404, '盘点单不存在');
+    assertWorkshopWrite(req.user, normalizeWorkshopCode(initialRows[0].workshop_code, 'raw_grain'));
     if (initialRows[0].approveStatus !== '待审批') throw new ApiError(409, '该盘点单已经处理');
 
     const [initialItems] = await connection.query(
@@ -208,6 +213,7 @@ router.post('/inventory-orders/:id/approve', requireRole('admin'), asyncHandler(
       [orderId]
     );
     if (!orderRows.length) throw new ApiError(404, '盘点单不存在');
+    assertWorkshopWrite(req.user, normalizeWorkshopCode(orderRows[0].workshop_code, 'raw_grain'));
     if (orderRows[0].approveStatus !== '待审批') throw new ApiError(409, '该盘点单已经处理');
 
     if (status === '已通过') {

@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS work_score_jobs (
+ id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+ job_key VARCHAR(100) NULL,
+ user_id BIGINT UNSIGNED NOT NULL,
+ week_start DATE NOT NULL,
+ source VARCHAR(20) NOT NULL,
+ status VARCHAR(20) NOT NULL,
+ actor_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+ reason TEXT NULL,
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ finished_at DATETIME NULL,
+ UNIQUE KEY scheduled_once(job_key),
+ KEY owner_week(user_id,week_start,id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

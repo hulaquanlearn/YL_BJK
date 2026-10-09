@@ -25,6 +25,15 @@
       <text class="label">用途：</text>
       <text class="value">{{part.usageDescription || '未填写'}}</text>
     </view>
+    <view class="card-item">
+      <text class="label">绑定模型：</text>
+      <text class="value">{{part.categoryModelName || '未绑定'}}</text>
+    </view>
+    <view class="card-item" wx:if="{{part.categoryModelId}}">
+      <text class="label">模型ID：</text><text class="value">{{part.categoryModelId}}</text>
+    </view>
+    <view class="card-item" wx:if="{{part.categoryModelName &amp;&amp; !part.categoryModelUrl}}"><text class="value">绑定模型待生成，请核对安装外形后选择细分模型。</text></view>
+    <picker wx:if="{{canBindModel}}" mode="selector" range="{{modelLabels}}" value="{{modelChoiceIndex}}" disabled="{{modelBindingBusy || !modelChoices.length}}" bindchange="changeBoundModel"><button loading="{{modelBindingBusy}}" size="mini">绑定 / 更换模型</button></picker>
   </view>
 
   <view class="card">
@@ -52,7 +61,7 @@
     </view>
   </view>
 
-  <view class="card" wx:if="{{canEditPart}}">
+  <view class="card">
     <view class="card-header">库存调整</view>
     <view class="operation-reason">
       <text class="operation-label">操作原因：</text>
@@ -96,15 +105,12 @@
     </view>
   </view>
 
-  <view class="card permission-note" wx:else>
-    <view class="card-header">权限说明</view>
-    <view class="remark-content">当前账号可查看库存信息，出入库操作需备件编辑权限。</view>
-  </view>
+
 
   <view class="card">
     <view class="card-header">备注信息</view>
     <view class="remark-content">{{part.remark}}</view>
   </view>
 
-  <button class="archive-btn" wx:if="{{canEditPart}}" bindtap="archivePart">停用该备件记录</button>
+  <button class="archive-btn" bindtap="archivePart">停用该备件记录</button>
 </view>

@@ -13,6 +13,7 @@ function stockState(item) {
   const stock = Number(item.totalStock) || 0;
   const hasReorderPoint = item.reorderPoint !== null && item.reorderPoint !== undefined;
   if (stock <= 0) return { stockStatus: 'zero', stockStatusText: '无库存' };
+  if (!hasReorderPoint) return { stockStatus: 'unconfigured', stockStatusText: '订购点未配置' };
   if (hasReorderPoint && stock <= Number(item.reorderPoint)) {
     return { stockStatus: 'low', stockStatusText: '低库存' };
   }
@@ -237,6 +238,10 @@ Page({
       this.refreshFilterMeta();
       this.loadParts({ page: 1 });
     });
+  },
+
+  showAllStock() {
+    this.setData({ lowStockOnly: false }, () => this.refreshParts());
   },
 
   buildParams(page) {

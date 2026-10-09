@@ -1,6 +1,6 @@
 <view class="page-wrap">
   <view class="head-card">
-    <view><text class="head-title">系统账号</text><text class="head-desc">{{isViewer ? '查看账号与岗位' : '创建账号并分配角色与岗位'}}</text></view>
+    <view><text class="head-title">{{isSystemAdmin ? "系统账号" : "本车间账号"}}</text><text class="head-desc">{{isViewer ? '查看账号与岗位' : '创建账号并分配角色与岗位'}}</text></view>
     <button class="add-btn" wx:if="{{!isViewer}}" bindtap="openCreate">新增账号</button>
   </view>
 
@@ -14,7 +14,7 @@
         <switch wx:else checked="{{item.enabled}}" color="#C6000B" data-id="{{item.id}}" bindchange="toggleEnabled" />
       </view>
       <view class="action-row">
-        <picker wx:if="{{!isViewer}}" range="{{roles}}" value="{{item.roleIndex}}" data-id="{{item.id}}" bindchange="changeRole"><view class="action-btn">修改角色</view></picker>
+        <picker wx:if="{{isSystemAdmin}}" range="{{roles}}" value="{{item.roleIndex}}" data-id="{{item.id}}" bindchange="changeRole"><view class="action-btn">修改角色</view></picker>
         <view class="action-btn" data-id="{{item.id}}" bindtap="openIdentity">{{isViewer ? '查看岗位' : '设置岗位'}}</view>
         <view class="action-btn danger" wx:if="{{!isViewer}}" data-id="{{item.id}}" bindtap="openReset">重置密码</view>
       </view>
@@ -27,9 +27,9 @@
       <input class="input" placeholder="用户名：小写字母、数字或下划线" value="{{newUser.username}}" data-field="username" bindinput="onNewInput" />
       <input class="input" placeholder="姓名" value="{{newUser.displayName}}" data-field="displayName" bindinput="onNewInput" />
       <input class="input" password placeholder="初始密码：含大小写字母及数字" value="{{newUser.password}}" data-field="password" bindinput="onNewInput" />
-      <picker range="{{roles}}" value="{{newRoleIndex}}" bindchange="onNewRole"><view class="picker-input">角色：{{roles[newRoleIndex]}}</view></picker>
+      <picker disabled="{{!isSystemAdmin}}" range="{{roles}}" value="{{newRoleIndex}}" bindchange="onNewRole"><view class="picker-input">角色：{{roles[newRoleIndex]}}</view></picker>
       <block wx:if="{{newUser.role === 'viewer'}}">
-        <picker range="{{workshopNames}}" value="{{newWorkshopIndex}}" bindchange="onNewWorkshop"><view class="picker-input">所属车间：{{workshopNames[newWorkshopIndex]}}</view></picker>
+        <picker disabled="{{!isSystemAdmin}}" range="{{workshopNames}}" value="{{newWorkshopIndex}}" bindchange="onNewWorkshop"><view class="picker-input">所属车间：{{workshopNames[newWorkshopIndex]}}</view></picker>
         <picker range="{{createPositionNames}}" value="{{newPositionIndex}}" bindchange="onNewPosition"><view class="picker-input">岗位：{{createPositionNames[newPositionIndex]}}</view></picker>
       </block>
       <view class="modal-actions"><button class="cancel" bindtap="closeCreate">取消</button><button class="confirm" loading="{{submitting}}" bindtap="createUser">创建</button></view>
@@ -49,7 +49,7 @@
     <view class="modal" catchtap="noop">
       <text class="modal-title">{{pendingRole ? '分配车间人员岗位' : identityUser.displayName + '的岗位'}}</text>
       <text class="modal-tip">岗位用于区分班长与组长；两者在备件功能中均只能查看。</text>
-      <picker range="{{workshopNames}}" value="{{editWorkshopIndex}}" bindchange="onEditWorkshop" disabled="{{isViewer}}"><view class="picker-input">所属车间：{{workshopNames[editWorkshopIndex]}}</view></picker>
+      <picker disabled="{{!isSystemAdmin}}" range="{{workshopNames}}" value="{{editWorkshopIndex}}" bindchange="onEditWorkshop" disabled="{{isViewer}}"><view class="picker-input">所属车间：{{workshopNames[editWorkshopIndex]}}</view></picker>
       <picker range="{{positionNames}}" value="{{editPositionIndex}}" bindchange="onEditPosition" disabled="{{isViewer}}"><view class="picker-input">岗位：{{positionNames[editPositionIndex]}}</view></picker>
       <view class="modal-actions"><button class="cancel" bindtap="closeIdentity">{{isViewer ? '关闭' : '取消'}}</button><button class="confirm" wx:if="{{!isViewer}}" loading="{{submitting}}" bindtap="saveIdentity">保存</button></view>
     </view>

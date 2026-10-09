@@ -18,7 +18,7 @@ function isAdmin() { return getUser()?.role === 'admin'; }
 function isViewer() { return getUser()?.role === 'viewer'; }
 function requireWrite(allowed = canEditAnyWorkshop()) {
   if (allowed) return true;
-  wx.showModal({ title:'权限不足', content:'当前账号没有此操作权限。车间人员仅可查看，不能新增、修改、删除或提交业务数据。', showCancel:false });
+  wx.showModal({ title:'权限不足', content:'当前账号不能修改备件或审批盘点单；盘点提交请到盘点页。', showCancel:false });
   return false;
 }
 function userWorkshopCode() {
@@ -28,6 +28,15 @@ function userWorkshopCode() {
 function canEditAnyWorkshop() { return isAdmin() || Boolean(WORKSHOP_ROLES[getUser()?.role]); }
 function canEditWorkshop(workshopCode) {
   return isAdmin() || (Boolean(WORKSHOP_ROLES[getUser()?.role]) && WORKSHOP_ROLES[getUser().role] === String(workshopCode || ''));
+}
+function canSubmitInventory() {
+  return canEditAnyWorkshop() || (isViewer() && Boolean(userWorkshopCode()));
+}
+function canApproveInventory() { return canEditAnyWorkshop(); }
+function requireInventorySubmit() {
+  if (canSubmitInventory()) return true;
+  wx.showModal({ title:'权限不足', content:'请先由管理员分配所属车间，才能提交盘点单。', showCancel:false });
+  return false;
 }
 
 function goLogin() {
@@ -74,6 +83,9 @@ module.exports = {
   userWorkshopCode,
   canEditAnyWorkshop,
   canEditWorkshop,
+  canSubmitInventory,
+  canApproveInventory,
+  requireInventorySubmit,
   goLogin,
   requireLogin
 };

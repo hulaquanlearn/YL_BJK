@@ -1,8 +1,8 @@
 <template>
   <div class="knowledge-page">
     <header class="knowledge-workspace-head">
-      <div><h2>知识库</h2><p>资料文档与故障经验，集中查找与维护</p></div>
-      <div class="workspace-actions"><el-button @click="assistantVisible=true"><el-icon><ChatDotRound /></el-icon>知识问答</el-button><el-button v-if="$showControl(canEditAny)" @click="openStageManager"><el-icon><Setting /></el-icon>分类配置</el-button><el-button v-write v-if="$showControl(canEditAny)" type="primary" @click="openCreate"><el-icon><Plus /></el-icon>新增知识</el-button></div>
+      <h2 class="visually-hidden">工程知识库</h2>
+      <div class="workspace-actions"><el-button @click="assistantVisible=true"><el-icon><ChatDotRound /></el-icon>知识问答</el-button><el-button v-if="$showControl(canEditAny)" @click="openStageManager"><el-icon><Setting /></el-icon>分类配置</el-button><el-button v-write="canEditAny" v-if="$showControl(canEditAny)" type="primary" @click="openCreate"><el-icon><Plus /></el-icon>新增知识</el-button></div>
     </header>
     <div class="knowledge-layout">
       <aside class="knowledge-sidebar" aria-label="知识分类">
@@ -20,7 +20,7 @@
         </section>
         <div v-if="filters.category||filters.type" class="active-filters"><span>当前筛选</span><el-tag v-if="filters.type" closable @close="setType('')">{{ filters.type==='fault'?'故障知识':'资料文档' }}</el-tag><el-tag v-if="filters.category" closable @close="setCategory('')">{{ filters.category }}</el-tag></div>
     <section class="knowledge-content">
-      <div class="content-head"><div><strong>知识条目</strong><span>共 {{ total }} 条</span></div><div class="knowledge-view-controls"><el-radio-group v-model="entryView" size="small" aria-label="知识展示方式"><el-radio-button value="list">紧凑列表</el-radio-button><el-radio-button value="cards">卡片</el-radio-button></el-radio-group><el-button :loading="loading" text @click="load"><el-icon><Refresh /></el-icon>刷新</el-button></div></div>
+      <div class="content-head"><div><strong>知识条目</strong><span>共 {{ total }} 条</span></div><div class="knowledge-view-controls"><el-radio-group v-model="entryView" size="small" aria-label="知识展示方式"><el-radio-button value="list">列表</el-radio-button><el-radio-button value="cards">卡片</el-radio-button></el-radio-group></div></div>
       <div v-loading="loading" class="knowledge-grid" :class="{'is-list':entryView==='list'}">
         <article v-for="item in entries" :key="item.id" class="knowledge-card" tabindex="0" role="button" :aria-label="`查看${item.title}`" @click="openDetail(item)" @keydown.enter="openDetail(item)" @keydown.space.prevent="openDetail(item)">
           <div class="card-top"><span class="type-chip" :class="`is-${item.entryType}`"><el-icon><Document v-if="item.entryType==='document'"/><Warning v-else/></el-icon>{{ item.entryType==='document'?'资料文档':'故障知识' }}</span><span class="card-date">{{ formatDate(item.createdAt) }}</span></div>
@@ -72,7 +72,7 @@
     </el-dialog>
 
     <el-dialog v-model="stageVisible" title="知识选项配置" width="min(760px,94vw)">
-      <el-select v-model="stageWorkshopCode" :disabled="!$showControl(isAdmin)" style="width:100%;margin-bottom:12px" @change="loadManagerData"><el-option v-for="item in managerWorkshops" :key="item.code" :label="item.name" :value="item.code"/></el-select>
+      <el-select v-model="stageWorkshopCode" :disabled="!isAdmin" style="width:100%;margin-bottom:12px" @change="loadManagerData"><el-option v-for="item in managerWorkshops" :key="item.code" :label="item.name" :value="item.code"/></el-select>
       <h3 class="manager-heading">工序 / 区域</h3>
       <div class="stage-create"><el-input v-write v-model="newStage.name" maxlength="80" placeholder="新增工序或区域名称" @keyup.enter="addStage"/><el-input-number v-write v-model="newStage.sortOrder" :min="0" :max="99999"/><el-button v-write type="primary" :loading="stageSaving" @click="addStage">新增</el-button></div>
       <div class="stage-list">
@@ -100,10 +100,10 @@
         <template v-else><section><h3>资料摘要</h3><div class="md-content" v-html="renderMd(detail.summary || '暂无摘要')"></div></section><section v-if="detail.contentText"><h3>文本内容</h3><div class="md-content" v-html="renderMd(detail.contentText)"></div></section></template>
         <div class="detail-file" v-if="detail.hasFile"><el-icon><Document /></el-icon><div><strong>{{ detail.originalFilename }}</strong><small>{{ formatSize(detail.fileSize) }} · {{ indexStatusLabel(detail.indexStatus) }}<template v-if="detail.indexMessage"> · {{ detail.indexMessage }}</template></small></div><div class="file-actions"><el-button v-if="canPreview(detail)" type="primary" :loading="previewLoading" @click="openPreview(detail)">在线阅读</el-button><el-button plain :loading="downloading" @click="download(detail)"><el-icon><Download /></el-icon>下载</el-button></div></div>
         <footer class="detail-footer"><span>上传人：{{ detail.uploadedByName }}</span><span>V{{ detail.revisionNo||1 }} · {{ formatTime(detail.createdAt) }} · 已查阅 {{ detail.viewCount }} 次</span></footer>
-        <div v-if="$showControl(detail.canEdit)" class="detail-manage"><el-button v-write type="primary" @click="openEdit(detail)">编辑/替换附件</el-button><el-button @click="openHistory(detail)">修订历史</el-button><el-button v-write v-if="detail.hasFile&&detail.indexStatus!=='ready'" :loading="reindexing" @click="retryIndex(detail)">重建全文索引</el-button><el-button v-write v-if="$showControl(detail.canDelete)" type="danger" plain @click="removeEntry(detail)">彻底删除</el-button></div>
+        <div v-if="$showControl(detail.canEdit)" class="detail-manage"><el-button v-write="detail.canEdit" type="primary" @click="openEdit(detail)">编辑/替换附件</el-button><el-button @click="openHistory(detail)">修订历史</el-button><el-button v-write="detail.canEdit" v-if="detail.hasFile&&detail.indexStatus!=='ready'" :loading="reindexing" @click="retryIndex(detail)">重建全文索引</el-button><el-button v-write="detail.canDelete" v-if="$showControl(detail.canDelete)" type="danger" plain @click="removeEntry(detail)">彻底删除</el-button></div>
       </div>
     </el-drawer>
-    <el-dialog v-model="historyVisible" title="修订历史" width="min(760px,94vw)"><el-alert :title="`当前版本 V${detail?.revisionNo||1}；下方是每次修改前自动保留的版本。`" type="info" :closable="false"/><div v-loading="historyLoading" class="revision-list"><article v-for="item in revisions" :key="item.revisionNo"><div><strong>V{{ item.revisionNo }} · {{ item.title }}</strong><small>{{ formatTime(item.createdAt) }} · {{ item.createdByName||'系统用户' }}<template v-if="item.originalFilename"> · {{ item.originalFilename }}</template></small><p v-if="item.changeSummary">{{ item.changeSummary }}</p></div><el-button v-write v-if="$showControl(detail?.canEdit)" plain @click="restoreRevision(item)">恢复为新版本</el-button></article><el-empty v-if="!historyLoading&&!revisions.length" :image-size="54" description="尚无历史修订"/></div></el-dialog>
+    <el-dialog v-model="historyVisible" title="修订历史" width="min(760px,94vw)"><el-alert :title="`当前版本 V${detail?.revisionNo||1}；下方是每次修改前自动保留的版本。`" type="info" :closable="false"/><div v-loading="historyLoading" class="revision-list"><article v-for="item in revisions" :key="item.revisionNo"><div><strong>V{{ item.revisionNo }} · {{ item.title }}</strong><small>{{ formatTime(item.createdAt) }} · {{ item.createdByName||'系统用户' }}<template v-if="item.originalFilename"> · {{ item.originalFilename }}</template></small><p v-if="item.changeSummary">{{ item.changeSummary }}</p></div><el-button v-write="detail?.canEdit" v-if="$showControl(detail?.canEdit)" plain @click="restoreRevision(item)">恢复为新版本</el-button></article><el-empty v-if="!historyLoading&&!revisions.length" :image-size="54" description="尚无历史修订"/></div></el-dialog>
     <el-dialog v-model="previewVisible" :title="detail?.originalFilename||'在线阅读'" width="min(1180px,96vw)" top="3vh" destroy-on-close @closed="closePreview"><el-alert v-if="previewNotice" :title="previewNotice" type="warning" :closable="false" show-icon/><div class="file-preview"><img v-if="previewKind==='image'" :src="previewUrl" alt="资料预览"/><video v-else-if="previewKind==='video'" :src="previewUrl" controls/><audio v-else-if="previewKind==='audio'" :src="previewUrl" controls/><iframe v-else :src="previewUrl" title="资料在线预览" sandbox></iframe></div><template #footer><el-button @click="previewVisible=false">关闭</el-button><el-button @click="download(detail)">下载原文件</el-button></template></el-dialog>
   </div>
 </template>

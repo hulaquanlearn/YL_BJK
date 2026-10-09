@@ -22,7 +22,7 @@ Page({
     newUser: { username: '', displayName: '', password: '', role: 'viewer', staffWorkshopCode: 'raw_grain', staffPosition: 'group_leader' }, submitting: false
   },
 
-  onLoad() { if (auth.requireLogin()) { this.setData({isViewer:auth.isViewer()}); this.loadUsers(); } },
+  onLoad() { if (auth.requireLogin({editor:true})) { this.setData({isViewer:false,isSystemAdmin:auth.isAdmin()}); this.loadUsers(); } },
   denyWrite() { auth.requireWrite(false); },
   noop() {},
   onPullDownRefresh() { this.loadUsers().finally(() => wx.stopPullDownRefresh()); },
@@ -37,7 +37,7 @@ Page({
   },
 
   openCreate() {
-    if (!auth.requireWrite(auth.isAdmin())) return; this.setData({ showCreate: true, newRoleIndex:4, newWorkshopIndex:1, newPositionIndex:0, newUser: { username: '', displayName: '', password: '', role: 'viewer', staffWorkshopCode:'raw_grain', staffPosition:'group_leader' } }); },
+    if (!auth.requireWrite(auth.canEditAnyWorkshop())) return; this.setData({ showCreate: true, newRoleIndex:4, newWorkshopIndex:Math.max(1,workshops.findIndex(w=>w.value===auth.userWorkshopCode())), newPositionIndex:0, newUser: { username: '', displayName: '', password: '', role: 'viewer', staffWorkshopCode:auth.userWorkshopCode()||'raw_grain', staffPosition:'group_leader' } }); },
   closeCreate() { if (!this.data.submitting) this.setData({ showCreate: false }); },
   onNewInput(e) { this.setData({ [`newUser.${e.currentTarget.dataset.field}`]: e.detail.value }); },
   onNewRole(e) { this.setData({ newRoleIndex:Number(e.detail.value), 'newUser.role': this.data.roleValues[Number(e.detail.value)] }); },
@@ -45,7 +45,7 @@ Page({
   onNewPosition(e) { const index=Number(e.detail.value); this.setData({newPositionIndex:index,'newUser.staffPosition':positions[index+1].value}); },
 
   async createUser() {
-    if (!auth.requireWrite(auth.isAdmin())) return;
+    if (!auth.requireWrite(auth.canEditAnyWorkshop())) return;
     const user = { ...this.data.newUser, username: this.data.newUser.username.trim().toLowerCase(), displayName: this.data.newUser.displayName.trim() };
     if (!user.username || !user.displayName || !user.password) return wx.showToast({ title: '请填写完整', icon: 'none' });
     if (user.role === 'viewer' && (!user.staffWorkshopCode || !user.staffPosition)) return wx.showToast({title:'请选择车间和岗位',icon:'none'});
@@ -62,7 +62,7 @@ Page({
   },
 
   async toggleEnabled(e) {
-    if (!auth.requireWrite(auth.isAdmin())) { await this.loadUsers(); return; }
+    if (!auth.requireWrite(auth.canEditAnyWorkshop())) { await this.loadUsers(); return; }
     try {
       await api.updateUser(e.currentTarget.dataset.id, { enabled: e.detail.value });
       wx.showToast({ title: e.detail.value ? '已启用' : '已停用', icon: 'success' });
@@ -70,7 +70,7 @@ Page({
   },
 
   async changeRole(e) {
-    if (!auth.requireWrite(auth.isAdmin())) { await this.loadUsers(); return; }
+    if (!auth.requireWrite(auth.canEditAnyWorkshop())) { await this.loadUsers(); return; }
     const role = this.data.roleValues[Number(e.detail.value)];
     const user=this.data.users.find(item=>item.id===e.currentTarget.dataset.id);
     if (role==='viewer' && user?.role!=='viewer') {
@@ -98,7 +98,7 @@ Page({
   onEditWorkshop(e) { this.setData({editWorkshopIndex:Number(e.detail.value)}); },
   onEditPosition(e) { this.setData({editPositionIndex:Number(e.detail.value)}); },
   async saveIdentity() {
-    if (!auth.requireWrite(auth.isAdmin())) return;
+    if (!auth.requireWrite(auth.canEditAnyWorkshop())) return;
     const staffWorkshopCode=workshops[this.data.editWorkshopIndex].value;
     const staffPosition=positions[this.data.editPositionIndex].value;
     if (staffPosition && !staffWorkshopCode) return wx.showToast({title:'请选择所属车间',icon:'none'});
@@ -113,14 +113,14 @@ Page({
   },
 
   openReset(e) {
-    if (!auth.requireWrite(auth.isAdmin())) return;
+    if (!auth.requireWrite(auth.canEditAnyWorkshop())) return;
     const user = this.data.users.find(item => item.id === e.currentTarget.dataset.id);
     this.setData({ showReset: true, resetUser: user, resetPassword: '' });
   },
   closeReset() { if (!this.data.submitting) this.setData({ showReset: false }); },
   onResetInput(e) { this.setData({ resetPassword: e.detail.value }); },
   async confirmReset() {
-    if (!auth.requireWrite(auth.isAdmin())) return;
+    if (!auth.requireWrite(auth.canEditAnyWorkshop())) return;
     if (!this.data.resetPassword) return wx.showToast({ title: '请输入新密码', icon: 'none' });
     const passwordError = getPasswordError(this.data.resetPassword);
     if (passwordError) return wx.showToast({ title: passwordError, icon: 'none' });

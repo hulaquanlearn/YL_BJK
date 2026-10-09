@@ -19,7 +19,8 @@ Page({
     stockReason: '',
     isStockOperating: false,
     isAdmin: false,
-    canEditPart: false, isViewer: false
+    canEditPart: false, isViewer: false,
+    canBindModel: false, modelChoices: [], modelLabels: [], modelChoiceIndex: 0, modelBindingBusy: false
   },
 
   onLoad(options) {
@@ -49,7 +50,9 @@ Page({
           maxStockText: res.data.maxStock === null || res.data.maxStock === undefined ? '未设置' : `${res.data.maxStock}${res.data.unit || ''}`,
           reorderPointText: res.data.reorderPoint === null || res.data.reorderPoint === undefined ? '未设置' : `${res.data.reorderPoint}${res.data.unit || ''}`
         };
-        this.setData({ part, canEditPart: auth.canEditWorkshop(part.workshopCode) });
+        const scopes = String(part.assetWorkshopCodes || part.workshopCode || '').split(',').filter(Boolean);
+        this.setData({ part, canEditPart: auth.canEditWorkshop(part.workshopCode), canBindModel: scopes.length > 0 && scopes.every(code => auth.canEditWorkshop(code)) });
+        if (this.data.canBindModel) this.loadModelChoices();
       } else {
         wx.showToast({ title: '未找到该备件', icon: 'none' });
         wx.navigateBack();
@@ -59,6 +62,28 @@ Page({
       wx.showToast({ title: '加载失败', icon: 'none' });
       wx.navigateBack();
     });
+  },
+
+  async loadModelChoices() {
+    try {
+      const result = await api.getPartModels();
+      const models = (result.data || []).filter(model => !model.workshopCode || model.workshopCode === this.data.part.workshopCode).sort((a,b) => Number(a.id)-Number(b.id));
+      const choices = [{ id: null, name: '解除绑定' }, ...models];
+      this.setData({ modelChoices: choices, modelLabels: choices.map(model => model.id ? `${model.id} · ${model.name}${model.modelUrl ? '' : '（待生成）'}` : model.name), modelChoiceIndex: Math.max(0, choices.findIndex(model => Number(model.id) === Number(this.data.part.categoryModelId))) });
+    } catch (_) { wx.showToast({ title: '模型目录加载失败', icon: 'none' }); }
+  },
+
+  async changeBoundModel(event) {
+    if (!auth.requireWrite(this.data.canBindModel) || this.data.modelBindingBusy) return;
+    const model = this.data.modelChoices[Number(event.detail.value)];
+    if (!model) return;
+    this.setData({ modelBindingBusy: true });
+    try {
+      await api.bindPartModel(this.data.part.partId, model.id === null ? null : Number(model.id));
+      await this.fetchPartByID(this.partId);
+      wx.showToast({ title: '模型绑定已保存' });
+    } catch (error) { wx.showToast({ title: error.message || '绑定失败', icon: 'none' }); }
+    finally { this.setData({ modelBindingBusy: false }); }
   },
 
   checkPartLoaded() {

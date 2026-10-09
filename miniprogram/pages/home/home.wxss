@@ -4,16 +4,17 @@
   background: #f4f6f8;
 }
 
-.section-heading, .flow-title-row, .dashboard-heading, .dashboard-refresh {
+.section-heading, .flow-title-row, .dashboard-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 .workbench > .section:first-child { margin-top: 0; }
-.dashboard-heading { margin-top: 30rpx; padding: 0 4rpx; gap: 12rpx; flex-wrap: nowrap; }
-.dashboard-refresh { margin-left: auto; gap: 12rpx; flex: none; }
+.dashboard-heading { width: 100%; margin-top: 30rpx; padding: 0 4rpx; box-sizing: border-box; flex-wrap: nowrap; }
+.dashboard-caption { display: flex; min-width: 0; flex: 1; align-items: center; }
+.dashboard-caption .section-title { flex: none; margin-right: 12rpx; }
 .update-time { color: #6f7885; font-size: 22rpx; white-space: nowrap; }
-.refresh-button { display: flex; height: 56rpx; margin: 0; padding: 0 14rpx; min-width: 80rpx; align-items: center; justify-content: center; color: #b4232d; background: transparent; font-size: 24rpx; line-height: 1.2; }
+.refresh-button { display: flex; width: 112rpx; height: 56rpx; margin: 0 0 0 12rpx; padding: 0; flex: 0 0 112rpx; align-items: center; justify-content: center; color: #b4232d; background: transparent; font-size: 24rpx; line-height: 1.2; }
 .refresh-button::after { border: 0; }
 .refresh-button[disabled] { color: #9199a4; background: transparent; }
 

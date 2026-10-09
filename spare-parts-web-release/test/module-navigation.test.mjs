@@ -10,6 +10,12 @@ const routerSource = fs.readFileSync(path.join(root, 'src/router/index.js'), 'ut
 const portalSource = fs.readFileSync(path.join(root, 'src/views/Portal.vue'), 'utf8')
 const apiSource = fs.readFileSync(path.join(root, 'src/api/index.js'), 'utf8')
 
+test('retired PLC/ABB entry redirects old bookmarks and has no navigation link', () => {
+  assert.match(routerSource, /path: '\/plc-analysis', redirect: '\/knowledge'/)
+  assert.doesNotMatch(routerSource, /import\('\.\.\/views\/PlcAnalysis\.vue'\)/)
+  for (const source of [appSource, portalSource]) assert.doesNotMatch(source, /to="\/plc-analysis"/)
+})
+
 test('account management is removed while every authenticated page keeps logout', () => {
   assert.match(routerSource, /path: '\/account', redirect: '\/portal'/)
   assert.match(routerSource, /path: '\/users', redirect: '\/portal'/)
@@ -30,6 +36,12 @@ test('portal exposes only the two business modules and keeps logout', () => {
   assert.match(portalSource, />智能工程中心</)
   assert.doesNotMatch(portalSource, />账户与权限中心</)
   assert.match(portalSource, /command="logout"[\s\S]*退出登录/)
+})
+
+test('inspection notice stays inside work management navigation without a duplicate business switch item', () => {
+  assert.doesNotMatch(appSource, /<el-dropdown-item\b[^>]*\bcommand="\/inspection-notices"/)
+  assert.match(appSource, /<router-link to="\/inspection-notices"/)
+  assert.match(portalSource, /to="\/inspection-notices"/)
 })
 
 test('PLC upload submits the files already confirmed by the interface', () => {

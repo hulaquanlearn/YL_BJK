@@ -11,7 +11,7 @@
 
     <p v-if="query.warehouseAreaName||query.partType||query.stockStatus||query.lowStock||query.activeOnly" class="inherited-scope">沿用库存范围：{{[query.warehouseAreaName,query.partType,query.stockStatus,query.lowStock?'低库存':'',query.activeOnly?'仅当前有效备件':''].filter(Boolean).join(' · ')}}<el-button text size="small" @click="clearInheritedScope">清除范围</el-button></p>
     <section class="panel movement-table">
-      <div class="table-toolbar"><div><strong>流水明细</strong><span class="result-count">共 {{ total }} 条</span></div><div class="movement-table-tools"><span class="audit-tip"><el-icon><CircleCheck /></el-icon>记录由服务端自动生成</span><el-button text :loading="loading" aria-label="刷新流水" title="刷新流水" @click="load"><el-icon><Refresh /></el-icon></el-button></div></div>
+      <div class="table-toolbar"><div><strong>流水明细</strong><span class="result-count">共 {{ total }} 条</span></div><div class="movement-table-tools"><span class="audit-tip"><el-icon><CircleCheck /></el-icon>记录由服务端自动生成</span></div></div>
       <el-table :data="list" v-loading="loading" row-key="id" empty-text="暂无符合条件的库存流水">
         <el-table-column label="时间" width="158"><template #default="{ row }"><span class="time-cell">{{ formatDate(row.createdAt) }}</span></template></el-table-column>
         <el-table-column label="类型" width="100" align="center"><template #default="{ row }"><el-tag :type="movementTag(row.type)" effect="light" round>{{ movementLabel(row.type) }}</el-tag></template></el-table-column>

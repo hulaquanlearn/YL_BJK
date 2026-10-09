@@ -14,6 +14,29 @@ test('rules require explicit standards, valid totals and integer daily targets',
   assert.throws(()=>W.rules([{...config[0],max:100,target:5.5}]),{status:400});
   assert.throws(()=>W.rules([{...config[0],max:99}]),{status:400});
 });
+test('catalog scoring accepts fractional points and still enforces the 25 point total',()=>{
+  const config=[{dutyId:'production_progress',kind:'manual',max:24.5,standard:'依据生产材料复核'},{dutyId:'team_feedback',kind:'manual',max:0.5,standard:'依据反馈材料复核'}]
+  assert.equal(W.rules(config,{requireDuty:true})[1].max,0.5)
+  assert.throws(()=>W.rules([{...config[0],max:24},{...config[1]}],{requireDuty:true}),/25 分/)
+  assert.throws(()=>W.rules([{...config[0],max:25},{...config[1],max:0}],{requireDuty:true}),{status:400})
+})
+test('new scoring rules must select distinct existing duties and count only that duty',()=>{
+  const standard='依据本项工作记录和验证材料复核';
+  const strict={requireDuty:true};
+  const rule=W.rules([{dutyId:'production_progress',title:'随意填写的名称',kind:'duties',max:25,target:5,deduction:5,standard}],strict)[0];
+  assert.equal(rule.title,W.duties.get('production_progress').title);
+  assert.equal(rule.dutyId,'production_progress');
+  assert.throws(()=>W.rules([{title:'自由填写',kind:'manual',max:100,standard}],strict),/已建工作事项/);
+  assert.throws(()=>W.rules([{dutyId:'energy_usage',kind:'duties',max:100,target:1,deduction:20,standard}],strict),/只有每日事项/);
+  assert.throws(()=>W.rules([{dutyId:'production_progress',kind:'manual',max:50,standard},{dutyId:'production_progress',kind:'manual',max:50,standard}],strict),/不能重复/);
+  const records=[
+    {id:1,kind:'duties',status:'submitted',record_date:'2026-09-21',payload:{mode:'daily',checks:[{dutyId:'team_feedback'}]}},
+    {id:2,kind:'duties',status:'submitted',record_date:'2026-09-22',payload:{mode:'daily',checks:[{dutyId:'production_progress',status:'正常'}]}}
+  ];
+  assert.equal(W.evaluate([rule],records).items[0].count,1);
+  assert.equal(rule.deduction,25);
+  assert.equal(W.evaluate([rule],records).items[0].score,0);
+});
 test('drafts and multiple same-day entries cannot inflate completion score', () => {
   const r=W.rules(config), records=[{id:1,kind:'process',status:'submitted',record_date:'2026-09-21'},{id:2,kind:'process',status:'submitted',record_date:'2026-09-21'},{id:3,kind:'process',status:'draft',record_date:'2026-09-22'}];
   const result=W.evaluate(r,records); assert.equal(result.items[0].count,1);assert.equal(result.items[0].score,8);assert.equal(result.total,null);
@@ -39,8 +62,8 @@ test('daily, weekly and continuous work contents follow the source cadence and a
   assert.equal(W.record({...dailyRecord,checks:[{dutyId:daily[0].id,status:''}]},false).checks[0].status,'');
   assert.throws(()=>W.record({...dailyRecord,checks:dailyRecord.checks.map((c,i)=>i?c:{...c,status:'伪造状态'})},true),{status:400});
   const abnormal=daily.find(x=>x.id==='team_feedback');
-  assert.throws(()=>W.record({...dailyRecord,checks:dailyRecord.checks.map(c=>c.dutyId===abnormal.id?{...c,status:'有异常'}:c)},true),{status:400});
-  assert.equal(W.record({...dailyRecord,checks:dailyRecord.checks.map(c=>c.dutyId===abnormal.id?{...c,status:'有异常',note:'发现员工异常'}:c)},true).checks.length,daily.length);
+  assert.throws(()=>W.record({...dailyRecord,checks:dailyRecord.checks.map(c=>c.dutyId===abnormal.id?{...c,status:'异常'}:c)},true),{status:400});
+  assert.equal(W.record({...dailyRecord,checks:dailyRecord.checks.map(c=>c.dutyId===abnormal.id?{...c,status:'异常',note:'发现员工异常'}:c)},true).checks.length,daily.length);
   assert.equal(W.record({kind:'duties',floor:2,mode:'continuous',checks:[{dutyId:continuous[0].id,status:continuous[0].options[0]}]},true).checks.length,1);
   assert.throws(()=>W.record({kind:'duties',floor:2,mode:'weekly',checks:[{dutyId:daily[0].id,status:daily[0].options[0]}]},true),{status:400});
 });
@@ -97,3 +120,19 @@ test('production abnormal report exports a Word document with the source form fi
   const bytes=await createProductionReport({record:{id:7,record_date:'2026-09-23'},leader:'组长甲',workshop:'制曲车间',floor:4,check:{productionReport:{startTime:'08:00',endTime:'09:00',agvCount:'2',vehicleNo:'35号车',repairProgress:'维修完成',issues:[{category:'设备',description:'总线故障',delay:'60分钟'}],measures:['下线维修后复测']}}});
   assert.equal(bytes.subarray(0,2).toString(),'PK');assert.ok(bytes.length>1000);
 });
+
+test('production analysis retains more than twenty issues and requires a named custom factor',()=>{
+ const issues=Array.from({length:25},(_,i)=>({factorType:'其他',category:'原料'+i,description:'原因'+i,delay:'10分钟'}));
+ const productionReport={startTime:'08:00',endTime:'16:00',agvCount:'7',vehicleNo:'35',repairProgress:'检修中',issues,measures:['复查']};
+ const payload={kind:'duties',floor:1,mode:'daily',checks:[{dutyId:'production_progress',status:'异常',productionReport}]};
+ const saved=W.record(payload,true).checks[0].productionReport;
+ assert.equal(saved.issues.length,25);assert.equal(saved.issues[24].category,'原料24');
+ const wb=createWorkbook([{id:42,kind:'duties',record_date:'2026-09-29',payload:{...payload,checks:[{dutyId:'production_progress',status:'异常',productionReport:saved}]}}],[],null,'测试');
+ const sheet=wb.getWorksheet('生产异常-42');assert.equal(sheet.getCell('A6').value,'问题分析(设备/人员/其他)');assert.equal(sheet.getCell('A6').alignment.horizontal,'center');assert.ok(sheet.getColumn(1).values.includes('原料24'));
+ issues[0].category='';assert.throws(()=>W.record(payload,true),{status:400});
+ issues[0].category='其他';assert.throws(()=>W.record(payload,true),{status:400});
+});
+
+test('custom manual criteria persist title and standard and reject formula spoofing',()=>{
+ const item={custom:true,customId:'custom_1',title:'新增检查事项',kind:'manual',max:25,standard:'完成检查且提交材料满分',bonusPerClosure:0};const saved=W.rules([item],{requireDuty:true});assert.equal(saved[0].customId,item.customId);assert.equal(saved[0].standard,item.standard);for(const bad of [{...item,title:''},{...item,kind:'duties'},{...item,dutyId:'unknown'},{...item,bonusPerClosure:0.5}])assert.throws(()=>W.rules([bad],{requireDuty:true}),{status:400});assert.throws(()=>W.rules([{...item,max:12.5},{...item,max:12.5}],{requireDuty:true}),{status:400})
+})

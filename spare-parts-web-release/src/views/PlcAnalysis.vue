@@ -6,10 +6,10 @@
         <h2>程序项目</h2>
 
       </div>
-      <div class="compact-stats" aria-label="程序统计">
+      <div class="compact-stats" v-if="stats.projects>0" aria-label="程序统计">
         <span><b>{{ stats.projects }}</b>项目</span><span><b>{{ stats.items }}</b>条目</span><span><b>{{ stats.blocks }}</b>程序块</span><span :class="{ warning: stats.protectedBlocks }"><b>{{ stats.protectedBlocks }}</b>加密</span>
       </div>
-      <div class="hero-actions"><el-button @click="showGuide = true">本机解析助手</el-button><el-button v-write v-if="$showControl(isAdmin)" type="primary" @click="uploadVisible = true">导入程序项目</el-button><el-tag v-else effect="plain">项目只读</el-tag></div>
+      <div class="hero-actions"><el-button @click="showGuide = true">本机解析助手</el-button><el-button v-write="isAdmin" v-if="$showControl(isAdmin)" type="primary" @click="uploadVisible = true">导入程序项目</el-button><el-tag v-else effect="plain">项目只读</el-tag></div>
     </section>
 
     <section class="plc-workbench">
@@ -26,11 +26,11 @@
         </div>
       </aside>
 
-      <main class="program-panel">
+      <main class="program-panel" :class="{'is-empty':!currentProject && !projects.length}">
         <template v-if="currentProject">
           <div class="project-overview">
             <div><span class="eyebrow">{{ currentProject.programFamily === 'abb_rapid' ? 'ABB RAPID' : currentProject.tiaVersion }} PROGRAM MAP</span><h3>{{ currentProject.name }}</h3><p>{{ platformSummary(currentProject) }}</p></div>
-            <div class="project-tags"><el-tag>{{ currentProject.programFamily === 'abb_rapid' ? '机器人程序' : 'PLC 程序' }}</el-tag><el-tag :type="currentProject.parseStatus === 'parsed' ? 'success' : 'warning'">{{ parseStatusLabel(currentProject.parseStatus) }}</el-tag><el-button v-write v-if="$showControl(isAdmin)" type="danger" plain size="small" @click="removeCurrentProject">删除项目</el-button></div>
+            <div class="project-tags"><el-tag>{{ currentProject.programFamily === 'abb_rapid' ? '机器人程序' : 'PLC 程序' }}</el-tag><el-tag :type="currentProject.parseStatus === 'parsed' ? 'success' : 'warning'">{{ parseStatusLabel(currentProject.parseStatus) }}</el-tag><el-button v-write="isAdmin" v-if="$showControl(isAdmin)" type="danger" plain size="small" @click="removeCurrentProject">删除项目</el-button></div>
           </div>
 
           <el-alert v-if="currentProject.parseStatus === 'extracting'" type="info" :closable="false" show-icon>

@@ -1,6 +1,6 @@
 {
   "name": "spare-parts-api",
-  "version": "1.9.4",
+  "version": "1.9.10",
   "private": true,
   "description": "备件管理小程序的 MySQL REST API",
   "main": "src/app.js",

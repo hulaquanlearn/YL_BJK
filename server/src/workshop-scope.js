@@ -12,9 +12,29 @@ const ROLE_LABELS = Object.freeze({admin:'系统管理员',raw_grain:'原粮车�
 
 function enforceReadOnly(req, _res, next) {
   if (['GET','HEAD','OPTIONS'].includes(req.method) || EDIT_ROLES.has(req.user?.role)) return next();
+  if (req.method === 'POST' && req.path === '/inventory-orders' && req.user?.role === 'viewer'
+    && WORKSHOP_CODES.has(req.user.workshopCode)) return next();
   // Questions produce answers and internal usage records, not business changes.
   if (req.method === 'POST' && (req.path === '/ai/chat' || /^\/plc\/projects\/\d+\/analyze$/.test(req.path))) return next();
-  next(new ApiError(403, '权限不足：车间人员仅可查看，不能新增、修改、删除、导入或审批业务数据'));
+  next(new ApiError(403, '权限不足：车间人员可提交所属车间盘点单，但不能修改备件或审批'));
+}
+
+function inventoryOrderScope(user, requestedWorkshopCode = '') {
+  if (user?.role === 'admin') return requestedWorkshopCode ? normalizeWorkshopCode(requestedWorkshopCode) : '';
+  const assigned = workshopForRole(user?.role)
+    || (user?.role === 'viewer' ? normalizeWorkshopCode(user.workshopCode) : '');
+  if (!assigned) throw new ApiError(403, '当前账号未分配车间，无法查看或提交盘点单');
+  if (requestedWorkshopCode && normalizeWorkshopCode(requestedWorkshopCode) !== assigned) {
+    throw new ApiError(403, '只能查看所属车间的盘点单');
+  }
+  return assigned;
+}
+
+function assertInventoryOrderSubmit(user, workshopCode) {
+  const assigned = inventoryOrderScope(user);
+  if (assigned && assigned !== normalizeWorkshopCode(workshopCode)) {
+    throw new ApiError(403, '只能提交所属车间的盘点单');
+  }
 }
 
 function normalizeWorkshopCode(value, fallback = '') {
@@ -56,6 +76,8 @@ module.exports = {
   canWriteWorkshop,
   assertWorkshopWrite,
   requireAnyWorkshopEditor,
+  inventoryOrderScope,
+  assertInventoryOrderSubmit,
   ROLE_LABELS,
   enforceReadOnly
 };

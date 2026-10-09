@@ -53,12 +53,12 @@ Page({
     pageSize: 20,
     total: 0,
     hasMore: false,
-    isViewer: false
+    canApprove: false
   },
 
   onLoad() {
     if (!auth.requireLogin()) return;
-    this.setData({ isViewer: auth.isViewer() });
+    this.setData({ canApprove: auth.canApproveInventory() });
     this.loadApproveList();
   },
 
@@ -110,7 +110,7 @@ Page({
   loadMore(){if(this.data.hasMore&&!this.data.isLoading)this.loadApproveList(true);},
 
   handleApprove(orderId, status) {
-    if (!auth.requireWrite(auth.isAdmin())) return;
+    if (!auth.requireWrite(auth.canApproveInventory())) return;
     if (!orderId || !status) {
       wx.showToast({ title: '盘点单ID无效', icon: 'none' });
       return;
@@ -137,7 +137,7 @@ Page({
   },
 
   async updateApproveStatus(orderId, status) {
-    if (!auth.requireWrite(auth.isAdmin())) return;
+    if (!auth.requireWrite(auth.canApproveInventory())) return;
     try {
       if (!orderId) {
         throw new Error('盘点单ID无效');

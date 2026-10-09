@@ -21,8 +21,57 @@ const entries = [
   abnormalOptions: options.filter(v => ['异常','有异常','未完成','发现问题'].includes(v)),
 }));
 
+// Match the supplied weekly worksheet: some rows are evidence, not a judgment.
+const documentIds = new Set(['standard_operation','process_adjustment','safety_activity']);
+for (const entry of entries) {
+  entry.worksheetVersion = 2;
+  entry.reportMode = documentIds.has(entry.id) ? 'document' : ['traffic_safety','six_s'].includes(entry.id) ? 'photo' : 'result';
+  if (entry.reportMode !== 'result') { entry.options = ['已提交材料']; entry.abnormalOptions = []; entry.photoRequired = entry.reportMode === 'photo'; }
+  else if (entry.id !== 'directive_tasks') { entry.options=['正常','异常']; entry.abnormalOptions=['异常']; }
+  if (entry.id === 'quality_issue') entry.abnormalEvidence = true;
+  if (['mes_maintenance','iot_equipment'].includes(entry.id)) entry.photoRequired = true;
+  if (['mes_maintenance','iot_equipment','contractor_safety','safety_violation'].includes(entry.id)) entry.photoWhen = 'abnormal';
+}
 const byId = new Map(entries.map(entry => [entry.id, entry]));
+const fixedDocuments = {
+  standard_operation: { documentTitle: '2026年曲坯分析记录', documentUrl: 'https://www.kdocs.cn/l/cuvwtXifQI5l' },
+  process_adjustment: { documentTitle: '四部制曲工艺分析表', documentUrl: 'https://www.kdocs.cn/l/cu8JE709DJFw' },
+  safety_activity: { documentTitle: '专项检查表', documentUrl: 'https://www.kdocs.cn/l/cpTIwcP5eUkN' },
+};
+// Supply the agreed links for existing saved catalogs as well as the initial catalog.
+// An explicitly configured document takes precedence over these defaults.
+function withFixedDocument(duty) {
+  if (!duty) return duty;
+  const linked = duty.documentConfigured || duty.documentUrl || !fixedDocuments[duty.id] ? duty : { ...duty, ...fixedDocuments[duty.id] };
+  // Sharing a URL is not evidence of this person's completed work. New submissions
+  // require a screenshot; old record snapshots keep their original requirements.
+  if (linked.reportMode === 'document') return { ...linked, documentScreenshotRequired: Boolean(linked.documentUrl), photoRequired: Boolean(linked.documentUrl) };
+  return linked;
+}
+for (const duty of entries) Object.assign(duty, withFixedDocument(duty));
+// Upgrade recognized built-in legacy forms on read; never rewrite record snapshots.
+// Saving the catalog stamps version 2, so later deliberate admin changes are retained.
+function withWorksheet(duty) {
+  const current = byId.get(duty?.id);
+  const legacyOptions = [['正常','异常'],['无异常','有异常'],['未发现','发现问题'],['已完成','未完成'],['已完成','未完成','无需调整'],['已提交材料']];
+  if (!current || duty.worksheetVersion >= 2 || !legacyOptions.some(options => JSON.stringify(options) === JSON.stringify(duty.options))) return duty;
+  return { ...duty, worksheetVersion: 2, reportMode: current.reportMode, options: [...current.options], abnormalOptions: [...current.abnormalOptions],
+    photoRequired: current.photoRequired, photoWhen: current.photoWhen || 'always', abnormalEvidence: current.abnormalEvidence === true };
+}
+function materialRequirement(duty, status) {
+  if (duty?.documentScreenshotRequired) return 'photo';
+  if (duty?.abnormalEvidence && duty.abnormalOptions.includes(status)) return 'either';
+  if (duty?.reportMode === 'document') return 'either';
+  if (duty?.reportMode === 'photo') return 'photo';
+  return duty?.photoRequired && (duty.photoWhen !== 'abnormal' || duty.abnormalOptions.includes(status)) ? 'photo' : 'optional';
+}
+function hasMaterial(duty, check, hasPhoto) {
+  const requirement = materialRequirement(duty, check.status);
+  const linkedPhoto = check.taskEvidence?.some(t => t.files?.length);
+  const link = check.reference || check.taskEvidence?.some(t => t.reference);
+  return requirement === 'optional' || hasPhoto || linkedPhoto || (requirement === 'either' && Boolean(link));
+}
 const cadence = { '每日': 'daily', '每周': 'weekly', '持续': 'continuous' };
 function list(frequency) { return entries.filter(entry => !frequency || cadence[entry.frequency] === frequency); }
 function get(id) { return byId.get(String(id)); }
-module.exports = { entries, byId, cadence, list, get };
+module.exports = { entries, byId, cadence, list, get, materialRequirement, hasMaterial, withFixedDocument, withWorksheet };

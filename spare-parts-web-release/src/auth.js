@@ -17,7 +17,7 @@ export function clearSession() {
 }
 export function isAdmin() { return getUser()?.role === 'admin' }
 export function isViewer() { return getUser()?.role === 'viewer' }
-export function showControl(allowed) { return isViewer() || Boolean(allowed) }
+export function showControl(_allowed) { return Boolean(getUser()) }
 export const WORKSHOP_ROLES = Object.freeze({ raw_grain: 'raw_grain', qu_making: 'qu_making', brewing: 'brewing' })
 export function userWorkshopCode() { return getUser()?.workshopCode || WORKSHOP_ROLES[getUser()?.role] || '' }
 export function canEditWorkshop(workshopCode) {

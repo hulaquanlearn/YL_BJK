@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-import { clearSession, getToken, isViewer } from '../auth'
-import { isBusinessWrite, PERMISSION_MESSAGE } from '../utils/write-permission.mjs'
+import { clearSession, getToken, isViewer, userWorkshopCode } from '../auth'
+import { canSubmitInventoryRequest, isBusinessWrite, PERMISSION_MESSAGE } from '../utils/write-permission.mjs'
 
 const http = axios.create({
   baseURL: '/api',
@@ -9,7 +9,8 @@ const http = axios.create({
 })
 
 http.interceptors.request.use(config => {
-  if (isViewer() && isBusinessWrite(config.method, config.url)) {
+  if (isViewer() && isBusinessWrite(config.method, config.url)
+    && !canSubmitInventoryRequest(config.method, config.url, userWorkshopCode())) {
     const error = new Error(PERMISSION_MESSAGE)
     error.response = { status:403, data:{ msg:PERMISSION_MESSAGE } }
     return Promise.reject(error)
@@ -130,13 +131,15 @@ export const getPartModelLibrary = params => http.get('/part-model-library', { p
 export const uploadPartImage = (partId, formData) => http.post(`/parts/${partId}/image`, formData, { timeout: 60000 })
 export const deletePartImage = partId => http.delete(`/parts/${partId}/image`)
 export const batchUpdatePartImages = updates => http.post('/parts/batch-images', { updates })
-export const batchAssignPartCategoryModel = data => http.post('/parts/batch-category-model', data)
+export const batchAssignPartCategoryModel = data => http.post('/parts/batch-model', { partIds: data.partIds, modelId: data.categoryModelId })
 export const previewPartCategoryMatches = partIds => http.post('/part-category-model-matches/preview', { partIds })
 export const applyPartCategoryMatches = items => http.post('/part-category-model-matches/apply', { items })
-export const getPartCategoryModels = params => http.get('/part-category-models', { params })
-export const createPartCategoryModel = formData => http.post('/part-category-models', formData, { timeout: 180000 })
-export const updatePartCategoryModel = (id, formData) => http.put(`/part-category-models/${id}`, formData, { timeout: 180000 })
-export const deletePartCategoryModel = id => http.delete(`/part-category-models/${id}`)
+export const getPartCategoryModels = params => http.get('/part-models', { params })
+export const createPartCategoryModel = formData => http.post('/part-models', formData, { timeout: 180000 })
+export const updatePartCategoryModel = (id, formData) => http.put(`/part-models/${id}`, formData, { timeout: 180000 })
+export const deletePartCategoryModel = id => http.delete(`/part-models/${id}`)
+export const previewModelBindings = data => http.post('/parts/model-bindings/preview', data, { timeout: 120000 })
+export const importModelBindings = data => http.post('/parts/model-bindings/import', data, { timeout: 120000 })
 export const getStagingPoints = params => http.get('/staging-points', { params })
 export const createStagingPoint = data => http.post('/staging-points', data)
 export const updateStagingPoint = (id, data) => http.put(`/staging-points/${id}`, data)

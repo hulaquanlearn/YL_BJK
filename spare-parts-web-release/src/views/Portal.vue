@@ -23,20 +23,19 @@
 
       <article class="module-card knowledge-card">
         <div class="module-card-top"><span class="module-icon"><el-icon><Reading /></el-icon></span><span class="module-status">资料与经验</span></div>
-        <div><h2>智能工程中心</h2><p>查阅工程资料与故障经验，理解设备程序。</p></div>
+        <div><h2>智能工程中心</h2><p>查阅工程资料与故障经验。</p></div>
         
         <router-link class="module-enter" to="/knowledge">进入工程知识 <el-icon><Right /></el-icon></router-link>
         <nav class="workspace-links" aria-label="工程常用功能">
-          <router-link to="/knowledge"><el-icon><Document /></el-icon><span>工程知识库</span><el-icon><ArrowRight /></el-icon></router-link>
-          <router-link to="/plc-analysis"><el-icon><Cpu /></el-icon><span>程序智能分析</span><el-icon><ArrowRight /></el-icon></router-link>
+          <router-link to="/knowledge"><el-icon><Reading /></el-icon><span>工程知识库</span><el-icon><ArrowRight /></el-icon></router-link>
+
         </nav>
       </article>
       <article class="module-card work-card">
         <div class="module-card-top"><span class="module-icon"><el-icon><DocumentChecked /></el-icon></span><span class="module-status">填报与考评</span></div>
-        <div><h2>工作管理中心</h2><p>制曲车间履职填报与考评，原粮车间检查通报整理。</p></div>
-        <router-link v-if="canUseWork || canViewNotice" class="module-enter" :to="canUseWork?'/work':'/inspection-notices'">进入工作管理 <el-icon><Right /></el-icon></router-link>
-        <p v-else class="module-unavailable">当前账号尚未分配工作管理职责</p>
-        <nav v-if="canUseWork || canViewNotice" class="workspace-links" aria-label="工作管理常用功能"><router-link v-if="canUseWork" to="/work"><el-icon><DocumentChecked /></el-icon><span>制曲 · 组长履职考评{{ workRole==='shift_leader'?'（班长复核）':'' }}</span><el-icon><ArrowRight /></el-icon></router-link><router-link v-if="canViewNotice" to="/inspection-notices"><el-icon><DocumentChecked /></el-icon><span>原粮 · 检查通报{{ canEditNotice?'整理':'查看' }}</span><el-icon><ArrowRight /></el-icon></router-link></nav>
+        <div><h2>工作管理中心</h2><p>制曲考评·原粮通报。</p></div>
+        <router-link class="module-enter" :to="preferredWorkPath(user)">进入工作管理 <el-icon><Right /></el-icon></router-link>
+        <nav class="workspace-links" aria-label="工作管理常用功能"><router-link to="/work"><el-icon><DocumentChecked /></el-icon><span>制曲 · 组长履职考评{{ workRole==='shift_leader'?'（班长复核）':'' }}</span><el-icon><ArrowRight /></el-icon></router-link><router-link to="/inspection-notices"><el-icon><DocumentChecked /></el-icon><span>原粮 · 检查通报{{ canEditNotice?'整理':'查看' }}</span><el-icon><ArrowRight /></el-icon></router-link></nav>
       </article>
     </section>
   </main>
@@ -49,14 +48,15 @@ import { ElMessageBox } from 'element-plus'
 import { logout } from '../api'
 import { clearSession, getUser } from '../auth'
 import { work } from '../api/work'
+import { preferredWorkPath } from '../utils/feature-access.mjs'
 
 const router = useRouter()
 const user = getUser()
 const canEditNotice = ['admin', 'raw_grain'].includes(user?.role)
-const canViewNotice = canEditNotice || (user?.role==='viewer' && user?.staffWorkshopCode==='raw_grain')
+const canViewNotice = ['admin','raw_grain','qu_making','brewing'].includes(user?.role) || (user?.role==='viewer' && user?.staffWorkshopCode==='raw_grain')
 const workRole=ref('')
-const canUseWork = computed(() => ['admin', 'qu_making'].includes(user?.role) || Boolean(workRole.value))
-onMounted(async()=>{if(user?.role!=='viewer'||(user.staffWorkshopCode&&user.staffWorkshopCode!=='qu_making'))return;try{const response=await work.get('/context');workRole.value=response.data.workRole||''}catch{workRole.value=''}})
+const canUseWork = computed(() => ['admin','raw_grain','qu_making','brewing'].includes(user?.role) || (user?.role==='viewer' && user?.staffWorkshopCode==='qu_making' && user?.staffPosition==='shift_leader') || Boolean(workRole.value))
+onMounted(async()=>{if(user?.role!=='viewer'||user.staffWorkshopCode!=='qu_making'||!['group_leader','shift_leader'].includes(user.staffPosition))return;try{const response=await work.get('/context');workRole.value=response.data.workRole||''}catch{workRole.value=''}})
 const initial = computed(() => user?.displayName?.slice(0, 1) || '用')
 const roleLabel = computed(() => ({
   admin: '总管理员',

@@ -46,7 +46,7 @@
 
     <view class="card">
       <view class="card-heading"><view><text class="section-title">低库存备件</text><text class="section-desc">仅统计已设置订购点的备件</text></view><text class="section-link" bindtap="goToLowStockParts">查看全部</text></view>
-      <view class="low-item" wx:for="{{lowStockParts}}" wx:key="_id">
+      <view class="low-item" wx:for="{{lowStockPreview}}" wx:key="_id">
         <view class="low-main"><text class="low-name">{{item.materialDesc}}</text><text class="low-location">{{item.warehouseAreaName}} · {{item.shelf || '-'}}号架 · {{item.layer || '-'}}层</text><text class="replenish-tip" wx:if="{{item.suggestedQuantity !== null && item.suggestedQuantity > 0}}">建议补充 {{item.suggestedQuantity}}{{item.unit}} 至最高储备</text></view>
         <text class="low-stock">余 {{item.totalStock}}{{item.unit}}</text>
       </view>

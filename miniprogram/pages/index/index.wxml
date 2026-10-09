@@ -18,28 +18,28 @@
   <view class="low-stock-banner" wx:if="{{lowStockOnly}}">
     <text>低库存清单</text>
     <text class="low-stock-desc">仅显示达到或低于订购点的备件</text>
+    <button class="show-all-stock" bindtap="showAllStock">查看全部库存</button>
   </view>
 
   <view class="filter-toolbar">
     <view class="filter-main" bindtap="toggleFilters">
-      <view class="filter-title-row">
-        <text class="filter-title">筛选</text>
-        <text class="filter-count" wx:if="{{activeFilterCount}}">{{activeFilterCount}}</text>
-      </view>
+      <text class="filter-title">货区：</text>
       <text class="filter-summary">{{filterSummary}}</text>
+      <text class="filter-count" wx:if="{{activeFilterCount > 1}}">{{activeFilterCount}}</text>
       <text class="filter-toggle">{{isFilterExpanded ? '收起' : '展开'}}</text>
     </view>
     <picker mode="selector" range="{{sortTypes}}" value="{{sortIndex}}" bindchange="onSortChange">
       <view class="sort-compact">
-        <text class="sort-caption">排序</text>
+        <text class="sort-caption">排序：</text>
         <text class="sort-current">{{sortTypes[sortIndex]}}</text>
+        <text class="sort-toggle">选择</text>
       </view>
     </picker>
   </view>
 
   <view class="filter-panel" wx:if="{{isFilterExpanded}}">
     <view class="filter-panel-head">
-      <text>选择筛选条件</text>
+      <text>选择货区</text>
       <text class="filter-close" bindtap="toggleFilters">×</text>
     </view>
 

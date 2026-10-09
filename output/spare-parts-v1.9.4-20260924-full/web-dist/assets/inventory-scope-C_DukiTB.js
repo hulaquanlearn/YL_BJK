@@ -1,1 +1,0 @@
-const o=["workshopCode","warehouseAreaName","partType","searchKeyword","stockStatus","lowStock"];function n(e={}){return Object.fromEntries(o.map(t=>[t,typeof e[t]=="string"?e[t]:""]))}function s(e={},t={}){return{scope:"1",...Object.fromEntries(Object.entries({...n(e),...t}).filter(([,r])=>r!==""&&r!=null))}}export{o as I,s as a,n as i};

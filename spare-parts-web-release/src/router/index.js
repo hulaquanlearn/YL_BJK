@@ -9,7 +9,7 @@ const routes = [
   { path: '/', redirect: '/portal' },
   { path: '/portal', name: 'Portal', component: () => import('../views/Portal.vue'), meta: { portal: true, title: '业务板块' } },
   { path: '/knowledge', name: 'Knowledge', component: () => import('../views/Knowledge.vue'), meta: { module: 'knowledge', title: '工程知识', description: '沉淀工程资料、故障经验与标准处置方法' } },
-  { path: '/plc-analysis', name: 'PlcAnalysis', component: () => import('../views/PlcAnalysis.vue'), meta: { module: 'knowledge', title: '程序智能分析', description: '只读解析 Siemens TIA V16/V17 与 ABB RAPID 程序，追踪控制逻辑与程序证据' } },
+  { path: '/plc-analysis', redirect: '/knowledge' },
   { path: '/inventory', name: 'Inventory', component: () => import('../views/Inventory.vue'), meta: { module: 'spare', title: '库存总览', description: '查询备件库存、库位和预警状态' } },
   { path: '/replenishment', name: 'Replenishment', component: () => import('../views/Replenishment.vue'), meta: { title: '补货清单', description: '按最高储备生成低库存备件补货建议' } },
   { path: '/movements', name: 'Movements', component: () => import('../views/Movements.vue'), meta: { title: '库存流水', description: '追溯每一次出库、入库和盘点调整' } },
@@ -38,8 +38,6 @@ router.beforeEach(async to => {
   if (to.meta.public) return getToken() && getUser() ? '/portal' : true
   if (!getToken() || !getUser()) return { path: '/login', query: { redirect: to.fullPath } }
   if (to.meta.admin && getUser()?.role !== 'admin') return '/portal'
-  if (to.meta.inspection && !(['admin','raw_grain'].includes(getUser()?.role) || (getUser()?.role==='viewer' && getUser()?.staffWorkshopCode==='raw_grain'))) return '/portal'
-  if (to.path === '/work' && !(['admin', 'qu_making'].includes(getUser()?.role) || (getUser()?.role==='viewer' && (!getUser()?.staffWorkshopCode || getUser()?.staffWorkshopCode==='qu_making')))) return '/portal'
   return true
 })
 

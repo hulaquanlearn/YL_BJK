@@ -13,8 +13,6 @@ const usersRouter = require('./routes/users');
 const warehouseLayoutRouter = require('./routes/warehouse-layout');
 const operationsRouter = require('./routes/operations');
 const knowledgeRouter = require('./routes/knowledge');
-const plcRouter = require('./routes/plc');
-const plcAgentRouter = require('./routes/plc-agent');
 const { requireAuth, requireAssetAuth, assertAuthConfig } = require('./auth');
 const { privateResponse, createAccessLimits } = require('./data-protection');
 const { enforceReadOnly } = require('./workshop-scope');
@@ -54,7 +52,11 @@ app.get('/api/health', async (_req, res) => {
 });
 
 app.use('/api/auth', authRouter);
-app.use('/api/program-agent', plcAgentRouter);
+// Temporarily retired, including agent callbacks and both Siemens/ABB analysis.
+// Keep historical program records and uploads for a possible future restoration.
+app.use(['/api/plc', '/api/program-agent'], (_req, res) => {
+  res.status(410).json({ success: false, msg: 'PLC 和 ABB 程序分析功能已停用' });
+});
 // 已下线的采购/供应商旧地址在认证前直接返回410，让旧客户端获得稳定、明确的停用状态。
 app.use(['/api/suppliers', '/api/suppliers/*', '/api/procurement-orders', '/api/procurement-orders/*'], (_req, res) => {
   res.status(410).json({ success: false, msg: '采购与供应商功能已停用' });
@@ -74,7 +76,6 @@ app.use('/api', inventoryRouter);
 app.use('/api', warehouseLayoutRouter);
 app.use('/api', operationsRouter);
 app.use('/api', knowledgeRouter);
-app.use('/api', plcRouter);
 app.use('/api', aiRouter);
 
 app.use((_req, res) => {
@@ -102,9 +103,15 @@ async function start() {
   console.log('MySQL connected');
   await ensureSchema();
   console.log('Schema check complete');
-  return app.listen(config.port, '127.0.0.1', () => {
+  const stopScoring = require('./work-score-scheduler').startScheduler({
+    pool: require('./db').pool,
+    generate: require('./routes/work').generateSuggestion
+  });
+  const server = app.listen(config.port, '127.0.0.1', () => {
     console.log(`Spare parts API listening on 127.0.0.1:${config.port}`);
   });
+  server.on('close', stopScoring);
+  return server;
 }
 
 if (require.main === module) {

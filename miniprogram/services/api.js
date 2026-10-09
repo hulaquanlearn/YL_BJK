@@ -12,8 +12,9 @@ function buildQuery(params = {}) {
 function request(path, options = {}) {
   const method = options.method || 'GET';
   if (auth.isViewer() && !['GET','HEAD','OPTIONS'].includes(method.toUpperCase())
-    && !['/auth/login','/auth/logout','/auth/change-password','/ai/chat'].includes(path.split('?')[0])) {
-    const error=new Error('权限不足：车间人员仅可查看，不能修改业务数据');
+    && !['/auth/login','/auth/logout','/auth/change-password','/ai/chat',
+      ...(auth.canSubmitInventory() ? ['/inventory-orders'] : [])].includes(path.split('?')[0])) {
+    const error=new Error('权限不足：车间人员可提交所属车间盘点单，但不能修改备件或审批');
     error.statusCode=403;
     return Promise.reject(error);
   }
@@ -75,6 +76,8 @@ module.exports = {
   getParts: params => request(`/parts${buildQuery(params)}`),
   getPart: id => request(`/parts/${encodeURIComponent(id)}`),
   addPart: data => request('/parts', { method: 'POST', data }),
+  getPartModels: () => request('/part-models'),
+  bindPartModel: (partId, modelId) => request('/parts/batch-model', { method: 'POST', data: { partIds: [partId], modelId } }),
   deletePart: id => request(`/parts/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   updateStock: (id, data) => request(`/parts/${encodeURIComponent(id)}/stock`, { method: 'POST', data }),
   getInventoryOrders: params => request(`/inventory-orders${buildQuery(params)}`),

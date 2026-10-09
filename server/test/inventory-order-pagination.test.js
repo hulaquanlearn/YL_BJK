@@ -12,7 +12,7 @@ function listHandler(pool) {
     express: {Router:()=>router}, '../db':{pool},
     '../utils': {...utils, asyncHandler:fn=>fn},
     '../inventory-guards': {}, '../auth':{requireRole:()=>()=>{}},
-    '../workshop-scope': {normalizeWorkshopCode:code=>code,requireAnyWorkshopEditor:()=>{}}
+    '../workshop-scope': require('../src/workshop-scope')
   };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../src/routes/inventory.js'),'utf8'), {require:name=>mocks[name],module:{exports:{}},console});
   return handlers.get('get /inventory-orders');
@@ -27,11 +27,11 @@ test('inventory orders page beyond 200 carries separate unfiltered status counts
     return [[{id:221,approveStatus:'待审批',inventoryAllList:'[]',abnormalList:'[]',filterParams:'{}'}]];
   }});
   let body;
-  await handler({query:{page:'12',pageSize:'20',status:'待审批',workshopCode:'raw_grain',date:'2026-09-05'}},{json:value=>{body=value}});
+  await handler({user:{role:'admin'},query:{page:'12',pageSize:'20',status:'待审批',workshopCode:'raw_grain',date:'2026-09-05'}},{json:value=>{body=value}});
   assert.equal(body.page,12);assert.equal(body.pageSize,20);assert.equal(body.total,401);
   assert.equal(body.summary.total,601);assert.equal(body.summary.approved,180);
-  assert.deepEqual(calls[0].params,['2026-09-05','raw_grain']);
-  assert.deepEqual(calls[2].params,['2026-09-05','raw_grain','待审批',20,220]);
+  assert.deepEqual(calls[0].params,['raw_grain','2026-09-05']);
+  assert.deepEqual(calls[2].params,['raw_grain','2026-09-05','待审批',20,220]);
   assert.match(calls[2].sql,/ORDER BY createTime DESC,id DESC LIMIT \? OFFSET \?/);
   assert.equal(body.data.length,1);
 });
@@ -39,8 +39,8 @@ test('inventory orders page beyond 200 carries separate unfiltered status counts
 test('legacy limit stays supported and explicit pageSize is capped', async () => {
   const query=async(sql)=>sql.includes('AS pending')?[[{total:0,pending:null,approved:null,rejected:null}]]:sql.startsWith('SELECT COUNT')?[[{total:0}]]:[[]];
   const handler=listHandler({query});let body;
-  await handler({query:{limit:'80'}},{json:value=>body=value});
+  await handler({user:{role:'admin'},query:{limit:'80'}},{json:value=>body=value});
   assert.equal(body.page,1);assert.equal(body.pageSize,80);assert.equal(body.summary.pending,0);
-  await handler({query:{pageSize:'9999'}},{json:value=>body=value});
+  await handler({user:{role:'admin'},query:{pageSize:'9999'}},{json:value=>body=value});
   assert.equal(body.pageSize,200);
 });

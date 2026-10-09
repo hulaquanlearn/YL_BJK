@@ -1,0 +1,1538 @@
+{
+  "version": "ledger-names-20261008-v1",
+  "models": [
+    {
+      "id": 1,
+      "name": "微型断路器1P",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/1.glb",
+      "shape": "breaker"
+    },
+    {
+      "id": 2,
+      "name": "交流接触器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/2.glb",
+      "shape": "contactor"
+    },
+    {
+      "id": 3,
+      "name": "马达保护器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/3.glb",
+      "shape": "protector"
+    },
+    {
+      "id": 4,
+      "name": "变频器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/4.glb",
+      "shape": "drive"
+    },
+    {
+      "id": 5,
+      "name": "微型断路器3P",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/5.glb",
+      "shape": "breaker"
+    },
+    {
+      "id": 6,
+      "name": "塑壳断路器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/6.glb",
+      "shape": "breaker"
+    },
+    {
+      "id": 7,
+      "name": "微型断路器2P",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/7.glb",
+      "shape": "breaker"
+    },
+    {
+      "id": 8,
+      "name": "辅助触头",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/8.glb",
+      "shape": "relay"
+    },
+    {
+      "id": 9,
+      "name": "电磁阀",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/9.glb",
+      "shape": "valve"
+    },
+    {
+      "id": 10,
+      "name": "防爆控制按钮",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/10.glb",
+      "shape": "button"
+    },
+    {
+      "id": 11,
+      "name": "开关电源",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/11.glb",
+      "shape": "supply"
+    },
+    {
+      "id": 12,
+      "name": "功率模块",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/12.glb",
+      "shape": "supply"
+    },
+    {
+      "id": 13,
+      "name": "条码定位器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/13.glb",
+      "shape": "module"
+    },
+    {
+      "id": 14,
+      "name": "PLC CPU",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/14.glb",
+      "shape": "module"
+    },
+    {
+      "id": 15,
+      "name": "中间继电器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/15.glb",
+      "shape": "relay"
+    },
+    {
+      "id": 16,
+      "name": "电源模块",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/16.glb",
+      "shape": "supply"
+    },
+    {
+      "id": 17,
+      "name": "数字量输出模块",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/17.glb",
+      "shape": "module"
+    },
+    {
+      "id": 18,
+      "name": "数字量输入模块",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/18.glb",
+      "shape": "module"
+    },
+    {
+      "id": 19,
+      "name": "模拟量输入模块",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/19.glb",
+      "shape": "module"
+    },
+    {
+      "id": 20,
+      "name": "模拟量输出模块",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/20.glb",
+      "shape": "module"
+    },
+    {
+      "id": 21,
+      "name": "工业交换机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/21.glb",
+      "shape": "network"
+    },
+    {
+      "id": 22,
+      "name": "称重变送器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/22.glb",
+      "shape": "transmitter"
+    },
+    {
+      "id": 23,
+      "name": "PT100温度传感器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/23.glb",
+      "shape": "probe"
+    },
+    {
+      "id": 24,
+      "name": "速度传感器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/24.glb",
+      "shape": "sensor"
+    },
+    {
+      "id": 25,
+      "name": "限位开关",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/25.glb",
+      "shape": "switch"
+    },
+    {
+      "id": 26,
+      "name": "跑偏开关",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/26.glb",
+      "shape": "switch"
+    },
+    {
+      "id": 27,
+      "name": "行程开关",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/27.glb",
+      "shape": "switch"
+    },
+    {
+      "id": 28,
+      "name": "软启动器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/28.glb",
+      "shape": "drive"
+    },
+    {
+      "id": 29,
+      "name": "变频器控制单元",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/29.glb",
+      "shape": "module"
+    },
+    {
+      "id": 30,
+      "name": "变频器操作面板",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/30.glb",
+      "shape": "panel"
+    },
+    {
+      "id": 31,
+      "name": "避障传感器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/31.glb",
+      "shape": "sensor"
+    },
+    {
+      "id": 32,
+      "name": "制动电阻",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/32.glb",
+      "shape": "probe"
+    },
+    {
+      "id": 33,
+      "name": "千兆工业交换机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/33.glb",
+      "shape": "network"
+    },
+    {
+      "id": 34,
+      "name": "接近开关",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/34.glb",
+      "shape": "sensor"
+    },
+    {
+      "id": 35,
+      "name": "分布式IO",
+      "quality": "外观示意",
+      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
+      "modelUrl": null
+    },
+    {
+      "id": 36,
+      "name": "通讯模块",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/36.glb",
+      "shape": "module"
+    },
+    {
+      "id": 37,
+      "name": "通讯处理器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/37.glb",
+      "shape": "module"
+    },
+    {
+      "id": 38,
+      "name": "阻旋式料位器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/38.glb",
+      "shape": "level"
+    },
+    {
+      "id": 39,
+      "name": "压差变送器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/39.glb",
+      "shape": "transmitter"
+    },
+    {
+      "id": 40,
+      "name": "整流模块",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/40.glb",
+      "shape": "supply"
+    },
+    {
+      "id": 41,
+      "name": "取电器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/41.glb",
+      "shape": "bracket"
+    },
+    {
+      "id": 42,
+      "name": "光电开关",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/42.glb",
+      "shape": "sensor"
+    },
+    {
+      "id": 43,
+      "name": "防爆光电开关",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/43.glb",
+      "shape": "sensor"
+    },
+    {
+      "id": 44,
+      "name": "编码器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/44.glb",
+      "shape": "encoder"
+    },
+    {
+      "id": 45,
+      "name": "防爆接线箱",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/45.glb",
+      "shape": "panel"
+    },
+    {
+      "id": 46,
+      "name": "轴流风机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/46.glb",
+      "shape": "fan"
+    },
+    {
+      "id": 47,
+      "name": "防爆行程开关",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/47.glb",
+      "shape": "switch"
+    },
+    {
+      "id": 48,
+      "name": "温度传感器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/48.glb",
+      "shape": "probe"
+    },
+    {
+      "id": 49,
+      "name": "伺服电机驱动器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/49.glb",
+      "shape": "drive"
+    },
+    {
+      "id": 50,
+      "name": "跑偏传感器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/50.glb",
+      "shape": "sensor"
+    },
+    {
+      "id": 51,
+      "name": "接口模块",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/51.glb",
+      "shape": "module"
+    },
+    {
+      "id": 52,
+      "name": "拉绳开关",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/52.glb",
+      "shape": "switch"
+    },
+    {
+      "id": 53,
+      "name": "堵料传感器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/53.glb",
+      "shape": "sensor"
+    },
+    {
+      "id": 54,
+      "name": "失速传感器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/54.glb",
+      "shape": "sensor"
+    },
+    {
+      "id": 55,
+      "name": "电流变送器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/55.glb",
+      "shape": "transmitter"
+    },
+    {
+      "id": 56,
+      "name": "多功能电力仪表",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/56.glb",
+      "shape": "instrument"
+    },
+    {
+      "id": 57,
+      "name": "电流表",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/57.glb",
+      "shape": "instrument"
+    },
+    {
+      "id": 58,
+      "name": "操作面板",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/58.glb",
+      "shape": "panel"
+    },
+    {
+      "id": 59,
+      "name": "薄型继电器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/59.glb",
+      "shape": "relay"
+    },
+    {
+      "id": 60,
+      "name": "压力变送器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/60.glb",
+      "shape": "transmitter"
+    },
+    {
+      "id": 61,
+      "name": "测温传感器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/61.glb",
+      "shape": "probe"
+    },
+    {
+      "id": 62,
+      "name": "隔爆轴流风机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/62.glb",
+      "shape": "fan"
+    },
+    {
+      "id": 63,
+      "name": "多级离心鼓风机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/63.glb",
+      "shape": "fan"
+    },
+    {
+      "id": 64,
+      "name": "熔断器底座",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/64.glb",
+      "shape": "module"
+    },
+    {
+      "id": 65,
+      "name": "微型断路器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/65.glb",
+      "shape": "breaker"
+    },
+    {
+      "id": 66,
+      "name": "称重传感器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/66.glb",
+      "shape": "sensor"
+    },
+    {
+      "id": 67,
+      "name": "吸尘器吸头",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/67.glb",
+      "shape": "blade"
+    },
+    {
+      "id": 68,
+      "name": "料位器电路板",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/68.glb",
+      "shape": "board"
+    },
+    {
+      "id": 69,
+      "name": "脉冲控制器内芯",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/69.glb",
+      "shape": "board"
+    },
+    {
+      "id": 70,
+      "name": "分站模块",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/70.glb",
+      "shape": "module"
+    },
+    {
+      "id": 71,
+      "name": "称重模块",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/71.glb",
+      "shape": "instrument"
+    },
+    {
+      "id": 72,
+      "name": "工业以太网交换机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/72.glb",
+      "shape": "network"
+    },
+    {
+      "id": 73,
+      "name": "热电阻",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/73.glb",
+      "shape": "probe"
+    },
+    {
+      "id": 74,
+      "name": "主控板",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/74.glb",
+      "shape": "board"
+    },
+    {
+      "id": 75,
+      "name": "显示板",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/75.glb",
+      "shape": "panel"
+    },
+    {
+      "id": 76,
+      "name": "薄膜按键面板",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/76.glb",
+      "shape": "panel"
+    },
+    {
+      "id": 77,
+      "name": "控制器电源模组",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/77.glb",
+      "shape": "supply"
+    },
+    {
+      "id": 78,
+      "name": "防爆机械式传感器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/78.glb",
+      "shape": "switch"
+    },
+    {
+      "id": 79,
+      "name": "5G CPE",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/79.glb",
+      "shape": "network"
+    },
+    {
+      "id": 80,
+      "name": "网络耦合器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/80.glb",
+      "shape": "network"
+    },
+    {
+      "id": 81,
+      "name": "防静电软连接",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/81.glb",
+      "shape": "connector"
+    },
+    {
+      "id": 82,
+      "name": "气动快插接头",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/82.glb",
+      "shape": "fitting"
+    },
+    {
+      "id": 83,
+      "name": "带制动万向轮",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/83.glb",
+      "shape": "wheel"
+    },
+    {
+      "id": 84,
+      "name": "无制动万向轮",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/84.glb",
+      "shape": "wheel"
+    },
+    {
+      "id": 85,
+      "name": "深沟球轴承",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/85.glb",
+      "shape": "bearing"
+    },
+    {
+      "id": 86,
+      "name": "带座外球面轴承",
+      "quality": "外观示意",
+      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
+      "modelUrl": null
+    },
+    {
+      "id": 87,
+      "name": "调心滚子轴承",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/87.glb",
+      "shape": "bearing"
+    },
+    {
+      "id": 88,
+      "name": "带座轴承",
+      "quality": "外观示意",
+      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
+      "modelUrl": null
+    },
+    {
+      "id": 89,
+      "name": "不锈钢带座轴承",
+      "quality": "外观示意",
+      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
+      "modelUrl": null
+    },
+    {
+      "id": 90,
+      "name": "橡胶密封条",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/90.glb",
+      "shape": "seal"
+    },
+    {
+      "id": 91,
+      "name": "标准气缸",
+      "quality": "外观示意",
+      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
+      "modelUrl": null
+    },
+    {
+      "id": 92,
+      "name": "A型三角带",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/92.glb",
+      "shape": "belt"
+    },
+    {
+      "id": 93,
+      "name": "B型三角带",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/93.glb",
+      "shape": "belt"
+    },
+    {
+      "id": 94,
+      "name": "气源二联件",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/94.glb",
+      "shape": "air-unit"
+    },
+    {
+      "id": 95,
+      "name": "气源处理元件",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/95.glb",
+      "shape": "air-unit"
+    },
+    {
+      "id": 96,
+      "name": "轴承座",
+      "quality": "外观示意",
+      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
+      "modelUrl": null
+    },
+    {
+      "id": 97,
+      "name": "不锈钢钢丝绳",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/97.glb",
+      "shape": "cable"
+    },
+    {
+      "id": 98,
+      "name": "链条接头",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/98.glb",
+      "shape": "chain"
+    },
+    {
+      "id": 99,
+      "name": "安全阀",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/99.glb",
+      "shape": "regulator"
+    },
+    {
+      "id": 100,
+      "name": "电磁阀线圈",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/100.glb",
+      "shape": "coil"
+    },
+    {
+      "id": 101,
+      "name": "SPB三角带",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/101.glb",
+      "shape": "belt"
+    },
+    {
+      "id": 102,
+      "name": "齿楔带",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/102.glb",
+      "shape": "belt"
+    },
+    {
+      "id": 103,
+      "name": "喂料辊",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/103.glb",
+      "shape": "roller"
+    },
+    {
+      "id": 104,
+      "name": "同步带",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/104.glb",
+      "shape": "belt"
+    },
+    {
+      "id": 105,
+      "name": "防爆电机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/105.glb",
+      "shape": "motor"
+    },
+    {
+      "id": 106,
+      "name": "减速机",
+      "quality": "外观示意",
+      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
+      "modelUrl": null
+    },
+    {
+      "id": 107,
+      "name": "振动电机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/107.glb",
+      "shape": "motor"
+    },
+    {
+      "id": 108,
+      "name": "减速机（带电机）",
+      "quality": "外观示意",
+      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
+      "modelUrl": null
+    },
+    {
+      "id": 109,
+      "name": "闭风器套筒",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/109.glb",
+      "shape": "fitting"
+    },
+    {
+      "id": 110,
+      "name": "防爆变频电机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/110.glb",
+      "shape": "motor"
+    },
+    {
+      "id": 111,
+      "name": "驱动电机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/111.glb",
+      "shape": "motor"
+    },
+    {
+      "id": 112,
+      "name": "气动振动器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/112.glb",
+      "shape": "motor"
+    },
+    {
+      "id": 113,
+      "name": "双排链条",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/113.glb",
+      "shape": "chain"
+    },
+    {
+      "id": 114,
+      "name": "软连接",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/114.glb",
+      "shape": "connector"
+    },
+    {
+      "id": 115,
+      "name": "畚斗",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/115.glb",
+      "shape": "bucket"
+    },
+    {
+      "id": 116,
+      "name": "止逆器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/116.glb",
+      "shape": "reducer"
+    },
+    {
+      "id": 117,
+      "name": "清扫板",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/117.glb",
+      "shape": "blade"
+    },
+    {
+      "id": 118,
+      "name": "碾弧板",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/118.glb",
+      "shape": "blade"
+    },
+    {
+      "id": 119,
+      "name": "防静电布筒",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/119.glb",
+      "shape": "bag"
+    },
+    {
+      "id": 120,
+      "name": "Z型三角带",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/120.glb",
+      "shape": "belt"
+    },
+    {
+      "id": 121,
+      "name": "电磁脉冲阀",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/121.glb",
+      "shape": "valve"
+    },
+    {
+      "id": 122,
+      "name": "过滤减压阀",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/122.glb",
+      "shape": "regulator"
+    },
+    {
+      "id": 123,
+      "name": "紧定套",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/123.glb",
+      "shape": "coupling"
+    },
+    {
+      "id": 124,
+      "name": "筛网",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/124.glb",
+      "shape": "mesh"
+    },
+    {
+      "id": 125,
+      "name": "筛片",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/125.glb",
+      "shape": "mesh"
+    },
+    {
+      "id": 126,
+      "name": "橡胶弹簧",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/126.glb",
+      "shape": "spring"
+    },
+    {
+      "id": 127,
+      "name": "SEW电机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/127.glb",
+      "shape": "motor"
+    },
+    {
+      "id": 128,
+      "name": "托辊",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/128.glb",
+      "shape": "roller"
+    },
+    {
+      "id": 129,
+      "name": "盘根",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/129.glb",
+      "shape": "seal"
+    },
+    {
+      "id": 130,
+      "name": "制动片",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/130.glb",
+      "shape": "blade"
+    },
+    {
+      "id": 131,
+      "name": "输送带",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/131.glb",
+      "shape": "belt"
+    },
+    {
+      "id": 132,
+      "name": "电动缸",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/132.glb",
+      "shape": "cylinder"
+    },
+    {
+      "id": 133,
+      "name": "磁性开关",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/133.glb",
+      "shape": "sensor"
+    },
+    {
+      "id": 134,
+      "name": "磁性开关支架",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/134.glb",
+      "shape": "bracket"
+    },
+    {
+      "id": 135,
+      "name": "制动线圈",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/135.glb",
+      "shape": "coil"
+    },
+    {
+      "id": 136,
+      "name": "RGV主动轮",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/136.glb",
+      "shape": "wheel"
+    },
+    {
+      "id": 137,
+      "name": "RGV驱动轴",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/137.glb",
+      "shape": "shaft"
+    },
+    {
+      "id": 138,
+      "name": "RGV导向轮",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/138.glb",
+      "shape": "wheel"
+    },
+    {
+      "id": 139,
+      "name": "电磁离合器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/139.glb",
+      "shape": "coupling"
+    },
+    {
+      "id": 140,
+      "name": "联轴器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/140.glb",
+      "shape": "coupling"
+    },
+    {
+      "id": 141,
+      "name": "安装支架",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/141.glb",
+      "shape": "bracket"
+    },
+    {
+      "id": 142,
+      "name": "电缆线",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/142.glb",
+      "shape": "cable"
+    },
+    {
+      "id": 143,
+      "name": "电磁换向阀",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/143.glb",
+      "shape": "valve"
+    },
+    {
+      "id": 144,
+      "name": "除尘滤袋",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/144.glb",
+      "shape": "bag"
+    },
+    {
+      "id": 145,
+      "name": "粉碎机锤片",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/145.glb",
+      "shape": "blade"
+    },
+    {
+      "id": 146,
+      "name": "三相异步电机",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/146.glb",
+      "shape": "motor"
+    },
+    {
+      "id": 147,
+      "name": "减速机（带联轴器）",
+      "quality": "外观示意",
+      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
+      "modelUrl": null
+    },
+    {
+      "id": 148,
+      "name": "回转减速器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/148.glb",
+      "shape": "reducer"
+    },
+    {
+      "id": 149,
+      "name": "轴承座（含轴承）",
+      "quality": "外观示意",
+      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
+      "modelUrl": null
+    },
+    {
+      "id": 150,
+      "name": "离合器轴",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/150.glb",
+      "shape": "coupling"
+    },
+    {
+      "id": 151,
+      "name": "气动单联件",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/151.glb",
+      "shape": "air-unit"
+    },
+    {
+      "id": 152,
+      "name": "爆破片",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/152.glb",
+      "shape": "blade"
+    },
+    {
+      "id": 153,
+      "name": "铁辊",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/153.glb",
+      "shape": "roller"
+    },
+    {
+      "id": 154,
+      "name": "玻璃钢吊杆",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/154.glb",
+      "shape": "bracket"
+    },
+    {
+      "id": 155,
+      "name": "风门调节装置",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/155.glb",
+      "shape": "bracket"
+    },
+    {
+      "id": 156,
+      "name": "刮灰叶片",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/156.glb",
+      "shape": "blade"
+    },
+    {
+      "id": 157,
+      "name": "塑料刮板",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/157.glb",
+      "shape": "blade"
+    },
+    {
+      "id": 158,
+      "name": "导向轮偏心轴",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/158.glb",
+      "shape": "wheel"
+    },
+    {
+      "id": 159,
+      "name": "耐磨套",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/159.glb",
+      "shape": "fitting"
+    },
+    {
+      "id": 160,
+      "name": "调压阀",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/160.glb",
+      "shape": "regulator"
+    },
+    {
+      "id": 161,
+      "name": "轴承防尘盖",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/161.glb",
+      "shape": "seal"
+    },
+    {
+      "id": 162,
+      "name": "滚子链条",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/162.glb",
+      "shape": "chain"
+    },
+    {
+      "id": 163,
+      "name": "主气缸",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/163.glb",
+      "shape": "cylinder"
+    },
+    {
+      "id": 164,
+      "name": "平筛筛格",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/164.glb",
+      "shape": "mesh"
+    },
+    {
+      "id": 165,
+      "name": "链轮联轴器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/165.glb",
+      "shape": "coupling"
+    },
+    {
+      "id": 166,
+      "name": "滚子链联轴器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/166.glb",
+      "shape": "coupling"
+    },
+    {
+      "id": 167,
+      "name": "电动拨斗",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/167.glb",
+      "shape": "bucket"
+    },
+    {
+      "id": 168,
+      "name": "液压纠偏装置",
+      "quality": "外观示意",
+      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
+      "modelUrl": null
+    },
+    {
+      "id": 169,
+      "name": "聚氨酯托辊",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/169.glb",
+      "shape": "roller"
+    },
+    {
+      "id": 170,
+      "name": "消声器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/170.glb",
+      "shape": "fitting"
+    },
+    {
+      "id": 171,
+      "name": "开关操作件",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/171.glb",
+      "shape": "button"
+    },
+    {
+      "id": 172,
+      "name": "立式托辊",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/172.glb",
+      "shape": "roller"
+    },
+    {
+      "id": 173,
+      "name": "无动力托辊",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/173.glb",
+      "shape": "roller"
+    },
+    {
+      "id": 174,
+      "name": "笼骨架",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/174.glb",
+      "shape": "mesh"
+    },
+    {
+      "id": 175,
+      "name": "防跑偏传感器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/175.glb",
+      "shape": "sensor"
+    },
+    {
+      "id": 176,
+      "name": "热过载继电器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/176.glb",
+      "shape": "relay"
+    },
+    {
+      "id": 177,
+      "name": "缓冲胶垫",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/177.glb",
+      "shape": "seal"
+    },
+    {
+      "id": 178,
+      "name": "马达保护器辅助触点",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/178.glb",
+      "shape": "relay"
+    },
+    {
+      "id": 179,
+      "name": "调心球轴承",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/179.glb",
+      "shape": "bearing"
+    },
+    {
+      "id": 180,
+      "name": "弹性圈",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/180.glb",
+      "shape": "seal"
+    },
+    {
+      "id": 181,
+      "name": "压筛板",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/181.glb",
+      "shape": "blade"
+    },
+    {
+      "id": 182,
+      "name": "拉紧把手",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/182.glb",
+      "shape": "bracket"
+    },
+    {
+      "id": 183,
+      "name": "磁棒",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/183.glb",
+      "shape": "shaft"
+    },
+    {
+      "id": 184,
+      "name": "磁棒支架",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/184.glb",
+      "shape": "bracket"
+    },
+    {
+      "id": 185,
+      "name": "轴承座密封圈",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/185.glb",
+      "shape": "seal"
+    },
+    {
+      "id": 186,
+      "name": "皮带清扫器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/186.glb",
+      "shape": "blade"
+    },
+    {
+      "id": 187,
+      "name": "聚氨酯刮刀",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/187.glb",
+      "shape": "blade"
+    },
+    {
+      "id": 188,
+      "name": "总线适配器",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/188.glb",
+      "shape": "network"
+    },
+    {
+      "id": 189,
+      "name": "均风板",
+      "quality": "外观示意",
+      "description": "按台账简称生成的外观示意；未核实厂家尺寸，不用于安装校核。",
+      "modelUrl": "/models/ledger-20261008/189.glb",
+      "shape": "mesh"
+    },
+    {
+      "id": 190,
+      "name": "带座轴承 · 底座式示意",
+      "shape": "housing",
+      "quality": "外观示意",
+      "description": "安装外形示意；未核实厂家尺寸，选择前请核对备件实际外形。",
+      "modelUrl": "/models/ledger-20261008/190.glb"
+    },
+    {
+      "id": 191,
+      "name": "带座轴承 · 法兰式示意",
+      "shape": "flange-bearing",
+      "quality": "外观示意",
+      "description": "安装外形示意；未核实厂家尺寸，选择前请核对备件实际外形。",
+      "modelUrl": "/models/ledger-20261008/191.glb"
+    },
+    {
+      "id": 192,
+      "name": "标准气缸 · 拉杆式示意",
+      "shape": "cylinder",
+      "quality": "外观示意",
+      "description": "安装外形示意；未核实厂家尺寸，选择前请核对备件实际外形。",
+      "modelUrl": "/models/ledger-20261008/192.glb"
+    },
+    {
+      "id": 193,
+      "name": "减速机 · 箱体式示意",
+      "shape": "reducer",
+      "quality": "外观示意",
+      "description": "安装外形示意；未核实厂家尺寸，选择前请核对备件实际外形。",
+      "modelUrl": "/models/ledger-20261008/193.glb"
+    }
+  ]
+}

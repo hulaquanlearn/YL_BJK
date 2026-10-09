@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {createWritePermissionDirective,isBusinessWrite,PERMISSION_MESSAGE} from '../src/utils/write-permission.mjs'
+import {createWritePermissionDirective,isBusinessWrite,canSubmitInventoryRequest,PERMISSION_MESSAGE} from '../src/utils/write-permission.mjs'
 
 test('visible write controls block clicks and file drops for viewers, permit editors, and remove their listeners',()=>{
   let viewer=true;const notices=[],attributes={};const target=new EventTarget();target.setAttribute=(key,value)=>attributes[key]=value;
@@ -16,4 +16,11 @@ test('visible write controls block clicks and file drops for viewers, permit edi
 test('request boundary permits reads, questions and own session actions, but blocks business writes regardless of endpoint',()=>{
   for(const [method,url] of [['GET','/users'],['GET','/knowledge/1/download'],['POST','/ai/chat'],['POST','/auth/logout'],['POST','/auth/change-password'],['POST','/plc/projects/1/analyze']])assert.equal(isBusinessWrite(method,url),false,url)
   for(const [method,url] of [['POST','/parts'],['PATCH','/users/1'],['DELETE','/knowledge/1'],['POST','/parts/import'],['POST','/plc/projects/1/analyze/other'],['POST','/inventory-orders/1/approve']])assert.equal(isBusinessWrite(method,url),true,url)
+})
+
+test('assigned staff may submit a count order but cannot approve or change parts',()=>{
+  assert.equal(canSubmitInventoryRequest('post','/inventory-orders','raw_grain'),true)
+  assert.equal(canSubmitInventoryRequest('post','/inventory-orders',''),false)
+  assert.equal(canSubmitInventoryRequest('post','/inventory-orders/1/approve','raw_grain'),false)
+  assert.equal(canSubmitInventoryRequest('patch','/parts/1','raw_grain'),false)
 })

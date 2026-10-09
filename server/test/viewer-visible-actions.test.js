@@ -6,7 +6,7 @@ const path=require('node:path');
 const {pool}=require('../src/db');
 const {enforceReadOnly}=require('../src/workshop-scope');
 
-test('viewer reads account roles and basic list, while all account and business writes fail before database access',async()=>{
+test('viewer cannot enumerate accounts and all business writes fail before database access',async()=>{
   const saved=pool.query;let queries=0;
   pool.query=async()=>{queries++;return [[{id:1,username:'test',displayName:'测试账号',role:'admin',enabled:1,lastLoginAt:'private-metadata',createdAt:'private-metadata'}]]};
   const app=express();app.use(express.json());app.use((req,_res,next)=>{req.user={id:9,role:'viewer'};next()});
@@ -14,10 +14,9 @@ test('viewer reads account roles and basic list, while all account and business 
   app.use((err,_req,res,_next)=>res.status(err.status||500).json({msg:err.message}));
   const server=app.listen(0,'127.0.0.1');await once(server,'listening');const base=`http://127.0.0.1:${server.address().port}`;
   try{
-    const response=await fetch(base+'/users');assert.equal(response.status,200);
-    assert.deepEqual((await response.json()).data,[{id:'1',username:'test',displayName:'测试账号',role:'admin',staffWorkshopCode:null,staffPosition:null,enabled:true}]);
-    assert.equal((await fetch(base+'/users/roles')).status,200);
-    const before=queries;
+    const response=await fetch(base+'/users');assert.equal(response.status,403);
+    assert.equal((await fetch(base+'/users/roles')).status,403);
+    assert.equal(queries,0);const before=queries;
     for(const [method,url] of [['POST','/users'],['PATCH','/users/1'],['POST','/users/1/reset-password'],['POST','/parts'],['PATCH','/parts/1'],['DELETE','/parts/1'],['POST','/inventory-orders/1/approve'],['PUT','/knowledge/1'],['POST','/plc/projects'],['POST','/part-category-model-matches/apply']]){
       const result=await fetch(base+url,{method});assert.equal(result.status,403,url);assert.match((await result.json()).msg,/权限不足/);
     }
@@ -33,7 +32,7 @@ test('mini-program viewer sees role context, visits read pages and gets permissi
   try{
     const home=page('home');home.onShow();assert.equal(home.data.isViewer,true);home.gotoApprove();assert.match(navigations[0],/approve/);
     const beforeNavigation=navigations.length;home.gotoAddPart();assert.equal(navigations.length,beforeNavigation);assert.equal(modals.at(-1).title,'权限不足');
-    const users=page('users');users.onLoad();await new Promise(resolve=>setImmediate(resolve));assert.equal(users.data.isViewer,true);assert.ok(requests.some(r=>r.url.endsWith('/users')));
+    const users=page('users');users.onLoad();await new Promise(resolve=>setImmediate(resolve));assert.equal(requests.some(r=>r.url.endsWith('/users')),false);
     const detail=page('detail');detail.data.part={_id:1,workshopCode:'raw_grain',totalStock:0};
     const inventory=page('inventory'),approve=page('approve'),add=page('addPart');
     approve.onLoad();await new Promise(resolve=>setImmediate(resolve));assert.ok(requests.some(r=>r.url.includes('/inventory-orders')));

@@ -29,6 +29,9 @@ foreach ($directory in @('src', 'scripts', 'sql', 'nginx')) {
 foreach ($file in @('.env.example', 'package.json', 'package-lock.json', 'README.md')) {
   Copy-Item -LiteralPath (Join-Path $root "server\$file") -Destination (Join-Path $package 'server')
 }
+New-Item -ItemType Directory -Path (Join-Path $package 'server\data') | Out-Null
+# Runtime seed catalog only; never ship inventory ledgers, uploads, or configured secrets.
+Copy-Item -LiteralPath (Join-Path $root 'server\data\ledger-model-catalog.json') -Destination (Join-Path $package 'server\data')
 Copy-Item -Path (Join-Path $root 'spare-parts-web-release\dist\*') -Destination (Join-Path $package 'web-dist') -Recurse
 foreach ($file in @('server.js', 'package.json', 'package-lock.json')) {
   Copy-Item -LiteralPath (Join-Path $root "spare-parts-web-release\$file") -Destination (Join-Path $package 'web-runtime')
@@ -37,15 +40,14 @@ if (Test-Path -LiteralPath (Join-Path $root 'docs')) {
   New-Item -ItemType Directory -Path (Join-Path $package 'docs') | Out-Null
   # Ship maintained operational references and this release's audit evidence; exclude unrelated ledgers.
   Get-ChildItem -LiteralPath (Join-Path $root 'docs') -File |
-    Where-Object { $_.Name -in @('DOCUMENT_PREVIEW_V1.4.0.md', 'KNOWLEDGE_PLC_DESIGN_REFERENCES.md', 'OPENCLAW_MODEL_MATCHING.md', 'PLC_ANALYSIS_VERIFICATION_20260920.md', 'LOCAL_AUDIT_REMEDIATION_20260924.md') } |
+    Where-Object { $_.Name -in @('DOCUMENT_PREVIEW_V1.4.0.md', 'OPENCLAW_MODEL_MATCHING.md', 'LOCAL_AUDIT_REMEDIATION_20260924.md', 'WORK_ASSESSMENT_V1.9.7.md', 'WORK_FLOW_V1.9.9.md', 'PROJECT_REVIEW_SECURITY_20260930.md', 'PROJECT_DECISIONS.md', 'RELEASE_AUDIT_20261009.md') } |
     Copy-Item -Destination (Join-Path $package 'docs')
 }
-New-Item -ItemType Directory -Path (Join-Path $package 'plc-agent') | Out-Null
-Copy-Item -LiteralPath (Join-Path $root 'tools\tia-openness-exporter\Start-ProgramAnalysisAgent.ps1') -Destination (Join-Path $package 'plc-agent')
 Copy-Item -Path (Join-Path $root 'miniprogram\*') -Destination (Join-Path $package 'miniprogram') -Recurse
 Copy-Item -LiteralPath (Join-Path $root 'project.config.json') -Destination $package
 Copy-Item -LiteralPath (Join-Path $root 'spare-parts-web-release\RELEASE_NOTES.md') -Destination $package
 Copy-Item -LiteralPath (Join-Path $root 'README.md') -Destination (Join-Path $package 'README.md')
+Copy-Item -LiteralPath (Join-Path $root 'design-qa.md') -Destination (Join-Path $package 'design-qa.md')
 Copy-Item -LiteralPath (Join-Path $root 'VERSION') -Destination $package
 Copy-Item -LiteralPath $deployDoc -Destination $package
 Copy-Item -LiteralPath $guideDoc -Destination $package

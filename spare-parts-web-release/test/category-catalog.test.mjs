@@ -3,9 +3,9 @@ import assert from 'node:assert/strict'
 import {prepareCategoryCatalog,searchCategoryCatalog,referenceImageForModel} from '../src/utils/category-catalog.mjs'
 import {locatedPartDisplay} from '../src/utils/located-part-display.mjs'
 
-test('Chinese and English model names share A-Z order; dropdown finds names, aliases and pinyin',()=>{
+test('model IDs determine order; dropdown still finds names, aliases and pinyin',()=>{
   const rows=prepareCategoryCatalog(['轴承','RGV部件','消声器','电机','PLC模块','三角带/V带'].map((name,i)=>({id:i+1,name,keywords:name==='消声器'?'muffler,排气降噪':''})))
-  assert.deepEqual(rows.map(r=>r.name),['电机','PLC模块','RGV部件','三角带/V带','消声器','轴承'])
+  assert.deepEqual(rows.map(r=>r.name),['轴承','RGV部件','消声器','电机','PLC模块','三角带/V带'])
   for(const query of ['消声','xiaosheng','xsq','MUFFLER','排气'])assert.deepEqual(searchCategoryCatalog(rows,query).map(r=>r.name),['消声器'])
   assert.equal(searchCategoryCatalog(rows,'轴承 muffler').length,0)
   assert.equal(searchCategoryCatalog(rows,'').length,6)
