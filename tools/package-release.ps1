@@ -40,7 +40,7 @@ if (Test-Path -LiteralPath (Join-Path $root 'docs')) {
   New-Item -ItemType Directory -Path (Join-Path $package 'docs') | Out-Null
   # Ship maintained operational references and this release's audit evidence; exclude unrelated ledgers.
   Get-ChildItem -LiteralPath (Join-Path $root 'docs') -File |
-    Where-Object { $_.Name -in @('DOCUMENT_PREVIEW_V1.4.0.md', 'OPENCLAW_MODEL_MATCHING.md', 'LOCAL_AUDIT_REMEDIATION_20260924.md', 'WORK_ASSESSMENT_V1.9.7.md', 'WORK_FLOW_V1.9.9.md', 'PROJECT_REVIEW_SECURITY_20260930.md', 'PROJECT_DECISIONS.md', 'RELEASE_AUDIT_20261009.md') } |
+    Where-Object { $_.Name -in @('DOCUMENT_PREVIEW_V1.4.0.md', 'OPENCLAW_MODEL_MATCHING.md', 'LOCAL_AUDIT_REMEDIATION_20260924.md', 'WORK_ASSESSMENT_V1.9.7.md', 'WORK_FLOW_V1.9.9.md', 'PROJECT_REVIEW_SECURITY_20260930.md', 'PROJECT_DECISIONS.md', 'RELEASE_AUDIT_20261009.md', 'ATTENDANCE_REVIEW_20261009.md') } |
     Copy-Item -Destination (Join-Path $package 'docs')
 }
 Copy-Item -Path (Join-Path $root 'miniprogram\*') -Destination (Join-Path $package 'miniprogram') -Recurse

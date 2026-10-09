@@ -1534,5 +1534,47 @@
       "description": "安装外形示意；未核实厂家尺寸，选择前请核对备件实际外形。",
       "modelUrl": "/models/ledger-20261008/193.glb"
     }
+  ],
+  "supplements": [
+    {
+      "version": "missing-five-20261009-v1",
+      "models": [
+        {
+          "name": "电容补偿盒 · 外形示意",
+          "materialCode": "502005240",
+          "description": "电容补偿盒识别示意；截图型号不完整，接口、内部结构及厂家尺寸待核对。",
+          "quality": "外观示意",
+          "modelUrl": "/models/supplement-20261009/capacitor-compensation-box.glb"
+        },
+        {
+          "name": "时间继电器底座 · 外形示意",
+          "materialCode": "502006637",
+          "description": "时间继电器底座识别示意；孔位、针脚数量及厂家尺寸待核对。",
+          "quality": "外观示意",
+          "modelUrl": "/models/supplement-20261009/timer-relay-socket.glb"
+        },
+        {
+          "name": "SKF 22212E · 双列轴承示意",
+          "materialCode": "505024987",
+          "description": "按台账型号制作双列滚子轴承外观示意；外形按SKF官方60×110×28毫米比例生成；滚子、保持架及滚道结构示意，非厂家CAD。",
+          "quality": "外观示意",
+          "modelUrl": "/models/supplement-20261009/spherical-roller-bearing-22212e.glb"
+        },
+        {
+          "name": "骨架油封 90×110×12 · 示意",
+          "materialCode": "505026166",
+          "description": "按台账内径90、外径110、宽12毫米的比例生成；唇口和骨架结构示意，非厂家CAD。",
+          "quality": "外观示意",
+          "modelUrl": "/models/supplement-20261009/oil-seal-90-110-12.glb"
+        },
+        {
+          "name": "轴面油封 RB60×80×5.5 · 示意",
+          "materialCode": "505026171",
+          "description": "按台账内径60、外径80、宽5.5毫米的比例生成；RB截面、材料与厂家结构待核对。",
+          "quality": "外观示意",
+          "modelUrl": "/models/supplement-20261009/oil-seal-60-80-5-5.glb"
+        }
+      ]
+    }
   ]
 }

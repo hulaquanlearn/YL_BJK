@@ -59,6 +59,14 @@ async function ensureSchema() {
     for (const statement of documentSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
     const inspectionSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_inspection_notice_20260924.sql'), 'utf8');
     for (const statement of inspectionSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
+    const attendanceSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_attendance_storage_20261009.sql'), 'utf8');
+    for (const statement of attendanceSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
+    // Older attachment tables did not record upload time. Start their retention clock
+    // at migration time rather than guessing that a newly uploaded image is old.
+    for(const attachmentTable of ['work_photos','work_task_files']){
+      const [uploadColumns]=await conn.query('SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? AND COLUMN_NAME=\'created_at\'',[attachmentTable]);
+      if(!Number(uploadColumns[0].cnt))await conn.query(`ALTER TABLE ${attachmentTable} ADD COLUMN created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`);
+    }
     const [inspectionSizeColumns] = await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='inspection_sources' AND COLUMN_NAME='byte_size'`);
     if (!Number(inspectionSizeColumns[0].cnt)) {
       await conn.query('ALTER TABLE inspection_sources ADD COLUMN byte_size INT NOT NULL DEFAULT 0 AFTER image');

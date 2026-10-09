@@ -1,5 +1,6 @@
 const express = require('express');
 const crypto = require('crypto');
+const { createWarehouseArea, listWarehouseAreas } = require('../warehouse-areas');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
@@ -26,7 +27,7 @@ const { toMovement, toMovementDetail } = require('../stock-movements');
 const { parseMovementMetadata, assertMovementAssociations } = require('../movement-metadata');
 const { buildReplenishmentItem } = require('../replenishment');
 const { buildMovementTrend } = require('../dashboard-stats');
-const { workshopImportSchema, makePartsTemplate, makePartsErrorWorkbook, sendXlsx } = require('../import-workbook');
+const { workshopImportSchema, makePartsTemplate, makePartsErrorWorkbook, makeModelBindingsTemplate, sendXlsx } = require('../import-workbook');
 const { duplicateLocationErrors } = require('../part-import-validation');
 const { changedSharedDescriptors } = require('../part-import-identity');
 const { deleteParts } = require('../part-deletion');
@@ -277,6 +278,11 @@ async function parsePartLedger(buffer) {
       errors.push({ row: index + 1, field: '六位库位码', reason: '库位码必须是6位数字', suggestion: '例如011101；无固定库位时留空' });
     }
     if (!materialCode || !materialDesc) continue;
+    for (const [field, aliases] of [['订购点', ['订购点','安全库存']], ['最高储备', ['最高储备','最高库存']], ['不含税单价', ['不含税单价','单价']]]) {
+      const raw = firstLedgerValue(row, aliases);
+      const number = ledgerNumber(raw);
+      if (ledgerText(raw) && (number === null || number < 0)) errors.push({ row: index + 1, field, reason: '必须是大于或等于0的有效数字', suggestion: '填写0或正数；未知时留空表示未配置' });
+    }
     const totalStock = Math.max(0, stockValue || 0);
     records.push({
       materialCode,
@@ -333,6 +339,11 @@ async function assertPartAssetWrite(user, partId) {
   const [rows] = await pool.query("SELECT COALESCE(workshop_code,'raw_grain') AS workshopCode FROM inventory WHERE part_id=? AND COALESCE(active,1)=1", [partId]);
   assertAssetScope(user, rows.map(row => row.workshopCode));
 }
+
+router.get('/parts/model-bindings/template', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+  const [models] = await pool.query('SELECT id,name FROM part_models WHERE active=1 ORDER BY id');
+  sendXlsx(res, '模型名称绑定导入模板.xlsx', await makeModelBindingsTemplate(models));
+}));
 
 router.post('/parts/model-bindings/preview', requireAnyWorkshopEditor, partLedgerUpload, asyncHandler(async (req, res) => {
   if (!req.file) throw new ApiError(400, '请选择含模型名称的资料表');
@@ -819,6 +830,9 @@ router.post('/parts', requireAnyWorkshopEditor, asyncHandler(async (req, res) =>
   if (!code) throw new ApiError(400, '物料编码不能为空');
   if (!name) throw new ApiError(400, '物料描述不能为空');
   const totalStock = parseNonNegativeQuantity(data.totalStock ?? 0, '初始库存');
+  for (const [field, label] of [['reorderPoint','订购点'],['maxStock','最高储备'],['price','不含税单价']]) {
+    if (data[field] !== '' && data[field] != null) data[field] = parseNonNegativeQuantity(data[field], label);
+  }
 
   const connection = await pool.getConnection();
   try {
@@ -1267,6 +1281,14 @@ router.post('/parts/:id/stock', requireAnyWorkshopEditor, asyncHandler(async (re
   } finally {
     connection.release();
   }
+}));
+
+router.get('/warehouse-areas', asyncHandler(async (req, res) => {
+  res.json({ success: true, data: await listWarehouseAreas(pool, req.query.workshopCode) });
+}));
+
+router.post('/warehouse-areas', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
+  res.json({ success: true, data: await createWarehouseArea(pool, req.user, req.body) });
 }));
 
 router.get('/filters', asyncHandler(async (req, res) => {

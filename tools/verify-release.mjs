@@ -75,7 +75,7 @@ if([...files.keys()].some(n=>n.startsWith(folder+'/plc-agent/')||/\/assets\/PlcA
 const catalogFile=files.get(folder+'/server/data/ledger-model-catalog.json')
 if(!catalogFile)throw new Error('Missing runtime model catalog')
 const ledgerCatalog=JSON.parse(catalogFile.toString('utf8'))
-for(const model of ledgerCatalog.models){
+for(const model of [...ledgerCatalog.models, ...(ledgerCatalog.supplements || []).flatMap(batch=>batch.models)]){
   if(!model.modelUrl)continue
   const bytes=files.get(folder+'/web-dist'+model.modelUrl)
   if(!bytes||bytes.toString('ascii',0,4)!=='glTF'||bytes.readUInt32LE(8)!==bytes.length)throw new Error('Missing/invalid ledger model '+model.id)
@@ -138,3 +138,12 @@ if(['V1.9.7','V1.9.8','V1.9.9','V1.9.10'].includes(releaseVersion)){
 for(const file of ['server.js','package.json','package-lock.json'])if(!files.has(folder+'/web-runtime/'+file))throw new Error('Missing web runtime '+file)
 if(!deployGuide.includes('web-dist/')||!deployGuide.includes('/opt/spare-parts/web/dist/')||!deployGuide.includes('test -f /opt/spare-parts/web/dist/index.html'))throw new Error('Deployment guide must name the web dist source, target, and preflight check')
 console.log(JSON.stringify({archive,files:files.size,referenceModels:models.length,referencePhotos:photos.length,categoryModels:fs.readdirSync(sourceAssetDir).filter(n=>n.endsWith('.glb')).length,categoryPhotos:fs.readdirSync(sourceAssetDir).filter(n=>n.endsWith('.jpg')).length,sha256:archiveHash,outerChecksumVerified:true,result:'all hashes and current sources match'},null,2))
+
+if(releaseVersion==='V1.9.10'){
+ for(const required of ['server/src/attendance-analysis.js','server/src/attendance-workbook.js','server/src/routes/attendance.js','server/src/routes/work-storage.js','server/src/work-storage.js','server/src/warehouse-areas.js','server/sql/migration_attendance_storage_20261009.sql','docs/ATTENDANCE_REVIEW_20261009.md'])if(!files.has(folder+'/'+required))throw new Error('Missing combined release file '+required)
+ for(const page of ['AttendanceReview','WorkStorage'])if(![...files.keys()].some(n=>n.includes('/web-dist/assets/'+page+'-')&&n.endsWith('.js')))throw new Error('Missing compiled '+page)
+ const app=files.get(folder+'/server/src/app.js').toString('utf8'),db=files.get(folder+'/server/src/db.js').toString('utf8')
+ if(!app.includes("'/api/attendance'")||!app.includes("'/api/work-storage'")||!db.includes('migration_attendance_storage_20261009.sql'))throw new Error('Work center routes/schema not mounted')
+ if((ledgerCatalog.supplements||[]).flatMap(batch=>batch.models).length!==5)throw new Error('Missing five supplemental models')
+ console.log('Work center routes, migration, pages and five supplemental models verified')
+}

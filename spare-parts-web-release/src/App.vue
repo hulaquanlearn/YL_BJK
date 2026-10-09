@@ -40,7 +40,7 @@
       </header>
 
       <nav class="section-nav" aria-label="功能导航">
-        <template v-if="isWork"><router-link to="/work"><el-icon><DocumentChecked /></el-icon>制曲 · 组长履职考评</router-link><router-link to="/inspection-notices"><el-icon><Document /></el-icon>原粮 · 检查通报</router-link></template>
+        <template v-if="isWork"><router-link to="/work"><el-icon><DocumentChecked /></el-icon>制曲 · 组长履职考评</router-link><router-link to="/inspection-notices"><el-icon><Document /></el-icon>原粮 · 检查通报</router-link><router-link v-if="canReadFeature(user,'/attendance')" to="/attendance"><el-icon><Calendar /></el-icon>原粮 · 考勤核查</router-link><router-link v-if="isAdmin" to="/work-storage"><el-icon><FolderOpened /></el-icon>资料管理</router-link></template>
         <template v-else-if="isKnowledge">
           <router-link to="/knowledge"><el-icon><Collection /></el-icon>工程知识</router-link>
         </template>
@@ -51,7 +51,7 @@
           <router-link to="/warehouse-3d"><el-icon><OfficeBuilding /></el-icon>3D 库位</router-link>
           <router-link to="/check"><el-icon><DocumentChecked /></el-icon>盘点管理</router-link>
           <router-link to="/statistics"><el-icon><DataAnalysis /></el-icon>备件统计</router-link>
-          <el-dropdown class="maintenance-nav" trigger="click" @command="switchWorkspace"><button class="maintenance-switch" :class="{ selected: ['/model-library', '/equipment', '/data-quality'].includes(route.path) }" type="button"><el-icon><Tools /></el-icon><span>基础维护</span><el-icon class="maintenance-arrow"><ArrowDown /></el-icon></button><template #dropdown><el-dropdown-menu><el-dropdown-item command="/model-library">备件模型库</el-dropdown-item><el-dropdown-item command="/equipment">设备与备件</el-dropdown-item><el-dropdown-item command="/data-quality">数据质量</el-dropdown-item></el-dropdown-menu></template></el-dropdown>
+          <el-dropdown class="maintenance-nav" popper-class="maintenance-menu" trigger="click" @command="switchWorkspace"><button class="maintenance-switch" :class="{ selected: ['/model-library', '/equipment', '/data-quality'].includes(route.path) }" type="button"><el-icon><Tools /></el-icon><span>基础维护</span><el-icon class="maintenance-arrow"><ArrowDown /></el-icon></button><template #dropdown><el-dropdown-menu><el-dropdown-item command="/model-library"><el-icon><Box /></el-icon>备件模型</el-dropdown-item><el-dropdown-item command="/equipment"><el-icon><OfficeBuilding /></el-icon>设备型号与备件</el-dropdown-item><el-dropdown-item command="/data-quality"><el-icon><Warning /></el-icon>数据检查</el-dropdown-item></el-dropdown-menu></template></el-dropdown>
         </template>
       </nav>
 
@@ -63,6 +63,7 @@
 
 <style>
 .workspace-menu .el-dropdown-menu__item{padding:0}.workspace-menu .workspace-entry{display:flex;align-items:center;gap:6px;min-height:40px;width:100%;box-sizing:border-box;padding:7px 16px;color:inherit;text-decoration:none}.workspace-menu .workspace-entry:focus-visible{outline:2px solid #5b5cab;outline-offset:-2px}
+#app .app-shell.is-work .section-nav>a.router-link-active{border-bottom-color:#5b5cab;color:#5b5cab;background:#f0f0fa}
 </style>
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
@@ -95,7 +96,7 @@ const roleLabel = computed(() => user.value?.role === 'viewer' && user.value?.st
 const isKnowledge = computed(() => route.meta.module === 'knowledge')
 const isWork = computed(() => route.meta.module === 'work')
 const moduleName = computed(() => isWork.value ? '工作管理中心' : isKnowledge.value ? '智能工程中心' : '备件管理中心')
-watch(()=>route.meta.title,title=>{document.title=title?`${title} · 数字工作台`:'数字工作台'},{immediate:true})
+watch(()=>route.meta.title,title=>{document.title='数字工作台'},{immediate:true})
 const userInitial = computed(() => user.value?.displayName?.slice(0, 1) || '用')
 const healthState = computed(() => `is-${health.value}`)
 const healthText = computed(() => ({ checking: '正在连接', online: '服务正常', offline: '服务异常', preview: '本地预览' }[health.value]))
@@ -128,4 +129,8 @@ onMounted(async () => {
 .maintenance-switch{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;white-space:nowrap;font:inherit;font-weight:700;border:0;background:transparent;color:#637083;cursor:pointer;padding:9px 13px;min-height:36px;border-radius:7px;transition:.2s ease}
 .maintenance-switch:hover,.maintenance-switch.selected{color:var(--brand);background:var(--brand-soft)}
 .maintenance-arrow{font-size:11px}
+</style>
+
+<style>
+:root .section-nav{display:flex;align-items:center;gap:8px}:root .section-nav>a,:root .section-nav .maintenance-switch{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;box-sizing:border-box;font-size:15px;line-height:20px;border-radius:6px;white-space:nowrap}:root .section-nav>a .el-icon,:root .section-nav .maintenance-switch>.el-icon{width:18px;height:18px;font-size:18px;flex:none}:root .section-nav>a.router-link-active{border-bottom:3px solid #be203b;color:#be203b;background:#fff7f9}:root .section-nav .maintenance-nav{margin-left:auto;padding-left:24px;border-left:1px solid #e4e9ef}.maintenance-menu .el-dropdown-menu__item{display:flex;align-items:center;gap:10px;min-height:42px;padding:8px 18px;font-size:14px}.maintenance-menu .el-icon{width:18px;height:18px;font-size:18px;flex:none}@media(max-width:1100px){:root .section-nav .maintenance-nav{margin-left:12px;padding-left:12px}}@media(max-width:600px){:root .section-nav>a,:root .section-nav .maintenance-switch{font-size:14px;height:40px}}
 </style>

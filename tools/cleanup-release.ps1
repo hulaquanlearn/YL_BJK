@@ -8,7 +8,7 @@ function WorkspacePath([string]$relative) {
 }
 $version = (Get-Content -LiteralPath (WorkspacePath 'VERSION') -Raw).Trim()
 if ($version -ne 'V1.9.10') { throw '本清理清单仅适用于已核验的 V1.9.10 交付' }
-$archive = WorkspacePath 'output\spare-parts-v1.9.10-20261009-full.tar.gz'
+$archive = WorkspacePath 'output\spare-parts-v1.9.10-20261009-full-work-center.tar.gz'
 if (-not (Test-Path -LiteralPath $archive)) { throw '先生成并核验当前部署包' }
 node (WorkspacePath 'tools\verify-release.mjs') $archive
 if ($LASTEXITCODE -ne 0) { throw '当前包未通过独立核验，停止清理' }
@@ -39,17 +39,11 @@ if (Test-Path -LiteralPath $previous) {
 if (-not (Test-Path -LiteralPath $rollback) -or -not (Test-Path -LiteralPath (Join-Path $rollbackDir 'SHA256SUMS.txt'))) { throw '缺少上一版回滚包' }
 
 $targets = @(
-  'output\spare-parts-v1.9.9-20260930-full-final',
+  'output\spare-parts-v1.9.10-20261009-full.tar.gz',
+  'output\spare-parts-v1.9.10-20261009-full-wxml-fix.tar.gz',
   'output\spare-parts-v1.9.10-20261009-full',
-  '.local\release-archive-20260930', '.local\release-history', '.local\superseded-releases',
-  '.local\audit-final-20260930', '.local\effects-20260930', '.local\inspection-qa',
-  '.local\portal-qa', '.local\sites-preview-20260930', '.local\ui-audit-20260930',
-  '.local\user-experience-audit-20260930', '.local\work-qa', '.local\work-redesign', '.local\work-settings-qa',
-  '.local\api-audit-final-20260930.json', '.local\api-tests-final-20260930.log',
-  '.local\web-audit-final-20260930.json', '.local\web-build-final-20260930.log', '.local\web-tests-final-20260930.log',
-  '.local\targeted-audit-tests.log', '.local\web-tests-20261009.log',
-  '.local\cleanup-record-20260930.json', '.local\shutdown-final-20260930.json', '.local\shutdown-final-20260930.ps1',
-  'server\.local\release-20261009'
+  'output\spare-parts-v1.9.10-20261009-full-wxml-fix',
+  'output\spare-parts-v1.9.10-20261009-full-work-center'
 )
 $deleted = @()
 foreach ($relative in $targets) {

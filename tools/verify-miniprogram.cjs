@@ -8,6 +8,16 @@ const root = path.resolve(__dirname, '../miniprogram');
 const walk = dir => fs.readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]);
 const files = walk(root).filter(f => f.endsWith('.js'));
 for (const file of files) execFileSync(process.execPath, ['--check', file], { stdio: 'pipe' });
+// WXML does not decode HTML entities inside its expression grammar.
+// JS syntax checks and event-binding checks alone cannot detect this error.
+let expressions = 0;
+for (const file of walk(root).filter(f => f.endsWith('.wxml'))) {
+  const source = fs.readFileSync(file, 'utf8');
+  for (const match of source.matchAll(/\{\{([\s\S]*?)\}\}/g)) {
+    assert.doesNotMatch(match[1], /&(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-f]+);/i, `${file}: HTML entity inside WXML expression`);
+    expressions++;
+  }
+}
 const app = JSON.parse(fs.readFileSync(path.join(root, 'app.json')));
 let handlers = 0;
 for (const page of app.pages) {
@@ -21,4 +31,4 @@ for (const page of app.pages) {
     handlers++;
   }
 }
-console.log(JSON.stringify({ javascriptFiles: files.length, registeredPages: app.pages.length, boundHandlers: handlers, result: 'passed' }));
+console.log(JSON.stringify({ javascriptFiles: files.length, registeredPages: app.pages.length, boundHandlers: handlers, wxmlExpressions: expressions, result: 'passed' }));

@@ -32,7 +32,7 @@
     <view class="card-item" wx:if="{{part.categoryModelId}}">
       <text class="label">模型ID：</text><text class="value">{{part.categoryModelId}}</text>
     </view>
-    <view class="card-item" wx:if="{{part.categoryModelName &amp;&amp; !part.categoryModelUrl}}"><text class="value">绑定模型待生成，请核对安装外形后选择细分模型。</text></view>
+    <view class="card-item" wx:if="{{part.categoryModelName && !part.categoryModelUrl}}"><text class="value">绑定模型待生成，请核对安装外形后选择细分模型。</text></view>
     <picker wx:if="{{canBindModel}}" mode="selector" range="{{modelLabels}}" value="{{modelChoiceIndex}}" disabled="{{modelBindingBusy || !modelChoices.length}}" bindchange="changeBoundModel"><button loading="{{modelBindingBusy}}" size="mini">绑定 / 更换模型</button></picker>
   </view>
 

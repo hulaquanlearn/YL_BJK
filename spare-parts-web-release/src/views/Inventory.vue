@@ -38,7 +38,7 @@
     <div v-if="loadError" class="inventory-load-error panel" role="alert"><strong>库存列表加载失败</strong><span>{{loadError}}；当前显示的数据可能未更新。</span><el-button :disabled="loading" @click="refreshAll">重新加载</el-button></div>
     <details class="inventory-summary" :open="overviewOpen" @toggle="overviewOpen=$event.target.open">
       <summary>库存概况 <span>{{ formatNumber(dashboard.partTypes) }} 种 · 低库存 {{ formatNumber(dashboard.lowStock) }} 条</span><el-button class="summary-refresh" :loading="loading" aria-label="刷新库存概况和列表" title="刷新库存概况和列表" @click.stop="refreshAll"><el-icon v-if="!loading"><Refresh /></el-icon><span>刷新</span></el-button></summary>
-      
+
       <section class="metric-grid inventory-metric-grid" aria-label="库存指标">
         <button type="button" class="metric-card is-parts is-clickable" @click="typeBreakdownVisible=true"><div class="metric-top"><span>备件种类</span><span class="metric-icon"><el-icon><Tickets /></el-icon></span></div><div class="metric-value">{{ formatNumber(dashboard.partTypes) }}</div><div class="metric-note">当前筛选 · 点击查看类型构成</div></button>
         <button type="button" class="metric-card is-stock is-clickable" @click="goStatistics()"><div class="metric-top"><span>库存总量</span><span class="metric-icon"><el-icon><Box /></el-icon></span></div><div class="metric-unit-list" :title="unitSummary"><span v-for="item in dashboard.unitTotals" :key="item.unit"><strong>{{ formatNumber(item.total) }}</strong>{{ item.unit }}</span><span v-if="!dashboard.unitTotals.length">暂无库存</span></div><div class="metric-note">不同单位分别统计，不混合相加</div></button>
@@ -69,7 +69,7 @@
         <div class="table-actions">
           <el-button v-write="canEditAny" v-if="$showControl(canEditAny)" type="primary" size="small" @click="openCreate"><el-icon><Plus /></el-icon>新增备件</el-button>
           <el-button v-write="canEditAny" v-if="$showControl(canEditAny)" type="success" plain size="small" @click="openImport"><el-icon><Upload /></el-icon>导入备件</el-button>
-          <el-button v-write="canEditAny" v-if="$showControl(canEditAny)" size="small" :loading="exporting" :disabled="!total || loading" @click="exportCurrent">导出当前结果</el-button>
+          <el-button v-write="canEditAny" v-if="$showControl(canEditAny)" size="small" :loading="exporting" :disabled="!total || loading" @click="exportCurrent">导出备件</el-button>
           <el-button v-if="query.lowStock" type="danger" plain size="small" @click="clearLowStock">退出预警筛选</el-button>
           <el-popover placement="bottom-end" :width="220" trigger="click"><template #reference><el-button size="small"><el-icon><Grid /></el-icon>自定义列</el-button></template><div class="column-picker"><strong>显示字段</strong><el-checkbox-group v-model="visibleColumns"><el-checkbox v-for="item in columnOptions" :key="item.value" :value="item.value">{{ item.label }}</el-checkbox></el-checkbox-group></div></el-popover>
         </div>
@@ -220,26 +220,27 @@
       <PartModelBinding v-model="bindingId" :workshop-code="bindingTarget?.workshopCode" />
       <template #footer><el-button @click="bindingVisible=false">取消</el-button><el-button type="primary" :loading="bindingSaving" @click="saveBinding">保存绑定</el-button></template>
     </el-dialog>
-    <el-dialog v-model="createVisible" title="新增备件" width="min(760px, 96vw)" destroy-on-close>
-      <el-alert title="所有账号都能查看新增后的备件；只有该车间管理员和总管理员可继续修改。" type="info" :closable="false" show-icon />
-      <el-form label-position="top" class="part-form-grid">
-        <el-form-item label="所属车间" required><el-select v-model="createForm.workshopCode" style="width:100%"><el-option v-for="item in editableWorkshops" :key="item.code" :label="item.name" :value="item.code" /></el-select></el-form-item>
+    <el-dialog v-model="createVisible" title="新增备件" class="ledger-entry-dialog ledger-create-dialog" width="min(860px, 96vw)" destroy-on-close>
+      <el-form label-position="left" label-width="112px" require-asterisk-position="right" class="part-form-grid ledger-form">
+        <el-form-item label="所属车间" required><el-select v-model="createForm.workshopCode"><el-option v-for="item in editableWorkshops" :key="item.code" :label="item.name" :value="item.code" /></el-select></el-form-item>
+        <el-form-item label="库存量"><el-input-number v-model="createForm.totalStock" :min="0" :max="999999999" :controls="false" /></el-form-item>
         <el-form-item label="物料编码" required><el-input v-model="createForm.materialCode" maxlength="60" /></el-form-item>
-        <el-form-item label="物料名称" required class="span-2"><el-input v-model="createForm.materialDesc" maxlength="300" /></el-form-item>
-        <el-form-item label="规格型号"><el-input v-model="createForm.spec" maxlength="180" /></el-form-item>
+        <el-form-item label="不含税单价"><el-input-number v-model="createForm.price" :min="0" :precision="2" :controls="false" placeholder="选填" /></el-form-item>
+        <el-form-item label="物料名称" required><el-input v-model="createForm.materialDesc" maxlength="300" /></el-form-item>
+        <el-form-item label="订购点"><el-input-number v-model="createForm.reorderPoint" :min="0" :controls="false" placeholder="选填" /></el-form-item>
+        <el-form-item label="单位" required><el-select v-model="createForm.unit" filterable allow-create default-first-option><el-option v-for="unit in ['个','根','米','台','套','条','只','件']" :key="unit" :value="unit" :label="unit" /></el-select></el-form-item>
+        <el-form-item label="最高储备"><el-input-number v-model="createForm.maxStock" :min="0" :controls="false" placeholder="选填" /></el-form-item>
+        <el-form-item label="规格型号"><el-input v-model="createForm.spec" maxlength="180" placeholder="选填" /></el-form-item>
+        <el-form-item label="用途"><el-input v-model="createForm.usageDescription" maxlength="300" placeholder="选填" /></el-form-item>
         <el-form-item label="备件类型"><el-input v-model="createForm.partType" maxlength="80" placeholder="例如：易损件" /></el-form-item>
-        <el-form-item label="绑定模型" class="span-2"><PartModelBinding v-model="createForm.modelId" :workshop-code="createForm.workshopCode" /></el-form-item>
-        <el-form-item label="单位"><el-input v-model="createForm.unit" maxlength="20" /></el-form-item>
-        <el-form-item label="初始库存"><el-input-number v-model="createForm.totalStock" :min="0" :max="999999999" controls-position="right" style="width:100%" /></el-form-item>
-        <el-form-item v-if="createUsesArea" label="货区/仓库名称" required><el-input v-model="createForm.warehouseAreaName" maxlength="100" placeholder="例如：五粮货区" /></el-form-item>
-        <el-form-item v-if="createUsesArea" label="六位库位码"><el-input v-model="createForm.locationCode" maxlength="6" placeholder="例如：011101；无固定库位可留空" /></el-form-item>
-        <el-form-item v-else label="存放位置"><el-input v-model="createForm.locationNote" maxlength="200" placeholder="例如：备件库东侧A柜" /></el-form-item>
-        <el-form-item label="订购点"><el-input-number v-model="createForm.reorderPoint" :min="0" controls-position="right" style="width:100%" /></el-form-item>
-        <el-form-item label="最高储备"><el-input-number v-model="createForm.maxStock" :min="0" controls-position="right" style="width:100%" /></el-form-item>
-        <el-form-item label="不含税单价"><el-input-number v-model="createForm.price" :min="0" :precision="2" controls-position="right" style="width:100%" /></el-form-item>
-        <el-form-item label="用途"><el-input v-model="createForm.usageDescription" maxlength="300" /></el-form-item>
+        <el-form-item label="备注"><el-input v-model="createForm.remark" maxlength="500" placeholder="选填" /></el-form-item>
+        <PartLocationEntry v-model="createLocation" v-model:area="createForm.warehouseAreaName" :workshop-code="createForm.workshopCode" :workshop-name="workshops.find(w=>w.code===createForm.workshopCode)?.name" />
       </el-form>
-      <template #footer><el-button @click="createVisible=false">取消</el-button><el-button v-write type="primary" :loading="createSubmitting" @click="submitCreate">保存备件</el-button></template>
+      <section class="ledger-model-section"><h3>3D 模型展示</h3><el-radio-group v-model="createModelMode"><el-radio value="bound">关联指定模型</el-radio><el-radio value="public">使用公共模型</el-radio></el-radio-group>
+        <PartModelBinding v-if="createModelMode==='bound'" v-model="createForm.modelId" :workshop-code="createForm.workshopCode" />
+        <el-alert v-else title="未关联专属模型，将显示公共模型，可后续更换。" type="warning" :closable="false" show-icon />
+      </section><p class="ledger-form-note">单价、订购点、最高储备等选填项留空表示未配置；同编码物料已有模型绑定时沿用原绑定。</p>
+      <template #footer><el-button @click="createVisible=false">取消</el-button><el-button v-write type="primary" :loading="createSubmitting" @click="submitCreate">{{ createModelMode==='public' ? '使用公共模型并保存' : '保存备件' }}</el-button></template>
     </el-dialog>
 
     <el-dialog v-model="editVisible" title="编辑备件信息" width="min(760px, 96vw)" align-center append-to-body destroy-on-close>
@@ -253,7 +254,7 @@
         <el-form-item label="绑定模型" class="span-2"><PartModelBinding v-model="editForm.modelId" :workshop-code="editForm.workshopCode" :disabled="!canBindModel(editTarget)" /></el-form-item>
         <el-form-item label="品牌"><el-input v-model="editForm.brand" maxlength="100" /></el-form-item>
         <el-form-item label="单位"><el-input v-model="editForm.unit" maxlength="20" /></el-form-item>
-        <el-form-item v-if="editUsesArea" label="货区/仓库名称" required><el-input v-model="editForm.warehouseAreaName" maxlength="100" /></el-form-item>
+        <el-form-item v-if="editUsesArea" label="货区 / 仓库" required><WarehouseAreaPicker v-model="editForm.warehouseAreaName" :workshop-code="editForm.workshopCode" :workshop-name="workshops.find(w=>w.code===editForm.workshopCode)?.name" /></el-form-item>
         <el-form-item v-if="editUsesArea" label="六位库位码"><el-input v-model="editForm.locationCode" maxlength="6" placeholder="例如：011101；无固定库位可留空" /></el-form-item>
         <el-form-item v-if="editUsesArea&&!editForm.locationCode" label="无固定库位说明" class="span-2"><el-input v-model="editForm.locationNote" maxlength="200" placeholder="例如：货区内待确认位置" /></el-form-item>
         <el-form-item v-if="!editUsesArea" label="存放位置" class="span-2"><el-input v-model="editForm.locationNote" maxlength="200" /></el-form-item>
@@ -266,15 +267,19 @@
       <template #footer><el-button @click="editVisible=false">取消</el-button><el-button v-write type="primary" :loading="editSubmitting" @click="submitEdit">保存修改</el-button></template>
     </el-dialog>
 
-    <el-dialog v-model="importVisible" title="导入备件台账" width="min(760px, 94vw)" destroy-on-close>
-      <el-form label-position="top">
-        <el-form-item label="导入到车间" required><div class="import-workshop-row"><el-select v-model="importWorkshopCode"><el-option v-for="item in editableWorkshops" :key="item.code" :label="item.name" :value="item.code" /></el-select><el-button :loading="templateDownloading" @click="downloadImportTemplate">下载当前车间模板</el-button></div><small class="field-hint">本次只处理所选车间；校验通过前不会写入任何数据。</small></el-form-item>
-        <el-form-item label="Excel 台账（.xlsx）" required>
-          <el-upload v-write ref="importUploadRef" drag :auto-upload="false" :limit="1" accept=".xlsx" :on-change="handleImportFile" :on-remove="clearImportFile" style="width:100%">
-            <el-icon class="el-icon--upload"><UploadFilled /></el-icon><div class="el-upload__text">拖入台账，或<em>点击选择</em></div>
-          </el-upload>
-        </el-form-item>
+    <el-dialog v-model="importVisible" title="导入备件台账" class="ledger-entry-dialog" width="min(820px, 96vw)" destroy-on-close>
+      <p class="ledger-dialog-description">导入完整备件台账，包含库存、价格、库位和模型绑定。</p>
+      <el-form label-position="left" label-width="112px" class="ledger-form import-workshop-form">
+        <el-form-item label="导入到车间" required><el-select v-model="importWorkshopCode"><el-option v-for="item in editableWorkshops" :key="item.code" :label="item.name" :value="item.code" /></el-select></el-form-item>
       </el-form>
+      <div class="import-template-actions"><el-button class="template-download" :loading="templateDownloading" @click="downloadImportTemplate"><el-icon><Download /></el-icon>下载导入模板</el-button><el-button link class="model-name-link" @click="router.push('/model-library')">查看模型名称 <el-icon><ArrowRight /></el-icon></el-button></div>
+      <el-upload v-write ref="importUploadRef" class="ledger-upload" drag :auto-upload="false" :limit="1" accept=".xlsx" :on-change="handleImportFile" :on-remove="clearImportFile">
+        <WorkbookUploadMark /><div class="el-upload__text">拖入 .xlsx 文件，或<em>点击选择</em></div>
+      </el-upload>
+      <table v-if="!importPreview" class="import-example"><caption>填写示例（仅说明格式，不会导入）</caption><thead><tr><th>物料编码</th><th>物料名称</th><th>模型名称</th></tr></thead><tbody><tr><td>502000268</td><td>微型断路器 IC65N</td><td>微型断路器1P</td></tr><tr><td>502000300</td><td>交流接触器</td><td>交流接触器</td></tr></tbody></table>
+      <div class="import-rule-box"><p><b>1</b> 模型名称留空：保留原绑定；新备件未绑定时使用公共模型。</p><p><b>2</b> 文件有错误：校验提示，修正后再导入；校验通过前不会写入数据。</p></div>
+      <details class="import-field-details"><summary>查看完整模板字段与填写说明</summary><p>物料编码 · 物料名称 · 单位 · 规格型号 · 备件类型 · 库存量 · 订购点 · 最高储备 · 不含税单价 · 用途 · 备注 · 模型名称<template v-if="importWorkshopCode!=='qu_making'"> · 货区 · 六位库位码</template> · 存放位置。单价和储备等选填项留空表示未配置。</p></details>
+      <el-table v-if="importPreview?.sample?.length && !importPreview.errorCount" :data="importPreview.sample" border max-height="240" class="ledger-sample-table"><el-table-column prop="materialCode" label="物料编码" width="145" /><el-table-column prop="materialDesc" label="物料名称" min-width="180" /><el-table-column prop="totalStock" label="库存量" width="85" /><el-table-column prop="modelName" label="模型名称" min-width="150"><template #default="{row}">{{ row.modelName || '未填写，沿用绑定 / 公共模型' }}</template></el-table-column></el-table>
       <div v-if="importPreview" class="import-preview" :class="{'has-errors':importPreview.errorCount}"><div class="import-preview-head"><strong>{{ importPreview.errorCount ? `发现 ${importPreview.errorCount} 个问题` : `校验通过，共 ${importPreview.total} 条` }}</strong><el-button v-if="importPreview.errorCount" type="warning" plain :loading="errorReportDownloading" @click="downloadImportErrorReport">下载错误修正台账</el-button></div><el-table v-if="importPreview.errors?.length" :data="importPreview.errors" size="small" border max-height="220"><el-table-column prop="row" label="行" width="64"/><el-table-column prop="field" label="字段" width="110"/><el-table-column prop="reason" label="原因" min-width="190"/><el-table-column prop="suggestion" label="修改建议" min-width="190"/></el-table></div>
       <template #footer><el-button @click="importVisible=false">取消</el-button><el-button v-write :loading="importPreviewing" @click="previewImport">校验文件</el-button><el-button v-write type="primary" :disabled="!importPreview||importPreview.errorCount>0" :loading="importSubmitting" @click="submitImport">确认导入</el-button></template>
     </el-dialog>
@@ -329,6 +334,10 @@
 <script setup>
 import PartModelDetail from '../components/PartModelDetail.vue'
 import PartModelBinding from '../components/PartModelBinding.vue'
+import WorkbookUploadMark from '../components/WorkbookUploadMark.vue'
+import WarehouseAreaPicker from '../components/WarehouseAreaPicker.vue'
+import PartLocationEntry from '../components/PartLocationEntry.vue'
+import { emptyPartLocation, locationEntryPayload } from '../utils/part-location-entry.mjs'
 import { collectFilteredParts } from '../utils/selection.mjs'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -425,7 +434,9 @@ const importWorkshopCode = ref('')
 const importFile = ref(null)
 const importPreview = ref(null)
 const importUploadRef = ref(null)
-const createForm = reactive({ workshopCode:'', materialCode:'', materialDesc:'', modelId:null, spec:'', partType:'', unit:'个', totalStock:0, warehouseAreaName:'', locationCode:'', locationNote:'', reorderPoint:null, maxStock:null, price:null, usageDescription:'' })
+const createModelMode = ref('public')
+const createLocation = ref(emptyPartLocation())
+const createForm = reactive({ workshopCode:'', materialCode:'', materialDesc:'', modelId:null, spec:'', partType:'', unit:'个', totalStock:0, warehouseAreaName:'', locationCode:'', locationNote:'', reorderPoint:null, maxStock:null, price:null, usageDescription:'', remark:'' })
 const editVisible = ref(false)
 const editSubmitting = ref(false)
 const editTarget = ref(null)
@@ -522,20 +533,23 @@ function goScoped(path, extra={}) { router.push({ path, query: inventoryRouteQue
 function goReplenishment() { goScoped('/replenishment') }
 
 function defaultEditableWorkshop() {
-  return canEditWorkshop(query.workshopCode) ? query.workshopCode : (editableWorkshops.value[0]?.code || '')
+  return query.workshopCode && canEditWorkshop(query.workshopCode) ? query.workshopCode : (editableWorkshops.value[0]?.code || '')
 }
 function openCreate() {
+  createModelMode.value='public'
+  createLocation.value=emptyPartLocation()
   const workshopCode = defaultEditableWorkshop()
-  const workshopName = workshops.value.find(item => item.code === workshopCode)?.name || '车间'
-  Object.assign(createForm, { workshopCode, materialCode:'', materialDesc:'', modelId:null, spec:'', partType:'', unit:'个', totalStock:0, warehouseAreaName:workshopCode==='qu_making'?'':`${workshopName}备件库`, locationCode:'', locationNote:'', reorderPoint:null, maxStock:null, price:null, usageDescription:'' })
+  Object.assign(createForm, { workshopCode, materialCode:'', materialDesc:'', modelId:null, spec:'', partType:'', unit:'个', totalStock:0, warehouseAreaName:'', locationCode:'', locationNote:'', reorderPoint:null, maxStock:null, price:null, usageDescription:'', remark:'' })
   createVisible.value = true
 }
 async function submitCreate() {
   if (!createForm.workshopCode || !createForm.materialCode.trim() || !createForm.materialDesc.trim() || (createUsesArea.value && !createForm.warehouseAreaName.trim())) return ElMessage.warning(`请完整填写车间、物料编码、物料名称${createUsesArea.value?'和货区':''}`)
-  if (createForm.locationCode && !/^\d{6}$/.test(createForm.locationCode)) return ElMessage.warning('六位库位码必须是6位数字')
-  const location = createForm.locationCode ? { shelf:Number(createForm.locationCode.slice(0,2)), position:Number(createForm.locationCode.slice(2,3)), layer:Number(createForm.locationCode.slice(3,4)), location:Number(createForm.locationCode.slice(4,6)), locationType:'shelf' } : { locationType:'free_text', locationNote:createForm.locationNote||'新增时未设置固定库位' }
+  if (!createForm.unit.trim()) return ElMessage.warning('请填写单位')
+  if (createModelMode.value==='bound' && !createForm.modelId) return ElMessage.warning('请选择要关联的3D模型，或改用公共模型')
+  let location
+  try { location=locationEntryPayload(createLocation.value,createForm.workshopCode) } catch(error) { return ElMessage.warning(error.message) }
   createSubmitting.value = true
-  try { await createPart({ ...createForm, modelId:createForm.modelId || undefined, ...location }); ElMessage.success('备件已新增'); createVisible.value=false; query.workshopCode=createForm.workshopCode; await refreshAll() } finally { createSubmitting.value=false }
+  try { await createPart({ ...createForm, modelId:createModelMode.value==='bound' ? createForm.modelId : undefined, ...location }); ElMessage.success('备件已新增'); createVisible.value=false; query.workshopCode=createForm.workshopCode; await refreshAll() } finally { createSubmitting.value=false }
 }
 function openEdit(row) {
   if (!canEditWorkshop(row.workshopCode)) return ElMessage.warning('当前账号只能编辑所属车间备件')
@@ -676,7 +690,8 @@ watch(() => stockForm.type, () => { stockForm.reasonCode = '' })
 watch(() => batchForm.type, () => { batchForm.reasonCode = '' })
 watch(importWorkshopCode, () => { importPreview.value = null })
 watch(() => createForm.workshopCode, code => {
-  if (code === 'qu_making') { createForm.warehouseAreaName=''; createForm.locationCode='' }
+  createForm.warehouseAreaName=''
+  if (code === 'qu_making') createForm.locationCode=''
 })
 watch(()=>route.query.inventoryId,openLinkedPart)
 onMounted(() => Promise.allSettled([refreshAll(), loadOperationOptions(),openLinkedPart()]))
@@ -720,3 +735,20 @@ onMounted(() => Promise.allSettled([refreshAll(), loadOperationOptions(),openLin
 .spec-cell{font-weight:400;font-size:13px}
 .metric-unit-list{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:baseline;margin:12px 0}.metric-unit-list>span{white-space:nowrap}.metric-unit-list strong{font-size:24px;margin-right:4px}
 .inventory-dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}.inventory-dialog-heading h2{margin:0;font-size:18px;line-height:1.5}.inventory-dialog-heading .el-button{flex:none}.detail-card-body{overflow:visible}.inventory-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px}:deep(.inventory-row-actions .el-button){margin:0;padding:6px;min-height:32px;white-space:nowrap}</style>
+
+
+
+<style scoped>
+.material-code-cell{font-size:16px;font-weight:600;line-height:1.6;color:#334155}
+.ledger-model-section{padding-top:16px;border-top:1px solid #e5eaf0}.ledger-model-section h3{font-size:16px;margin:0 0 10px}.ledger-model-section .binding-picker,.ledger-model-section .el-alert{margin-top:12px}.ledger-form-note,.ledger-dialog-description{font-size:13px;color:#64748b;line-height:1.7}.ledger-template-fields{padding:12px 14px;background:#f5f7fa;border:1px solid #e4e9f0;border-radius:8px;margin:0 0 14px;font-size:13px;line-height:1.8}.ledger-template-fields strong{display:block;color:#334155}.ledger-template-fields span{color:#64748b}.ledger-sample-table{margin-top:16px}.ledger-form :deep(.el-input-number){width:100%}.ledger-form :deep(.el-form-item__label){color:#334155}.ledger-form :deep(.el-input__inner){font-size:15px}.ledger-entry-dialog :deep(.el-dialog__footer){border-top:1px solid #e5eaf0;padding-top:16px;margin-top:18px}.ledger-entry-dialog :deep(.el-dialog__header){border-bottom:1px solid #e5eaf0;padding-bottom:16px}
+@media(max-width:680px){.ledger-form{grid-template-columns:1fr}.ledger-form .span-2{grid-column:auto}.ledger-form :deep(.el-form-item){display:block}.ledger-form :deep(.el-form-item__label){width:auto!important;float:none;text-align:left}.ledger-form :deep(.el-form-item__content){margin-left:0!important}.ledger-form :deep(.el-form-item__label){margin-bottom:6px}}
+</style>
+<style scoped>
+.inventory-metric-grid .metric-card{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:16px;min-height:178px}
+.inventory-metric-grid .metric-card .metric-top{min-height:34px;align-items:center;font-size:14px;line-height:20px}
+.inventory-metric-grid .metric-card .metric-icon{width:34px;height:34px;flex:0 0 34px;border-radius:9px;font-size:19px}
+.inventory-metric-grid .metric-card .metric-value{margin-top:12px;line-height:1.25}
+.inventory-metric-grid .metric-card .metric-unit-list{margin:12px 0 0;gap:8px 12px;line-height:1.25}
+.inventory-metric-grid .metric-card .metric-unit-list strong{font-size:30px}
+.inventory-metric-grid .metric-card .metric-note{margin-top:auto;padding-top:12px;line-height:1.5}
+</style>

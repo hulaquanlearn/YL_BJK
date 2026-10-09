@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getToken, getUser, setSession } from '../auth'
 import { getMe } from '../api'
+import { canReadFeature } from '../utils/feature-access.mjs'
 
 const routes = [
+  { path: '/attendance', name: 'AttendanceReview', component: () => import('../views/AttendanceReview.vue'), meta: { module: 'work', title: '考勤核查', description: '按排班核对闸机进出与手机打卡记录' } },
+  { path: '/work-storage', name: 'WorkStorage', component: () => import('../views/WorkStorage.vue'), meta: { module: 'work', admin: true, title: '工作资料管理', description: '管理上传资料与清理过期内容' } },
   { path: '/work', name: 'WorkAssessment', component: () => import('../views/WorkAssessment.vue'), meta: { module: 'work', title: '组长履职考评', description: '工作填报、每周考评与复核' } },
   { path: '/inspection-notices', name: 'InspectionNotices', component: () => import('../views/InspectionNoticeAccess.vue'), meta: { module: 'work', inspection: true, title: '检查通报', description: '查看原粮车间检查通报与现场问题' } },
   { path: '/login', name: 'Login', component: () => import('../views/Login.vue'), meta: { public: true, title: '账号登录' } },
@@ -38,6 +41,7 @@ router.beforeEach(async to => {
   if (to.meta.public) return getToken() && getUser() ? '/portal' : true
   if (!getToken() || !getUser()) return { path: '/login', query: { redirect: to.fullPath } }
   if (to.meta.admin && getUser()?.role !== 'admin') return '/portal'
+  if (to.path === '/attendance' && !canReadFeature(getUser(), to.path)) return '/portal'
   return true
 })
 

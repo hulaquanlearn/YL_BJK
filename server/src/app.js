@@ -69,6 +69,8 @@ app.use('/api', (req, res, next) => /\/(download|preview|import-template|export)
 // Inventory's viewer restrictions remain unchanged.
 app.use('/api/work', require('./routes/work'));
 app.use('/api/inspection-notices', require('./routes/inspection-notices'));
+app.use('/api/attendance', require('./routes/attendance'));
+app.use('/api/work-storage', require('./routes/work-storage'));
 app.use('/api', enforceReadOnly);
 app.use('/api/users', usersRouter);
 app.use('/api', partsRouter);

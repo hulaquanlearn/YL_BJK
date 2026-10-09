@@ -2,7 +2,7 @@
   <div class="model-library">
     <div class="library-tabs-wrap">
     <el-tabs v-model="activeTab" class="library-tabs" @tab-change="reloadCurrent">
-      <el-tab-pane label="备件模型关联" name="parts">
+      <el-tab-pane label="物料绑定" name="parts">
         <section class="workbench-head panel">
           <div class="workbench-copy"><strong>查找物料</strong></div>
           <div class="search-row">
@@ -21,7 +21,7 @@
           <div class="result-toolbar">
             <div class="filter-tabs">
               <button :class="{active:filter==='all'}" @click="filter='all'">全部 {{ parts.length }}</button>
-              <button :class="{active:filter==='category'}" @click="filter='category'">备件模型</button><button :class="{active:filter==='none'}" @click="filter='none'">未关联</button>
+              <button :class="{active:filter==='category'}" @click="filter='category'">备件模型</button><button :class="{active:filter==='none'}" @click="filter='none'">未绑定 / 待生成</button>
             </div>
             <div v-if="$showControl(canEditAny)" class="selection-tools"><el-button v-write size="small" @click="openImportBindings">导入模型名称绑定</el-button><el-button size="small" @click="selectVisible">全选筛选结果</el-button><el-button v-if="selected.size" size="small" @click="selected.clear()">取消选择</el-button></div>
           </div>
@@ -36,18 +36,34 @@
           <div v-loading="loading" class="ml-grid">
             <article v-for="item in pagedParts" :key="item.id" class="ml-card" :class="{selected:selected.has(item.id),readonly:!canEditPart(item)}">
               <el-checkbox v-if="$showControl(canEditPart(item))" :disabled="!canEditPart(item)" class="card-check" :model-value="selected.has(item.id)" @change="toggleSelect(item)" /><span v-else class="readonly-badge">只读</span>
-              <div class="model-state" :class="modelState(item).type">{{ modelState(item).label }}</div>
-              <div class="ml-card-img"><ModelReferenceImage :src="item.imageUrl||''" :fallback-src="item.categoryImageUrl||''" :model-url="item.categoryModelUrl||''" :alt="item.name"><template #default="{source}"><span class="image-source">{{ item.partImageUrl && source===item.partImageUrl ? '实物图' : '模型参考图' }}</span></template></ModelReferenceImage></div>
-              <div class="ml-card-info"><strong :title="item.name">{{ item.name }}</strong><code>{{ item.code }}</code><p>{{ item.spec || '未填写规格' }}</p><p class="category-line">{{ item.categoryName || '未分类' }}<template v-if="item.categoryModelName"> · {{ item.categoryModelName }}</template></p></div>
+              <header class="part-card-heading"><strong :title="item.name">{{ item.name }}</strong><code>{{ item.code }}</code></header>
+              <div class="part-media-grid">
+                <section class="part-media">
+                  <span class="media-label">3D 示意模型</span>
+                  <button v-if="displayedPartModel(item)" type="button" class="media-view" :aria-label="`查看${item.name}3D模型`" @click="openPartPreview(item)">
+                    <ModelThumbnail :model-url="displayedPartModel(item)" :front-rotation-y="Number(item.categoryFrontRotationY)||0" :alt="`${item.name}3D示意模型`" /><span class="media-hint">点击旋转查看</span>
+                  </button>
+                  <div v-else class="media-empty"><el-icon><Box /></el-icon><span>{{ item.categoryModelId ? '模型待生成' : '尚未绑定模型' }}</span><small>{{ item.categoryModelId ? '生成后可查看 3D' : '请选择对应备件模型' }}</small></div>
+                </section>
+                <section class="part-media photo-pane">
+                  <span class="media-label">实物照片</span>
+                  <button v-if="item.partImageUrl && !failedPhotos.has(item.partImageUrl)" type="button" class="media-view" :aria-label="`放大${item.name}实物照片`" @click="openPhoto(item)"><img :src="item.partImageUrl" :alt="`${item.name}实物照片`" loading="lazy" @error="failedPhotos.add(item.partImageUrl)" /><span class="media-hint">点击放大</span></button>
+                  <div v-else class="media-empty"><el-icon><Camera /></el-icon><span>{{ item.partImageUrl ? '实物照片加载失败' : '尚未上传实物图' }}</span>
+                    <el-button v-if="item.partImageUrl" link type="primary" @click="failedPhotos.delete(item.partImageUrl)">重新加载</el-button>
+                    <el-upload v-else-if="$showControl(canEditPart(item))" v-write="canEditPart(item)" :show-file-list="false" :before-upload="file=>handleSingleUpload(item,file)" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp"><el-button size="small" :disabled="!canEditPart(item)">上传实物图</el-button></el-upload>
+                  </div>
+                </section>
+              </div>
+              <div class="ml-card-info"><p class="category-line" :title="item.categoryModelName"><template v-if="item.categoryModelId">绑定模型 {{ item.categoryModelId }} · {{ item.categoryModelName }}<span v-if="!item.categoryModelUrl">（待生成）</span></template><template v-else>公共模型 · 未关联专属模型</template></p><p :title="item.spec">{{ item.spec || '未填写规格' }}</p></div>
               <div v-write="canEditPart(item)" v-if="$showControl(canEditPart(item))" class="card-actions">
-                <el-button link type="primary" @click="openSingleBinding(item)">绑定 / 更换模型</el-button><el-upload v-write :show-file-list="false" :before-upload="file=>handleSingleUpload(item,file)" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp"><el-button link type="primary">{{ item.partImageUrl?'更换实物图':'上传实物图' }}</el-button></el-upload>
+                <el-button link type="primary" @click="openSingleBinding(item)">{{ item.categoryModelId ? '更换模型' : '绑定模型' }}</el-button><el-upload v-write :show-file-list="false" :before-upload="file=>handleSingleUpload(item,file)" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp"><el-button link type="primary">{{ item.partImageUrl?'更换照片':'上传实物图' }}</el-button></el-upload>
               </div>
             </article>
           </div><el-pagination v-if="filteredParts.length" v-model:current-page="modelPage" :page-size="24" :total="filteredParts.length" layout="total, prev, pager, next" class="model-pagination"/><el-empty v-if="!loading&&!filteredParts.length" description="没有符合条件的备件" />
         </section>
       </el-tab-pane>
 
-      <el-tab-pane label="备件模型管理" name="categories">
+      <el-tab-pane label="模型目录" name="categories">
         <section class="workbench-head panel category-head">
           <div class="workbench-copy"><strong>查找备件模型</strong></div>
           <div class="search-row category-search"><el-input v-model="categorySearch" clearable placeholder="搜索名称、搜索词或说明" @keyup.enter="loadCategoryModels" @clear="loadCategoryModels"><template #prefix><el-icon><Search /></el-icon></template></el-input><el-button type="primary" @click="loadCategoryModels">搜索</el-button><el-button v-write="canEditAny" v-if="$showControl(canEditAny)" type="primary" @click="openCategoryDialog()">新增备件模型</el-button></div>
@@ -69,15 +85,18 @@
       <p>{{ singleBinding.part?.name }}</p><PartModelBinding v-model="singleBinding.modelId" :workshop-code="singleBinding.part?.workshopCode" />
       <template #footer><el-button @click="singleBinding.visible=false">取消</el-button><el-button v-write type="primary" :loading="singleBinding.saving" @click="saveSingleBinding">保存绑定</el-button></template>
     </el-dialog>
-    <el-dialog v-model="bindingImport.visible" title="导入模型名称绑定" width="min(900px,94vw)" destroy-on-close>
+    <el-dialog v-model="bindingImport.visible" title="导入模型名称绑定" class="binding-import-dialog ledger-entry-dialog" width="min(820px,96vw)" destroy-on-close>
       <p>只读取物料编码和模型名称，不修改库存、价格、库位或备件主信息。模型名称留空保留原绑定。</p>
-      <input type="file" accept=".xlsx" @change="chooseBindingFile" />
+      <div class="binding-import-tools"><el-button class="binding-template-download template-download" :loading="bindingTemplateLoading" @click="downloadBindingTemplate"><el-icon><Download /></el-icon>下载导入模板</el-button><el-button link class="model-name-link" @click="bindingImport.visible=false;activeTab='categories';reloadCurrent()">查看模型名称 <el-icon><ArrowRight /></el-icon></el-button></div>
+      <el-upload class="ledger-upload" v-write drag :auto-upload="false" :limit="1" accept=".xlsx" :on-change="file=>{bindingImport.file=file.raw;bindingImport.plan=null}" :on-remove="()=>{bindingImport.file=null;bindingImport.plan=null}"><WorkbookUploadMark /><div class="el-upload__text">拖入 .xlsx 文件，或<em>点击选择</em></div></el-upload>
+      <table v-if="!bindingImport.plan" class="import-example"><caption>填写示例（仅说明格式，不会导入）</caption><thead><tr><th>物料编码</th><th>模型名称</th></tr></thead><tbody><tr><td>502000268</td><td>微型断路器1P</td></tr><tr><td>502000300</td><td>交流接触器</td></tr></tbody></table>
+      <div class="import-rule-box"><p><b>1</b> 名称留空：保留原绑定；原本未绑定时使用公共模型。</p><p><b>2</b> 名称不存在：校验提示，修正后再导入。</p></div>
       <el-alert v-if="bindingImport.plan" :title="`共 ${bindingImport.plan.total} 条，将改变 ${bindingImport.plan.changed} 个绑定；错误 ${bindingImport.plan.errors.length} 条`" :type="bindingImport.plan.errors.length ? 'error' : 'success'" :closable="false" />
       <el-table v-if="bindingImport.plan" :data="bindingImport.plan.errors.length ? bindingImport.plan.errors : bindingImport.plan.items" max-height="360">
         <el-table-column prop="sourceRow" label="行号" width="70"><template #default="{row}">{{ row.sourceRow || row.row }}</template></el-table-column>
         <el-table-column prop="code" label="物料编码" width="150"/><el-table-column prop="previousModelName" label="原模型"/><el-table-column prop="modelName" label="新模型"/><el-table-column prop="reason" label="错误原因"/>
       </el-table>
-      <template #footer><el-button @click="bindingImport.visible=false">取消</el-button><el-button :disabled="!bindingImport.file" :loading="bindingImport.loading" @click="checkBindingImport">校验</el-button><el-button v-write type="primary" :disabled="!bindingImport.plan || bindingImport.plan.errors.length>0" :loading="bindingImport.saving" @click="applyBindingImport">导入绑定</el-button></template>
+      <template #footer><el-button @click="bindingImport.visible=false">取消</el-button><el-button :disabled="!bindingImport.file" :loading="bindingImport.loading" @click="checkBindingImport">校验文件</el-button><el-button v-write type="primary" :disabled="!bindingImport.plan || bindingImport.plan.errors.length>0" :loading="bindingImport.saving" @click="applyBindingImport">导入绑定</el-button></template>
     </el-dialog>
     <el-dialog v-model="categoryDialog.visible" :title="categoryDialog.id?'编辑备件模型':'新增备件模型'" width="min(920px,94vw)" destroy-on-close @closed="resetCategoryDialog">
       <div class="category-editor-layout">
@@ -87,7 +106,7 @@
           <el-form-item label="用途说明"><el-input v-model="categoryDialog.description" type="textarea" :rows="3" maxlength="500" show-word-limit /></el-form-item>
           <el-form-item label="货位占用缩放"><el-input-number v-model="categoryDialog.modelScale" :min="0.1" :max="5" :step="0.1" /><small>模型始终受单个货位和货架一侧边界限制。</small></el-form-item>
           <el-form-item :label="categoryDialog.id?'替换3D文件（可选）':'3D文件'" ><input class="native-file" type="file" accept=".glb" @change="captureCategoryFile" /><small v-if="categoryDialog.file">已选择：{{ categoryDialog.file.name }}</small><small v-else>{{ categoryDialog.id?'未选择时保留原模型':'可先保存模型名称，之后上传自包含 GLB 2.0，最大50MB' }}</small></el-form-item>
-          <el-form-item :label="categoryDialog.id?'替换模型参考图（可选）':'模型参考图'" ><input class="native-file" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp" @change="captureCategoryImage" /><small v-if="categoryDialog.imageFile">已选择：{{ categoryDialog.imageFile.name }}</small><small v-else>{{ categoryDialog.id?'未选择时保留原参考图':'绑定类别后，没有实物图的备件会自动继承此图' }}</small></el-form-item>
+          <el-form-item :label="categoryDialog.id?'替换模型参考图（可选）':'模型参考图'" ><input class="native-file" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp" @change="captureCategoryImage" /><small v-if="categoryDialog.imageFile">已选择：{{ categoryDialog.imageFile.name }}</small><small v-else>{{ categoryDialog.id?'未选择时保留原参考图':'用于模型参考展示；实物照片需单独上传' }}</small></el-form-item>
         </el-form>
         <section class="front-editor">
           <strong>设置模型正面</strong><p>绿色“正面”标记代表 3D 库位的查看方向。点击左右旋转，保存后货架两侧会自动相向翻转。</p>
@@ -99,6 +118,9 @@
       <template #footer><el-button @click="categoryDialog.visible=false">取消</el-button><el-button v-write type="primary" :loading="categoryDialog.saving" @click="saveCategoryModel">保存模型</el-button></template>
     </el-dialog>
 
+    <el-dialog v-model="photoDialog.visible" :title="photoDialog.name" width="min(900px,94vw)" destroy-on-close>
+      <el-image class="photo-enlarged" :src="photoDialog.url" fit="contain" :preview-src-list="[photoDialog.url]" preview-teleported><template #error><span>照片无法加载，请关闭后重新加载。</span></template></el-image>
+    </el-dialog>
     <el-dialog v-model="previewDialog.visible" :title="previewDialog.name" width="min(760px,94vw)" destroy-on-close>
       <ModelPreview :model-url="previewDialog.modelUrl" :front-rotation-y="previewDialog.frontRotationY" height="420px" />
       <div class="preview-caption"><ModelReferenceImage :src="previewDialog.imageUrl" :model-url="previewDialog.modelUrl" :alt="`${previewDialog.name}参考图`" /><div><strong>保存的正面视角</strong><span>可拖动查看其他角度；再次打开仍以已保存正面为初始视角。</span></div></div>
@@ -111,12 +133,15 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Picture, Refresh, Search } from '@element-plus/icons-vue'
+import WorkbookUploadMark from '../components/WorkbookUploadMark.vue'
+import { Picture, Refresh, Search, Box, Camera, UploadFilled } from '@element-plus/icons-vue'
+import ModelThumbnail from '../components/ModelThumbnail.vue'
 import ModelPreview from '../components/ModelPreview.vue'
 import ModelReferenceImage from '../components/ModelReferenceImage.vue'
 import PartModelBinding from '../components/PartModelBinding.vue'
-import { previewModelBindings, importModelBindings, batchAssignPartCategoryModel, createPartCategoryModel, deletePartCategoryModel, getPartCategoryModels, getPartModelLibrary, updatePartCategoryModel, uploadPartImage, } from '../api'
+import { downloadModelBindingsTemplate, previewModelBindings, importModelBindings, batchAssignPartCategoryModel, createPartCategoryModel, deletePartCategoryModel, getPartCategoryModels, getPartModelLibrary, updatePartCategoryModel, uploadPartImage, } from '../api'
 import { canEditWorkshop, canEditAnyWorkshop, isAdmin, getUser, showControl } from '../auth'
+import { displayedPartModel } from '../utils/public-part-model.mjs'
 import { normalizeModelRotation } from '../utils/model-fit.mjs'
 import { prepareCategoryCatalog, searchCategoryCatalog } from '../utils/category-catalog.mjs'
 
@@ -143,12 +168,12 @@ const batchCategoryOptions = computed(() => searchCategoryCatalog(categoryModels
 const visibleCategoryModels = computed(() => searchCategoryCatalog(categoryModels.value,categorySearch.value))
 function searchBatchModels(text) { batchCategorySearch.value=text }
 
-const withCategoryModel = computed(() => parts.value.filter(item => item.categoryModelId).length)
-const withoutAnyModel = computed(() => parts.value.filter(item => !item.categoryModelId).length)
+const withCategoryModel = computed(() => parts.value.filter(item => item.categoryModelId && item.categoryModelUrl).length)
+const withoutAnyModel = computed(() => parts.value.filter(item => !item.categoryModelId || !item.categoryModelUrl).length)
 const modelPage = ref(1)
 const pagedParts = computed(()=>filteredParts.value.slice((modelPage.value-1)*24,modelPage.value*24))
 watch(()=>[query.workshopCode,query.search,filter.value],()=>{modelPage.value=1})
-const filteredParts = computed(() => parts.value.filter(item => filter.value === 'category' ? Boolean(item.categoryModelId) : filter.value === 'none' ? !item.categoryModelId : true))
+const filteredParts = computed(() => parts.value.filter(item => filter.value === 'category' ? Boolean(item.categoryModelId) : filter.value === 'none' ? (!item.categoryModelId || !item.categoryModelUrl) : true))
 
 watch(()=>filteredParts.value.length, count=>{modelPage.value=Math.min(modelPage.value,Math.max(1,Math.ceil(count/24)))})
 
@@ -164,7 +189,7 @@ function normalizePartRows(rows) {
     const item = { ...source }
     const codes = Array.isArray(item.workshopCodes) ? item.workshopCodes : String(item.workshopCodes || item.workshopCode || '').split(',').filter(Boolean)
     item.workshopCodes = [...new Set(codes)]
-    item.partImageUrl = Object.prototype.hasOwnProperty.call(item, 'partImageUrl') ? (item.partImageUrl || null) : (item.imageUrl || null)
+    item.partImageUrl = Object.prototype.hasOwnProperty.call(item, 'partImageUrl') ? (item.partImageUrl || null) : (item.imageSource === 'category' || item.imageUrl === item.categoryImageUrl ? null : item.imageUrl || null)
     item.imageUrl = item.partImageUrl || item.categoryImageUrl || item.imageUrl || null
     const existing = byId.get(String(item.id))
     if (!existing) byId.set(String(item.id), item)
@@ -190,7 +215,7 @@ async function runBatches(ids, action, label) {
   ElMessage.success(`${label}完成：${completed} 种物料${batches.length > 1 ? `，共 ${batches.length} 批` : ''}`)
 }
 
-async function handleSingleUpload(item, file) { if (!validateImage(file)) return false; const data = new FormData(); data.append('image', file); const result = await uploadPartImage(item.id, data); item.partImageUrl = result.data.imageUrl; item.imageUrl = result.data.imageUrl; ElMessage.success('实物图片已上传，将优先于模型参考图显示'); return false }
+async function handleSingleUpload(item, file) { if (!validateImage(file)) return false; const data = new FormData(); data.append('image', file); const result = await uploadPartImage(item.id, data); item.partImageUrl = result.data.imageUrl; item.imageUrl = result.data.imageUrl; ElMessage.success('实物照片已更新'); return false }
 
 
 async function assignCategoryModel() { const ids = [...selected]; if (!ids.length || !batchCategoryId.value) return; batchAssigning.value = true; try { await runBatches(ids, batch => batchAssignPartCategoryModel({ partIds: batch, categoryModelId: batchCategoryId.value }), '模型绑定'); await Promise.all([loadParts(),loadCategoryModels()]) } finally { batchAssigning.value = false } }
@@ -218,6 +243,15 @@ function rotateCategory(direction) { categoryDialog.frontRotationY = normalizeMo
 async function saveCategoryModel() { if (!categoryDialog.name.trim()) return ElMessage.warning('请填写备件模型名称'); categoryDialog.saving = true; try { const data = new FormData(); data.append('name', categoryDialog.name.trim()); data.append('keywords', categoryDialog.keywords); data.append('description', categoryDialog.description); data.append('modelScale', String(categoryDialog.modelScale)); data.append('frontRotationY', String(normalizeModelRotation(categoryDialog.frontRotationY))); if (categoryDialog.file) data.append('model', categoryDialog.file); if (categoryDialog.imageFile) data.append('image', categoryDialog.imageFile); if (categoryDialog.id) await updatePartCategoryModel(categoryDialog.id, data); else await createPartCategoryModel(data); categoryDialog.visible = false; ElMessage.success('备件模型、参考图和正面设置已保存'); await loadCategoryModels() } finally { categoryDialog.saving = false } }
 async function removeCategoryModel(item) { try { await ElMessageBox.confirm(`删除备件模型“${item.name}”后，关联物料将解除绑定；物料自己的实物图不会删除。`, '删除备件模型', { type: 'warning' }); await deletePartCategoryModel(item.id); ElMessage.success('备件模型已删除'); await Promise.all([loadCategoryModels(), loadParts()]) } catch { /* cancel */ } }
 
+const bindingTemplateLoading = ref(false)
+async function downloadBindingTemplate() {
+  bindingTemplateLoading.value=true
+  try { const data=await downloadModelBindingsTemplate();const url=URL.createObjectURL(data);const a=document.createElement('a');a.href=url;a.download='模型名称绑定导入模板.xlsx';a.click();URL.revokeObjectURL(url) } finally { bindingTemplateLoading.value=false }
+}
+const failedPhotos = reactive(new Set())
+const photoDialog = reactive({ visible: false, name: '', url: '' })
+function openPhoto(item) { Object.assign(photoDialog, { visible: true, name: `${item.name} · 实物照片`, url: item.partImageUrl }) }
+function openPartPreview(item) { openPreview({ name: `${item.name} · ${item.categoryModelName || '3D示意模型'}`, modelUrl: displayedPartModel(item), imageUrl: item.categoryImageUrl, frontRotationY: item.categoryFrontRotationY }) }
 const previewDialog = reactive({ visible: false, name: '', modelUrl: '', imageUrl: '', frontRotationY: 0 })
 function openPreview(item) { Object.assign(previewDialog, { visible: true, name: item.name, modelUrl: item.modelUrl, imageUrl: item.imageUrl || '', frontRotationY: Number(item.frontRotationY) || 0 }) }
 
@@ -235,4 +269,24 @@ onMounted(async () => { query.workshopCode = String(route.query.workshopCode || 
 .selection-tools{flex-wrap:wrap;justify-content:flex-end}.selection-tools .el-button{margin:0}.batch-workbench .el-select{width:230px;flex-shrink:0}
 .category-image{height:168px;min-height:168px}.reference-thumb>.reference-image{flex:none;width:54px;height:42px}.preview-caption>.reference-image{flex:none;width:88px;height:66px;border:1px solid #e1e6ed;border-radius:8px}
 @media(max-width:680px){.model-library{padding:12px}.summary-row{grid-template-columns:repeat(3,minmax(0,1fr))}.summary-row article{align-items:flex-start;flex-direction:column;gap:7px;padding:13px 10px}.summary-row article span{font-size:11px}.summary-row article strong{font-size:23px}.selection-tools{justify-content:flex-start}.batch-workbench .el-select{width:100%}}
+</style>
+<style scoped>
+.ml-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.part-card-heading{padding:16px 38px 12px 14px;min-height:84px;box-sizing:border-box}.part-card-heading strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14px;line-height:1.5;height:42px}.part-card-heading code{display:block;margin-top:4px;color:#7a8799;font-size:12px}.card-check{top:12px;right:12px}
+.part-media-grid{display:grid;grid-template-columns:1fr 1fr;margin:0 12px;border:1px solid #e9edf3;border-radius:8px;overflow:hidden}.part-media{position:relative;min-width:0;background:#f5f7fa}.photo-pane{border-left:1px solid #e9edf3;background:#fff}.media-label{position:absolute;top:10px;left:10px;z-index:1;color:#657389;font-size:11px;pointer-events:none}.media-view{position:relative;display:block;width:100%;height:190px;padding:26px 5px 25px;border:0;background:transparent;cursor:pointer}.media-view:hover{background:#e8eef633}.media-view:focus-visible{outline:2px solid #bf203c;outline-offset:-2px}.media-view>img{width:100%;height:100%;object-fit:contain}.media-hint{position:absolute;bottom:9px;left:0;right:0;color:#718098;font-size:11px;text-align:center}.media-empty{height:190px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#8995a7;font-size:12px;box-sizing:border-box;padding:28px 6px 8px;text-align:center}.media-empty .el-icon{font-size:30px}.media-empty small{font-size:10px}.ml-card-info{padding:10px 14px 14px}.ml-card-info p{font-size:12px;line-height:1.6}.category-line{color:#56677f!important}.card-actions{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:10px 0;min-height:42px}.card-actions>button{margin:0}.card-actions>:last-child{border-left:1px solid #e9edf3;text-align:center}.photo-enlarged{display:block;width:100%;height:min(65vh,600px)}
+@media(max-width:1250px){.ml-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:950px){.ml-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.ml-grid{grid-template-columns:1fr}.media-view,.media-empty{height:210px}}
+</style>
+
+<style scoped>
+.binding-import-tools{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}.binding-import-tools>span{color:#64748b;font-size:13px}
+</style>
+
+<style scoped>
+.binding-import-dialog :deep(.el-dialog__header){border-bottom:1px solid #e5eaf0;padding-bottom:16px}.binding-import-dialog :deep(.el-dialog__footer){border-top:1px solid #e5eaf0;padding-top:16px;margin-top:18px}.binding-import-dialog>p{color:#64748b;font-size:13px;line-height:1.7}
+</style>
+
+<style scoped>
+.binding-import-tools .binding-template-download{color:#be203b;background:#fff;border-color:#be203b}.binding-import-tools .binding-template-download:hover,.binding-import-tools .binding-template-download:focus-visible{color:#a71930;background:#fff1f4;border-color:#a71930}
 </style>

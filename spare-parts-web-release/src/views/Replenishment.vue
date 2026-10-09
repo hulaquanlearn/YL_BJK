@@ -20,7 +20,7 @@
 
     <section class="panel replenish-controls replenish-selection">
       <div class="selection-summary">
-        <div class="selection-details"><span>已选 {{ selectedRows.length }} 条</span><strong>{{ selectedUnitSummary }}</strong><small>建议补货数量按单位分开统计</small><span class="amount-separator"></span><span class="selection-amount-label">全部库存金额</span><strong>¥ {{ formatMoney(summary.stockAmount) }}</strong><span class="selection-amount-label">已选备件金额</span><strong>¥ {{ formatMoney(selectedStockAmount) }}</strong></div>
+        <div class="selection-details"><span>已选 {{ selectedRows.length }} 条</span><strong>{{ selectedUnitSummary }}</strong><small>建议补货数量按单位分开统计</small><span class="amount-separator"></span><span class="selection-amount-label">全部库存金额</span><strong>¥ {{ formatMoney(summary.stockAmount) }}</strong><span class="selection-amount-label">已选补货金额</span><strong>¥ {{ formatMoney(selectedReplenishmentAmount) }}</strong></div>
         <div class="selection-actions"><el-button :disabled="loading||!selectedRows.length" @click="exportList"><el-icon><Download /></el-icon>导出表格清单</el-button></div>
       </div>
     </section>
@@ -72,7 +72,7 @@ const selectedUnitSummary = computed(() => {
   const text = [...totals].map(([unit, value]) => `${value}${unit}`).join('、')
   return text || '暂无可计算数量'
 })
-const selectedStockAmount = computed(() => selectedRows.value.reduce((sum,row) => sum + Number(row.currentStock || 0) * Number(row.price || 0), 0))
+const selectedReplenishmentAmount = computed(() => selectedRows.value.reduce((sum,row) => sum + Number(row.estimatedAmount || 0), 0))
 
 function formatNumber(value) { return Number(value || 0).toLocaleString('zh-CN',{maximumFractionDigits:4}) }
 function formatMoney(value) { return Number(value || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }

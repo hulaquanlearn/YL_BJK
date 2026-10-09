@@ -38,6 +38,7 @@ export function instanceStockModels(root) {
     if(nodes.length<2)continue
     const mesh=new InstancedMesh(nodes[0].geometry,nodes[0].material,nodes.length)
     mesh.userData.sharedStockModel=true
+    mesh.userData.stockPartsByInstance = nodes.map(node => node.userData.stockParts || [])
     nodes.forEach((node,index)=>{
       const matrix=root.matrixWorld.clone().invert().multiply(node.matrixWorld)
       mesh.setMatrixAt(index,matrix)
@@ -47,4 +48,15 @@ export function instanceStockModels(root) {
     mesh.computeBoundingSphere()
     root.add(mesh)
   }
+}
+
+export function stockPartsForHit(hit) {
+  if (!hit?.object) return []
+  if (hit.object.isInstancedMesh) return hit.object.userData.stockPartsByInstance?.[hit.instanceId] || []
+  let node = hit.object
+  while (node) {
+    if (node.userData.stockParts?.length) return node.userData.stockParts
+    node = node.parent
+  }
+  return []
 }

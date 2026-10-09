@@ -1,5 +1,20 @@
 'use strict';
 const catalog = require('../data/ledger-model-catalog.json');
+async function ensureSupplementalModels(db, batches = catalog.supplements || []) {
+  for (const batch of batches) {
+    const [version] = await db.query('INSERT IGNORE INTO model_catalog_versions(version) VALUES (?)', [batch.version]);
+    if (!version.affectedRows) continue;
+    for (const model of batch.models) {
+      // Add by name without reusing IDs or replacing a user's existing model.
+      await db.query(`INSERT IGNORE INTO part_models(name,description,model_url,built_in,quality) VALUES (?,?,?,1,?)`,
+        [model.name, model.description, model.modelUrl, model.quality]);
+      // Only the five explicitly requested codes; keep every existing binding.
+      await db.query(`UPDATE parts p JOIN part_models m ON m.name=? AND m.active=1
+        SET p.bound_model_id=m.id WHERE p.code=? AND COALESCE(p.active,1)=1 AND p.bound_model_id IS NULL`,
+        [model.name, model.materialCode]);
+    }
+  }
+}
 async function ensureModelCatalog(db) {
   // A separate catalog avoids reusing legacy IDs or changing historical records.
   await db.query(`CREATE TABLE IF NOT EXISTS part_models (
@@ -31,7 +46,8 @@ async function ensureModelCatalog(db) {
           [model.id, model.name, model.description, model.modelUrl || null, model.quality]);
       }
     }
+    await ensureSupplementalModels(db);
     await db.commit();
   } catch (error) { await db.rollback(); throw error; }
 }
-module.exports = { ensureModelCatalog };
+module.exports = { ensureModelCatalog, ensureSupplementalModels };

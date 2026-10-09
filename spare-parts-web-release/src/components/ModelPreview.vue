@@ -13,6 +13,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+import { PUBLIC_PART_MODEL, createPublicPartModel } from '../utils/public-part-model.mjs'
 
 const props = defineProps({
   modelUrl: { type: String, default: '' },
@@ -83,7 +84,8 @@ function frameModel(model) {
   camera.near = Math.max(radius / 100, .001)
   camera.far = Math.max(radius * 100, 100)
   const angle=Number(props.initialAngle)||0
-  camera.position.set(radius * (.08 + Math.sin(angle)*2.35), size.y * (angle ? 1.25 : .58), radius * Math.cos(angle)*2.35)
+  const distanceFactor = 2.35 / Math.min(camera.aspect || 1, 1)
+  camera.position.set(radius * (.08 + Math.sin(angle)*distanceFactor), size.y * (angle ? 1.25 : .58), radius * Math.cos(angle)*distanceFactor)
   camera.lookAt(target)
   camera.updateProjectionMatrix()
   controls.target.copy(target)
@@ -100,8 +102,7 @@ async function loadModel() {
   if (!props.modelUrl || !scene) { loading.value = false; return }
   loading.value = true
   try {
-    const url = new URL(props.modelUrl, window.location.origin).href
-    const gltf = await loader.loadAsync(url)
+    const gltf = props.modelUrl === PUBLIC_PART_MODEL ? { scene: createPublicPartModel() } : await loader.loadAsync(new URL(props.modelUrl, window.location.origin).href)
     if (token !== loadToken) { disposeObject(gltf.scene); return }
     currentModel = gltf.scene
     scene.add(currentModel)

@@ -93,10 +93,10 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <el-button v-if="displayMode==='3d'" @click="setView(viewMode==='perspective'?'top':'perspective')"><el-icon><View /></el-icon>{{ viewMode==='perspective'?'俯视角':'立体角' }}</el-button>
+            <el-dropdown v-if="displayMode==='3d'" class="scene-view-menu" trigger="click" @command="setView"><el-button><el-icon><View /></el-icon>视角：{{viewMode==='perspective'?'立体':'俯视'}}<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item command="perspective">立体视角</el-dropdown-item><el-dropdown-item command="top">俯视视角</el-dropdown-item></el-dropdown-menu></template></el-dropdown>
             <el-button v-if="displayMode==='3d'" class="touch-reset-button" @click="resetPerspectiveView">复位视角</el-button>
-            <el-button class="panel-toggle-button" @click="toggleSidePanel">
-              <el-icon><ArrowLeftBold v-if="sidePanelCollapsed" /><ArrowRightBold v-else /></el-icon>{{ sidePanelCollapsed ? '显示列表' : '收起列表' }}
+            <el-button class="panel-toggle-button" :aria-pressed="!sidePanelCollapsed" :title="sidePanelCollapsed ? '显示货架' : '收起货架'" @click="toggleSidePanel">
+              <el-icon><ArrowLeftBold v-if="sidePanelCollapsed" /><ArrowRightBold v-else /></el-icon>货架
             </el-button>
             <el-button class="fullscreen-button" :type="isFullscreen ? 'primary' : ''" @click="toggleFullscreen">
               <el-icon><FullScreen /></el-icon>{{ isFullscreen ? '退出全屏' : '全屏查看' }}
@@ -120,7 +120,17 @@
         <p v-if="displayMode==='2d'" class="plan-help">按真实相对位置显示；点击货架查看层数与备件。暂存点为历史只读标记。</p>
       </article>
 
-      <aside v-show="!sidePanelCollapsed" class="shelf-panel panel">
+      <aside v-show="!sidePanelCollapsed" class="shelf-panel panel" :class="{'is-stock-detail':stockDetailVisible}">
+        <section v-if="stockDetailVisible" class="stock-detail-panel" v-loading="stockDetailLoading">
+          <header><strong>备件详情</strong><el-button text aria-label="关闭备件详情" @click="stockDetailVisible=false"><el-icon><Close /></el-icon></el-button></header>
+          <h3>{{ selectedPart?.materialDesc }}</h3><div class="stock-identity-line"><code>{{ selectedPart?.materialCode }}</code><el-tag :type="Number(selectedPart?.totalStock)===0?'danger':selectedPart?.reorderPoint!=null && Number(selectedPart?.totalStock)<=Number(selectedPart?.reorderPoint)?'warning':'success'">{{ Number(selectedPart?.totalStock)===0?'零库存':selectedPart?.reorderPoint!=null && Number(selectedPart?.totalStock)<=Number(selectedPart?.reorderPoint)?'需补货':'库存正常' }}</el-tag></div>
+          <PartModelDetail :part="selectedPart" compact />
+          <dl class="stock-detail-fields"><div><dt>规格型号</dt><dd>{{ selectedPart?.spec || '未填写' }}</dd></div><div><dt>库位</dt><dd>{{ compactLocation(selectedPart) }}</dd></div><div><dt>当前库存</dt><dd>{{ selectedPart?.totalStock }} {{ selectedPart?.unit }}</dd></div><div><dt>订购点 / 最高储备</dt><dd>{{ selectedPart?.reorderPoint ?? '未配置' }} / {{ selectedPart?.maxStock ?? '未配置' }}</dd></div><div><dt>不含税单价</dt><dd>{{ selectedPart?.price == null ? '未配置' : `¥ ${Number(selectedPart.price).toFixed(2)}` }}</dd></div></dl>
+          <div v-if="stockDetailError" role="alert">详情加载失败 <el-button link @click="loadStockDetail(selectedPart)">重新加载</el-button></div>
+          <div v-if="stockDetailCandidates.length>1" class="stock-slot-choices"><strong>同一货位的备件</strong><button v-for="part in stockDetailCandidates" :key="part._id" :class="{active:String(part._id)===String(selectedPart?._id)}" @click="locatePart(part)">{{ part.materialCode }} · {{ part.materialDesc }}</button></div>
+          <el-button type="primary" @click="router.push({path:'/inventory',query:{...inventoryRouteQuery({workshopCode:selectedPart?.workshopCode}),inventoryId:selectedPart?._id}})">查看完整台账</el-button>
+        </section>
+        <template v-else>
         <header>
           <div><span>{{ panelMode === 'parts' ? '本架备件' : '货架导航' }}</span><strong>{{ panelMode === 'parts' ? shelfPartsCountText : `${visibleShelves.length} 组` }}</strong></div>
           <div class="panel-head-actions">
@@ -200,6 +210,7 @@
             <el-empty v-if="!shelfPartsLoading && !shelfPartsError && !displayedShelfParts.length" :image-size="58" description="当前层暂无备件记录" />
           </div>
         </div>
+        </template>
       </aside>
     </section>
 
@@ -260,9 +271,11 @@ import { useRoute, useRouter } from 'vue-router'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { CSS2DObject, CSS2DRenderer } from 'three/addons/renderers/CSS2DRenderer.js'
-import { flattenStockModel, instanceStockModels } from '../utils/stock-model-geometry.mjs'
+import { flattenStockModel, instanceStockModels, stockPartsForHit } from '../utils/stock-model-geometry.mjs'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import QRCode from 'qrcode'
+import PartModelDetail from '../components/PartModelDetail.vue'
+import { inventoryRouteQuery } from '../utils/inventory-scope.mjs'
 import { getPart, getParts, getWarehouseLayout, updateWarehouseShelf, getStagingPoints } from '../api'
 import { canEditWorkshop } from '../auth'
 import { modelFacingRotation, modelFitScale, slotModelBounds } from '../utils/model-fit.mjs'
@@ -297,6 +310,13 @@ const workshopOptions = ref([
 ])
 const activeGroup = ref('')
 const selectedShelf = ref(null)
+const stockDetailVisible = ref(false), stockDetailLoading = ref(false), stockDetailError = ref(false), stockDetailCandidates = ref([])
+let stockDetailToken = 0
+async function loadStockDetail(part) {
+  const token=++stockDetailToken
+  stockDetailLoading.value=true;stockDetailError.value=false
+  try { const result=await getPart(part._id);if(token===stockDetailToken)selectedPart.value=result.data } catch { if(token===stockDetailToken)stockDetailError.value=true } finally { if(token===stockDetailToken)stockDetailLoading.value=false }
+}
 const selectedPart = ref(null)
 const selectedPartId = ref('')
 const partOptions = ref([])
@@ -666,6 +686,7 @@ async function replaceWithCustomModel(anchor, fallback, part, placement, shelf, 
     if(!stockMaterialCache.has(lowStock)) { const colors=stockModelColors(lowStock); stockMaterialCache.set(lowStock,new THREE.MeshStandardMaterial({color:colors.color,emissive:colors.emissive,emissiveIntensity:.34,roughness:.58,metalness:.08})) }
     const model = new THREE.Mesh(geometry,stockMaterialCache.get(lowStock))
     model.userData.sharedStockModel=true
+    model.userData.stockParts=fallback.userData.stockParts
     // The saved category angle makes +Z the model's front. Shelf side 2 faces
     // the opposite aisle, so rotate it another half turn before fitting.
     model.rotation.y = modelFacingRotation(modelFrontRotationFor(part), placement.location.position)
@@ -748,6 +769,8 @@ function drawPartModels() {
     const anchor = new THREE.Group()
     anchor.position.set(shelf.position.x, 0, shelf.position.z)
     anchor.rotation.y = Number(shelf.position.rotationY || 0)
+    model.userData.stockParts=group.parts
+    anchor.userData.stockParts=group.parts
     anchor.add(model)
     partModelsRoot.add(anchor)
     pendingModels.push(replaceWithCustomModel(anchor, model, part, placement, shelf, { width, height, depth }, low, drawToken))
@@ -779,6 +802,10 @@ async function locatePart(part) {
   drawPartModels()
   drawPartMarker(shelf, part)
   focusPart(shelf, part)
+  stockDetailCandidates.value=allLocatedParts.value.filter(item=>String(item.locationCode||item.location)===String(part.locationCode||part.location) && Number(resolvePartLocation(item).shelf)===Number(location.shelf) && Number(resolvePartLocation(item).position)===Number(location.position) && Number(resolvePartLocation(item).layer)===Number(location.layer))
+  stockDetailVisible.value=true;sidePanelCollapsed.value=false
+  await loadStockDetail(part)
+  await nextTick();resizeScene()
 }
 
 async function locatePartById(id) {
@@ -855,6 +882,7 @@ function setGroup(group) {
 }
 
 function toggleSidePanel() {
+  stockDetailVisible.value=false
   sidePanelCollapsed.value = !sidePanelCollapsed.value
   nextTick(() => {
     window.setTimeout(resizeScene, 30)
@@ -1311,8 +1339,10 @@ function onStageClick(event) {
   pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
   pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
   raycaster.setFromCamera(pointer, camera)
-  const hit = raycaster.intersectObjects(clickableMeshes, false)[0]
-  if (hit?.object?.userData?.shelf) selectShelf(hit.object.userData.shelf, true)
+  const hit = raycaster.intersectObjects([...clickableMeshes, partModelsRoot].filter(Boolean), true)[0]
+  const parts=stockPartsForHit(hit)
+  if(parts.length) { locatePart(parts.find(part=>String(part._id)===String(selectedPart.value?._id)) || parts[0]); return }
+  if (hit?.object?.userData?.shelf) { stockDetailVisible.value=false;selectShelf(hit.object.userData.shelf, true) }
 }
 
 function onStagePointerCancel(event) {
@@ -1730,4 +1760,20 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .warehouse-page .plan-help{position:static;margin:10px 12px;line-height:1.6;background:#f4f6f9;overflow-wrap:anywhere}.entrance-2d,.floor-label,.east-label{pointer-events:none}
+</style>
+
+<style scoped>
+.model-toolbar{display:flex;flex-direction:column;align-items:stretch;gap:12px}.model-actions{display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap;padding-top:10px;border-top:1px solid #e5eaf0}.scene-view-menu{margin-left:auto}.model-actions .el-button{margin-left:0;min-height:36px}.stock-detail-panel{padding:16px}.stock-detail-panel>header{display:flex;align-items:center;justify-content:space-between}.stock-detail-panel h3{margin:12px 0 6px;font-size:16px;line-height:1.5}.stock-detail-panel>code{font-size:16px;color:#475569}.stock-detail-panel :deep(.visual-grid){gap:8px}.stock-detail-panel :deep(.visual-grid section){padding:8px}.stock-detail-panel :deep(.visual-grid h3){font-size:12px}.stock-detail-panel :deep(.visual-grid h3 small){display:none}.stock-detail-panel :deep(.model-preview),.stock-detail-panel :deep(.part-photo),.stock-detail-panel :deep(.visual-empty){height:160px!important}.stock-detail-fields{margin:16px 0}.stock-detail-fields>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #edf0f4;font-size:13px}.stock-detail-fields dt{color:#64748b}.stock-detail-fields dd{margin:0;text-align:right}.stock-slot-choices{display:grid;gap:6px;margin:14px 0}.stock-slot-choices>button{padding:8px;border:1px solid #e3e8ef;border-radius:6px;background:white;text-align:left;cursor:pointer}.stock-slot-choices>button.active{border-color:#be203b;background:#fff2f5}.stock-detail-panel>button{width:100%}@media(max-width:760px){.scene-view-menu{margin-left:0}.model-actions{gap:6px}}
+</style>
+
+<style scoped>
+.model-toolbar .model-title{flex:none}.stock-detail-panel :deep(.model-preview){min-height:160px}
+</style>
+
+<style scoped>
+.shelf-panel.is-stock-detail{align-self:stretch;display:flex;flex-direction:column}.shelf-panel.is-stock-detail .stock-detail-panel{flex:1;display:flex;flex-direction:column;min-height:0}.stock-detail-panel>button:last-child{margin-top:auto}.stock-detail-fields{overflow-wrap:anywhere}
+</style>
+
+<style scoped>
+.warehouse-workspace{grid-template-columns:minmax(0,1fr) clamp(360px,24vw,430px)}.shelf-panel.is-stock-detail{height:auto;max-height:none;align-self:stretch}.stock-detail-panel{padding:20px}.stock-detail-panel>header{padding-bottom:14px;border-bottom:1px solid #e7edf3}.stock-detail-panel>header strong{font-size:18px;color:#20364e}.stock-detail-panel>h3{font-size:19px;line-height:1.5;margin:18px 0 12px}.stock-identity-line{display:flex;align-items:center;justify-content:space-between;gap:10px}.stock-identity-line code{font-size:16px;color:#50637b;background:#f2f5f9;border-radius:5px;padding:5px 8px}.stock-detail-panel :deep(.bound-model){font-size:12px;margin:0 0 12px}.stock-detail-panel :deep(.visual-grid section){padding:10px;background:#f8fafc;border-color:#e5ebf2}.stock-detail-panel :deep(.visual-grid h3){font-size:13px;margin:0 0 10px}.stock-detail-fields>div{padding:12px 0;font-size:14px}.stock-detail-fields dd{font-weight:500;color:#20364e}.stock-detail-fields dt{flex:none}.stock-detail-panel>button:last-child{min-height:46px;font-size:15px;border-radius:8px}.stock-detail-panel :deep(.compact-model-note){font-size:11px;color:#8793a4;line-height:1.5;margin:10px 0 0}@media(max-width:980px){.warehouse-workspace{grid-template-columns:1fr}.shelf-panel.is-stock-detail{height:auto}}
 </style>

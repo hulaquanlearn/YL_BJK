@@ -30,6 +30,9 @@ test('real XLSX uploads preview inventory and equipment using read-excel-file 9 
     const parts = await send('/parts/import-preview', [['物料编码', '物料名称', '单位', '库存量'], ['TEST-1', '测试备件', '个', 4]]);
     assert.equal(parts.success, true);
     assert.equal(parts.data.total, 1);
+    const invalidNumeric = await send('/parts/import-preview', [['物料编码', '物料名称', '不含税单价', '最高储备'], ['TEST-2', '测试备件', '未知金额', -2]]);
+    assert.equal(invalidNumeric.success, false);
+    assert.deepEqual(invalidNumeric.data.errors.map(error => error.field).sort(), ['不含税单价','最高储备'].sort());
     const equipment = await send('/equipment/import-preview', [['设备型号'], ['测试设备']]);
     assert.equal(equipment.success, true);
     assert.equal(equipment.data.modelCount, 1);

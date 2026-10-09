@@ -61,6 +61,8 @@ export const previewPartsImport = data => http.post('/parts/import-preview', dat
 export const downloadPartsImportTemplate = workshopCode => http.get('/parts/import-template', { params: { workshopCode }, responseType: 'blob' })
 export const downloadPartsImportErrorReport = data => http.post('/parts/import-error-report', data, { timeout: 180000, responseType: 'blob' })
 export const getFilters = params => http.get('/filters', { params })
+export const getWarehouseAreas = workshopCode => http.get('/warehouse-areas', { params: { workshopCode } })
+export const createWarehouseArea = data => http.post('/warehouse-areas', data)
 export const getDashboard = params => http.get('/dashboard', { params })
 export const getStats = params => http.get('/stats', { params })
 export const updateStock = (id, data) => http.post(`/parts/${id}/stock`, data)
@@ -144,3 +146,5 @@ export const getStagingPoints = params => http.get('/staging-points', { params }
 export const createStagingPoint = data => http.post('/staging-points', data)
 export const updateStagingPoint = (id, data) => http.put(`/staging-points/${id}`, data)
 export const deleteStagingPoint = id => http.delete(`/staging-points/${id}`)
+
+export const downloadModelBindingsTemplate = () => http.get('/parts/model-bindings/template', { responseType: 'blob' })

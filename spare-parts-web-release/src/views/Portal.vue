@@ -33,9 +33,9 @@
       </article>
       <article class="module-card work-card">
         <div class="module-card-top"><span class="module-icon"><el-icon><DocumentChecked /></el-icon></span><span class="module-status">填报与考评</span></div>
-        <div><h2>工作管理中心</h2><p>制曲考评·原粮通报。</p></div>
+        <div><h2>工作管理中心</h2><p>制曲考评 · 原粮通报与考勤核查。</p></div>
         <router-link class="module-enter" :to="preferredWorkPath(user)">进入工作管理 <el-icon><Right /></el-icon></router-link>
-        <nav class="workspace-links" aria-label="工作管理常用功能"><router-link to="/work"><el-icon><DocumentChecked /></el-icon><span>制曲 · 组长履职考评{{ workRole==='shift_leader'?'（班长复核）':'' }}</span><el-icon><ArrowRight /></el-icon></router-link><router-link to="/inspection-notices"><el-icon><DocumentChecked /></el-icon><span>原粮 · 检查通报{{ canEditNotice?'整理':'查看' }}</span><el-icon><ArrowRight /></el-icon></router-link></nav>
+        <nav class="workspace-links" aria-label="工作管理常用功能"><router-link to="/work"><el-icon><DocumentChecked /></el-icon><span>制曲 · 组长履职考评{{ workRole==='shift_leader'?'（班长复核）':'' }}</span><el-icon><ArrowRight /></el-icon></router-link><router-link to="/inspection-notices"><el-icon><DocumentChecked /></el-icon><span>原粮 · 检查通报{{ canEditNotice?'整理':'查看' }}</span><el-icon><ArrowRight /></el-icon></router-link><router-link v-if="canReadFeature(user,'/attendance')" to="/attendance"><el-icon><Calendar /></el-icon><span>原粮 · 考勤核查</span><el-icon><ArrowRight /></el-icon></router-link><router-link v-if="user?.role==='admin'" to="/work-storage"><el-icon><FolderOpened /></el-icon><span>工作资料管理</span><el-icon><ArrowRight /></el-icon></router-link></nav>
       </article>
     </section>
   </main>
@@ -48,7 +48,7 @@ import { ElMessageBox } from 'element-plus'
 import { logout } from '../api'
 import { clearSession, getUser } from '../auth'
 import { work } from '../api/work'
-import { preferredWorkPath } from '../utils/feature-access.mjs'
+import { preferredWorkPath, canReadFeature } from '../utils/feature-access.mjs'
 
 const router = useRouter()
 const user = getUser()

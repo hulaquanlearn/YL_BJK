@@ -5,7 +5,7 @@ const WORKSHOP_IMPORT_SCHEMAS = {
     name: '原粮车间',
     usesWarehouseArea: true,
     locationMode: 'rack',
-    columns: ['物料编码', '物料名称', '单位', '规格型号', '库存量', '订购点', '最高储备', '不含税单价', '备件类型', '货区', '六位库位码', '用途', '备注', '模型名称']
+    columns: ['物料编码', '物料名称', '单位', '规格型号', '库存量', '订购点', '最高储备', '不含税单价', '备件类型', '货区', '六位库位码', '存放位置', '用途', '备注', '模型名称']
   },
   qu_making: {
     name: '制曲车间',
@@ -17,7 +17,7 @@ const WORKSHOP_IMPORT_SCHEMAS = {
     name: '酿酒车间',
     usesWarehouseArea: true,
     locationMode: 'mixed',
-    columns: ['物料编码', '物料名称', '单位', '规格型号', '库存量', '订购点', '最高储备', '不含税单价', '备件类型', '货区', '存放位置', '用途', '备注', '模型名称']
+    columns: ['物料编码', '物料名称', '单位', '规格型号', '库存量', '订购点', '最高储备', '不含税单价', '备件类型', '货区', '六位库位码', '存放位置', '用途', '备注', '模型名称']
   }
 };
 
@@ -58,7 +58,9 @@ async function makePartsTemplate(workshopCode) {
     notes: [
       '必填列只有“物料编码”和“物料名称”。请勿修改表头名称。',
       `当前模板适用于${schema.name}；${schema.usesWarehouseArea ? '支持货区字段。' : '该车间不要求货区，使用“存放位置”即可。'}`,
-      '模型名称必须与模型库名称完全一致；留空保留已有绑定，解除绑定请在页面操作。',
+      '模型名称必须与模型库名称完全一致；留空保留已有绑定，新物料未绑定时展示公共模型，解除绑定请在页面操作。',
+      '单价、订购点、最高储备等选填项留空表示未配置，不按0处理；单位留空默认为个，库存量留空默认为0。',
+      '有固定货架库位时填写六位库位码；无固定库位时填写存放位置。',
       '正式导入采用整批校验：只要存在错误行，就不会写入任何数据。系统会显示具体行号、字段、原因和修改建议。'
     ]
   });
@@ -136,4 +138,17 @@ function sendXlsx(res, filename, buffer) {
   res.send(Buffer.from(buffer));
 }
 
-module.exports = { WORKSHOP_IMPORT_SCHEMAS, workshopImportSchema, makePartsTemplate, makePartsErrorWorkbook, makeEquipmentTemplate, sendXlsx };
+async function makeModelBindingsTemplate(models = []) {
+  const buffer = await makeWorkbook({ title: '模型绑定', columns: ['物料编码', '模型名称'], notes: [
+    '填写已有物料编码，以及模型库中的准确模型名称。不要修改表头。',
+    '模型名称留空保留原绑定；未绑定物料展示公共模型。',
+    '本导入只更新模型绑定，不修改库存、价格、库位或备件主信息。',
+    '请先校验文件；任一错误都会阻止整批写入。可从“可用模型”工作表复制名称。'
+  ] });
+  const workbook = new ExcelJS.Workbook(); await workbook.xlsx.load(buffer);
+  const sheet = workbook.addWorksheet('可用模型');
+  sheet.columns = [{ header: '模型ID', key: 'id', width: 12 }, { header: '模型名称', key: 'name', width: 40 }];
+  models.forEach(model => sheet.addRow(model)); sheet.getRow(1).font = { bold: true };
+  return workbook.xlsx.writeBuffer();
+}
+module.exports = { WORKSHOP_IMPORT_SCHEMAS, workshopImportSchema, makePartsTemplate, makePartsErrorWorkbook, makeEquipmentTemplate, makeModelBindingsTemplate, sendXlsx };
