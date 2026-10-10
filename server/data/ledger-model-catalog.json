@@ -277,8 +277,8 @@
       "id": 35,
       "name": "分布式IO",
       "quality": "外观示意",
-      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
-      "modelUrl": null
+      "description": "分布式IO的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。",
+      "modelUrl": "/models/named-20261009/35.glb"
     },
     {
       "id": 36,
@@ -684,8 +684,8 @@
       "id": 86,
       "name": "带座外球面轴承",
       "quality": "外观示意",
-      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
-      "modelUrl": null
+      "description": "带座外球面轴承的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。",
+      "modelUrl": "/models/named-20261009/86.glb"
     },
     {
       "id": 87,
@@ -699,15 +699,15 @@
       "id": 88,
       "name": "带座轴承",
       "quality": "外观示意",
-      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
-      "modelUrl": null
+      "description": "带座轴承的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。",
+      "modelUrl": "/models/named-20261009/88.glb"
     },
     {
       "id": 89,
       "name": "不锈钢带座轴承",
       "quality": "外观示意",
-      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
-      "modelUrl": null
+      "description": "不锈钢带座轴承的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。",
+      "modelUrl": "/models/named-20261009/89.glb"
     },
     {
       "id": 90,
@@ -721,8 +721,8 @@
       "id": 91,
       "name": "标准气缸",
       "quality": "外观示意",
-      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
-      "modelUrl": null
+      "description": "标准气缸的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。",
+      "modelUrl": "/models/named-20261009/91.glb"
     },
     {
       "id": 92,
@@ -760,8 +760,8 @@
       "id": 96,
       "name": "轴承座",
       "quality": "外观示意",
-      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
-      "modelUrl": null
+      "description": "轴承座的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。",
+      "modelUrl": "/models/named-20261009/96.glb"
     },
     {
       "id": 97,
@@ -839,8 +839,8 @@
       "id": 106,
       "name": "减速机",
       "quality": "外观示意",
-      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
-      "modelUrl": null
+      "description": "减速机的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。",
+      "modelUrl": "/models/named-20261009/106.glb"
     },
     {
       "id": 107,
@@ -854,8 +854,8 @@
       "id": 108,
       "name": "减速机（带电机）",
       "quality": "外观示意",
-      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
-      "modelUrl": null
+      "description": "减速机（带电机）的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。",
+      "modelUrl": "/models/named-20261009/108.glb"
     },
     {
       "id": 109,
@@ -1165,8 +1165,8 @@
       "id": 147,
       "name": "减速机（带联轴器）",
       "quality": "外观示意",
-      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
-      "modelUrl": null
+      "description": "减速机（带联轴器）的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。",
+      "modelUrl": "/models/named-20261009/147.glb"
     },
     {
       "id": 148,
@@ -1180,8 +1180,8 @@
       "id": 149,
       "name": "轴承座（含轴承）",
       "quality": "外观示意",
-      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
-      "modelUrl": null
+      "description": "轴承座（含轴承）的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。",
+      "modelUrl": "/models/named-20261009/149.glb"
     },
     {
       "id": 150,
@@ -1331,8 +1331,8 @@
       "id": 168,
       "name": "液压纠偏装置",
       "quality": "外观示意",
-      "description": "同名简称可能包含不同规格或安装外形，请选择细分模型或上传已核对的模型；暂不展示猜测外形。",
-      "modelUrl": null
+      "description": "液压纠偏装置的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。",
+      "modelUrl": "/models/named-20261009/168.glb"
     },
     {
       "id": 169,
@@ -1573,6 +1573,1820 @@
           "description": "按台账内径60、外径80、宽5.5毫米的比例生成；RB截面、材料与厂家结构待核对。",
           "quality": "外观示意",
           "modelUrl": "/models/supplement-20261009/oil-seal-60-80-5-5.glb"
+        }
+      ]
+    },
+    {
+      "version": "pending-ledger-20261009-v1",
+      "models": [
+        {
+          "materialCode": "502004846",
+          "previousModelName": "分布式IO",
+          "previousModelNames": [
+            "分布式IO"
+          ],
+          "name": "502004846 · 西门子,分布式IO,IM 155-6PN ST 6ES7155-6AU01-0BN0,",
+          "modelUrl": "/models/pending-20261009/502004846.glb",
+          "quality": "外观示意",
+          "description": "台账：西门子,分布式IO,IM 155-6PN ST 6ES7155-6AU01-0BN0,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505002286",
+          "previousModelName": "带座外球面轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505002286 · 带座外球面轴承,UCF210 ,方形座带座轴承",
+          "modelUrl": "/models/pending-20261009/505002286.glb",
+          "quality": "外观示意",
+          "description": "台账：带座外球面轴承,UCF210 ,方形座带座轴承。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505002290",
+          "previousModelName": "带座外球面轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505002290 · 带座外球面轴承,UCFU206,方形座带座轴承",
+          "modelUrl": "/models/pending-20261009/505002290.glb",
+          "quality": "外观示意",
+          "description": "台账：带座外球面轴承,UCFU206,方形座带座轴承。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505002392",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505002392 · 福山,带座轴承,UCFL208,",
+          "modelUrl": "/models/pending-20261009/505002392.glb",
+          "quality": "外观示意",
+          "description": "台账：福山,带座轴承,UCFL208,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505002414",
+          "previousModelName": "不锈钢带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505002414 · 不锈钢带座轴承,SUCP213,立式座带座轴承",
+          "modelUrl": "/models/pending-20261009/505002414.glb",
+          "quality": "外观示意",
+          "description": "台账：不锈钢带座轴承,SUCP213,立式座带座轴承。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505002433",
+          "previousModelName": "带座外球面轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505002433 · 哈轴/瓦轴/洛轴,带座外球面轴承,UCP208,立式座带座轴承",
+          "modelUrl": "/models/pending-20261009/505002433.glb",
+          "quality": "外观示意",
+          "description": "台账：哈轴/瓦轴/洛轴,带座外球面轴承,UCP208,立式座带座轴承。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505003760",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505003760 · 亚德客,标准气缸,SC40×100-S",
+          "modelUrl": "/models/pending-20261009/505003760.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,标准气缸,SC40×100-S。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505003880",
+          "previousModelName": "不锈钢带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505003880 · 不锈钢带座轴承,SUCP206",
+          "modelUrl": "/models/pending-20261009/505003880.glb",
+          "quality": "外观示意",
+          "description": "台账：不锈钢带座轴承,SUCP206。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505007827",
+          "previousModelName": "轴承座（含轴承）",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505007827 · 轴承座,SN515,含轴承",
+          "modelUrl": "/models/pending-20261009/505007827.glb",
+          "quality": "外观示意",
+          "description": "台账：轴承座,SN515,含轴承。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505009415",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505009415 · 带座轴承,UCP214",
+          "modelUrl": "/models/pending-20261009/505009415.glb",
+          "quality": "外观示意",
+          "description": "台账：带座轴承,UCP214。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505012001",
+          "previousModelName": "轴承座",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505012001 · 轴承座,SN518",
+          "modelUrl": "/models/pending-20261009/505012001.glb",
+          "quality": "外观示意",
+          "description": "台账：轴承座,SN518。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505012117",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505012117 · SKF,带座轴承,UCF307,方形座,",
+          "modelUrl": "/models/pending-20261009/505012117.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,带座轴承,UCF307,方形座,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505013668",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505013668 · SKF,带座轴承,UCP310",
+          "modelUrl": "/models/pending-20261009/505013668.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,带座轴承,UCP310。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505013669",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505013669 · SKF,带座轴承,UCP312",
+          "modelUrl": "/models/pending-20261009/505013669.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,带座轴承,UCP312。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505015676",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505015676 · SKF,带座轴承,UCFL204,",
+          "modelUrl": "/models/pending-20261009/505015676.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,带座轴承,UCFL204,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505017049",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505017049 · 亚德客,气缸,SC63*350,",
+          "modelUrl": "/models/pending-20261009/505017049.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC63*350,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505017050",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505017050 · 亚德客,气缸,SC50*150S,",
+          "modelUrl": "/models/pending-20261009/505017050.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC50*150S,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018937",
+          "previousModelName": "减速机",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018937 · SEW,减速机,R37 AM80 速比36.72,序号25.8123680901.0001.22.22",
+          "modelUrl": "/models/pending-20261009/505018937.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机,R37 AM80 速比36.72,序号25.8123680901.0001.22.22。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018939",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018939 · SEW,减速机(含皖南防爆电机),KAZ67 YFB4-100L2-4，M1A,速比 27.28,3KW序号25.8185490503.",
+          "modelUrl": "/models/pending-20261009/505018939.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含皖南防爆电机),KAZ67 YFB4-100L2-4，M1A,速比 27.28,3KW序号25.8185490503.0003.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018940",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018940 · SEW,减速机(含皖南防爆电机）,KAZ97 YFB4-132M-4，M1A,速比 56.55,序号25.8125245618.0002",
+          "modelUrl": "/models/pending-20261009/505018940.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含皖南防爆电机）,KAZ97 YFB4-132M-4，M1A,速比 56.55,序号25.8125245618.0002.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018941",
+          "previousModelName": "减速机",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018941 · SEW,减速机,KAZ57 YFB4-90L-4,M1A,速比30.28,序号25.8125245611.0004.22.24",
+          "modelUrl": "/models/pending-20261009/505018941.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机,KAZ57 YFB4-90L-4,M1A,速比30.28,序号25.8125245611.0004.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018942",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018942 · SEW,减速机(含皖南防爆电机),KAZ67 YFB4-100L1-4,M1A,速比 30.22,序号25.8125245613.000",
+          "modelUrl": "/models/pending-20261009/505018942.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含皖南防爆电机),KAZ67 YFB4-100L1-4,M1A,速比 30.22,序号25.8125245613.0003.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018952",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018952 · SEW,减速机(含皖南防爆电机),R77 YFB4-132S-4,M1,速比15.60,5.5KW,序号25.8167701901.00",
+          "modelUrl": "/models/pending-20261009/505018952.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含皖南防爆电机),R77 YFB4-132S-4,M1,速比15.60,5.5KW,序号25.8167701901.0001.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018954",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505018954 · 亚德客,普通双作用气缸,SAI160×370-CB,",
+          "modelUrl": "/models/pending-20261009/505018954.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,普通双作用气缸,SAI160×370-CB,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018957",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018957 · SEW,减速机(含皖南防爆电机),R27 YFB4-80M2-4,M1,速比15.63,0.75KW，序号25.8143951701/8",
+          "modelUrl": "/models/pending-20261009/505018957.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含皖南防爆电机),R27 YFB4-80M2-4,M1,速比15.63,0.75KW，序号25.8143951701/8140293401.。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018958",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505018958 · 亚德客,气缸,SC50-475S,",
+          "modelUrl": "/models/pending-20261009/505018958.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC50-475S,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018967",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018967 · SEW,减速机(含皖南防爆电机),R87 YFBBP-132M-4,M1,速比15.35,7.5KW,序号25.8125245639/3",
+          "modelUrl": "/models/pending-20261009/505018967.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含皖南防爆电机),R87 YFBBP-132M-4,M1,速比15.35,7.5KW,序号25.8125245639/32.0005.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018968",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018968 · SEW,减速机(含皖南防爆电机),KAZ107 YFB4-160L-4，M1A,速比 49.90,15KW,序号25.812524560",
+          "modelUrl": "/models/pending-20261009/505018968.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含皖南防爆电机),KAZ107 YFB4-160L-4，M1A,速比 49.90,15KW,序号25.8125245603.0001.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018969",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018969 · SEW,减速机(含皖南防爆电机),RF77 YFB4-90L-4，M2,速比65.77,1.5KW,序号25.8125245629.00",
+          "modelUrl": "/models/pending-20261009/505018969.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含皖南防爆电机),RF77 YFB4-90L-4，M2,速比65.77,1.5KW,序号25.8125245629.0009.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018970",
+          "previousModelName": "减速机",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018970 · SEW,减速机,R57 AM90,速比26.31,序号25.8130878002.0001.22.13",
+          "modelUrl": "/models/pending-20261009/505018970.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机,R57 AM90,速比26.31,序号25.8130878002.0001.22.13。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018971",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505018971 · SEW,减速机(含皖南防爆电机),KAZ77 YFB4-100L2-4,M1B,速比40.04,3KW,序号25.8125245614.",
+          "modelUrl": "/models/pending-20261009/505018971.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含皖南防爆电机),KAZ77 YFB4-100L2-4,M1B,速比40.04,3KW,序号25.8125245614.0001.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018973",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505018973 · 亚德客,气缸,SC50X125S,",
+          "modelUrl": "/models/pending-20261009/505018973.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC50X125S,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018974",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505018974 · 亚德客,气缸,SC50X300S,",
+          "modelUrl": "/models/pending-20261009/505018974.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC50X300S,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018975",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505018975 · 亚德客,气缸,SAI100X200,",
+          "modelUrl": "/models/pending-20261009/505018975.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SAI100X200,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505018976",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505018976 · 亚德客,气缸,JSI32X75S,",
+          "modelUrl": "/models/pending-20261009/505018976.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,JSI32X75S,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019152",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505019152 · SKF,带座轴承,UCF310,方形座,",
+          "modelUrl": "/models/pending-20261009/505019152.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,带座轴承,UCF310,方形座,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019154",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505019154 · SKF,带座轴承,UCP308,立式座,",
+          "modelUrl": "/models/pending-20261009/505019154.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,带座轴承,UCP308,立式座,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019267",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505019267 · 扬州双升气动,气缸,SC50*1500-S-CA-EUL,",
+          "modelUrl": "/models/pending-20261009/505019267.glb",
+          "quality": "外观示意",
+          "description": "台账：扬州双升气动,气缸,SC50*1500-S-CA-EUL,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019275",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505019275 · SEW,减速机,R127 速比49.81，配DRU180M4 15KW电机用,25.8152081005.0001.22.21",
+          "modelUrl": "/models/pending-20261009/505019275.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机,R127 速比49.81，配DRU180M4 15KW电机用,25.8152081005.0001.22.21。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019276",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505019276 · SEW,减速机,R97 速比33.25,M1,配DRU160L4 11KW电机用，25.8152081004.0001.22.21",
+          "modelUrl": "/models/pending-20261009/505019276.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机,R97 速比33.25,M1,配DRU160L4 11KW电机用，25.8152081004.0001.22.21。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019277",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505019277 · SEW,减速机,R97 速比33.25,M1,配DRU160M4 7.5KW电机用,25.8477878601.0001.24.21",
+          "modelUrl": "/models/pending-20261009/505019277.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机,R97 速比33.25,M1,配DRU160M4 7.5KW电机用,25.8477878601.0001.24.21。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019278",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505019278 · SEW,减速机,RF67 速比17.95，配DRU112M4 3KW电机用,25.8139749503.0001.22.21",
+          "modelUrl": "/models/pending-20261009/505019278.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机,RF67 速比17.95，配DRU112M4 3KW电机用,25.8139749503.0001.22.21。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019279",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505019279 · SEW,减速机,R87 速比32.66，配DRU132S4 4KW电机用,25.8152081018.0001.22.21",
+          "modelUrl": "/models/pending-20261009/505019279.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机,R87 速比32.66，配DRU132S4 4KW电机用,25.8152081018.0001.22.21。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019281",
+          "previousModelName": "轴承座",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505019281 · SN系列轴承座,SN522,",
+          "modelUrl": "/models/pending-20261009/505019281.glb",
+          "quality": "外观示意",
+          "description": "台账：SN系列轴承座,SN522,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019282",
+          "previousModelName": "轴承座",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505019282 · SN系列轴承座,SN516,",
+          "modelUrl": "/models/pending-20261009/505019282.glb",
+          "quality": "外观示意",
+          "description": "台账：SN系列轴承座,SN516,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019284",
+          "previousModelName": "轴承座",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505019284 · SKF,SNL铸铁轴承座,SNL216,",
+          "modelUrl": "/models/pending-20261009/505019284.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,SNL铸铁轴承座,SNL216,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019295",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505019295 · SKF,带座轴承,UCF308,方形座,",
+          "modelUrl": "/models/pending-20261009/505019295.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,带座轴承,UCF308,方形座,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019297",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505019297 · NSK,带座轴承,UCP213，立式座,",
+          "modelUrl": "/models/pending-20261009/505019297.glb",
+          "quality": "外观示意",
+          "description": "台账：NSK,带座轴承,UCP213，立式座,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019298",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505019298 · NSK,带座轴承,UCP218，立式座,",
+          "modelUrl": "/models/pending-20261009/505019298.glb",
+          "quality": "外观示意",
+          "description": "台账：NSK,带座轴承,UCP218，立式座,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019302",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505019302 · NSK,带座轴承,UCFU207,方形座,",
+          "modelUrl": "/models/pending-20261009/505019302.glb",
+          "quality": "外观示意",
+          "description": "台账：NSK,带座轴承,UCFU207,方形座,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019400",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505019400 · SEW,减速机,FA77/G 速比19.70,序号25.8172351203.0001.22.21，含皖南防爆电机YFB4-132M-4",
+          "modelUrl": "/models/pending-20261009/505019400.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机,FA77/G 速比19.70,序号25.8172351203.0001.22.21，含皖南防爆电机YFB4-132M-4，7.5KW。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019405",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505019405 · SEW,减速机(含皖南防爆电机),RF57 YFB4-100L1-4,M1,速比16.79,电机2.2KW,序号25.816462870",
+          "modelUrl": "/models/pending-20261009/505019405.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含皖南防爆电机),RF57 YFB4-100L1-4,M1,速比16.79,电机2.2KW,序号25.8164628708.0001.22.21。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019423",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505019423 · 皖南电机,高效率粉尘防爆型三相异步电机,YFB4-112M-4，4KW,与sew减速机配套使用",
+          "modelUrl": "/models/pending-20261009/505019423.glb",
+          "quality": "外观示意",
+          "description": "台账：皖南电机,高效率粉尘防爆型三相异步电机,YFB4-112M-4，4KW,与sew减速机配套使用。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019424",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505019424 · SEW,减速机(含皖南防爆电机),FA57/G YFB4-112M-4,M3,速比16.81,4KW,序号25.8172351202.0",
+          "modelUrl": "/models/pending-20261009/505019424.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含皖南防爆电机),FA57/G YFB4-112M-4,M3,速比16.81,4KW,序号25.8172351202.0001.22.21。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019425",
+          "previousModelName": "轴承座",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505019425 · 轴承座,SN519,",
+          "modelUrl": "/models/pending-20261009/505019425.glb",
+          "quality": "外观示意",
+          "description": "台账：轴承座,SN519,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019697",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505019697 · 亚德客,气缸,SC63x600S,",
+          "modelUrl": "/models/pending-20261009/505019697.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC63x600S,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505019698",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505019698 · 亚德客,气缸,SC100x450S,",
+          "modelUrl": "/models/pending-20261009/505019698.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC100x450S,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020143",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020143 · SEW,减速机（含电机）,R87 R57 DRU90S4/V,M1,速比2873.00,0.75KW,序号：25.8144434201.",
+          "modelUrl": "/models/pending-20261009/505020143.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含电机）,R87 R57 DRU90S4/V,M1,速比2873.00,0.75KW,序号：25.8144434201.0006.22.。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020144",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020144 · SEW,减速机（含电机）,R87 DRU132L4,M1,速比32.66,7.5KW,序号：25.8152081003.0001.22.",
+          "modelUrl": "/models/pending-20261009/505020144.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含电机）,R87 DRU132L4,M1,速比32.66,7.5KW,序号：25.8152081003.0001.22.21,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020145",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020145 · SEW,减速机（含电机）,R107 DRU180M4,M1,速比35.26,15KW,序号：25.8152081015.0001.22.",
+          "modelUrl": "/models/pending-20261009/505020145.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含电机）,R107 DRU180M4,M1,速比35.26,15KW,序号：25.8152081015.0001.22.21,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020151",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020151 · SEW,减速机（含皖南防爆电机）,KAZ97 YFB4-132M-4,M1B,速比56.55,7.5kw,序号：25.812524561",
+          "modelUrl": "/models/pending-20261009/505020151.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,KAZ97 YFB4-132M-4,M1B,速比56.55,7.5kw,序号：25.8125245617.0001.22.2。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020152",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020152 · SEW,减速机（含皖南防爆电机）,KAZ77 YFB4-100L2-4,M1A,速比40.04,3KW,序号:25.8125245615",
+          "modelUrl": "/models/pending-20261009/505020152.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,KAZ77 YFB4-100L2-4,M1A,速比40.04,3KW,序号:25.8125245615.0001.22.24,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020153",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020153 · SEW,减速机（含皖南防爆电机）,KAZ87 YFB4-132S-4,M1B,速比36.52,5.5KW,序号:25.812524561",
+          "modelUrl": "/models/pending-20261009/505020153.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,KAZ87 YFB4-132S-4,M1B,速比36.52,5.5KW,序号:25.8125245616.0001.22.2。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020155",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020155 · SEW,减速机（含皖南防爆电机）,KAZ67 YFB4-100L1-4,M1B,速比30.22,2.2KW,序号:25.81252456",
+          "modelUrl": "/models/pending-20261009/505020155.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,KAZ67 YFB4-100L1-4,M1B,速比30.22,2.2KW,序号:25.8125245612.0001.22.2。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020157",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020157 · SEW,减速机（含皖南防爆电机）,R27 YFB4-80M2-4,M3,速比18.08,0.75KW,序号:25.8125245622.",
+          "modelUrl": "/models/pending-20261009/505020157.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,R27 YFB4-80M2-4,M3,速比18.08,0.75KW,序号:25.8125245622.0003.22.。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020158",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020158 · SEW,减速机（含皖南防爆电机）,RF87 YFB4-100L1-4,M2,速比60.35,2.2KW,序号:25.8125245638",
+          "modelUrl": "/models/pending-20261009/505020158.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,RF87 YFB4-100L1-4,M2,速比60.35,2.2KW,序号:25.8125245638.0003.22.2。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020159",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020159 · SEW,减速机（含皖南防爆电机）,R37 YFB4-90L-4,M3,速比18.05,1.5KW,序号:25.8125245635.00",
+          "modelUrl": "/models/pending-20261009/505020159.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,R37 YFB4-90L-4,M3,速比18.05,1.5KW,序号:25.8125245635.0006.22.2。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020160",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020160 · SEW,减速机（含皖南防爆电机）,R97 YFB4-160M-4,M1,速比14.62,11KW,序号:25.8125245627.00",
+          "modelUrl": "/models/pending-20261009/505020160.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,R97 YFB4-160M-4,M1,速比14.62,11KW,序号:25.8125245627.0001.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020161",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020161 · SEW,减速机（含皖南防爆电机）,KA47 YFB4-100L1-4,M1B,速比10.56,2.2KW,序号:25.812524560",
+          "modelUrl": "/models/pending-20261009/505020161.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,KA47 YFB4-100L1-4,M1B,速比10.56,2.2KW,序号:25.8125245607.0001.22.2。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020162",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020162 · SEW,减速机（含皖南防爆电机）,KA57 YFB4-100L2-4,M1A,速比11.26,3KW,序号:25.8125245609.",
+          "modelUrl": "/models/pending-20261009/505020162.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,KA57 YFB4-100L2-4,M1A,速比11.26,3KW,序号:25.8125245609.0001.22.24,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020163",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020163 · SEW,减速机（含皖南防爆电机）,KA47 YFB4-90L-4,M1A,速比16.86,1.5KW,序号:5.8125245601.0",
+          "modelUrl": "/models/pending-20261009/505020163.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,KA47 YFB4-90L-4,M1A,速比16.86,1.5KW,序号:5.8125245601.0005.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020164",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020164 · SEW,减速机（含皖南防爆电机）,R107 YFB4-180M-4,M1,速比18.21,18.5KW,序号:25.8125245621",
+          "modelUrl": "/models/pending-20261009/505020164.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,R107 YFB4-180M-4,M1,速比18.21,18.5KW,序号:25.8125245621.0001.22.。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020165",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020165 · SEW,减速机（含皖南防爆电机）,R87 YFBBP-132S-4,M1,速比15.35,5.5KW,序号:25.8125245634.",
+          "modelUrl": "/models/pending-20261009/505020165.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,R87 YFBBP-132S-4,M1,速比15.35,5.5KW,序号:25.8125245634.0002.22.2。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020166",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020166 · SEW,减速机（含皖南防爆电机）,R77 YBBP-132S-4,M1,速比15.60,5.5KW,序号:25.8167701902.0",
+          "modelUrl": "/models/pending-20261009/505020166.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,R77 YBBP-132S-4,M1,速比15.60,5.5KW,序号:25.8167701902.0001.22.2。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020167",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020167 · SEW,减速机（含皖南防爆电机）,R97 YFBBP-160M-4,M1,速比14.62,11KW,序号:25.8125245633.0",
+          "modelUrl": "/models/pending-20261009/505020167.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,R97 YFBBP-160M-4,M1,速比14.62,11KW,序号:25.8125245633.0001.22.24。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020168",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020168 · SEW,减速机（含皖南防爆电机）,SAF37 YFB4-80M2-4,M1B,速比10.91,0.75KW,序号:25.81281489",
+          "modelUrl": "/models/pending-20261009/505020168.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,SAF37 YFB4-80M2-4,M1B,速比10.91,0.75KW,序号:25.8128148901.0002.22.。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020169",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020169 · SEW,减速机（含皖南防爆电机）,RF37 YFB4-80M2-4,M1,速比10.11,0.75KW,序号:25.8125245628",
+          "modelUrl": "/models/pending-20261009/505020169.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,RF37 YFB4-80M2-4,M1,速比10.11,0.75KW,序号:25.8125245628.0001.22.。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020170",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020170 · SEW,减速机（含皖南防爆电机）,RF27 YFB4-71M2-4,M1,速比15.63,0.37KW,序号:25.8138770401",
+          "modelUrl": "/models/pending-20261009/505020170.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,RF27 YFB4-71M2-4,M1,速比15.63,0.37KW,序号:25.8138770401.0008.22.。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020176",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020176 · SEW,减速机（含联轴器）,RF57 AM90,速比43.30,序号：25.8169176401.0001.22.13,",
+          "modelUrl": "/models/pending-20261009/505020176.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含联轴器）,RF57 AM90,速比43.30,序号：25.8169176401.0001.22.13,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020177",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020177 · SEW,减速机（含联轴器）,RF47 AM90,速比26.70,序号：25.8169176402.0002.22.13,",
+          "modelUrl": "/models/pending-20261009/505020177.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含联轴器）,RF47 AM90,速比26.70,序号：25.8169176402.0002.22.13,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020179",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020179 · SEW,减速机（含皖南防爆电机）,RF57 YFB4-80M2-4 安装方式M2,速比57.29,电机0.75KW，序号25.81646",
+          "modelUrl": "/models/pending-20261009/505020179.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,RF57 YFB4-80M2-4 安装方式M2,速比57.29,电机0.75KW，序号25.8164636905.0001。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020180",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020180 · SEW,减速机（含皖南防爆电机）,RF57 YFB4-90S-4，安装方式M2，速比57.29，电机1.1KW，序号 25.816463",
+          "modelUrl": "/models/pending-20261009/505020180.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,RF57 YFB4-90S-4，安装方式M2，速比57.29，电机1.1KW，序号 25.8164636904.0001。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020181",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020181 · SEW,减速机（含联轴器）,RF47 AM90  速比42.87 安装方式M1 序号 25.8177292403.0001.22.21,",
+          "modelUrl": "/models/pending-20261009/505020181.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含联轴器）,RF47 AM90  速比42.87 安装方式M1 序号 25.8177292403.0001.22.21,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020182",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020182 · SEW,减速机（含皖南防爆电机）,RF77 YFB4-112M-4,安装方式M1,速比17.82,电机4KW， 序号25.8164628",
+          "modelUrl": "/models/pending-20261009/505020182.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,RF77 YFB4-112M-4,安装方式M1,速比17.82,电机4KW， 序号25.8164628712.0001.2。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020183",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020183 · SEW,减速机(含联轴器),R87 AMS132S/M,M1,速比17.08,安M1，减速机序号:25.8431671701.0001.",
+          "modelUrl": "/models/pending-20261009/505020183.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含联轴器),R87 AMS132S/M,M1,速比17.08,安M1，减速机序号:25.8431671701.0001.24.21,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020184",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020184 · SEW,减速机(含联轴器),RF57 AMS100,M1,速比10.79,输出扭矩390Nm,减速机序号：25.8431671704.0",
+          "modelUrl": "/models/pending-20261009/505020184.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含联轴器),RF57 AMS100,M1,速比10.79,输出扭矩390Nm,减速机序号：25.8431671704.0001.24.21,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020185",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020185 · SEW,减速机(含联轴器),RF47 AM90,M1,速比10.15,输出扭矩150Nm,减速机序号25.8171043801.0002",
+          "modelUrl": "/models/pending-20261009/505020185.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含联轴器),RF47 AM90,M1,速比10.15,输出扭矩150Nm,减速机序号25.8171043801.0002.22.44,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020186",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020186 · SEW,减速机(含联轴器),RF37 AMS90,M1,速比10.11,输出扭矩170Nm,减速机序号：25.8431671705.00",
+          "modelUrl": "/models/pending-20261009/505020186.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含联轴器),RF37 AMS90,M1,速比10.11,输出扭矩170Nm,减速机序号：25.8431671705.0001.24.21,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020187",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020187 · SEW,减速机（含皖南防爆电机）,RF57 YFBBP-100L2-4,M1,速比10.79,电机功率3KW 减速机序号：25.8164",
+          "modelUrl": "/models/pending-20261009/505020187.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,RF57 YFBBP-100L2-4,M1,速比10.79,电机功率3KW 减速机序号：25.8164628709.0001。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020188",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020188 · SEW,减速机（含皖南防爆电机）,RF47 YFBBP-100L1-4,M1,速比10.15,电机功率2.2KW 减速机序号：25.81",
+          "modelUrl": "/models/pending-20261009/505020188.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,RF47 YFBBP-100L1-4,M1,速比10.15,电机功率2.2KW 减速机序号：25.8164628711.00。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020189",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020189 · SEW,减速机(含联轴器),RF47 AMS100，速比10.15 输出扭矩230Nm，安装方式：M1 减速机序号：25.8431671",
+          "modelUrl": "/models/pending-20261009/505020189.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含联轴器),RF47 AMS100，速比10.15 输出扭矩230Nm，安装方式：M1 减速机序号：25.8431671703.0001.2。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020190",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020190 · SEW,减速机(含联轴器),RF47 AMS90，速比36.93 输出扭矩300Nm，安装方式：M1 减速机序号：25.83535710",
+          "modelUrl": "/models/pending-20261009/505020190.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含联轴器),RF47 AMS90，速比36.93 输出扭矩300Nm，安装方式：M1 减速机序号：25.8353571001.0001.2。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020191",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020191 · SEW,减速机(含联轴器),RF47 AM90,速比34.73,输出扭矩300N安装方式：M1，减速机序号：25.8191216502.",
+          "modelUrl": "/models/pending-20261009/505020191.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含联轴器),RF47 AM90,速比34.73,输出扭矩300N安装方式：M1，减速机序号：25.8191216502.0001.22.21,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020192",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020192 · SEW,减速机(含联轴器),R77 AM112 速比33.47 输出扭矩820Nm 减速机序号：25.8191216501.0001.2",
+          "modelUrl": "/models/pending-20261009/505020192.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含联轴器),R77 AM112 速比33.47 输出扭矩820Nm 减速机序号：25.8191216501.0001.22.21,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020193",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020193 · SEW,减速机(含联轴器),R47 AM80 速比52.69 输出扭矩300Nm安装方式：M1 减速机序号：25.8168724502.",
+          "modelUrl": "/models/pending-20261009/505020193.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含联轴器),R47 AM80 速比52.69 输出扭矩300Nm安装方式：M1 减速机序号：25.8168724502.0004.22.44,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020194",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020194 · SEW,减速机(含联轴器),R57 AM90 速比43.30 输出扭矩450Nm安装方式：M1 减速机序号：25.8168724503.",
+          "modelUrl": "/models/pending-20261009/505020194.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机(含联轴器),R57 AM90 速比43.30 输出扭矩450Nm安装方式：M1 减速机序号：25.8168724503.0004.22.44,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020195",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020195 · SEW,减速机（含皖南防爆电机）,RF97 R57 YFB4-80M2-4速比632 电机0.75KW，安装方式：M2 序号25.816",
+          "modelUrl": "/models/pending-20261009/505020195.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含皖南防爆电机）,RF97 R57 YFB4-80M2-4速比632 电机0.75KW，安装方式：M2 序号25.8168700401.0。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020197",
+          "previousModelName": "轴承座",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505020197 · SKF,轴承座,SNL524-620,",
+          "modelUrl": "/models/pending-20261009/505020197.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,轴承座,SNL524-620,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020198",
+          "previousModelName": "轴承座（含轴承）",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505020198 · SKF,轴承座（含轴承22218K）,SNL518,",
+          "modelUrl": "/models/pending-20261009/505020198.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,轴承座（含轴承22218K）,SNL518,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020199",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020199 · 华康,联轴器,ZL6 减速机端Φ80x140 头轮端Φ90x150,",
+          "modelUrl": "/models/pending-20261009/505020199.glb",
+          "quality": "外观示意",
+          "description": "台账：华康,联轴器,ZL6 减速机端Φ80x140 头轮端Φ90x150,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020200",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020200 · 华康,联轴器,ZL7 减速机端Φ105x210 头轮端Φ90x150,",
+          "modelUrl": "/models/pending-20261009/505020200.glb",
+          "quality": "外观示意",
+          "description": "台账：华康,联轴器,ZL7 减速机端Φ105x210 头轮端Φ90x150,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020201",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020201 · 华康,联轴器,ZL8 减速机端Φ120x210 头轮端Φ90x150,",
+          "modelUrl": "/models/pending-20261009/505020201.glb",
+          "quality": "外观示意",
+          "description": "台账：华康,联轴器,ZL8 减速机端Φ120x210 头轮端Φ90x150,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020202",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020202 · 华康,联轴器,ZL9 减速机端Φ140x250 头轮端Φ90x150,",
+          "modelUrl": "/models/pending-20261009/505020202.glb",
+          "quality": "外观示意",
+          "description": "台账：华康,联轴器,ZL9 减速机端Φ140x250 头轮端Φ90x150,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020203",
+          "previousModelName": "减速机（带联轴器）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505020203 · 华康,联轴器,ZL7 减速机端Φ100x170 头轮端Φ90x150,",
+          "modelUrl": "/models/pending-20261009/505020203.glb",
+          "quality": "外观示意",
+          "description": "台账：华康,联轴器,ZL7 减速机端Φ100x170 头轮端Φ90x150,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020205",
+          "previousModelName": "轴承座（含轴承）",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505020205 · 福山,轴承座（含轴承）,UCFL205,",
+          "modelUrl": "/models/pending-20261009/505020205.glb",
+          "quality": "外观示意",
+          "description": "台账：福山,轴承座（含轴承）,UCFL205,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020206",
+          "previousModelName": "轴承座",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505020206 · SKF,轴承座,SNL520-617,",
+          "modelUrl": "/models/pending-20261009/505020206.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,轴承座,SNL520-617,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020208",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505020208 · SKF,带座轴承,UCFL207,",
+          "modelUrl": "/models/pending-20261009/505020208.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,带座轴承,UCFL207,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020212",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505020212 · 亚德客,气缸,SC50x250S,",
+          "modelUrl": "/models/pending-20261009/505020212.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC50x250S,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020213",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505020213 · 亚德客,气缸,SC50x200S,",
+          "modelUrl": "/models/pending-20261009/505020213.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC50x200S,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020214",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505020214 · 亚德客,气缸,SC50x100S,",
+          "modelUrl": "/models/pending-20261009/505020214.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC50x100S,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020216",
+          "previousModelName": "轴承座（含轴承）",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505020216 · 轴承座(含轴承),SN519,",
+          "modelUrl": "/models/pending-20261009/505020216.glb",
+          "quality": "外观示意",
+          "description": "台账：轴承座(含轴承),SN519,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020218",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505020218 · 亚德客,气缸,SC63*250,",
+          "modelUrl": "/models/pending-20261009/505020218.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC63*250,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020219",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505020219 · 亚德客,气缸,SC63*150,",
+          "modelUrl": "/models/pending-20261009/505020219.glb",
+          "quality": "外观示意",
+          "description": "台账：亚德客,气缸,SC63*150,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020222",
+          "previousModelName": "带座外球面轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505020222 · NSK,带座外球面轴承,UCF213,",
+          "modelUrl": "/models/pending-20261009/505020222.glb",
+          "quality": "外观示意",
+          "description": "台账：NSK,带座外球面轴承,UCF213,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020223",
+          "previousModelName": "带座外球面轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505020223 · NSK,带座外球面轴承,UCF211,",
+          "modelUrl": "/models/pending-20261009/505020223.glb",
+          "quality": "外观示意",
+          "description": "台账：NSK,带座外球面轴承,UCF211,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020556",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505020556 · SKF,带座轴承，立式座,UCP207,",
+          "modelUrl": "/models/pending-20261009/505020556.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,带座轴承，立式座,UCP207,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505020565",
+          "previousModelName": "带座轴承",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505020565 · SKF,带座轴承，方形座,UCF205,",
+          "modelUrl": "/models/pending-20261009/505020565.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,带座轴承，方形座,UCF205,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505022762",
+          "previousModelName": "轴承座（含轴承）",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505022762 · SKF,轴承座（含轴承）,SNL212（含22212E轴承）,",
+          "modelUrl": "/models/pending-20261009/505022762.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,轴承座（含轴承）,SNL212（含22212E轴承）,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505022763",
+          "previousModelName": "轴承座（含轴承）",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505022763 · SKF,轴承座（含轴承）,SNL528（含22228CC/W33轴承）,",
+          "modelUrl": "/models/pending-20261009/505022763.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,轴承座（含轴承）,SNL528（含22228CC/W33轴承）,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505022766",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505022766 · 皖南电机,粉尘防爆型变频调速三相异步电动机,YFBBP90S-4，1.1kw，编号87150840，与sew减速机（RF47 AM90，",
+          "modelUrl": "/models/pending-20261009/505022766.glb",
+          "quality": "外观示意",
+          "description": "台账：皖南电机,粉尘防爆型变频调速三相异步电动机,YFBBP90S-4，1.1kw，编号87150840，与sew减速机（RF47 AM90，序号：25.81912。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505022767",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505022767 · 皖南电机,粉尘防爆型变频调速三相异步电动机,YFBBP-112M-4，4kw，编号87150031，与sew减速机(R77 AM112 ",
+          "modelUrl": "/models/pending-20261009/505022767.glb",
+          "quality": "外观示意",
+          "description": "台账：皖南电机,粉尘防爆型变频调速三相异步电动机,YFBBP-112M-4，4kw，编号87150031，与sew减速机(R77 AM112 ，序号：25.8191。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505022771",
+          "previousModelName": "标准气缸",
+          "previousModelNames": [
+            "标准气缸"
+          ],
+          "name": "505022771 · 主气缸,MDB1D63-125N-DNT0272,河北苹乐设备专用",
+          "modelUrl": "/models/pending-20261009/505022771.glb",
+          "quality": "外观示意",
+          "description": "台账：主气缸,MDB1D63-125N-DNT0272,河北苹乐设备专用。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505023260",
+          "previousModelName": "液压纠偏装置",
+          "previousModelNames": [
+            "液压纠偏装置"
+          ],
+          "name": "505023260 · 液压上纠偏装置,XBMJP-S-YY-650,按图纸加工",
+          "modelUrl": "/models/pending-20261009/505023260.glb",
+          "quality": "外观示意",
+          "description": "台账：液压上纠偏装置,XBMJP-S-YY-650,按图纸加工。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505023261",
+          "previousModelName": "液压纠偏装置",
+          "previousModelNames": [
+            "液压纠偏装置"
+          ],
+          "name": "505023261 · 液压下纠偏装置,XBMJP-X-YY-650,按图纸加工",
+          "modelUrl": "/models/pending-20261009/505023261.glb",
+          "quality": "外观示意",
+          "description": "台账：液压下纠偏装置,XBMJP-X-YY-650,按图纸加工。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505023262",
+          "previousModelName": "液压纠偏装置",
+          "previousModelNames": [
+            "液压纠偏装置"
+          ],
+          "name": "505023262 · 液压上纠偏装置,XBMJP-S-YY-800,按图纸加工",
+          "modelUrl": "/models/pending-20261009/505023262.glb",
+          "quality": "外观示意",
+          "description": "台账：液压上纠偏装置,XBMJP-S-YY-800,按图纸加工。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505023263",
+          "previousModelName": "液压纠偏装置",
+          "previousModelNames": [
+            "液压纠偏装置"
+          ],
+          "name": "505023263 · 液压下纠偏装置,XBMJP-X-YY-800,按图纸加工",
+          "modelUrl": "/models/pending-20261009/505023263.glb",
+          "quality": "外观示意",
+          "description": "台账：液压下纠偏装置,XBMJP-X-YY-800,按图纸加工。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505023835",
+          "previousModelName": "减速机（带电机）",
+          "previousModelNames": [
+            "减速机",
+            "减速机（带电机）",
+            "减速机（带联轴器）"
+          ],
+          "name": "505023835 · SEW,减速机（含电机）,型号：R47 DRU100LS4，M1，速比：26.70，1.5KW，序号25.8486170202.0002",
+          "modelUrl": "/models/pending-20261009/505023835.glb",
+          "quality": "外观示意",
+          "description": "台账：SEW,减速机（含电机）,型号：R47 DRU100LS4，M1，速比：26.70，1.5KW，序号25.8486170202.0002.25.35,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505024094",
+          "previousModelName": "轴承座",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505024094 · SKF,轴承座密封圈,TSN516L",
+          "modelUrl": "/models/pending-20261009/505024094.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,轴承座密封圈,TSN516L。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505024095",
+          "previousModelName": "轴承座",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505024095 · SKF,轴承座密封圈,TSN512L",
+          "modelUrl": "/models/pending-20261009/505024095.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,轴承座密封圈,TSN512L。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505024096",
+          "previousModelName": "轴承座（含轴承）",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505024096 · SKF,轴承座,SNL512-610(含定位环和密封件）,",
+          "modelUrl": "/models/pending-20261009/505024096.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,轴承座,SNL512-610(含定位环和密封件）,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "materialCode": "505024097",
+          "previousModelName": "轴承座（含轴承）",
+          "previousModelNames": [
+            "带座外球面轴承",
+            "带座轴承",
+            "不锈钢带座轴承",
+            "轴承座",
+            "轴承座（含轴承）"
+          ],
+          "name": "505024097 · SKF,轴承座,SNL517(含定位环和密封件）,",
+          "modelUrl": "/models/pending-20261009/505024097.glb",
+          "quality": "外观示意",
+          "description": "台账：SKF,轴承座,SNL517(含定位环和密封件）,。独立外形识别示意；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        }
+      ],
+      "bindByCode": false
+    }
+  ],
+  "assetUpdates": [
+    {
+      "version": "named-model-assets-20261009-v1",
+      "models": [
+        {
+          "name": "分布式IO",
+          "modelUrl": "/models/named-20261009/35.glb",
+          "quality": "外观示意",
+          "description": "分布式IO的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "name": "带座外球面轴承",
+          "modelUrl": "/models/named-20261009/86.glb",
+          "quality": "外观示意",
+          "description": "带座外球面轴承的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "name": "带座轴承",
+          "modelUrl": "/models/named-20261009/88.glb",
+          "quality": "外观示意",
+          "description": "带座轴承的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "name": "不锈钢带座轴承",
+          "modelUrl": "/models/named-20261009/89.glb",
+          "quality": "外观示意",
+          "description": "不锈钢带座轴承的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "name": "标准气缸",
+          "modelUrl": "/models/named-20261009/91.glb",
+          "quality": "外观示意",
+          "description": "标准气缸的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "name": "轴承座",
+          "modelUrl": "/models/named-20261009/96.glb",
+          "quality": "外观示意",
+          "description": "轴承座的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "name": "减速机",
+          "modelUrl": "/models/named-20261009/106.glb",
+          "quality": "外观示意",
+          "description": "减速机的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "name": "减速机（带电机）",
+          "modelUrl": "/models/named-20261009/108.glb",
+          "quality": "外观示意",
+          "description": "减速机（带电机）的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "name": "减速机（带联轴器）",
+          "modelUrl": "/models/named-20261009/147.glb",
+          "quality": "外观示意",
+          "description": "减速机（带联轴器）的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "name": "轴承座（含轴承）",
+          "modelUrl": "/models/named-20261009/149.glb",
+          "quality": "外观示意",
+          "description": "轴承座（含轴承）的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。"
+        },
+        {
+          "name": "液压纠偏装置",
+          "modelUrl": "/models/named-20261009/168.glb",
+          "quality": "外观示意",
+          "description": "液压纠偏装置的通用外观示意，具体规格可能有不同安装外形；尺寸、孔位和内部结构未核实，不用于安装校核。"
         }
       ]
     }

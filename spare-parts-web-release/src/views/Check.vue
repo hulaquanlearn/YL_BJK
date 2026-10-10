@@ -203,6 +203,8 @@ const list = ref([])
 const query = reactive({ status: typeof route.query.status === 'string' ? route.query.status : '', workshopCode: typeof route.query.workshopCode === 'string' ? route.query.workshopCode : '', date: '', page: 1, pageSize: 20 })
 const orderTotal=ref(0),orderSummary=reactive({total:0,pending:0,approved:0,rejected:0})
 let orderRequest=0
+let detailRequest=0
+let scopeRequest=0
 const detailVisible = ref(false)
 const detail = ref(null)
 const processingId = ref('')
@@ -267,7 +269,9 @@ async function load() {
 }
 
 async function viewDetail(row) {
+  const request=++detailRequest
   const result = await getInventoryOrder(row._id)
+  if(request!==detailRequest)return
   detail.value = result.data
   detailVisible.value = true
 }
@@ -348,8 +352,11 @@ async function loadCandidates() {
   } catch(error) { if(request===candidateRequest && !error?.response)ElMessage.error(error.message||'备件加载失败，请重试') } finally { if(request===candidateRequest)candidateLoading.value = false }
 }
 async function loadScopeOptions() {
+  const request=++scopeRequest
+  const requestedWorkshop=form.workshopCode
   try {
-    const result = await getFilters({ workshopCode: form.workshopCode })
+    const result = await getFilters({ workshopCode: requestedWorkshop })
+    if(request!==scopeRequest || requestedWorkshop!==form.workshopCode)return
     areas.value = result.data?.areas || []
     shelfMap.value = result.data?.shelfMap || {}
   } catch {}
@@ -425,7 +432,7 @@ async function submitOrder() {
 }
 
 onMounted(load)
-onBeforeUnmount(()=>{candidateRequest++;orderRequest++})
+onBeforeUnmount(()=>{candidateRequest++;orderRequest++;detailRequest++;scopeRequest++})
 </script>
 
 <style scoped>

@@ -1,8 +1,7 @@
 <template>
 <section class="part-model-detail">
-  <p class="bound-model"><strong>模型：</strong>{{ part?.categoryModelName || '公共模型（未关联专属模型）' }}<small v-if="part?.categoryModelId">（ID {{ part.categoryModelId }}）</small></p>
   <div class="visual-grid">
-    <section><h3>单件3D模型 <small>{{part?.modelQuality || '外观示意'}}</small></h3>
+    <section><h3><span>{{ part?.categoryModelName || '公共' }}<template v-if="part?.categoryModelId">（ID {{ part.categoryModelId }}）</template>模型</span><small>{{part?.modelQuality || '外观示意'}}</small></h3>
       <ModelPreview v-if="modelUrl" :key="modelUrl" :model-url="modelUrl" :initial-angle="0.55" height="300px" />
       <div v-else class="visual-empty">{{ part?.categoryModelName ? '绑定模型待生成' : '此备件尚未绑定模型' }}</div>
       

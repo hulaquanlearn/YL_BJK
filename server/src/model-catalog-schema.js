@@ -8,10 +8,35 @@ async function ensureSupplementalModels(db, batches = catalog.supplements || [])
       // Add by name without reusing IDs or replacing a user's existing model.
       await db.query(`INSERT IGNORE INTO part_models(name,description,model_url,built_in,quality) VALUES (?,?,?,1,?)`,
         [model.name, model.description, model.modelUrl, model.quality]);
-      // Only the five explicitly requested codes; keep every existing binding.
+      if (batch.bindByCode === false) continue;
+      // Replace only the named built-in empty placeholder for this exact code.
+      if (model.previousModelName) {
+        const previousNames = model.previousModelNames || [model.previousModelName];
+        await db.query(`UPDATE parts p JOIN part_models m ON m.name=? AND m.active=1
+          LEFT JOIN part_models old ON old.id=p.bound_model_id
+          SET p.bound_model_id=m.id WHERE p.code=? AND COALESCE(p.active,1)=1
+          AND (p.bound_model_id IS NULL OR (old.name IN (${previousNames.map(() => '?').join(',')}) AND old.built_in=1 AND old.active=1
+            AND NULLIF(old.model_url,'') IS NULL))`,
+          [model.name, model.materialCode, ...previousNames]);
+        continue;
+      }
+      // Exact requested codes; keep every existing binding.
       await db.query(`UPDATE parts p JOIN part_models m ON m.name=? AND m.active=1
         SET p.bound_model_id=m.id WHERE p.code=? AND COALESCE(p.active,1)=1 AND p.bound_model_id IS NULL`,
         [model.name, model.materialCode]);
+    }
+  }
+}
+async function ensureModelAssets(db, batches = catalog.assetUpdates || []) {
+  for (const batch of batches) {
+    const [version] = await db.query('INSERT IGNORE INTO model_catalog_versions(version) VALUES (?)', [batch.version]);
+    if (!version.affectedRows) continue;
+    for (const model of batch.models) {
+      // Fill the original named placeholder in place. Keep IDs, names and all
+      // bindings; an uploaded asset, inactive model or user model takes priority.
+      await db.query(`UPDATE part_models SET model_url=?,description=?,quality=?
+        WHERE BINARY name=BINARY ? AND built_in=1 AND active=1 AND NULLIF(model_url,'') IS NULL`,
+        [model.modelUrl, model.description, model.quality, model.name]);
     }
   }
 }
@@ -47,7 +72,8 @@ async function ensureModelCatalog(db) {
       }
     }
     await ensureSupplementalModels(db);
+    await ensureModelAssets(db);
     await db.commit();
   } catch (error) { await db.rollback(); throw error; }
 }
-module.exports = { ensureModelCatalog, ensureSupplementalModels };
+module.exports = { ensureModelCatalog, ensureSupplementalModels, ensureModelAssets };

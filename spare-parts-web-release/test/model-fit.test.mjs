@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {slotModelBounds,modelFacingRotation,modelFitScale,normalizeModelRotation} from '../src/utils/model-fit.mjs';
+import {slotModelBounds,modelFacingRotation,overviewModelRotation,modelFitScale,normalizeModelRotation} from '../src/utils/model-fit.mjs';
 test('models fit dense and sparse slots and never cross the shelf centre or outside edge',()=>{
   for(const slots of [1,4,12,30,99])for(const depth of [.4,.9,1.4]){
     const sideZ=depth*.28,b=slotModelBounds({usableWidth:4.08,slots,depth,layerHeight:.74,sideZ});
@@ -24,4 +24,13 @@ test('preferred scale can enlarge a small model but remains inside the slot enve
   const normal=modelFitScale(size,bounds,1),large=modelFitScale(size,bounds,1.6),extreme=modelFitScale(size,bounds,100);
   assert.ok(large>normal);
   assert.ok(size.x*extreme<=bounds.width);
+});
+test('model fronts face the overview camera regardless of shelf rotation',()=>{
+  const direction=Math.atan2(-.75,-1.09);
+  for(const front of [0,Math.PI/2,-Math.PI/2,Math.PI]){
+    for(const shelf of [0,Math.PI/2,Math.PI,-Math.PI/2]){
+      const worldFront=overviewModelRotation(front,shelf)+shelf-front;
+      assert.ok(Math.abs(normalizeModelRotation(worldFront-direction))<1e-10);
+    }
+  }
 });

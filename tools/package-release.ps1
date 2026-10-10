@@ -47,6 +47,9 @@ Copy-Item -Path (Join-Path $root 'miniprogram\*') -Destination (Join-Path $packa
 Copy-Item -LiteralPath (Join-Path $root 'project.config.json') -Destination $package
 Copy-Item -LiteralPath (Join-Path $root 'spare-parts-web-release\RELEASE_NOTES.md') -Destination $package
 Copy-Item -LiteralPath (Join-Path $root 'README.md') -Destination (Join-Path $package 'README.md')
+if (Test-Path -LiteralPath (Join-Path $root 'AGENTS.md')) {
+  Copy-Item -LiteralPath (Join-Path $root 'AGENTS.md') -Destination $package
+}
 Copy-Item -LiteralPath (Join-Path $root 'design-qa.md') -Destination (Join-Path $package 'design-qa.md')
 Copy-Item -LiteralPath (Join-Path $root 'VERSION') -Destination $package
 Copy-Item -LiteralPath $deployDoc -Destination $package

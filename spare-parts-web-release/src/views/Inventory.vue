@@ -39,14 +39,18 @@
     <details class="inventory-summary" :open="overviewOpen" @toggle="overviewOpen=$event.target.open">
       <summary>库存概况 <span>{{ formatNumber(dashboard.partTypes) }} 种 · 低库存 {{ formatNumber(dashboard.lowStock) }} 条</span><el-button class="summary-refresh" :loading="loading" aria-label="刷新库存概况和列表" title="刷新库存概况和列表" @click.stop="refreshAll"><el-icon v-if="!loading"><Refresh /></el-icon><span>刷新</span></el-button></summary>
 
-      <section class="metric-grid inventory-metric-grid" aria-label="库存指标">
-        <button type="button" class="metric-card is-parts is-clickable" @click="typeBreakdownVisible=true"><div class="metric-top"><span>备件种类</span><span class="metric-icon"><el-icon><Tickets /></el-icon></span></div><div class="metric-value">{{ formatNumber(dashboard.partTypes) }}</div><div class="metric-note">当前筛选 · 点击查看类型构成</div></button>
-        <button type="button" class="metric-card is-stock is-clickable" @click="goStatistics()"><div class="metric-top"><span>库存总量</span><span class="metric-icon"><el-icon><Box /></el-icon></span></div><div class="metric-unit-list" :title="unitSummary"><span v-for="item in dashboard.unitTotals" :key="item.unit"><strong>{{ formatNumber(item.total) }}</strong>{{ item.unit }}</span><span v-if="!dashboard.unitTotals.length">暂无库存</span></div><div class="metric-note">不同单位分别统计，不混合相加</div></button>
-        <button type="button" class="metric-card is-value is-clickable" @click="goStatistics()"><div class="metric-top"><span>{{dashboard.missingPrice?'已知库存价值':'库存总价值'}}</span><span class="metric-icon"><el-icon><Money /></el-icon></span></div><div class="metric-value">{{ formatCurrency(dashboard.totalValue) }}</div><div class="metric-note">库存 × 不含税单价<span v-if="dashboard.missingPrice"> · {{ dashboard.missingPrice }} 条缺价格</span></div></button>
-        <button v-if="dashboard.lowStock || query.lowStock" type="button" class="metric-card is-alert is-clickable" @click="showLowStock"><div class="metric-top"><span>低库存预警</span><span class="metric-icon"><el-icon><Warning /></el-icon></span></div><div class="metric-value">{{ formatNumber(dashboard.lowStock) }}</div><div class="metric-note">已配置订购点且库存达到或低于订购点</div></button>
-        <button v-if="dashboard.missingReorderPoint" type="button" class="metric-card is-quality is-clickable" @click="goScoped('/data-quality', { issue:'missing_reorder_point' })"><div class="metric-top"><span>订购点未配置</span><span class="metric-icon"><el-icon><CircleClose /></el-icon></span></div><div class="metric-value">{{ formatNumber(dashboard.missingReorderPoint) }}</div><div class="metric-note">含零库存记录 · 未配置记录不参与低库存判断</div></button>
-        <button v-if="dashboard.pendingApproval" type="button" class="metric-card is-pending is-clickable" @click="goScoped('/check', { status:'待审批' })"><div class="metric-top"><span>待审批盘点</span><span class="metric-icon"><el-icon><DocumentChecked /></el-icon></span></div><div class="metric-value">{{ formatNumber(dashboard.pendingApproval) }}</div><div class="metric-note">点击进入盘点审批</div></button>
+      <section class="inventory-metric-grid" aria-label="库存指标">
+        <button type="button" class="overview-card" @click="typeBreakdownVisible=true"><div class="overview-top"><span>备件种类</span><span class="overview-icon"><el-icon><Tickets /></el-icon></span></div><div class="overview-value">{{ formatNumber(dashboard.partTypes) }}<small>种</small></div><div class="overview-note">查看类型构成 <el-icon><ArrowRight /></el-icon></div></button>
+        <button type="button" class="overview-card overview-value-card" @click="goStatistics()"><div class="overview-top"><span>{{dashboard.missingPrice?'已知库存价值':'库存总价值'}}</span><span class="overview-icon"><el-icon><Money /></el-icon></span></div><div class="overview-value overview-currency">{{ formatCurrency(dashboard.totalValue) }}</div><div class="overview-note"><span>库存 × 不含税单价<template v-if="dashboard.missingPrice"> · {{ dashboard.missingPrice }} 条缺价格</template></span><el-icon><ArrowRight /></el-icon></div></button>
+        <button v-if="dashboard.lowStock || query.lowStock" type="button" class="overview-card overview-alert" @click="showLowStock"><div class="overview-top"><span>低库存预警</span><span class="overview-icon"><el-icon><Warning /></el-icon></span></div><div class="overview-value">{{ formatNumber(dashboard.lowStock) }}<small>条</small></div><div class="overview-note">已达到或低于订购点 <el-icon><ArrowRight /></el-icon></div></button>
+        <button v-if="dashboard.missingReorderPoint" type="button" class="overview-card overview-quality" @click="goScoped('/data-quality', { issue:'missing_reorder_point' })"><div class="overview-top"><span>订购点未配置</span><span class="overview-icon"><el-icon><CircleClose /></el-icon></span></div><div class="overview-value">{{ formatNumber(dashboard.missingReorderPoint) }}<small>条</small></div><div class="overview-note">不参与低库存判断 <el-icon><ArrowRight /></el-icon></div></button>
+        <button v-if="dashboard.pendingApproval" type="button" class="overview-card" @click="goScoped('/check', { status:'待审批' })"><div class="overview-top"><span>待审批盘点</span><span class="overview-icon"><el-icon><DocumentChecked /></el-icon></span></div><div class="overview-value">{{ formatNumber(dashboard.pendingApproval) }}<small>条</small></div><div class="overview-note">进入盘点审批 <el-icon><ArrowRight /></el-icon></div></button>
       </section>
+      <button type="button" class="inventory-stock-summary" @click="goStatistics()">
+        <span class="stock-summary-heading"><strong>库存数量</strong><small>按单位分别统计</small></span>
+        <span class="stock-unit-grid" :title="unitSummary"><span v-for="item in dashboard.unitTotals" :key="item.unit" class="stock-unit"><strong>{{ formatNumber(item.total) }}</strong><small>{{ item.unit }}</small></span><span v-if="!dashboard.unitTotals.length" class="stock-empty">暂无库存</span></span>
+        <span class="stock-summary-link">查看统计 <el-icon><ArrowRight /></el-icon></span>
+      </button>
     </details>
     <el-dialog v-model="typeBreakdownVisible" title="备件种类与价值分布" width="min(1240px,96vw)" align-center>
       <p class="scope-dialog-note">按当前筛选统计各车间、货区；数量按单位列出，价值按库存 × 不含税单价计算。相同备件出现在多个货区时，货区种类数不能直接相加。</p>
@@ -178,7 +182,7 @@
                   <span>当前库存</span>
                 </div>
               </div>
-              <PartModelDetail v-if="detailVisible" :part="currentPart" /><el-button v-if="canBindModel(currentPart)" @click="openBinding(currentPart)">绑定 / 更换模型</el-button>
+              <PartModelDetail v-if="detailVisible" :part="currentPart" />
               <div class="drawer-section">
                 <h3>库存与位置</h3>
                 <dl class="detail-fields">
@@ -208,6 +212,7 @@
               </div>
             </div>
             <div class="detail-card-footer">
+              <el-button v-if="canBindModel(currentPart)" @click="openBinding(currentPart)">绑定 / 更换模型</el-button>
               <el-button v-write="canEditWorkshop(currentPart.workshopCode)" v-if="$showControl(canEditWorkshop(currentPart.workshopCode))" :disabled="canEditWorkshop(currentPart.workshopCode) && currentPart.inventoryStatus === '待审批'" @click="openEdit(currentPart)">编辑信息</el-button>
               <el-button v-write="canEditWorkshop(currentPart.workshopCode)" v-if="$showControl(canEditWorkshop(currentPart.workshopCode))" type="danger" plain @click="removePart(currentPart)">删除备件</el-button>
               <el-button v-if="isLow(currentPart)" type="danger" plain @click="goReplenishment"><el-icon><ShoppingCartFull /></el-icon>补货</el-button>
@@ -488,8 +493,12 @@ async function load() {
   }
 }
 
+let filterRequestToken = 0
 async function loadFilters() {
-  const result = await getFilters({ workshopCode: query.workshopCode || undefined })
+  const token = ++filterRequestToken
+  const requestedWorkshop = query.workshopCode
+  const result = await getFilters({ workshopCode: requestedWorkshop || undefined })
+  if (token !== filterRequestToken || requestedWorkshop !== query.workshopCode) return
   areas.value = result.data?.areas || []
   partTypes.value = result.data?.partTypes || []
   workshops.value = result.data?.workshops || []
@@ -744,11 +753,24 @@ onMounted(() => Promise.allSettled([refreshAll(), loadOperationOptions(),openLin
 @media(max-width:680px){.ledger-form{grid-template-columns:1fr}.ledger-form .span-2{grid-column:auto}.ledger-form :deep(.el-form-item){display:block}.ledger-form :deep(.el-form-item__label){width:auto!important;float:none;text-align:left}.ledger-form :deep(.el-form-item__content){margin-left:0!important}.ledger-form :deep(.el-form-item__label){margin-bottom:6px}}
 </style>
 <style scoped>
-.inventory-metric-grid .metric-card{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:16px;min-height:178px}
-.inventory-metric-grid .metric-card .metric-top{min-height:34px;align-items:center;font-size:14px;line-height:20px}
-.inventory-metric-grid .metric-card .metric-icon{width:34px;height:34px;flex:0 0 34px;border-radius:9px;font-size:19px}
-.inventory-metric-grid .metric-card .metric-value{margin-top:12px;line-height:1.25}
-.inventory-metric-grid .metric-card .metric-unit-list{margin:12px 0 0;gap:8px 12px;line-height:1.25}
-.inventory-metric-grid .metric-card .metric-unit-list strong{font-size:30px}
-.inventory-metric-grid .metric-card .metric-note{margin-top:auto;padding-top:12px;line-height:1.5}
+.inventory-summary .inventory-metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.overview-card{display:flex;flex-direction:column;min-width:0;min-height:150px;padding:16px 18px;border:1px solid #e2e9f1;border-radius:12px;background:#fff;color:#193248;font:inherit;text-align:left;cursor:pointer;transition:border-color .18s,box-shadow .18s}
+.overview-card:hover,.inventory-stock-summary:hover{border-color:#a2bed8;box-shadow:0 3px 12px #19324809}
+.overview-card:focus-visible,.inventory-stock-summary:focus-visible{outline:2px solid #2f6fae;outline-offset:3px}
+.overview-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#61758a;font-size:13px}
+.overview-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#edf4fb;color:#2f6fae;font-size:17px}
+.overview-value{margin:10px 0 16px;font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.25;letter-spacing:-.6px;overflow-wrap:anywhere}
+.overview-value small{margin-left:6px;font-size:12px;font-weight:400;letter-spacing:0;color:#718096}
+.overview-currency{font-size:clamp(21px,2vw,28px)}
+.overview-note{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;color:#7b8999;font-size:11px;line-height:1.6}
+.overview-note .el-icon{flex:none;color:#95a7b9}
+.overview-alert{border-color:#f0dfcc;background:#fffcf8}.overview-alert .overview-icon{background:#fff0df;color:#c76a21}.overview-alert .overview-value{color:#b8611c}
+.overview-quality .overview-icon{background:#f0f3f6;color:#738295}
+.inventory-stock-summary{display:flex;align-items:center;gap:22px;width:100%;margin-top:12px;padding:15px 18px;border:1px solid #e2e9f1;border-radius:12px;background:#f8fafc;color:#193248;font:inherit;text-align:left;cursor:pointer}
+.stock-summary-heading{display:grid;gap:5px;flex:none}.stock-summary-heading strong{font-size:13px}.stock-summary-heading small{font-size:11px;color:#7b8999}
+.stock-unit-grid{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;flex:1;min-width:0}.stock-unit{display:flex;align-items:baseline;gap:5px;white-space:nowrap}.stock-unit strong{font-size:22px;font-weight:650;font-variant-numeric:tabular-nums}.stock-unit small{font-size:12px;color:#718096}
+.stock-summary-link{display:flex;align-items:center;gap:5px;flex:none;font-size:12px;color:#2f6fae}.stock-empty{font-size:13px;color:#7b8999}
+:deep(.inventory-row-actions .el-button.is-link:not(.is-disabled)),:deep(.mobile-part footer .el-button.is-link:not(.is-disabled)){color:#2f6fae!important}
+:deep(.inventory-row-actions .el-button.is-link:not(.is-disabled):hover),:deep(.mobile-part footer .el-button.is-link:not(.is-disabled):hover){color:#245887!important}
+@media(max-width:680px){.inventory-summary .inventory-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.overview-card{padding:13px;min-height:142px}.overview-value-card{grid-column:1/-1;grid-row:1}.overview-value{font-size:27px;margin:9px 0 12px}.overview-currency{font-size:28px}.inventory-stock-summary{flex-wrap:wrap;gap:12px;padding:14px}.stock-summary-heading{flex:1}.stock-summary-link{order:1}.stock-unit-grid{flex-basis:100%;order:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px}.stock-unit strong{font-size:20px}}
 </style>

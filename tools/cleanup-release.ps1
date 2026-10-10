@@ -1,65 +1,60 @@
+param([string]$CurrentArchive = '')
 $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-$prefix = $root.TrimEnd('\') + '\'
-function WorkspacePath([string]$relative) {
-  $full = [IO.Path]::GetFullPath((Join-Path $root $relative))
-  if (-not $full.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) { throw "清理目标超出工作区：$full" }
+$output = [IO.Path]::GetFullPath((Join-Path $root 'output'))
+$prefix = $output.TrimEnd('\') + '\'
+function OutputPath([string]$relative) {
+  $full = [IO.Path]::GetFullPath((Join-Path $output $relative))
+  if (-not $full.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) { throw "清理目标超出 output：$full" }
   return $full
 }
-$version = (Get-Content -LiteralPath (WorkspacePath 'VERSION') -Raw).Trim()
-if ($version -ne 'V1.9.10') { throw '本清理清单仅适用于已核验的 V1.9.10 交付' }
-$archive = WorkspacePath 'output\spare-parts-v1.9.10-20261009-full-work-center.tar.gz'
-if (-not (Test-Path -LiteralPath $archive)) { throw '先生成并核验当前部署包' }
-node (WorkspacePath 'tools\verify-release.mjs') $archive
+$version = (Get-Content -LiteralPath (Join-Path $root 'VERSION') -Raw).Trim()
+if ($version -notmatch '^V\d+\.\d+\.\d+$') { throw 'VERSION 格式无效' }
+if (-not $CurrentArchive) {
+  $lines = @(Get-Content -LiteralPath (OutputPath "SHA256SUMS-$version.txt") | Where-Object { $_.Trim() })
+  if ($lines.Count -ne 1 -or $lines[0] -notmatch '^([A-Fa-f0-9]{64})\s+\*?(spare-parts-v[\d.]+-\d{8}(?:-[a-z0-9-]+)?\.tar\.gz)$') { throw '外层校验文件必须指向唯一最新包' }
+  $CurrentArchive = $Matches[2]
+}
+if ($CurrentArchive -notmatch '^spare-parts-v[\d.]+-\d{8}(?:-[a-z0-9-]+)?\.tar\.gz$') { throw '当前包名无效' }
+$archive = OutputPath $CurrentArchive
+if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) { throw '先生成当前部署包' }
+node (Join-Path $root 'tools\verify-release.mjs') $archive
 if ($LASTEXITCODE -ne 0) { throw '当前包未通过独立核验，停止清理' }
 
-# Preserve one verified prior release. Never touch database backups or user uploads.
-$previous = WorkspacePath 'output\spare-parts-v1.9.9-20260930-full-final'
-$rollbackDir = WorkspacePath 'output\rollback'
-New-Item -ItemType Directory -Force -Path $rollbackDir | Out-Null
-$rollback = WorkspacePath 'output\rollback\spare-parts-v1.9.9-20260930-full-final.tar.gz'
-if (Test-Path -LiteralPath $previous) {
-  $previousPrefix = $previous.TrimEnd('\') + '\'
-  $manifest = Join-Path $previous 'SHA256SUMS-V1.9.9.txt'
-  foreach ($line in (Get-Content -LiteralPath $manifest)) {
-    if ($line -notmatch '^([A-Fa-f0-9]{64})\s+(.+)$') { throw '旧包校验清单格式错误' }
-    $expected = $Matches[1]
-    $file = [IO.Path]::GetFullPath((Join-Path $previous $Matches[2]))
-    if (-not $file.StartsWith($previousPrefix, [StringComparison]::OrdinalIgnoreCase)) { throw '旧包清单路径越界' }
-    if ((Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash -ne $expected) { throw "旧包文件校验失败：$file" }
-  }
-  if (Test-Path -LiteralPath $rollback) { throw '回滚包已存在，先核查后再重复运行清理' }
-  tar -czf $rollback -C (WorkspacePath 'output') 'spare-parts-v1.9.9-20260930-full-final'
-  if ($LASTEXITCODE -ne 0) { throw '回滚压缩失败' }
-  $entries = @(tar -tzf $rollback)
-  if ($LASTEXITCODE -ne 0 -or $entries.Count -lt 385) { throw '回滚压缩包不完整' }
-  $rollbackHash = (Get-FileHash -LiteralPath $rollback -Algorithm SHA256).Hash
-  [IO.File]::WriteAllText((Join-Path $rollbackDir 'SHA256SUMS.txt'), "$rollbackHash  spare-parts-v1.9.9-20260930-full-final.tar.gz`n", [Text.UTF8Encoding]::new($false))
+# Keep the existing prior-release rollback and verify it before any deletion.
+$rollbackDir = OutputPath 'rollback'
+$rollbackManifest = Join-Path $rollbackDir 'SHA256SUMS.txt'
+if (-not (Test-Path -LiteralPath $rollbackManifest -PathType Leaf)) { throw '缺少上一版回滚包校验清单，请先保存回滚包' }
+$rollbackPrefix = $rollbackDir.TrimEnd('\') + '\'
+$rollbackLines = @(Get-Content -LiteralPath $rollbackManifest | Where-Object { $_.Trim() })
+if (-not $rollbackLines.Count) { throw '回滚包校验清单为空' }
+foreach ($line in $rollbackLines) {
+  if ($line -notmatch '^([A-Fa-f0-9]{64})\s+\*?([^\\/]+\.tar\.gz)$') { throw '回滚包校验清单格式错误' }
+  $expected = $Matches[1]
+  $rollbackFile = [IO.Path]::GetFullPath((Join-Path $rollbackDir $Matches[2]))
+  if (-not $rollbackFile.StartsWith($rollbackPrefix, [StringComparison]::OrdinalIgnoreCase)) { throw '回滚包路径越界' }
+  if ((Get-FileHash -LiteralPath $rollbackFile -Algorithm SHA256).Hash -ne $expected) { throw '回滚包校验失败' }
 }
-if (-not (Test-Path -LiteralPath $rollback) -or -not (Test-Path -LiteralPath (Join-Path $rollbackDir 'SHA256SUMS.txt'))) { throw '缺少上一版回滚包' }
 
-$targets = @(
-  'output\spare-parts-v1.9.10-20261009-full.tar.gz',
-  'output\spare-parts-v1.9.10-20261009-full-wxml-fix.tar.gz',
-  'output\spare-parts-v1.9.10-20261009-full',
-  'output\spare-parts-v1.9.10-20261009-full-wxml-fix',
-  'output\spare-parts-v1.9.10-20261009-full-work-center'
-)
+# Enumerate release artifacts only; no business data or general-purpose directories.
+$targets = @(Get-ChildItem -LiteralPath $output -Force | Where-Object {
+  ($_.PSIsContainer -and $_.Name -match '^spare-parts-v[\d.]+-\d{8}(?:-[a-z0-9-]+)?$') -or
+  (-not $_.PSIsContainer -and $_.Name -match '^spare-parts-v[\d.]+-\d{8}(?:-[a-z0-9-]+)?\.tar\.gz$' -and $_.Name -ne $CurrentArchive)
+})
 $deleted = @()
-foreach ($relative in $targets) {
-  $target = WorkspacePath $relative
-  if (-not (Test-Path -LiteralPath $target)) { continue }
-  $item = Get-Item -LiteralPath $target -Force
+foreach ($item in $targets) {
+  $target = OutputPath $item.Name
   if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "不清理重解析点：$target" }
   if ($item.PSIsContainer) {
     $children = @(Get-ChildItem -LiteralPath $target -Force -Recurse)
     if ($children | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint }) { throw "目录含重解析点：$target" }
     $bytes = ($children | Where-Object { -not $_.PSIsContainer } | Measure-Object Length -Sum).Sum
   } else { $bytes = $item.Length }
-  # Every resolved absolute target above is checked against this exact workspace.
   Remove-Item -LiteralPath $target -Force -Recurse
-  $deleted += [pscustomobject]@{ path = $relative; bytes = [long]$bytes }
+  $deleted += [pscustomobject]@{ path=$item.Name; bytes=[long]$bytes }
 }
-$report = [pscustomobject]@{ version=$version; deleted=$deleted; removedBytes=($deleted | Measure-Object bytes -Sum).Sum; rollback=$rollback; preserved=@('server/data', 'server/uploads', '.env', '.local/modeling', '.local/release-20261009') }
-$report | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (WorkspacePath '.local\release-20261009\cleanup.json') -Encoding utf8
-$report | Select-Object version,removedBytes,rollback | Format-List
+$report = [pscustomobject]@{ version=$version; current=$CurrentArchive; deleted=$deleted; removedBytes=($deleted | Measure-Object bytes -Sum).Sum; rollback=$rollbackDir }
+$localDir = Join-Path $root '.local'
+New-Item -ItemType Directory -Force -Path $localDir | Out-Null
+$report | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $localDir 'release-cleanup.json') -Encoding utf8
+$report | Select-Object version,current,removedBytes,rollback | Format-List

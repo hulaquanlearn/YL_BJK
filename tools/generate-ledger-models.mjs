@@ -19,7 +19,7 @@ const ring=(g,r,t,c,p,rot)=>mesh(g,new T.TorusGeometry(r,t,8,24),c,p,rot)
 function holes(g,xs,y,z){for(const x of xs)cyl(g,.025,.018,dark,[x,y,z],[Math.PI/2,0,0])}
 function bearing(g,roller=false){ring(g,.38,.10,steel,[0,.5,0]);ring(g,.19,.035,steel,[0,.5,.01]);for(let i=0;i<10;i++){const a=i*Math.PI/5;const p=[Math.cos(a)*.275,.5+Math.sin(a)*.275,0];if(roller)cyl(g,.04,.14,white,p,[Math.PI/2,0,0]);else mesh(g,new T.SphereGeometry(.045,8,6),white,p)}}
 function motor(g,vertical=false){cyl(g,.28,.7,blue,[0,.4,0],[0,0,Math.PI/2]);for(let i=0;i<8;i++)cyl(g,.30,.025,blue,[-.28+i*.08,.4,0],[0,0,Math.PI/2]);cyl(g,.085,.32,steel,[.47,.4,0],[0,0,Math.PI/2]);box(g,.20,.15,.22,blue,[0,.76,0]);for(const x of [-.22,.22])box(g,.15,.08,.65,blue,[x,.09,0]);if(vertical)g.rotation.z=Math.PI/2}
-function shape(kind,name){const g=new T.Group();g.name=name
+export function shape(kind,name){const g=new T.Group();g.name=name
   switch(kind){
     case 'breaker': {const poles=Number(name.match(/([1234])P/)?.[1]||1);for(let i=0;i<poles;i++){const x=(i-(poles-1)/2)*.23;box(g,.22,.85,.35,white,[x,.44,0]);box(g,.13,.22,.06,dark,[x,.56,.2]);holes(g,[x],.13,.18);holes(g,[x],.77,.18)}break}
     case 'protector':box(g,.65,.8,.46,white,[0,.4,0]);cyl(g,.12,.05,dark,[0,.53,.25],[Math.PI/2,0,0]);box(g,.16,.10,.05,0xc93738,[-.13,.28,.25]);box(g,.16,.10,.05,0x24955b,[.13,.28,.25]);holes(g,[-.22,0,.22],.75,.24);break
@@ -76,6 +76,7 @@ function kind(name){
 }
 const ambiguous=new Set(['带座外球面轴承','带座轴承','不锈钢带座轴承','轴承座','轴承座（含轴承）','标准气缸','减速机','减速机（带电机）','减速机（带联轴器）'])
 // Separate install-form examples avoid representing unlike housings by one file.
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
 const variants=[['带座轴承 · 底座式示意','housing'],['带座轴承 · 法兰式示意','flange-bearing'],['标准气缸 · 拉杆式示意','cylinder'],['减速机 · 箱体式示意','reducer']]
 for(const [name,k] of variants)if(!catalog.models.some(m=>m.name===name))catalog.models.push({id:catalog.models.length+1,name,shape:k,quality:'外观示意',description:'安装外形示意；未核实厂家尺寸，选择前请核对备件实际外形。'})
 let generated=0;const pending=[]
@@ -93,3 +94,4 @@ for(const model of catalog.models){
 }
 await fs.writeFile(catalogPath,JSON.stringify(catalog,null,2)+'\n')
 console.log(JSON.stringify({catalog:catalog.models.length,generated,pending},null,2))
+}

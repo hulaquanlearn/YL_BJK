@@ -144,6 +144,9 @@ if(releaseVersion==='V1.9.10'){
  for(const page of ['AttendanceReview','WorkStorage'])if(![...files.keys()].some(n=>n.includes('/web-dist/assets/'+page+'-')&&n.endsWith('.js')))throw new Error('Missing compiled '+page)
  const app=files.get(folder+'/server/src/app.js').toString('utf8'),db=files.get(folder+'/server/src/db.js').toString('utf8')
  if(!app.includes("'/api/attendance'")||!app.includes("'/api/work-storage'")||!db.includes('migration_attendance_storage_20261009.sql'))throw new Error('Work center routes/schema not mounted')
- if((ledgerCatalog.supplements||[]).flatMap(batch=>batch.models).length!==5)throw new Error('Missing five supplemental models')
+ if((ledgerCatalog.supplements||[]).find(batch=>batch.version==='missing-five-20261009-v1')?.models.length!==5)throw new Error('Missing five supplemental models')
+ if((ledgerCatalog.supplements||[]).find(batch=>batch.version==='pending-ledger-20261009-v1')?.models.length!==131)throw new Error('Missing pending ledger models')
+ if(ledgerCatalog.supplements.find(batch=>batch.version==='pending-ledger-20261009-v1').bindByCode!==false)throw new Error('Per-code batch must preserve named bindings')
+ if(ledgerCatalog.assetUpdates?.find(batch=>batch.version==='named-model-assets-20261009-v1')?.models.length!==11)throw new Error('Missing named placeholder assets')
  console.log('Work center routes, migration, pages and five supplemental models verified')
 }

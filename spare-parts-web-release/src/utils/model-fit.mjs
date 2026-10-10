@@ -37,3 +37,9 @@ export function normalizeModelRotation(value) {
 export function modelFacingRotation(frontRotationY = 0, side = '1') {
   return normalizeModelRotation(Number(frontRotationY) + (String(side) === '2' ? Math.PI : 0))
 }
+
+// Keep the saved model front facing the initial overview camera in world space.
+// Cancel the shelf parent's rotation so every shelf presents the same front.
+export function overviewModelRotation(frontRotationY = 0, shelfRotationY = 0) {
+  return normalizeModelRotation(Number(frontRotationY) + Math.atan2(-.75, -1.09) - Number(shelfRotationY))
+}

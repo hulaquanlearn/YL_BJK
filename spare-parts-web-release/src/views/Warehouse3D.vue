@@ -278,7 +278,7 @@ import PartModelDetail from '../components/PartModelDetail.vue'
 import { inventoryRouteQuery } from '../utils/inventory-scope.mjs'
 import { getPart, getParts, getWarehouseLayout, updateWarehouseShelf, getStagingPoints } from '../api'
 import { canEditWorkshop } from '../auth'
-import { modelFacingRotation, modelFitScale, slotModelBounds } from '../utils/model-fit.mjs'
+import { overviewModelRotation, modelFitScale, slotModelBounds } from '../utils/model-fit.mjs'
 import { warehouseModelUrl } from '../utils/evidence-models.mjs'
 import {
   COMMON_SHELF_LEVELS,
@@ -314,6 +314,7 @@ const stockDetailVisible = ref(false), stockDetailLoading = ref(false), stockDet
 let stockDetailToken = 0
 async function loadStockDetail(part) {
   const token=++stockDetailToken
+  if (!part?._id) { stockDetailLoading.value=false; return }
   stockDetailLoading.value=true;stockDetailError.value=false
   try { const result=await getPart(part._id);if(token===stockDetailToken)selectedPart.value=result.data } catch { if(token===stockDetailToken)stockDetailError.value=true } finally { if(token===stockDetailToken)stockDetailLoading.value=false }
 }
@@ -421,6 +422,8 @@ let multiPointerGesture = false
 let previousStageAspect = null
 let partModelDrawToken = 0
 let partModelsRequestToken = 0
+let layoutRequestToken = 0
+let partLocationRequestToken = 0
 let partSearchRequestToken = 0
 let shelfPartsRequestToken = 0
 const gltfLoader = new GLTFLoader()
@@ -520,23 +523,31 @@ function shelfMatchesFilter(shelf, filter) {
 }
 
 async function loadLayout() {
+  const requestToken = ++layoutRequestToken
+  const requestedWorkshop = workshopCode.value
+  const isCurrent = () => requestToken === layoutRequestToken && requestedWorkshop === workshopCode.value
   loading.value = true
   try {
-    const result = await getWarehouseLayout({ workshopCode: workshopCode.value })
+    const result = await getWarehouseLayout({ workshopCode: requestedWorkshop })
+    if (!isCurrent()) return
+    let points = []
+    try {
+      const spResult = await getStagingPoints({ workshopCode: requestedWorkshop })
+      points = spResult.data || []
+    } catch { /* Staging points are optional; retain the warehouse layout. */ }
+    if (!isCurrent()) return
     layout.value = result.data
     if (Array.isArray(result.data?.workshops) && result.data.workshops.length) workshopOptions.value = result.data.workshops
-    shelves.value = (result.data?.shelves || []).map(item => applyPhysicalShelfLayout(item, workshopCode.value))
-    try {
-      const spResult = await getStagingPoints({ workshopCode: workshopCode.value })
-      stagingPoints.value = spResult.data || []
-    } catch { stagingPoints.value = [] }
+    shelves.value = (result.data?.shelves || []).map(item => applyPhysicalShelfLayout(item, requestedWorkshop))
+    stagingPoints.value = points
     if (selectedShelf.value) selectedShelf.value = shelves.value.find(item => item.id === selectedShelf.value.id) || null
     await nextTick()
+    if (!isCurrent()) return
     if (!scene) initScene()
     if (scene) { drawRoom(); drawShelves() }
     if (partModelMode.value !== 'hidden') await loadPartModels()
   } finally {
-    loading.value = false
+    if (isCurrent()) loading.value = false
   }
 }
 
@@ -553,10 +564,20 @@ async function searchParts(keyword) {
 }
 
 async function changeWorkshop() {
+  partModelsRequestToken++
+  partSearchRequestToken++
+  shelfPartsRequestToken++
+  partModelDrawToken++
+  partOptions.value = []
+  partSearching.value = false
+  shelfPartsLoading.value = false
+  allLocatedParts.value = []
+  activeGroup.value = ''
   selectedShelf.value = null
   clearPart()
   shelfParts.value = []
   shelfPartsError.value = ''
+  if (partModelsRoot) disposeChildren(partModelsRoot)
   await loadLayout()
 }
 
@@ -566,6 +587,12 @@ function choosePart(id) {
 }
 
 function clearPart() {
+  partLocationRequestToken++
+  stockDetailToken++
+  stockDetailVisible.value = false
+  stockDetailLoading.value = false
+  stockDetailError.value = false
+  stockDetailCandidates.value = []
   selectedPart.value = null
   selectedPartId.value = ''
   if (markerRoot) disposeChildren(markerRoot)
@@ -589,18 +616,12 @@ async function loadPartModels() {
   const requestToken = ++partModelsRequestToken
   const requestedMode = partModelMode.value
   const requestedWorkshop = workshopCode.value
-  const rows = []
-  let page = 1
-  let total = 0
-  do {
-    const result = await getParts({ page, pageSize: 200, workshopCode: requestedWorkshop, ...(requestedMode === 'low' ? { lowStock: 1 } : requestedMode === 'normal' ? { stockStatus: 'normal' } : {}) })
-    if (requestToken !== partModelsRequestToken || requestedMode !== partModelMode.value || requestedWorkshop !== workshopCode.value) return
-    const items = result.data || []
-    if (!items.length && rows.length < total) throw new Error('备件分页加载不完整，请刷新后重试')
-    rows.push(...items)
-    total = Number(result.total || items.length)
-    page += 1
-  } while (rows.length < total)
+  const rows = await collectParts(getParts, {
+    workshopCode: requestedWorkshop,
+    sort: 'codeAsc',
+    ...(requestedMode === 'low' ? { lowStock: 1 } : requestedMode === 'normal' ? { stockStatus: 'normal' } : {})
+  }, () => !(requestToken !== partModelsRequestToken || requestedMode !== partModelMode.value || requestedWorkshop !== workshopCode.value))
+  if (!rows) return
   if (requestToken !== partModelsRequestToken || requestedMode === 'hidden') return
   allLocatedParts.value = rows.filter(part => /^\d{6}$/.test(String(part.locationCode || '')))
   drawPartModels()
@@ -687,9 +708,8 @@ async function replaceWithCustomModel(anchor, fallback, part, placement, shelf, 
     const model = new THREE.Mesh(geometry,stockMaterialCache.get(lowStock))
     model.userData.sharedStockModel=true
     model.userData.stockParts=fallback.userData.stockParts
-    // The saved category angle makes +Z the model's front. Shelf side 2 faces
-    // the opposite aisle, so rotate it another half turn before fitting.
-    model.rotation.y = modelFacingRotation(modelFrontRotationFor(part), placement.location.position)
+    // Present each model's saved front toward the default overview camera.
+    model.rotation.y = overviewModelRotation(modelFrontRotationFor(part), shelf.position.rotationY || 0)
     model.updateMatrixWorld(true)
     const initialBox = new THREE.Box3().setFromObject(model)
     const initialSize = initialBox.getSize(new THREE.Vector3())
@@ -778,7 +798,11 @@ function drawPartModels() {
   Promise.allSettled(pendingModels).then(()=>{if(drawToken===partModelDrawToken && partModelMode.value!=='hidden')instanceStockModels(partModelsRoot)})
 }
 
-async function locatePart(part) {
+async function locatePart(part, requestToken = ++partLocationRequestToken) {
+  stockDetailToken++
+  stockDetailVisible.value = false
+  stockDetailLoading.value = false
+  const isCurrent = () => requestToken === partLocationRequestToken
   selectedPart.value = part
   allLocatedParts.value = allLocatedParts.value.map(item => String(item._id) === String(part._id) ? part : item)
   selectedPartId.value = part._id
@@ -787,6 +811,7 @@ async function locatePart(part) {
   if (part.workshopCode && part.workshopCode !== workshopCode.value) {
     workshopCode.value = part.workshopCode
     await loadLayout()
+    if (!isCurrent()) return
   }
   const shelf = shelves.value.find(item => Number(item.shelfNo) === Number(location.shelf))
   if (!shelf) {
@@ -796,6 +821,7 @@ async function locatePart(part) {
   activeGroup.value = ''
   panelMode.value = 'parts'
   await selectShelf(shelf, false, false, false)
+  if (!isCurrent()) return
   const targetLayer = Number(location.layer)
   if (!selectedLayers.value.includes(targetLayer)) selectedLayers.value = [targetLayer]
   drawShelves()
@@ -805,19 +831,22 @@ async function locatePart(part) {
   stockDetailCandidates.value=allLocatedParts.value.filter(item=>String(item.locationCode||item.location)===String(part.locationCode||part.location) && Number(resolvePartLocation(item).shelf)===Number(location.shelf) && Number(resolvePartLocation(item).position)===Number(location.position) && Number(resolvePartLocation(item).layer)===Number(location.layer))
   stockDetailVisible.value=true;sidePanelCollapsed.value=false
   await loadStockDetail(part)
+  if (!isCurrent()) return
   await nextTick();resizeScene()
 }
 
 async function locatePartById(id) {
   const value = String(id || '').trim()
   if (!value) return
+  const requestToken = ++partLocationRequestToken
   const result = await getPart(value)
-  if (!result.data) return
+  if (requestToken !== partLocationRequestToken || !result.data) return
   partOptions.value = [result.data, ...partOptions.value.filter(item => item._id !== result.data._id)]
-  await locatePart(result.data)
+  await locatePart(result.data, requestToken)
 }
 
 async function selectShelf(shelf, focus = true, clearLocatedPart = true, resetLayers = true) {
+  if (clearLocatedPart) partLocationRequestToken++
   const requestToken = ++shelfPartsRequestToken
   selectedShelf.value = shelf
   panelMode.value = 'parts'
@@ -828,8 +857,7 @@ async function selectShelf(shelf, focus = true, clearLocatedPart = true, resetLa
   }
   if (resetLayers) selectAllLayers()
   if (clearLocatedPart && !partBelongsToShelf(selectedPart.value || {}, shelf.shelfNo)) {
-    selectedPart.value = null
-    selectedPartId.value = ''
+    clearPart()
   }
   drawShelves()
   if (selectedPart.value && partBelongsToShelf(selectedPart.value, shelf.shelfNo)) drawPartMarker(shelf, selectedPart.value)
@@ -1558,10 +1586,17 @@ watch(() => route.query.partId, value => {
 onMounted(async () => {
   document.addEventListener('fullscreenchange', handleFullscreenChange)
   document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+  const requestToken = layoutRequestToken + 1
   await loadLayout()
+  if (requestToken !== layoutRequestToken) return
   if (route.query.partId) await locatePartById(route.query.partId)
 })
 onBeforeUnmount(() => {
+  partLocationRequestToken++
+  layoutRequestToken++
+  stockDetailToken++
+  partSearchRequestToken++
+  shelfPartsRequestToken++
   partModelDrawToken++
   partModelsRequestToken++
   for(const value of customModelCache.values())value.then(g=>g.dispose()).catch(()=>{})

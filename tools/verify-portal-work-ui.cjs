@@ -14,7 +14,7 @@ const out=path.resolve(__dirname,'../.local/portal-qa');
       {name:'shift-leader',role:'viewer',workRole:'shift_leader',inspection:false,assessment:true,width:390},
       {name:'unassigned',role:'viewer',workRole:'',inspection:false,assessment:false,width:390}
     ]){
-      const user={id:scenario.name,role:scenario.role,displayName:scenario.name};
+      const user={id:scenario.name,role:scenario.role,displayName:scenario.name,...(scenario.workRole?{staffWorkshopCode:'qu_making',staffPosition:scenario.workRole}:{})};
       const page=await browser.newPage({viewport:{width:scenario.width,height:900}}),errors=[];
       page.on('pageerror',error=>errors.push(error.message));
       await page.addInitScript(u=>{localStorage.setItem('spare_parts_auth_token','x'.repeat(43));localStorage.setItem('spare_parts_auth_user',JSON.stringify(u))},user);
@@ -29,8 +29,10 @@ const out=path.resolve(__dirname,'../.local/portal-qa');
       if(scenario.role==='viewer')await page.waitForTimeout(100);
       assert.equal(await page.getByText('从这里开始工作').count(),0);
       assert.equal(await page.getByText('工作空间',{exact:true}).count(),0);
-      assert.equal(await page.getByRole('link',{name:/制曲 · 组长履职考评/}).count()>0,scenario.assessment);
-      assert.equal(await page.getByRole('link',{name:/原粮 · 检查通报整理/}).count()>0,scenario.inspection);
+      // Entrances remain visible; route and server guards enforce data access.
+      assert.equal(await page.getByRole('link',{name:/制曲 · 组长履职考评/}).count(),1);
+      assert.equal(await page.getByRole('link',{name:/原粮 · 检查通报(整理|查看)/}).count(),1);
+      assert.equal(await page.getByRole('link',{name:/原粮 · 考勤核查/}).count(),scenario.role==='raw_grain'?1:0);
       const colors=await page.evaluate(()=>({work:getComputedStyle(document.querySelector('.work-card')).borderTopColor,knowledge:getComputedStyle(document.querySelector('.knowledge-card')).borderTopColor,overflow:document.documentElement.scrollWidth>innerWidth+1}));
       assert.notEqual(colors.work,colors.knowledge);
       assert.equal(colors.overflow,false);
