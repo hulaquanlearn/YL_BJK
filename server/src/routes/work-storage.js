@@ -5,13 +5,57 @@ const S=require('../work-storage');
 const router=express.Router();router.use(S.requireStorageAdmin);router.use((_req,res,next)=>{res.set('Cache-Control','private, no-store');next();});
 const ok=(res,data)=>res.json({success:true,data});
 async function tx(fn){const db=await pool.getConnection();try{await db.beginTransaction();const result=await fn(db);await db.commit();return result;}catch(e){await db.rollback();throw e;}finally{db.release();}}
+const MAX_CLEANUP_ITEMS=1000;
+function scope(input,required=false){
+  if(!input||typeof input!=='object'||Array.isArray(input))throw new ApiError(400,'请选择有效的功能和资料类型');
+  const feature=input.function??'',kind=input.kind??'';
+  if(typeof feature!=='string'||typeof kind!=='string'||feature&&!Object.hasOwn(S.FUNCTIONS,feature)||kind&&!S.TYPES.includes(kind)||required&&!feature)throw new ApiError(400,'请选择有效的功能和资料类型');
+  if(feature&&kind&&!S.FUNCTIONS[feature].includes(kind))throw new ApiError(400,'资料类型不属于所选功能');
+  const kinds=kind?[kind]:feature?S.FUNCTIONS[feature]:[];
+  return {feature,kind,kinds,where:kinds.length?` WHERE kind${kinds.length===1?'=?':' IN ('+kinds.map(()=>'?').join(',')+')'}`:'',args:[...kinds]};
+}
 router.get('/',asyncHandler(async(req,res)=>{
-  const cutoff=S.cutoffDate(req.query.cutoff),page=Number(req.query.page||1),kind=String(req.query.kind||'');if(!Number.isSafeInteger(page)||page<1||page>100000||kind&&!S.TYPES.includes(kind))throw new ApiError(400,'筛选参数无效');
-  const where=kind?' WHERE kind=?':'',args=kind?[kind]:[];
+  const cutoff=S.cutoffDate(req.query.cutoff),page=Number(req.query.page||1);if(!Number.isSafeInteger(page)||page<1||page>100000)throw new ApiError(400,'筛选参数无效');
+  const {where,args}=scope(req.query);
   const [items]=await pool.query(`SELECT * FROM (${S.STORAGE_UNION}) storage${where} ORDER BY updatedAt ASC,kind,id LIMIT 30 OFFSET ?`,[...args,(page-1)*30]);
   const [summary]=await pool.query(`SELECT kind,COUNT(*) AS itemCount,SUM(bytes) AS bytes,SUM(fileCount) AS fileCount FROM (${S.STORAGE_UNION}) storage GROUP BY kind`);
   const [[count]]=await pool.query(`SELECT COUNT(*) AS total FROM (${S.STORAGE_UNION}) storage${where}`,args);
   ok(res,{items:items.map(r=>S.decorate(r,cutoff)),summary:summary.map(r=>({...r,bytes:Number(r.bytes),itemCount:Number(r.itemCount),fileCount:Number(r.fileCount)})),total:Number(count.total),page,cutoff});
+}));
+router.get('/cleanup-preview',asyncHandler(async(req,res)=>{
+  const {where,args}=scope(req.query,true),cutoff=S.cutoffDate(req.query.cutoff);
+  const [rows]=await pool.query(`SELECT * FROM (${S.STORAGE_UNION}) storage${where} AND referenceCount=0 AND processingCount=0 AND DATE(updatedAt)<? AND (retentionUntil IS NULL OR DATE(retentionUntil)<?) ORDER BY updatedAt ASC,kind,id LIMIT 1001`,[...args,cutoff,S.today()]);
+  if(rows.length>MAX_CLEANUP_ITEMS)throw new ApiError(400,'待清理资料超过1000项，请按资料类型或截止日期缩小范围');
+  const items=rows.map(r=>({kind:r.kind,id:Number(r.id),revision:Number(r.revision),title:r.title,bytes:Number(r.bytes),fileCount:Number(r.fileCount)}));
+  ok(res,{items,itemCount:items.length,totalBytes:items.reduce((sum,r)=>sum+r.bytes,0)});
+}));
+router.post('/cleanup',asyncHandler(async(req,res)=>{
+  const {kinds}=scope(req.body,true),cutoff=S.cutoffDate(req.body.cutoff),submitted=req.body.items;
+  if(!Array.isArray(submitted)||!submitted.length||submitted.length>MAX_CLEANUP_ITEMS)throw new ApiError(400,'请先核对1至1000项待清理资料');
+  const seen=new Set(),items=submitted.map(item=>{
+    if(!item||typeof item!=='object'||Array.isArray(item)||!kinds.includes(item.kind)||!Number.isSafeInteger(item.id)||item.id<1||!Number.isSafeInteger(item.revision)||item.revision<0)throw new ApiError(400,'待清理资料的功能、编号或版本无效');
+    const key=`${item.kind}:${item.id}`;if(seen.has(key))throw new ApiError(400,'待清理资料存在重复项');seen.add(key);
+    return {kind:item.kind,id:item.id,revision:item.revision};
+  }).sort((a,b)=>a.kind.localeCompare(b.kind)||a.id-b.id);
+  const result=await tx(async db=>{
+    // Lock and validate all reviewed versions before a shared parent can change.
+    const locked=new Map();
+    for(const item of items){
+      const parent=await S.lockStorageSource(db,item.kind,item.id);
+      if(!parent||Number(parent.revision)!==item.revision)throw new ApiError(409,'资料已变化，请重新预览后核对清理');
+      locked.set(`${item.kind}:${item.id}`,parent);
+    }
+    let releasedBytes=0;
+    const changedParents=new Map();
+    for(const item of items){
+      const parent=locked.get(`${item.kind}:${item.id}`),parentKey=`${item.kind}:${parent.id}`;
+      const revision=item.revision+(changedParents.get(parentKey)||0);
+      try{const cleared=await S.deleteStorageItem(db,req.user,{...item,revision,cutoff});releasedBytes+=cleared.releasedBytes;}
+      catch(error){if(error.status===404)throw new ApiError(409,'资料已变化，请重新预览后核对清理');throw error;}
+      if(['work_photo','task_file'].includes(item.kind))changedParents.set(parentKey,(changedParents.get(parentKey)||0)+1);
+    }
+    return {itemCount:items.length,releasedBytes};
+  });ok(res,result);
 }));
 router.get('/audit',asyncHandler(async(_req,res)=>{const [rows]=await pool.query('SELECT id,actor_id,source_kind,source_id,title,released_bytes,created_at FROM work_storage_audit ORDER BY id DESC LIMIT 50');ok(res,rows);}));
 router.patch('/:kind/:id/retention',asyncHandler(async(req,res)=>{

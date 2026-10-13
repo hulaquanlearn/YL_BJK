@@ -17,7 +17,17 @@ test('HTTP import/roles/notes/download/reanalysis/dedup/cleanup and rollback con
   const note=await request('PATCH',`/attendance/reports/${r.id}/notes`,{revision:current.revision,entryKey:r.analysis.results[0].key,note:'待核对外出审批'});assert.equal(note.status,200);
   assert.equal((await request('PATCH',`/attendance/reports/${r.id}/notes`,{revision:current.revision,entryKey:r.analysis.results[0].key,note:'覆盖旧备注'})).status,409);assert.equal(f.inspect().notes[0].note,'待核对外出审批');
   const download=await fetch(root+`/attendance/reports/${r.id}/sources/schedule/download`,{headers:{Authorization:'Bearer attendance-preview-raw_grain'}});assert.equal(download.status,200);assert.deepEqual(Buffer.from(await download.arrayBuffer()),schedule);
-  assert.equal((await request('POST',`/attendance/reports/${r.id}/reanalyze`,{revision:note.body.data.revision,observationHours:1})).status,200);
+  // Reimport of identical originals upgrades the saved rule version and retains human notes.
+  const legacy=f.inspect().reports[0],oldAnalysis=JSON.parse(legacy.analysis_json);oldAnalysis.version=1;legacy.analysis_json=JSON.stringify(oldAnalysis);
+  const upgraded=await request('POST','/attendance/reports',form(2,true));
+  assert.equal(upgraded.body.data.id,r.id);assert.equal(upgraded.body.data.analysis.version,2);
+  assert.equal(upgraded.body.data.notes[r.analysis.results[0].key].note,'待核对外出审批');
+  assert.equal(f.inspect().sources.length,2);assert.ok(upgraded.body.data.revision>note.body.data.revision);
+  const previousRevision=JSON.parse(legacy.analysis_json);previousRevision.ruleRevision=1;legacy.analysis_json=JSON.stringify(previousRevision);
+  const retryUpgraded=await request('POST','/attendance/reports',form(2,true));
+  assert.equal(retryUpgraded.body.data.analysis.ruleRevision,4);assert.ok(retryUpgraded.body.data.revision>upgraded.body.data.revision);
+  assert.equal(retryUpgraded.body.data.notes[r.analysis.results[0].key].note,'待核对外出审批');
+  assert.equal((await request('POST',`/attendance/reports/${r.id}/reanalyze`,{revision:retryUpgraded.body.data.revision,observationHours:1})).status,200);
   assert.equal((await request('GET','/work-storage?cutoff=2025-01-01')).status,403);assert.equal((await request('GET','/work-storage?cutoff=2099-01-01',undefined,'admin')).status,400);
   const state=(await request('GET',`/attendance/reports/${r.id}`)).body.data;
   assert.equal((await request('DELETE',`/work-storage/attendance/${r.id}`,{revision:state.revision,cutoff:'2026-01-01'},'admin')).status,409);assert.equal(f.inspect().sources.length,2);
@@ -27,6 +37,21 @@ test('HTTP import/roles/notes/download/reanalysis/dedup/cleanup and rollback con
   const list=(await request('GET','/work-storage?cutoff=2025-01-01',undefined,'admin')).body.data;const item=list.items.find(x=>x.kind==='attendance');assert.equal(item.eligible,true);
   assert.equal((await request('DELETE',`/work-storage/attendance/${r.id}`,{revision:item.revision,cutoff:'2025-01-01'},'admin')).status,200);assert.equal(f.inspect().sources.length,0);assert.equal(f.inspect().notes.length,0);assert.equal(f.inspect().audit.length,1);assert.equal((await request('GET',`/attendance/reports/${r.id}`)).status,404);
 });
+test('HTTP normal-exit setting propagates through import and reanalysis and remains applied when omitted',async t=>{
+  const f=createFixture(),server=f.app.listen(0,'127.0.0.1');await new Promise(resolve=>server.once('listening',resolve));t.after(()=>server.close());const root=`http://127.0.0.1:${server.address().port}/api`;
+  const request=async(url,body,method='POST')=>{const multipart=body instanceof FormData,response=await fetch(root+url,{method,headers:{Authorization:'Bearer attendance-preview-raw_grain',...multipart?{}:{'Content-Type':'application/json'}},body:multipart?body:JSON.stringify(body)});return {status:response.status,body:await response.json()}};
+  const workbook=async rows=>{const book=new ExcelJS.Workbook();book.addWorksheet('数据').addRows(rows);return Buffer.from(await book.xlsx.writeBuffer())};
+  const schedule=await workbook([['工号','姓名','9月17号'],['G1','甲','8:00-16:00']]),attendance=await workbook([['工号','姓名','刷卡日期','刷卡时间','设备号','方向'],['G2','旁人','2026-09-15','00:00:00','GPS0999999',''],['G1','甲','2026-09-17','07:30:00','ONECARD','进'],['G1','甲','2026-09-17','16:05:00','GPS0999999',''],['G1','甲','2026-09-17','19:00:00','ONECARD','出'],['G2','旁人','2026-09-20','20:00:00','GPS0999999','']]);
+  const form=new FormData();form.append('month','2026-09');form.append('normalExitHours','1');form.append('observationHours','4');form.append('acknowledgeWarnings','true');form.append('schedule',new Blob([schedule]),'排班表.xlsx');form.append('attendance',new Blob([attendance]),'考勤表.xlsx');
+  const imported=await request('/attendance/reports',form);assert.equal(imported.status,200);const report=imported.body.data,key=report.analysis.results[0].key;
+  assert.equal(report.analysis.options.normalExitHours,1);assert.equal(report.analysis.options.observationHours,4);assert.equal(report.analysis.results[0].status,'missing_exit');assert.equal(report.analysis.results[0].normalExitEnd,'2026-09-17 17:00:00');
+  const note=await request(`/attendance/reports/${report.id}/notes`,{revision:report.revision,entryKey:key,note:'已核查人工通道'},'PATCH');assert.equal(note.status,200);
+  const changed=await request(`/attendance/reports/${report.id}/reanalyze`,{revision:note.body.data.revision,normalExitHours:4,observationHours:0.5});assert.equal(changed.status,200);const applied=changed.body.data;
+  assert.equal(applied.analysis.options.normalExitHours,4);assert.equal(applied.analysis.options.observationHours,0.5);assert.equal(applied.analysis.results[0].status,'normal');assert.equal(applied.analysis.results[0].normalExit,'2026-09-17 19:00:00');assert.equal(applied.analysis.results[0].normalExitEnd,'2026-09-17 20:00:00');assert.equal(applied.notes[key].note,'已核查人工通道');
+  const preserved=await request(`/attendance/reports/${report.id}/reanalyze`,{revision:applied.revision,observationHours:1});assert.equal(preserved.status,200);const retained=preserved.body.data;
+  assert.equal(retained.analysis.options.normalExitHours,4);assert.equal(retained.analysis.options.observationHours,1);assert.equal(retained.analysis.results[0].status,'normal');assert.equal(retained.analysis.results[0].normalExit,'2026-09-17 19:00:00');assert.equal(retained.analysis.month,'2026-09');assert.equal(retained.notes[key].note,'已核查人工通道');assert.equal(f.inspect().reports.length,1);assert.equal(f.inspect().sources.length,2);
+});
+
 test('real application rejects anonymous attendance sources, analysis, notes and cleanup before database access',async t=>{
   const f=createFixture(),app=require('../src/app'),server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));t.after(()=>server.close());
   const endpoints=[['GET','/attendance/reports'],['GET','/attendance/reports/1'],['GET','/attendance/reports/1/sources/schedule/download'],['POST','/attendance/preview'],['POST','/attendance/reports'],['POST','/attendance/reports/1/reanalyze'],['PATCH','/attendance/reports/1/notes'],['GET','/work-storage?cutoff=2025-01-01'],['DELETE','/work-storage/attendance/1'],['PATCH','/work-storage/attendance/1/retention']];

@@ -2,7 +2,7 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const S=require('../src/work-storage');
 function setup({kind='attendance',referenceCount=0,revision=2,retentionUntil=null,updatedAt='2025-01-01 10:00:00',processing=false}={}){
   const calls=[],parent={id:5,revision,updatedAt,retentionUntil},item={kind,id:1,title:'过期资料',bytes:1234,fileCount:2,referenceCount};
-  const db={query:async(sql,args)=>{calls.push([sql,args]);if(sql.includes('SELECT * FROM ('))return [[item]];if(sql.includes("status='processing'"))return [processing?[{id:1}]:[]];if(sql.startsWith('SELECT'))return [[parent]];return [{affectedRows:1}]}};
+  const db={query:async(sql,args)=>{calls.push([sql,args]);if(sql.includes('SELECT * FROM ('))return [[item]];if(sql.includes("status='processing'"))return [processing?[{id:1}]:[]];if(sql.startsWith('SELECT file_id FROM work_task_file_references'))return [referenceCount?[{file_id:1}]:[]];if(sql.startsWith('SELECT'))return [[parent]];return [{affectedRows:1}]}};
   return {db,calls,request:{kind,id:1,cutoff:'2025-02-01',revision}};
 }
 test('storage and attendance enforce server roles before touching data',()=>{
