@@ -1,0 +1,12 @@
+<resources>
+    <style name="WorkbenchBase" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#B91F35</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+        <item name="android:windowBackground">#F5F7FA</item>
+        <item name="android:colorControlHighlight">#16B91F35</item>
+    </style>
+    <style name="WorkbenchTheme" parent="WorkbenchBase" />
+</resources>

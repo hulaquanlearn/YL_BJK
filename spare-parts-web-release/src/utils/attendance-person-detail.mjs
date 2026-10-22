@@ -33,8 +33,9 @@ export function buildAttendanceMonth(analysis, personId) {
     blankDays:count(day => day.available && day.type === 'blank'),
     normalShifts:count(day => day.statusCategory === 'normal'),
     earlyShifts:count(day => day.statusCategory === 'early'),
+    lateShifts:count(day => day.type === 'work' && day.result?.arrival?.status === 'late'),
     reviewShifts:count(day => day.statusCategory === 'review'),
     unavailableDays:count(day => !day.available)
   }
-  return {person,month,days,weeks,summary,earlyDays:days.filter(day => day.statusCategory === 'early')}
+  return {person,month,days,weeks,summary,earlyDays:days.filter(day => day.statusCategory === 'early'),lateDays:days.filter(day => day.type === 'work' && day.result?.arrival?.status === 'late')}
 }

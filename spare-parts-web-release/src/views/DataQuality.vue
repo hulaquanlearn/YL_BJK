@@ -5,13 +5,13 @@
 
     <section class="quality-metrics">
       <article><span>质量得分</span><strong>{{ summary.total ? `${summary.qualityRate}%` : '—' }}</strong><small>{{ summary.total ? '无异常库存记录占比' : '当前范围暂无库存记录' }}</small></article>
-      <article class="is-good"><span>完整记录</span><strong>{{ summary.healthy }}</strong><small>可直接用于统计与补货</small></article>
+      <article class="is-good"><span>完整记录</span><strong>{{ summary.healthy }}</strong></article>
       <article class="is-alert"><span>受影响记录</span><strong>{{ summary.affected }}</strong><small>一条记录可能有多个问题</small></article>
-      <article class="is-total"><span>检查总量</span><strong>{{ summary.total }}</strong><small>当前有效库存记录</small></article>
+      <article class="is-total"><span>检查总量</span><strong>{{ summary.total }}</strong></article>
     </section>
 
     <section class="panel issue-overview">
-      <header><div><strong>问题分布</strong><span>点击分类可筛选，百分比以当前筛选范围的有效库存记录为分母</span></div><button type="button" :class="{active:!query.issueType}" @click="selectIssue('')">全部问题</button></header>
+      <header><div><strong>问题分布</strong><span>占当前有效库存记录的比例</span></div><button type="button" :class="{active:!query.issueType}" @click="selectIssue('')">全部问题</button></header>
       <div class="issue-grid">
         <button v-for="item in summary.issueGroups" :key="item.key" type="button" :class="[`is-${item.severity}`,{active:query.issueType===item.key}]" @click="selectIssue(item.key)">
           <span>{{ item.label }}</span><strong>{{ item.count }}</strong><small>{{ item.rate }}%</small>
@@ -22,11 +22,11 @@
     <section class="panel quality-filter">
       <div class="filter-field"><label>搜索备件</label><el-input v-model="query.searchKeyword" clearable placeholder="编码、名称、规格或库位" @keyup.enter="search" @clear="search"><template #prefix><el-icon><Search /></el-icon></template></el-input></div>
       <div class="filter-field"><label>所属车间</label><el-select v-model="query.workshopCode" clearable placeholder="全部车间" style="width:100%" @change="workshopChanged"><el-option v-for="item in workshops" :key="item.code" :label="item.name" :value="item.code" /></el-select></div>
-      <div class="filter-actions"><el-button @click="reset">重置</el-button><el-button type="primary" :loading="loading" @click="search">查询</el-button></div>
+      <div class="filter-actions"><el-button v-if="query.workshopCode || query.searchKeyword || query.warehouseAreaName || query.partType || query.stockStatus || query.lowStock || query.issueType" text @click="reset">重置</el-button><el-button :loading="loading" @click="search">查询</el-button></div>
     </section>
 
     <section class="panel table-panel">
-      <div class="table-toolbar"><div><strong>{{ activeIssueLabel }}</strong><span class="result-count">共 {{ total }} 条</span></div><div class="quality-table-tools"><span class="quality-note">修复后重新检查即可更新得分</span><el-button text :loading="loading" aria-label="重新检查" title="重新检查" @click="load"><el-icon><Refresh /></el-icon></el-button></div></div>
+      <div class="table-toolbar"><div><strong>{{ activeIssueLabel }}</strong><span class="result-count">共 {{ total }} 条</span></div><div class="quality-table-tools"><el-button text :loading="loading" aria-label="重新检查" title="重新检查" @click="load"><el-icon><Refresh /></el-icon></el-button></div></div>
       <el-table :data="list" v-loading="loading" row-key="_id" empty-text="当前筛选下没有数据质量问题">
         <el-table-column label="物料" min-width="260"><template #default="{row}"><div class="material-cell"><strong>{{ row.materialDesc }}</strong><span>{{ row.materialCode }} · {{ row.spec || '未填写规格' }}</span></div></template></el-table-column>
         <el-table-column label="问题" min-width="260"><template #default="{row}"><div class="issue-tags"><el-tag v-for="issue in row.issueDetails" :key="issue.key" :type="issue.severity==='critical'?'danger':issue.severity==='high'?'warning':'info'" effect="light" round>{{ issue.label }}</el-tag></div></template></el-table-column>
@@ -35,7 +35,7 @@
         <el-table-column label="最近盘点" width="125"><template #default="{row}">{{ row.lastInventoryDate || '从未盘点' }}</template></el-table-column>
         <el-table-column label="操作" width="90" align="right"><template #default="{row}"><el-button v-write="canEditWorkshop(row.workshopCode)" v-if="$showControl(canEditWorkshop(row.workshopCode))" link type="primary" @click="openFix(row)">修复</el-button><span v-else class="quality-note">只读</span></template></el-table-column>
       </el-table>
-      <div class="pagination-bar"><span>第 {{ query.page }} 页，每页 {{ query.pageSize }} 条</span><el-pagination v-model:current-page="query.page" v-model:page-size="query.pageSize" :total="total" :page-sizes="[20,50,100]" layout="sizes, prev, pager, next" @current-change="load" @size-change="search" /></div>
+      <div class="pagination-bar"><el-pagination v-model:current-page="query.page" v-model:page-size="query.pageSize" :total="total" :page-sizes="[20,50,100]" layout="sizes, prev, pager, next" @current-change="load" @size-change="search" /></div>
     </section>
 
     <el-dialog v-model="fixVisible" title="修复备件配置" width="min(720px, 94vw)" destroy-on-close>

@@ -1,0 +1,15 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import vm from 'node:vm'
+import {canReadFeature} from '../src/utils/feature-access.mjs'
+const result=value=>({data:{items:[{id:value}],total:45,summary:{requests:45,modelCalls:30,success:20,failed:5,blocked:10,totalTokens:450,unknownTokenCalls:2}}})
+function view(api){const source=fs.readFileSync(new URL('../src/views/AiCallLogs.vue',import.meta.url),'utf8').match(/<script setup>([\s\S]*?)<\/script>/)[1].replace(/^import .+$/gm,'');const context=vm.createContext({ref:value=>({value}),onMounted(){},getAiCallLogs:api});vm.runInContext(source+'\nthis.subject={filters,page,total,items,summary,loading,error,search,load,changePage};',context);return context.subject}
+test('AI call history is accessible only to system administrators',()=>{assert.equal(canReadFeature({role:'admin'},'/ai-call-logs'),true);for(const role of ['raw_grain','qu_making','brewing','viewer'])assert.equal(canReadFeature({role},'/ai-call-logs'),false);assert.equal(canReadFeature(null,'/ai-call-logs'),false)})
+test('call log pagination keeps the last applied filters rather than unsent text edits',async()=>{const calls=[],s=view(async query=>{calls.push(JSON.parse(JSON.stringify(query)));return result('row')});s.filters.value.client='miniprogram';s.filters.value.feature='robot_question';await s.search();s.filters.value.feature='knowledge_chat';await s.changePage(1);assert.equal(calls[1].client,'miniprogram');assert.equal(calls[1].feature,'robot_question');assert.equal(calls[1].actor,undefined);assert.equal(calls[1].page,2);assert.equal(s.total.value,45);assert.equal(s.summary.value.modelCalls,30)})
+test('late log responses cannot replace the latest filter results or clear its loading state',async()=>{const waiting=[];const s=view(()=>new Promise(r=>waiting.push(r)));const first=s.search();s.filters.value.client='web';const second=s.search();waiting[0](result('stale'));await first;assert.equal(s.loading.value,true);waiting[1](result('latest'));await second;assert.equal(s.items.value[0].id,'latest');assert.equal(s.loading.value,false)})
+test('mini chat and raw-summary requests identify their source while retaining authorization',async()=>{
+ for(const [relative,raw]of [['../../miniprogram/services/api.js',false],['../../miniprogram/packages/work/services/raw-duties.js',true]]){
+  const calls=[],auth={getToken:()=> 'local-test-token',getUser:()=>({role:'raw_grain'}),isViewer:()=>false,isRawEmployee:()=>false,goLogin:()=>assert.fail('must retain auth')},context={module:{exports:{}},require:key=>key.includes('auth')?auth:{apiBaseUrl:'https://fixture.invalid/api'},wx:{request:options=>{calls.push(options);options.success({statusCode:200,data:{success:true,data:{}}})}}};vm.runInNewContext(fs.readFileSync(new URL(relative,import.meta.url),'utf8'),context);if(raw)await context.module.exports.request('/reports/1/summary','POST',{revision:1});else await context.module.exports.chat([{role:'user',content:'设备维修'}]);assert.equal(calls[0].header['X-Client-Platform'],'miniprogram');assert.equal(calls[0].header.Authorization,'Bearer local-test-token');
+ }
+})

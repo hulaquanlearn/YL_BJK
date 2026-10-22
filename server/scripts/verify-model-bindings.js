@@ -49,7 +49,7 @@ async function main(){
     assert.equal((await request('/parts/batch-model',{partIds:[part.id],modelId:3},'raw_grain')).status,403);
     assert.equal((await request('/parts/batch-model',{partIds:[part.id],modelId:3},'admin')).status,200);
     assert.equal((await request('/parts/batch-model',{partIds:[part.id],modelId:null},'admin')).status,200);
-    assert.equal((await request('/parts/batch-category-model',{partIds:[part.id],categoryModelId:27})).status,410);
+    assert.equal((await request('/parts/batch-category-model',{partIds:[part.id],categoryModelId:27})).status,404);
     const makeModel=(name)=>{const form=new FormData();form.append('name',name);return form};
     let response=await request('/part-models',makeModel('测试车间模型'),'raw_grain');assert.equal(response.status,201);const own=(await response.json()).data;assert.equal(Number(own.id),194);
     assert.equal((await request(`/part-models/${own.id}`,makeModel('跨车间改名'),'qu_making','PUT')).status,403);

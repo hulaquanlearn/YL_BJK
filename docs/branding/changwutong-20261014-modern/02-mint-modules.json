@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-14",
+  "applicationName": "厂务通",
+  "variant": "B - Mint modules",
+  "tool": "image_gen.imagegen (built-in)",
+  "mode": "generate",
+  "prompt": "Use case: logo-brand\nAsset type: final square opaque Android app icon, flat vector-style artwork, not a presentation mockup.\nPrimary request: a fresh, stylish young-user identity for a Chinese factory operations app called 厂务通. The icon must be abstract, memorable and polished like a contemporary premium productivity app.\nScene/backdrop: one completely solid full-bleed very dark forest green square background (#073A32), no outer border, no pre-rounded square mask.\nSubject: a single distinctive compact emblem formed by four chunky rounded geometric modules that interlock visually into a balanced four-leaf or rotating cooperation motif. Wide confident rounded ends and clever open negative spaces. Use vivid pale mint green (#79F5C7) for most modules with one near-white ivory module as a tasteful accent. Let the emblem have an open uncluttered overall silhouette, softly dynamic but mathematically tidy. All shapes are coplanar and completely flat.\nComposition/framing: centered symbol occupying approximately 62% of canvas width and height; generous uniform safety margin; exactly one finished icon filling the image, no collage, no panels, no device mockup.\nStyle/medium: expertly crafted minimalist vector logo, smooth precise edges, thick solid fills, simple enough to remain instantly clear at 48px. Youthful, confident, clean and friendly. 1024x1024 square PNG, keep file under 2MB.\nConstraints: no text of any kind, no Chinese letters, no letters, no digits; no factory building, chimney, gear, box, check mark, person, thin outlines, 3D, shadows, gradients, glow, texture, noise, watermark, extra decorative dots. Do not imitate an existing brand's mark. Keep the full dark green background completely opaque.",
+  "transparentBackground": false,
+  "width": 1254,
+  "height": 1254,
+  "bytes": 1221477,
+  "pngColorType": 2,
+  "opaque": true,
+  "source": "C:/Users/Lenovo/.codex/generated_images/01a137f6-750d-7d21-bf9d-456ae97fd6f4/exec-538c39c6-65f0-4b4b-81d1-ae45f9559c4d.png",
+  "output": "D:/wx_xiangm/xiangmu/docs/branding/changwutong-20261014-modern/02-mint-modules.png",
+  "inspection": "Single centered abstract four-module rotating emblem: three mint green rounded organic blocks and one near-white block on dark forest green full-square background. No text, factory, gears, boxes or check marks. Clean broad negative-space gap through center. Color type 2 means RGB with no alpha; under 2,000,000 bytes."
+}

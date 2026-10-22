@@ -697,8 +697,9 @@ router.delete('/knowledge/:id', asyncHandler(async (req, res) => {
   let storedFilenames = [];
   try {
     await connection.beginTransaction();
-    const [[item]] = await connection.query('SELECT stored_filename AS storedFilename, uploaded_by AS uploadedBy FROM fermentation_knowledge_entries WHERE id=? FOR UPDATE', [id]);
+    const [[item]] = await connection.query('SELECT stored_filename AS storedFilename, uploaded_by AS uploadedBy,revision_no AS revision FROM fermentation_knowledge_entries WHERE id=? FOR UPDATE', [id]);
     if (!item) throw new ApiError(404, '知识条目不存在');
+    if (req.body?.revision!==undefined && Number(req.body.revision)!==Number(item.revision)) throw new ApiError(409, '知识已更新，请刷新数据管理后核对删除');
     if (req.user.role !== 'admin' && Number(item.uploadedBy) !== Number(req.user.id)) {
       throw new ApiError(403, '只能删除自己创建或上传的知识');
     }

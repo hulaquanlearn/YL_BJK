@@ -83,7 +83,7 @@ button, input, textarea, select { font: inherit; }
 .table-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 20px; border-bottom: 1px solid var(--line); }
 .table-toolbar strong { font-size: 15px; }
 .result-count { margin-left: 8px; color: var(--muted); font-size: 12px; font-weight: 400; }
-.pagination-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.pagination-bar { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 16px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 .material-cell strong, .material-cell span { display: block; }
 .material-cell strong { color: var(--ink); font-size: 13px; }
 .material-cell span { margin-top: 3px; color: var(--muted); font-size: 11px; }

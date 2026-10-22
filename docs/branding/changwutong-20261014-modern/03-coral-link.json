@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-14",
+  "tool": "image_gen.imagegen (built-in)",
+  "use_case": "logo-brand",
+  "direction": "C — 珊瑚橙协作纽带",
+  "name": "厂务通",
+  "prompt": "Use case: logo-brand\nAsset type: a final square Android app icon PNG for a Chinese workplace collaboration app named 厂务通, audience young working adults. Generate a single complete icon, not a presentation.\nPrimary request: highly polished, youthful contemporary app identity. A bold warm coral orange full-bleed solid square background. In its center, one distinctive chunky soft-white abstract interlocking link symbol: two generous rounded ribbon loops weave once through each other, making a compact fresh collaborative knot, with two beautiful simple curved negative spaces. Very soft super-rounded geometry, balanced and recognizable at 48 pixels. One small muted warm peach surface at the interlock is allowed, to clarify overlap, but predominantly warm white.\nStyle: excellent minimalist flat vector logo feel, friendly lifestyle app sophistication, perfectly smooth contour edges, deliberate optical balance. Shape should feel like an original emblem, not a generic metal chain clipart.\nComposition: square canvas filled entirely by coral orange, no pre-rounded canvas corners, central emblem fills about 62 percent of both dimensions. Opaque output, no transparency. No text anywhere, no title, no brand word, no watermark. No border, no surrounding margin of another color. No mockup, no app screen, no collage, no grid.\nAvoid: factories, chimneys, gear wheels, boxes, checkmarks, people, letters, line art, thin strokes, metallic materials, complicated 3D, shadows, texture, grain, speckles, bevels, glossy effects, cartoon faces. Keep a single immediately legible emblem.",
+  "width": 1254,
+  "height": 1254,
+  "bytes": 1192173,
+  "mime_type": "image/png",
+  "opaque": true,
+  "png_color_type": 2,
+  "sha256": "60E0AB6EF245DED52F553AC95A6A60633AC6B0E5CF4EEDB3AEC64C362901E907",
+  "source": "C:/Users/Lenovo/.codex/generated_images/01a137f6-9f3f-7e20-926f-b179beb53401/exec-b723535f-0b63-4162-8fba-c7acdcfb5273.png",
+  "output": "D:/wx_xiangm/xiangmu/docs/branding/changwutong-20261014-modern/03-coral-link.png",
+  "inspection": "珊瑚橙满底，中央近白色两条圆润环状纽带相互穿插，内侧有暖桃色层次。无文字、工厂、齿轮、箱子或勾。"
+}

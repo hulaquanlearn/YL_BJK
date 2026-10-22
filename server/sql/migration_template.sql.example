@@ -1,0 +1,8 @@
+-- MySQL 8.0+ new-table template. Rename the table and columns before use.
+-- Incremental deployments must run only the migration explicitly required.
+CREATE TABLE IF NOT EXISTS example_entity (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  title VARCHAR(180) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

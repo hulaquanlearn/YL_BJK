@@ -93,6 +93,20 @@ function parseAttendance(rows) {
   events.sort((a,b)=>a.at-b.at);
   return {events,warnings,duplicates};
 }
+// GPS is attendance evidence without a direction. It never supplies a gate return.
+// An observed exit separates arrival from later visits, even if entry was manual.
+function analyzeArrival(events,shift) {
+  const windowSeconds=1800;
+  const scoped=events.filter(e=>e.at>(shift.prevEnd??-Infinity)&&e.at<shift.end&&e.at<(shift.nextStart??Infinity));
+  const firstOut=scoped.find(e=>e.type==='out');
+  const beforeExit=scoped.filter(e=>!firstOut||e.at<firstOut.at);
+  const mobile=beforeExit.find(e=>e.type==='gps'),entry=beforeExit.find(e=>e.type==='in');
+  const gapSeconds=mobile&&entry?Math.abs(entry.at-mobile.at)/1000:null;
+  const paired=gapSeconds!==null&&gapSeconds<=windowSeconds;
+  const basis=paired?entry:mobile&&(!entry||mobile.at<entry.at)?mobile:entry;
+  const lateSeconds=basis?Math.max(0,(basis.at-shift.start)/1000):null;
+  return {status:basis?lateSeconds?'late':'on_time':'unknown',basis:paired?'paired_gate':basis?.type==='gps'?'gps':basis?'gate':null,time:basis?stamp(basis.at):null,mobileTime:mobile?stamp(mobile.at):null,gateTime:entry?stamp(entry.at):null,gapSeconds,paired,pairWindowSeconds:windowSeconds,lateSeconds,sourceRows:basis?[...new Set((paired?[mobile,entry]:[basis]).flatMap(e=>e.sourceRows))]:[]};
+}
 function analyzeAttendance(scheduleRows,attendanceRows,options={}) {
   const schedule=parseSchedule(scheduleRows,options.month),att=parseAttendance(attendanceRows);
   const hours=Number(options.observationHours??2);
@@ -123,21 +137,21 @@ function analyzeAttendance(scheduleRows,attendanceRows,options={}) {
     const nextEntry=ev.find(e=>e.type==='in'&&e.at>=s.end&&s.nextStart&&e.at>=s.nextStart-2*HOUR);
     const attributionEnd=nextEntry?Math.min(hi,nextEntry.at):hi;
     const belongs=e=>e.at<=hi&&e.at< (s.nextStart??Infinity)&&(!nextEntry||e.at<nextEntry.at);
-    // Repeated same-gate scans may be a failed opening followed by another scan.
+    // Repeated same-direction scans may be a failed opening followed by another scan.
     // Anchor to the FIRST scan, preserve raw events and never bridge a shift/window boundary.
     const gateGroups=[];
     const band=e=>e.at<=(s.prevEnd??-Infinity)?'previous':e.at<s.start?'pre':e.at<s.end?'shift':belongs(e)?'normal':'context';
     for(const e of ev.filter(e=>e.type!=='gps')){
       const group=gateGroups.at(-1),previous=group?.events.at(-1);
-      if(group&&e.gate&&e.gate===previous.gate&&e.device===previous.device&&e.type===previous.type&&e.at-group.events[0].at<=180000&&band(e)===band(previous))group.events.push(e);
+      if(group&&e.device===previous.device&&e.type===previous.type&&e.at-group.events[0].at<=120000&&band(e)===band(previous))group.events.push(e);
       else gateGroups.push({events:[e]});
     }
     const groupedGates=gateGroups.map(g=>({...g.events.at(-1),sourceRows:[...new Set(g.events.flatMap(e=>e.sourceRows))]}));
-    const retryGroups=gateGroups.filter(g=>g.events.length>1).map(g=>({type:g.events[0].type,gate:g.events[0].gate,from:stamp(g.events[0].at),to:stamp(g.events.at(-1).at),scanCount:g.events.length,sourceRows:[...new Set(g.events.flatMap(e=>e.sourceRows))]}));
+    const retryGroups=gateGroups.filter(g=>g.events.length>1).map(g=>({type:g.events[0].type,gate:[...new Set(g.events.map(e=>e.gate).filter(Boolean))].join('；'),from:stamp(g.events[0].at),to:stamp(g.events.at(-1).at),scanCount:g.events.length,sourceRows:[...new Set(g.events.flatMap(e=>e.sourceRows))]}));
     const retryScanCount=retryGroups.reduce((n,g)=>n+g.scanCount-1,0);
     const retriesByRow=new Map();
     retryGroups.forEach((g,i)=>g.sourceRows.forEach(row=>retriesByRow.set(row,{retryGroupId:`${s.key}|${i}`,retryGroupSize:g.scanCount})));
-    if(retryScanCount)finding('retry_scans',`同一通道同方向3分钟内有 ${retryScanCount} 条重复刷脸，可能为开闸重试；按一次进出核查，保留全部原始记录`);
+    if(retryScanCount)finding('retry_scans',`连续同方向2分钟内有 ${retryScanCount} 条重复刷脸，不限通道；按一次进出核查，保留全部原始记录`);
     // Earlier gate visits are context. Seed the sequence with the last observed pre-shift
     // direction, so an arrival more than two hours early is still visible and usable.
     const preGate=groupedGates.filter(e=>e.at<s.start&&e.at>(s.prevEnd??-Infinity)).at(-1);
@@ -186,10 +200,15 @@ function analyzeAttendance(scheduleRows,attendanceRows,options={}) {
     const subsequent=ev.filter(contextOnly);
     const later=subsequent.find(e=>e.type==='out');
     const entered=gates.find(e=>e.type==='in'&&e.at<s.end);
+    const arrival=analyzeArrival(ev,s);
+    const elapsed=seconds=>`${Math.floor(seconds/60)}分${String(seconds%60).padStart(2,'0')}秒`;
+    if(arrival.paired)finding('arrival_pair',`上班手机打卡 ${arrival.mobileTime} 与闸机进门 ${arrival.gateTime} 相隔 ${elapsed(arrival.gapSeconds)}，在30分钟内，按闸机进门时间核查上班`);
+    else if(arrival.gapSeconds!==null)finding('arrival_unpaired',`上班手机打卡与闸机进门相隔 ${elapsed(arrival.gapSeconds)}，超过30分钟，不合并为同一次到岗；较晚记录可能为班中返回或补打卡`);
+    if(arrival.status==='late')finding('late_arrival',`迟到 ${elapsed(arrival.lateSeconds)}；应上班 ${stamp(s.start)}，上班核查时间 ${arrival.time}，依据${arrival.basis==='gps'?'手机打卡':arrival.basis==='paired_gate'?'半小时内手机与闸机配对后的闸机进门':'闸机进门'}记录`);
     const gpsAfterExit=early?ev.find(e=>e.type==='gps'&&e.at>early.at&&e.at<=hi):null;
     const coverageLeft=first>s.start,coverageRight=last<hi;
     const complete=!coverageLeft&&!coverageRight,matchedPerson=byId.has(s.id);
-    if(outings.length)finding('outings',`班内有 ${outings.length} 次出门，${returnedOutings} 次观察到返回；明细不等同于提前下班`);
+    if(outings.length)finding('outings',`班内有 ${outings.length} 次闸机出门，${returnedOutings} 次记录到闸机返回；其他通道可能无记录，明细不等同于提前下班`);
     if(gps.length)finding('gps',`正常下班时段有 ${gps.length} 条手机GPS，不能确认离场方式或手机操作者`);
     if(supplementalGps.length)finding('supplemental_gps',`补充观察时段有 ${supplementalGps.length} 条GPS，不改变所选正常打卡时限`);
     if(nextEntry)finding('next_shift_entry',`发现临近下一班的进门 ${stamp(nextEntry.at)}，之后的出门不补算本班离场`);
@@ -199,7 +218,7 @@ function analyzeAttendance(scheduleRows,attendanceRows,options={}) {
     if(coverageRight)finding('coverage_right','文件末尾未覆盖正常下班窗口，不能完成缺记录核查');
     if(sequenceIssues.length)finding('sequence','进出顺序存在缺口或冲突，不能据此确认最终离场');
     if(!normal&&!early&&gps.length)finding('missing_gate_exit','有下班时段GPS，未见可关联的闸机下班出门；可结合人工通道及审批核查');
-    if(early)finding('early_exit',`下班前最后一次未见返回的出门为 ${stamp(early.at)}，仅为提前出门线索`);
+    if(early)finding('early_exit',`下班前最后一次未见后续闸机进门的出门为 ${stamp(early.at)}，距应下班 ${elapsed((s.end-early.at)/1000)}；不是实际离岗时长，GPS不能证明返回或离场，仅为提前出门线索`);
     let status;
     if(!matchedPerson)status='unmatched';
     else if(sequenceIssues.length)status='sequence_review';
@@ -211,7 +230,7 @@ function analyzeAttendance(scheduleRows,attendanceRows,options={}) {
     else status='missing_no_gps';
     const finalExit=sequenceIssues.length?null:normal||early;
     const timeline=[...ev.map(e=>({...serialEvent(e),contextOnly:contextOnly(e),scopeReason:contextOnly(e)?scopeReason(e):null,retryScan:retriesByRow.has(e.sourceRow),...retriesByRow.get(e.sourceRow)})),{time:stamp(s.start),type:'start'},{time:stamp(s.end),type:'end'},{time:stamp(hi),type:'window_end'}].sort((a,b)=>a.time.localeCompare(b.time));
-    return {key:s.key,id:s.id,name:s.name,date:s.date,shift:s.label,department:all[0]?.department||'',start:stamp(s.start),end:stamp(s.end),status,complete,matched:matchedPerson,normalExit:normal?stamp(normal.at):null,finalExit:finalExit?stamp(finalExit.at):null,normalExitEnd:stamp(hi),normalExitHours:normalHours,nextStart:s.nextStart?stamp(s.nextStart):null,attributionEnd:stamp(attributionEnd),contextStart:stamp(lo),contextEnd:stamp(contextEnd),flags,findings,sequenceIssues,retryGroups,retryScanCount,outingCount:outings.length,outingEvents:outings.map(serialEvent),returnedOutings,earlyCount:early?1:0,earlyEvents:early?[serialEvent(early)]:[],earlyExit:early?stamp(early.at):null,advanceSeconds:early?(s.end-early.at)/1000:null,returnedAt:returned?stamp(returned.at):null,enteredAt:entered?stamp(entered.at):null,afterExit:normal?stamp(normal.at):null,lateExit:later?stamp(later.at):null,gpsTimes:gps.map(e=>stamp(e.at)),supplementalGpsTimes:supplementalGps.map(e=>stamp(e.at)),gpsAfterExit:gpsAfterExit?stamp(gpsAfterExit.at):null,observationEnd:stamp(observationEnd),extendedEnd:stamp(contextEnd),extendedComplete:last>=contextEnd,subsequentEvents:subsequent.map(serialEvent),timeline,scheduleRow:s.scheduleRow,scheduleColumn:s.scheduleColumn};
+    return {key:s.key,id:s.id,name:s.name,date:s.date,shift:s.label,arrival,department:all[0]?.department||'',start:stamp(s.start),end:stamp(s.end),status,complete,matched:matchedPerson,normalExit:normal?stamp(normal.at):null,finalExit:finalExit?stamp(finalExit.at):null,normalExitEnd:stamp(hi),normalExitHours:normalHours,nextStart:s.nextStart?stamp(s.nextStart):null,attributionEnd:stamp(attributionEnd),contextStart:stamp(lo),contextEnd:stamp(contextEnd),flags,findings,sequenceIssues,retryGroups,retryScanCount,outingCount:outings.length,outingEvents:outings.map(serialEvent),returnedOutings,earlyCount:early?1:0,earlyEvents:early?[serialEvent(early)]:[],earlyExit:early?stamp(early.at):null,advanceSeconds:early?(s.end-early.at)/1000:null,returnedAt:returned?stamp(returned.at):null,enteredAt:entered?stamp(entered.at):null,afterExit:normal?stamp(normal.at):null,lateExit:later?stamp(later.at):null,gpsTimes:gps.map(e=>stamp(e.at)),supplementalGpsTimes:supplementalGps.map(e=>stamp(e.at)),gpsAfterExit:gpsAfterExit?stamp(gpsAfterExit.at):null,observationEnd:stamp(observationEnd),extendedEnd:stamp(contextEnd),extendedComplete:last>=contextEnd,subsequentEvents:subsequent.map(serialEvent),timeline,scheduleRow:s.scheduleRow,scheduleColumn:s.scheduleColumn};
   });
   const priority={early:0,missing_exit:1,sequence_review:2,missing_no_gps:3,partial:4,unmatched:5,no_records:6,normal:7};
   results.sort((a,b)=>priority[a.status]-priority[b.status]||(b.advanceSeconds||0)-(a.advanceSeconds||0)||a.date.localeCompare(b.date));
@@ -219,6 +238,6 @@ function analyzeAttendance(scheduleRows,attendanceRows,options={}) {
   if(partial)warnings.push({source:'数据覆盖',message:`文件记录范围 ${stamp(first)} 至 ${stamp(last)}，${partial} 个排班未覆盖班次开始至正常下班窗口，已单独标记；时间范围不能保证各人员或设备记录完整`});
   if(first>dayNumber(schedule.month+'-01'))warnings.push({source:'数据覆盖',message:'月初夜班的提前进门记录可能位于上月，当前文件不能确认这部分进门记录'});
   const counts=Object.fromEntries(Object.keys(priority).map(k=>[k,results.filter(r=>r.status===k).length]));
-  return {version:2,ruleRevision:4,month:schedule.month,people:schedule.people,shiftOptions:[...new Set(schedule.shifts.map(s=>s.label))],options:{observationHours:hours,normalExitHours:normalHours,retryWindowSeconds:180},coverage:{from:stamp(first),to:stamp(last)},summary:{people:schedule.people.length,matchedPeople:matched.length,attendancePeople:byId.size,eventCount:att.events.length,duplicateCount:att.duplicates,shiftCount:results.length,earlyEvents:results.reduce((n,r)=>n+r.earlyCount,0),outingEvents:results.reduce((n,r)=>n+r.outingCount,0),counts},warnings,results};
+  return {version:2,ruleRevision:7,month:schedule.month,people:schedule.people,shiftOptions:[...new Set(schedule.shifts.map(s=>s.label))],options:{observationHours:hours,normalExitHours:normalHours,retryWindowSeconds:120,arrivalPairWindowSeconds:1800},coverage:{from:stamp(first),to:stamp(last)},summary:{people:schedule.people.length,matchedPeople:matched.length,attendancePeople:byId.size,eventCount:att.events.length,duplicateCount:att.duplicates,shiftCount:results.length,lateArrivals:results.filter(r=>r.arrival.status==='late').length,earlyEvents:results.reduce((n,r)=>n+r.earlyCount,0),outingEvents:results.reduce((n,r)=>n+r.outingCount,0),counts},warnings,results};
 }
 module.exports={analyzeAttendance,parseSchedule,parseAttendance,dayNumber,timeNumber,stamp,monthValue};

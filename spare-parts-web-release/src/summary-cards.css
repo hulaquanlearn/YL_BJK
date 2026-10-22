@@ -1,0 +1,40 @@
+/* Shared summary cards for inventory, replenishment and counting. */
+#app :is([data-page="/inventory"] .overview-card,[data-page="/replenishment"] .replenishment-metrics article,[data-page="/check"] .check-metric-button){
+  --summary-accent:#bd182a;--summary-soft:#fff2f3;
+  display:flex;flex-direction:column;position:relative;min-width:0;min-height:158px;
+  padding:18px 20px;border:1px solid #e1e6ec;border-top:4px solid var(--summary-accent);
+  border-radius:14px;background:#fff;color:#193248;text-align:left;font:inherit;
+  box-shadow:0 6px 20px #1d293906;transition:border-color .16s,box-shadow .16s;
+}
+#app [data-page="/inventory"] .overview-card.overview-value-card,#app [data-page="/replenishment"] .replenishment-metrics article.is-money,#app [data-page="/check"] .check-metric-button.is-success{--summary-accent:#087f7b;--summary-soft:#edf9f7}
+#app [data-page="/inventory"] .overview-card.overview-alert,#app [data-page="/check"] .check-metric-button.is-alert{--summary-accent:#c7761f;--summary-soft:#fff5e8}
+#app [data-page="/inventory"] .overview-card.overview-quality,#app [data-page="/replenishment"] .replenishment-metrics article.is-config{--summary-accent:#64748b;--summary-soft:#f0f3f6}
+#app [data-page="/check"] .check-metric-button.is-pending{--summary-accent:#535aa2;--summary-soft:#f0f1fb}
+#app [data-page="/replenishment"] .replenishment-metrics article.is-critical{--summary-accent:#d92d3c;--summary-soft:#fff2f3}
+#app [data-page="/replenishment"] .replenishment-metrics article::before{display:none}
+#app :is([data-page="/inventory"] .overview-top,[data-page="/replenishment"] .metric-top,[data-page="/check"] .metric-top){display:flex;align-items:center;justify-content:space-between;gap:10px;color:#61758a;font-size:13px;font-weight:500}
+#app [data-page="/replenishment"] .metric-top>span:first-child{color:inherit;font-size:inherit;font-weight:inherit}
+#app :is([data-page="/inventory"] .overview-icon,[data-page="/replenishment"] .metric-icon,[data-page="/check"] .metric-icon){display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:9px;background:var(--summary-soft);color:var(--summary-accent);font-size:18px}
+#app :is([data-page="/inventory"] .overview-value,[data-page="/replenishment"] .metric-value,[data-page="/check"] .metric-value){display:block;margin:12px 0 16px;color:#193248;font-size:30px;font-weight:700;line-height:1.25;letter-spacing:-.5px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#app :is([data-page="/inventory"] .overview-note,[data-page="/replenishment"] .metric-note,[data-page="/check"] .metric-note){margin-top:auto;color:#7b8999;font-size:12px;font-weight:400;line-height:1.6}
+#app [data-page="/inventory"] .overview-alert .overview-value{color:#b8611c}
+#app :is([data-page="/inventory"] .overview-card,[data-page="/check"] .check-metric-button):hover{transform:none;border-color:#cbd5e1;border-top-color:var(--summary-accent);box-shadow:0 6px 20px #1d29390a}
+#app [data-page="/check"] .check-metric-button{transition:background-color .16s,box-shadow .16s,transform .12s}
+#app [data-page="/check"] .check-metric-button.selected{border-color:#e1e6ec;border-top-color:var(--summary-accent);background:var(--summary-soft);box-shadow:0 6px 20px #1d293906}
+#app [data-page="/check"] .check-metric-button.selected .metric-top>span:first-child{color:var(--summary-accent);font-weight:600}
+#app [data-page="/check"] .check-metric-button .metric-icon{position:relative}
+#app [data-page="/check"] .check-metric-button.selected .metric-icon::after{content:"✓";position:absolute;right:-4px;bottom:-4px;display:grid;place-items:center;width:15px;height:15px;border:2px solid var(--summary-soft);border-radius:50%;background:var(--summary-accent);color:#fff;font-size:10px;line-height:1;font-weight:700}
+#app [data-page="/check"] .check-metric-button:active{transform:translateY(1px)}
+@media(prefers-reduced-motion:reduce){#app [data-page="/check"] .check-metric-button{transition:none}#app [data-page="/check"] .check-metric-button:active{transform:none}}
+#app :is([data-page="/inventory"] .overview-card,[data-page="/check"] .check-metric-button):focus-visible{outline:2px solid var(--summary-accent);outline-offset:3px}
+#app [data-page="/inventory"] .inventory-stock-summary{border-left:4px solid #087f7b}
+@media(max-width:680px){
+  #app :is([data-page="/inventory"] .overview-card,[data-page="/replenishment"] .replenishment-metrics article,[data-page="/check"] .check-metric-button){min-height:148px;padding:14px;border-radius:12px}
+  #app :is([data-page="/inventory"] .overview-value,[data-page="/replenishment"] .metric-value,[data-page="/check"] .metric-value){font-size:26px}
+}
+
+@media(min-width:681px) and (max-width:1100px){#app :is([data-page="/inventory"] .inventory-metric-grid,[data-page="/replenishment"] .replenishment-metrics,[data-page="/check"] .metric-grid){grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Counting cards contain a label and value; avoid space reserved for removed notes. */
+#app [data-page="/check"] .check-metric-button{min-height:118px}
+#app [data-page="/check"] .check-metric-button .metric-value{margin-bottom:0}

@@ -1,0 +1,81 @@
+{
+  "applicationName": "厂务通",
+  "createdOn": "2026-10-14",
+  "generator": "built-in imagegen",
+  "recommendedVariant": "02-mint-modules",
+  "variants": [
+    {
+      "date": "2026-10-14",
+      "appName": "厂务通",
+      "candidate": "A",
+      "direction": "灵动蓝紫",
+      "tool": "built-in image_gen.imagegen",
+      "intent": "generate",
+      "transparent_background": false,
+      "prompt": "Use case: logo-brand\nAsset type: final square Android application icon, opaque PNG for a Chinese factory-work management app named 厂务通, without any written text.\nPrimary request: Create one entirely new, youthful and sophisticated app icon with outstanding small-size readability. A very simple, beautifully rounded continuous folded ribbon forms an open orbital loop with a distinctive generous negative-space center; imply connection and organized collaboration, almost a soft open C without being an actual letter. Make the silhouette original and confident, with an asymmetrical smooth opening toward the upper right. The ribbon consists of two broad interlocking curved surfaces and at most three large color areas, white to icy blue with a restrained violet accent at one fold. The form should feel playful yet precise and mature, like a beautifully designed native productivity app.\nScene/backdrop: perfectly flat, solid deep electric blue background, filling the entire square edge to edge. No rounded outer corners: Android will provide its own icon mask.\nStyle/medium: exceptionally clean vector-like graphic logo, no mockup, crisp antialiased edges, mostly flat design, only a subtle blue-violet color transition inside the central mark. A straight-on 2D graphic, not an object photographed or rendered.\nComposition/framing: square 1024x1024, one centered symbol occupying 60-65 percent of width and height, ample balanced safe margin, no border, no additional objects.\nText: none.\nConstraints: PNG, opaque background; simple flat solid background and limited detail so the file is preferably under 2MB. Exactly one icon only.\nAvoid: factory silhouette, chimney, gear, warehouse, box, checkmark, person, Chinese characters, letters, words, number, watermark, thin lines, circuit traces, metal, glass, complicated 3D, drop shadows, glowing speckles, decorative patterns, icon presentation boards, grids, UI screens, phones, gradients on background.",
+      "source": "C:/Users/Lenovo/.codex/generated_images/01a137f6-4f6e-73d2-9baf-ae703fb9bbe2/exec-71553609-4a07-40ce-a12f-f8958de353e4.png",
+      "path": "D:/wx_xiangm/xiangmu/docs/branding/changwutong-20261014-modern/01-blue-orbit.png",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1208523,
+      "pngColorType": 2,
+      "sha256": "7D722A276DEF74F57408E0E0D458E3FED02282CCDD53450749C4F67D9F35BC4F",
+      "description": "纯电蓝方形满底，中央冰蓝至白色宽带组成开放轨道环，右侧小段为淡紫色；圆润负空间，整张无文字、边框、实体物件、厂房或齿轮。"
+    },
+    {
+      "date": "2026-10-14",
+      "applicationName": "厂务通",
+      "variant": "B - Mint modules",
+      "tool": "image_gen.imagegen (built-in)",
+      "mode": "generate",
+      "prompt": "Use case: logo-brand\nAsset type: final square opaque Android app icon, flat vector-style artwork, not a presentation mockup.\nPrimary request: a fresh, stylish young-user identity for a Chinese factory operations app called 厂务通. The icon must be abstract, memorable and polished like a contemporary premium productivity app.\nScene/backdrop: one completely solid full-bleed very dark forest green square background (#073A32), no outer border, no pre-rounded square mask.\nSubject: a single distinctive compact emblem formed by four chunky rounded geometric modules that interlock visually into a balanced four-leaf or rotating cooperation motif. Wide confident rounded ends and clever open negative spaces. Use vivid pale mint green (#79F5C7) for most modules with one near-white ivory module as a tasteful accent. Let the emblem have an open uncluttered overall silhouette, softly dynamic but mathematically tidy. All shapes are coplanar and completely flat.\nComposition/framing: centered symbol occupying approximately 62% of canvas width and height; generous uniform safety margin; exactly one finished icon filling the image, no collage, no panels, no device mockup.\nStyle/medium: expertly crafted minimalist vector logo, smooth precise edges, thick solid fills, simple enough to remain instantly clear at 48px. Youthful, confident, clean and friendly. 1024x1024 square PNG, keep file under 2MB.\nConstraints: no text of any kind, no Chinese letters, no letters, no digits; no factory building, chimney, gear, box, check mark, person, thin outlines, 3D, shadows, gradients, glow, texture, noise, watermark, extra decorative dots. Do not imitate an existing brand's mark. Keep the full dark green background completely opaque.",
+      "transparentBackground": false,
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1221477,
+      "pngColorType": 2,
+      "opaque": true,
+      "source": "C:/Users/Lenovo/.codex/generated_images/01a137f6-750d-7d21-bf9d-456ae97fd6f4/exec-538c39c6-65f0-4b4b-81d1-ae45f9559c4d.png",
+      "output": "D:/wx_xiangm/xiangmu/docs/branding/changwutong-20261014-modern/02-mint-modules.png",
+      "inspection": "Single centered abstract four-module rotating emblem: three mint green rounded organic blocks and one near-white block on dark forest green full-square background. No text, factory, gears, boxes or check marks. Clean broad negative-space gap through center. Color type 2 means RGB with no alpha; under 2,000,000 bytes."
+    },
+    {
+      "date": "2026-10-14",
+      "tool": "image_gen.imagegen (built-in)",
+      "use_case": "logo-brand",
+      "direction": "C — 珊瑚橙协作纽带",
+      "name": "厂务通",
+      "prompt": "Use case: logo-brand\nAsset type: a final square Android app icon PNG for a Chinese workplace collaboration app named 厂务通, audience young working adults. Generate a single complete icon, not a presentation.\nPrimary request: highly polished, youthful contemporary app identity. A bold warm coral orange full-bleed solid square background. In its center, one distinctive chunky soft-white abstract interlocking link symbol: two generous rounded ribbon loops weave once through each other, making a compact fresh collaborative knot, with two beautiful simple curved negative spaces. Very soft super-rounded geometry, balanced and recognizable at 48 pixels. One small muted warm peach surface at the interlock is allowed, to clarify overlap, but predominantly warm white.\nStyle: excellent minimalist flat vector logo feel, friendly lifestyle app sophistication, perfectly smooth contour edges, deliberate optical balance. Shape should feel like an original emblem, not a generic metal chain clipart.\nComposition: square canvas filled entirely by coral orange, no pre-rounded canvas corners, central emblem fills about 62 percent of both dimensions. Opaque output, no transparency. No text anywhere, no title, no brand word, no watermark. No border, no surrounding margin of another color. No mockup, no app screen, no collage, no grid.\nAvoid: factories, chimneys, gear wheels, boxes, checkmarks, people, letters, line art, thin strokes, metallic materials, complicated 3D, shadows, texture, grain, speckles, bevels, glossy effects, cartoon faces. Keep a single immediately legible emblem.",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 1192173,
+      "mime_type": "image/png",
+      "opaque": true,
+      "png_color_type": 2,
+      "sha256": "60E0AB6EF245DED52F553AC95A6A60633AC6B0E5CF4EEDB3AEC64C362901E907",
+      "source": "C:/Users/Lenovo/.codex/generated_images/01a137f6-9f3f-7e20-926f-b179beb53401/exec-b723535f-0b63-4162-8fba-c7acdcfb5273.png",
+      "output": "D:/wx_xiangm/xiangmu/docs/branding/changwutong-20261014-modern/03-coral-link.png",
+      "inspection": "珊瑚橙满底，中央近白色两条圆润环状纽带相互穿插，内侧有暖桃色层次。无文字、工厂、齿轮、箱子或勾。"
+    }
+  ],
+  "verification": [
+    {
+      "File": "01-blue-orbit.png",
+      "Width": 1254,
+      "Height": 1254,
+      "Bytes": 1208523
+    },
+    {
+      "File": "02-mint-modules.png",
+      "Width": 1254,
+      "Height": 1254,
+      "Bytes": 1221477
+    },
+    {
+      "File": "03-coral-link.png",
+      "Width": 1254,
+      "Height": 1254,
+      "Bytes": 1192173
+    }
+  ]
+}

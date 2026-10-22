@@ -25,7 +25,7 @@ async function submit() {
   if (!form.username.trim() || !form.password) return ElMessage.warning('请输入用户名和密码')
   loading.value = true
   try {
-    const result = await login({ username: form.username.trim().toLowerCase(), password: form.password })
+    const result = await login({ username: form.username.trim(), password: form.password })
     setSession(result.data.token, result.data.user)
     router.replace(typeof route.query.redirect === 'string' ? route.query.redirect : '/portal')
   } finally { loading.value = false }

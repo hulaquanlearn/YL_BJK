@@ -12,7 +12,7 @@ function functionSource(name, next) {
 }
 function layoutHarness(getWarehouseLayout, getStagingPoints = async () => ({ data: [] })) {
   const state = {
-    layoutRequestToken: 0, workshopCode: ref('raw_grain'), loading: ref(false), layout: ref(null),
+    layoutRequestToken: 0,partModelsRequestToken:0,partModelDrawToken:0,partsLoading:ref(false),modelsPreparing:ref(false),workshopCode: ref('raw_grain'), loading: ref(false), layout: ref(null),loadError:ref(''),loadProgress:ref({phase:'layout'}),
     workshopOptions: ref([]), shelves: ref([]), stagingPoints: ref([]), selectedShelf: ref(null),
     getWarehouseLayout, getStagingPoints, applyPhysicalShelfLayout: item => item, nextTick: async () => {},
     scene: {}, initScene() {}, drawRoom() {}, drawShelves() {}, partModelMode: ref('hidden'), loadPartModels() {}
@@ -116,13 +116,13 @@ test('cancelled part location cannot resume opening details after the shelf requ
 test('warehouse rejects repeated pagination instead of duplicating models as a complete list', async () => {
   let draws = 0, calls = 0
   const state = {
-    partModelsRequestToken: 0, partModelMode: ref('all'), workshopCode: ref('raw_grain'),
+    partModelsRequestToken: 0, partModelDrawToken:0,partsLoading:ref(false),modelsPreparing:ref(false),loadError:ref(''),loadProgress:ref({phase:'parts'}),partModelMode: ref('all'), workshopCode: ref('raw_grain'),
     allLocatedParts: ref([]), collectParts,
     getParts: async () => { calls++; return { total: 3, data: [{ _id: '1', locationCode: '011101' }] } },
     drawPartModels() { draws++ }
   }
   vm.createContext(state)
-  vm.runInContext(functionSource('loadPartModels', 'function modelCategory'), state)
+  vm.runInContext(functionSource('loadPartModels', 'function modelUrlFor'), state)
   await assert.rejects(state.loadPartModels(), /未完整加载/)
   assert.equal(calls, 2)
   assert.equal(draws, 0)

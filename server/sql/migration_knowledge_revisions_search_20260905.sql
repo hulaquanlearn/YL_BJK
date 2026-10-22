@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS knowledge_entry_revisions (
   KEY idx_knowledge_revision_time (entry_id, created_at),
   CONSTRAINT fk_knowledge_revision_entry FOREIGN KEY (entry_id)
     REFERENCES fermentation_knowledge_entries(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 旧附件在部署后显示为待建索，管理员/作者可在页面重试。
 UPDATE fermentation_knowledge_entries

@@ -47,6 +47,7 @@ function formatLocation(item) {
 
 Page({
   data: {
+    canUseKnowledgeAI: false,
     userQuestion: '',
     isLoading: false,
     messages: [],
@@ -68,6 +69,7 @@ Page({
 
   onLoad() {
     if (!auth.requireLogin()) return;
+    this.setData({canUseKnowledgeAI:auth.canEditAnyWorkshop()});
     this.loadInventoryContext();
   },
 
@@ -285,6 +287,7 @@ Page({
   },
 
   async queryMaintenance(question) {
+    if(!auth.canEditAnyWorkshop()){this.setMessageResult('权限不足','仅系统管理员和车间管理员可以使用设备故障问答。','权限提示');return;}
     const recentMessages = (this.data.messages || []).slice(-4);
     const newMessages = [...recentMessages, { role: 'user', content: question }];
     try {

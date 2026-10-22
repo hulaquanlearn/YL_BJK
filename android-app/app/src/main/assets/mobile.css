@@ -1,0 +1,29 @@
+/* Android-only adaptations. The hosted website and its authorization rules are unchanged. */
+@media (max-width: 700px) {
+  html { -webkit-text-size-adjust:100%; }
+  body { background:#f5f7fa!important; }
+  #app .page-title { display:none!important; }
+  #app .topbar { min-height:48px!important;padding:6px 14px!important; }
+  #app .business-nav { overflow-x:auto!important;flex-wrap:nowrap!important;padding:8px 12px!important; }
+  #app .business-nav a { flex-shrink:0!important; }
+  #app .section-nav { scrollbar-width:none; }
+  #app .page-content { padding:12px!important; }
+  #app .panel { border-radius:16px!important;box-shadow:none!important; }
+  #app .el-button { min-height:40px; }
+  #app .el-input__wrapper { min-height:38px; }
+  #app .el-dialog { width:calc(100% - 24px)!important;max-width:560px!important;margin:12px auto!important;border-radius:18px!important; }
+  #app .web-login { background:#f5f7fa!important;padding:24px!important; }
+  #app .login-panel { padding:28px 24px!important;border-radius:24px!important;box-shadow:0 12px 40px #19354f09!important; }
+  #app .login-brand { align-items:flex-start!important; }
+  #app .login-brand h1 { font-size:24px!important; }
+  #app .login-brand p { line-height:1.7!important; }
+  #app .login-panel .el-button { min-height:48px!important;border-radius:12px!important; }
+  #app .workbench .portal-header { padding:14px 18px!important; }
+  #app .workbench .module-grid { padding:12px 16px!important;margin:0 auto!important;gap:12px!important; }
+  #app .workbench .module-card { min-height:0!important;padding:18px!important;gap:10px!important;border-radius:20px!important;border-top-width:2px!important; }
+  #app .workbench .module-card>div:nth-child(2) { margin-top:0!important; }
+  #app .workbench .module-card h2 { font-size:20px!important; }
+  #app .workbench .module-card p { font-size:12px!important;line-height:1.6!important; }
+  #app .workbench .module-enter { margin-top:4px!important;padding:11px 14px!important; }
+  #app .workspace-links { margin-top:0!important; }
+}

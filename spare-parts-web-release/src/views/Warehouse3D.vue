@@ -1,6 +1,6 @@
 <template>
   <div class="warehouse-page">
-    <section class="control-panel panel">
+    <section class="control-panel panel" :class="{ 'mobile-filters-open': mobileFiltersOpen }">
       <div class="locator-field">
         <label>快速定位备件</label>
         <el-select
@@ -25,13 +25,14 @@
           </el-option>
         </el-select>
       </div>
-      <div class="workshop-field">
+      <button type="button" class="mobile-filter-toggle" :aria-expanded="mobileFiltersOpen" aria-controls="warehouse-workshop-filter warehouse-area-filter" @click="mobileFiltersOpen=!mobileFiltersOpen">{{ workshopOptions.find(item=>item.code===workshopCode)?.name || '所属车间' }} · {{ groupFilters.find(item=>item.key===activeGroup)?.label || '全部区域' }}<span>{{ mobileFiltersOpen ? '收起筛选' : '筛选' }}</span></button>
+      <div id="warehouse-workshop-filter" class="workshop-field">
         <label>所属车间</label>
         <el-select v-model="workshopCode" style="width:100%" @change="changeWorkshop">
           <el-option v-for="item in workshopOptions" :key="item.code" :label="item.name" :value="item.code" />
         </el-select>
       </div>
-      <div class="group-filter">
+      <div id="warehouse-area-filter" class="group-filter">
         <label>区域筛选</label>
         <div class="filter-chips">
           <button type="button" :class="{ active: activeGroup === '' }" @click="setGroup('')">全部</button>
@@ -77,12 +78,12 @@
           <div class="model-actions">
             <div class="view-mode-tools">
               <el-button-group aria-label="库房展示方式">
-                <el-button :type="displayMode === '3d' ? 'primary' : ''" :aria-pressed="displayMode === '3d'" @click="displayMode='3d'">3D立体</el-button>
-                <el-button :type="displayMode === '2d' ? 'primary' : ''" :aria-pressed="displayMode === '2d'" @click="displayMode='2d'">2D平面</el-button>
+                <el-button aria-label="3D立体" :type="displayMode === '3d' ? 'primary' : ''" :aria-pressed="displayMode === '3d'" @click="displayMode='3d'"><span class="mode-full-label">3D立体</span><span class="mode-short-label" aria-hidden="true">3D</span></el-button>
+                <el-button aria-label="2D平面" :type="displayMode === '2d' ? 'primary' : ''" :aria-pressed="displayMode === '2d'" @click="displayMode='2d'"><span class="mode-full-label">2D平面</span><span class="mode-short-label" aria-hidden="true">2D</span></el-button>
               </el-button-group>
 
             </div>
-            <el-dropdown v-if="displayMode==='3d'" trigger="click" @command="setPartModelMode">
+            <el-dropdown v-if="displayMode==='3d'" class="desktop-scene-control" trigger="click" @command="setPartModelMode">
               <el-button><el-icon><Box /></el-icon>{{ partModelModeLabel }}<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -93,22 +94,39 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <el-dropdown v-if="displayMode==='3d'" class="scene-view-menu" trigger="click" @command="setView"><el-button><el-icon><View /></el-icon>视角：{{viewMode==='perspective'?'立体':'俯视'}}<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item command="perspective">立体视角</el-dropdown-item><el-dropdown-item command="top">俯视视角</el-dropdown-item></el-dropdown-menu></template></el-dropdown>
-            <el-button v-if="displayMode==='3d'" class="touch-reset-button" @click="resetPerspectiveView">复位视角</el-button>
-            <el-button class="panel-toggle-button" :aria-pressed="!sidePanelCollapsed" :title="sidePanelCollapsed ? '显示货架' : '收起货架'" @click="toggleSidePanel">
+            <el-dropdown v-if="displayMode==='3d'" class="scene-view-menu desktop-scene-control" trigger="click" @command="setView"><el-button><el-icon><View /></el-icon>视角：{{viewMode==='perspective'?'立体':'俯视'}}<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item command="perspective">立体视角</el-dropdown-item><el-dropdown-item command="top">俯视视角</el-dropdown-item></el-dropdown-menu></template></el-dropdown>
+            <el-button v-if="displayMode==='3d'" class="touch-reset-button desktop-scene-control" @click="resetPerspectiveView">复位视角</el-button>
+            <el-button class="panel-toggle-button desktop-scene-control" :aria-pressed="!sidePanelCollapsed" :title="sidePanelCollapsed ? '显示货架' : '收起货架'" @click="toggleSidePanel">
               <el-icon><ArrowLeftBold v-if="sidePanelCollapsed" /><ArrowRightBold v-else /></el-icon>货架
             </el-button>
             <el-button class="fullscreen-button" :type="isFullscreen ? 'primary' : ''" @click="toggleFullscreen">
-              <el-icon><FullScreen /></el-icon>{{ isFullscreen ? '退出全屏' : '全屏查看' }}
+              <el-icon><FullScreen /></el-icon>{{ isFullscreen ? '退出全屏' : '全屏' }}
             </el-button>
+            <el-dropdown class="mobile-scene-menu" trigger="click" @command="mobileSceneCommand">
+              <el-button aria-label="更多库位操作">更多<el-icon><ArrowDown /></el-icon></el-button>
+              <template #dropdown><el-dropdown-menu>
+                <el-dropdown-item command="shelves">{{ sidePanelCollapsed ? '显示货架列表' : '收起货架列表' }}</el-dropdown-item>
+                <template v-if="displayMode==='3d'">
+                  <el-dropdown-item command="reset">复位视角</el-dropdown-item>
+                  <el-dropdown-item command="perspective">立体视角</el-dropdown-item>
+                  <el-dropdown-item command="top">俯视视角</el-dropdown-item>
+                  <el-dropdown-item command="models:hidden" divided>隐藏备件模型</el-dropdown-item>
+                  <el-dropdown-item command="models:all">展示全部备件</el-dropdown-item>
+                  <el-dropdown-item command="models:normal">仅展示正常库存</el-dropdown-item>
+                  <el-dropdown-item command="models:low">仅展示低库存</el-dropdown-item>
+                </template>
+              </el-dropdown-menu></template>
+            </el-dropdown>
           </div>
         </div>
-        <div v-show="displayMode==='3d'" ref="stage" class="three-stage" :class="{ 'is-loading': loading }">
-          <div v-if="loading" class="stage-loading"><el-icon class="is-loading"><Loading /></el-icon><span>正在构建库房模型</span></div>
+        <div v-show="displayMode==='3d'" ref="stage" class="three-stage" :class="{ 'is-loading': loading || partsLoading || modelsPreparing }">
+          <div v-if="(loading || partsLoading || modelsPreparing) && !loadError" class="stage-loading" role="status" aria-live="polite"><el-icon class="is-loading"><Loading /></el-icon><span>{{sceneLoadingText}}</span><small v-if="loadProgress.phase==='models' && loadProgress.total">{{loadProgress.done}} / {{loadProgress.total}} 个库位已准备<template v-if="loadProgress.failed"> · {{loadProgress.failed}} 个模型加载失败，保留占位标记</template></small></div>
+          <div v-if="loadError && !webglError" class="stage-error" role="alert"><el-icon><Warning /></el-icon><strong>库位加载未完成</strong><span>{{loadError}}</span><el-button @click="loadLayout">重新加载</el-button></div>
+          <div v-if="!loading && !partsLoading && !modelsPreparing && loadProgress.failed && !loadError" class="model-load-warning" role="status">{{loadProgress.failed}} 个模型加载失败，已保留库存占位标记 <el-button text @click="loadPartModels">重试模型</el-button></div>
           <div v-if="webglError" class="stage-error">
             <el-icon><Warning /></el-icon>
             <strong>当前浏览器未启用 3D 图形</strong>
-            <span>请在新版 Chrome 或 Edge 中打开；货架列表仍可正常使用。</span>
+            <span>可切换“2D平面”或使用货架列表查看库位；也可更新微信或浏览器后重试。</span>
           </div>
           <div class="stock-model-legend" aria-label="备件模型颜色说明"><span><i class="normal"></i>库存正常</span><span><i class="low"></i>需要补充</span></div>
         </div>
@@ -262,6 +280,7 @@
 
 <style scoped>
 .warehouse-page .plan-shelf.active{color:#583a00;background:#ffd65a;border-color:#bf8600;outline:4px solid #f7bd3c88;filter:none}.warehouse-page .shelf-list button.active{color:#694500;background:#fff2bc;box-shadow:inset 3px 0 #e9a700}.warehouse-page .selected-shelf-card{border-color:#e8c161;background:#fffae7}
+.stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
 </style>
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
@@ -300,6 +319,9 @@ const route = useRoute()
 const router = useRouter()
 const fullscreenArea = ref(null)
 const loading = ref(true)
+const modelsPreparing = ref(false)
+const partsLoading=ref(false),loadError=ref(''),loadProgress=ref({phase:'layout',loaded:0,total:null,done:0,failed:0})
+const sceneLoadingText=computed(()=>loadProgress.value.phase==='layout'?'正在读取库位布局':loadProgress.value.phase==='staging'?'正在读取暂存点':loadProgress.value.phase==='parts'?`正在读取备件 ${loadProgress.value.loaded}${loadProgress.value.total===null?'': ' / '+loadProgress.value.total} 条`:loadProgress.value.phase==='models'?'正在准备备件模型':'正在呈现场景')
 const layout = ref(null)
 const shelves = ref([])
 const workshopCode = ref(String(route.query.workshopCode || 'raw_grain'))
@@ -309,6 +331,13 @@ const workshopOptions = ref([
   { code: 'brewing', name: '酿酒车间' }
 ])
 const activeGroup = ref('')
+const mobileFiltersOpen = ref(false)
+function mobileSceneCommand(command) {
+  if (command === 'shelves') toggleSidePanel()
+  else if (command === 'reset') resetPerspectiveView()
+  else if (command === 'perspective' || command === 'top') setView(command)
+  else if (command.startsWith('models:')) setPartModelMode(command.slice(7))
+}
 const selectedShelf = ref(null)
 const stockDetailVisible = ref(false), stockDetailLoading = ref(false), stockDetailError = ref(false), stockDetailCandidates = ref([])
 let stockDetailToken = 0
@@ -466,7 +495,7 @@ function eastVector(direction = currentRoom.value.eastDirection) {
   }[direction] || new THREE.Vector3(1, 0, 0)
 }
 
-function formatNumber(value) { return Number(value || 0).toLocaleString('zh-CN') }
+
 function padShelf(value) { return String(value ?? '').padStart(2, '0') }
 function padSlot(value) { return value == null || value === '' ? '—' : String(value).padStart(2, '0') }
 function shelfLabel(value) { return value == null || value === '' ? '未编号货架' : `${padShelf(value)}号货架` }
@@ -524,12 +553,15 @@ function shelfMatchesFilter(shelf, filter) {
 
 async function loadLayout() {
   const requestToken = ++layoutRequestToken
+  partModelsRequestToken++;partModelDrawToken++;partsLoading.value=false;modelsPreparing.value=false
   const requestedWorkshop = workshopCode.value
   const isCurrent = () => requestToken === layoutRequestToken && requestedWorkshop === workshopCode.value
   loading.value = true
+  loadError.value='';loadProgress.value={phase:'layout',loaded:0,total:null,done:0,failed:0}
   try {
     const result = await getWarehouseLayout({ workshopCode: requestedWorkshop })
     if (!isCurrent()) return
+    loadProgress.value.phase='staging'
     let points = []
     try {
       const spResult = await getStagingPoints({ workshopCode: requestedWorkshop })
@@ -546,6 +578,9 @@ async function loadLayout() {
     if (!scene) initScene()
     if (scene) { drawRoom(); drawShelves() }
     if (partModelMode.value !== 'hidden') await loadPartModels()
+  } catch(error){
+    if(isCurrent())loadError.value=error.response?.data?.msg||error.message||'无法读取库位，请检查网络后重试'
+    throw error
   } finally {
     if (isCurrent()) loading.value = false
   }
@@ -605,7 +640,10 @@ async function setPartModelMode(mode) {
   partModelMode.value = mode
   if (markerRoot) disposeChildren(markerRoot)
   if (mode === 'hidden') {
+    partsLoading.value=false;loadError.value=''
     allLocatedParts.value = []
+    partModelDrawToken++
+    modelsPreparing.value=false
     if (partModelsRoot) disposeChildren(partModelsRoot)
     return
   }
@@ -614,27 +652,23 @@ async function setPartModelMode(mode) {
 
 async function loadPartModels() {
   const requestToken = ++partModelsRequestToken
+  partModelDrawToken++
   const requestedMode = partModelMode.value
   const requestedWorkshop = workshopCode.value
+  const isCurrent=()=>requestToken===partModelsRequestToken&&requestedMode===partModelMode.value&&requestedWorkshop===workshopCode.value
+  partsLoading.value=true;modelsPreparing.value=false;loadError.value='';loadProgress.value={phase:'parts',loaded:0,total:null,done:0,failed:0}
+  try{
   const rows = await collectParts(getParts, {
     workshopCode: requestedWorkshop,
     sort: 'codeAsc',
     ...(requestedMode === 'low' ? { lowStock: 1 } : requestedMode === 'normal' ? { stockStatus: 'normal' } : {})
-  }, () => !(requestToken !== partModelsRequestToken || requestedMode !== partModelMode.value || requestedWorkshop !== workshopCode.value))
+  }, isCurrent, progress=>{if(isCurrent())loadProgress.value={...loadProgress.value,...progress}})
   if (!rows) return
   if (requestToken !== partModelsRequestToken || requestedMode === 'hidden') return
   allLocatedParts.value = rows.filter(part => /^\d{6}$/.test(String(part.locationCode || '')))
-  drawPartModels()
-}
-
-function modelCategory(part) {
-  const text = `${part.categoryName || ''} ${part.partType || ''} ${part.materialDesc || ''} ${part.spec || ''}`.toLowerCase()
-  const rules = [
-    ['轴承', /轴承|bearing/], ['断路器', /断路器|空开|breaker|mcb/], ['接触器继电器', /接触器|继电器|contactor|relay/],
-    ['电机减速机', /电机|马达|motor|减速机|gearbox/], ['阀门', /阀|valve/], ['传感器开关', /传感器|接近开关|光电开关|sensor|switch/],
-    ['泵', /泵|pump/], ['密封件', /密封|油封|o型圈|seal/], ['皮带链条', /皮带|链条|belt|chain/], ['紧固件', /螺栓|螺母|紧固|bolt|nut/]
-  ]
-  return rules.find(([,pattern]) => pattern.test(text))?.[0] || String(part.categoryName || part.partType || '通用备件').trim() || '通用备件'
+  await drawPartModels()
+  }catch(error){if(isCurrent())loadError.value=error.response?.data?.msg||error.message||'无法读取备件，请重试';throw error}
+  finally{if(isCurrent())partsLoading.value=false}
 }
 
 function modelUrlFor(part) {
@@ -649,11 +683,7 @@ function modelFrontRotationFor(part) {
   return Number(part.categoryFrontRotationY) || 0
 }
 
-function hasRenderedLocationModel(part) {
-  if (partModelMode.value === 'hidden') return false
-  const locationCode = String(resolvePartLocation(part).locationCode || '')
-  return Boolean(locationCode) && allLocatedParts.value.some(item => String(resolvePartLocation(item).locationCode || '') === locationCode)
-}
+
 
 const STOCK_MODEL_COLORS = {
   normal: { color: 0x19a974, emissive: 0x075b40 },
@@ -662,21 +692,6 @@ const STOCK_MODEL_COLORS = {
 
 function stockModelColors(lowStock) {
   return lowStock ? STOCK_MODEL_COLORS.low : STOCK_MODEL_COLORS.normal
-}
-
-function applyStockStatusMaterial(object, lowStock) {
-  const status = stockModelColors(lowStock)
-  object.traverse(node => {
-    if (!node.isMesh) return
-    const materials = Array.isArray(node.material) ? node.material : [node.material]
-    for (const material of materials) {
-      if (!material) continue
-      material.color?.setHex(status.color)
-      material.emissive?.setHex(status.emissive)
-      if ('emissiveIntensity' in material) material.emissiveIntensity = 0.34
-      material.needsUpdate = true
-    }
-  })
 }
 
 function partGeometry(part, width, height, depth) {
@@ -688,11 +703,14 @@ function loadCustomModel(url) {
   const absoluteUrl = new URL(url, window.location.origin).href
   if (!customModelCache.has(absoluteUrl)) {
     customModelCache.set(absoluteUrl, new Promise((resolve, reject) => {
+      let settled=false
+      const fail=error=>{if(settled)return;settled=true;clearTimeout(timer);customModelCache.delete(absoluteUrl);reject(error)}
+      const timer=setTimeout(()=>fail(new Error('模型加载超时')),15000)
       gltfLoader.load(absoluteUrl, gltf => {
-        try { const geometry=flattenStockModel(gltf.scene); resolve(geometry) }
-        catch(error){customModelCache.delete(absoluteUrl);reject(error)}
+        try { if(settled)return;const geometry=flattenStockModel(gltf.scene);settled=true;clearTimeout(timer);resolve(geometry) }
+        catch(error){fail(error)}
         finally { gltf.scene.traverse(node=>{node.geometry?.dispose?.();const materials=Array.isArray(node.material)?node.material:[node.material];materials.forEach(m=>{m?.map?.dispose?.();m?.dispose?.()})}) }
-      }, undefined, error => { customModelCache.delete(absoluteUrl); reject(error) })
+      }, undefined, fail)
     }))
   }
   return customModelCache.get(absoluteUrl)
@@ -728,18 +746,22 @@ async function replaceWithCustomModel(anchor, fallback, part, placement, shelf, 
     fallback.geometry?.dispose()
     fallback.material?.dispose()
     anchor.add(model)
+    return true
   } catch (error) {
     if (!isCurrent() || !anchor.parent) return
     console.warn(`3D模型加载失败，保留库存占位标记：${modelUrl}`, error)
+    return false
     // 自包含 GLB 加载失败时保留中性库存占位标记，避免货位空白。
   }
 }
 
-function drawPartModels() {
+async function drawPartModels() {
   if (!partModelsRoot) return
   const drawToken = ++partModelDrawToken
-  disposeChildren(partModelsRoot)
-  if (partModelMode.value === 'hidden') return
+  if (partModelMode.value === 'hidden') { disposeChildren(partModelsRoot); modelsPreparing.value=false; return }
+  const preparedRoot = new THREE.Group()
+  modelsPreparing.value=true
+  try {
   const groupedParts = new Map()
   for (const part of allLocatedParts.value) {
     const location = resolvePartLocation(part)
@@ -755,6 +777,7 @@ function drawPartModels() {
     } else groupedParts.set(groupKey, { shelf, location, representative: part, parts: [part] })
   }
   const pendingModels=[]
+  loadProgress.value={phase:'models',loaded:0,total:groupedParts.size,done:0,failed:0}
   for (const group of groupedParts.values()) {
     const { shelf, location } = group
     const part = group.parts.find(item => String(item._id) === String(selectedPart.value?._id)) || group.representative
@@ -778,8 +801,7 @@ function drawPartModels() {
       placement.shelfSurfaceY + height / 2,
       Math.min(Math.max(placement.z, -shelf.size.depth / 2 + depth / 2 + 0.08), shelf.size.depth / 2 - depth / 2 - 0.08)
     )
-    if (model.geometry.type === 'CylinderGeometry') model.rotation.z = Math.PI / 2
-    // Apply the same envelope to fallback geometry (including rotated cylinders).
+    // Fit the neutral fallback to the same slot envelope.
     const fallbackBox = new THREE.Box3().setFromObject(model)
     const fallbackScale = modelFitScale(fallbackBox.getSize(new THREE.Vector3()), { width, height, depth })
     model.scale.multiplyScalar(fallbackScale || 1)
@@ -792,10 +814,20 @@ function drawPartModels() {
     model.userData.stockParts=group.parts
     anchor.userData.stockParts=group.parts
     anchor.add(model)
-    partModelsRoot.add(anchor)
-    pendingModels.push(replaceWithCustomModel(anchor, model, part, placement, shelf, { width, height, depth }, low, drawToken))
+    preparedRoot.add(anchor)
+    pendingModels.push(replaceWithCustomModel(anchor, model, part, placement, shelf, { width, height, depth }, low, drawToken).then(result=>{if(drawToken===partModelDrawToken){loadProgress.value.done++;if(result===false)loadProgress.value.failed++}}))
   }
-  Promise.allSettled(pendingModels).then(()=>{if(drawToken===partModelDrawToken && partModelMode.value!=='hidden')instanceStockModels(partModelsRoot)})
+  await Promise.allSettled(pendingModels)
+  if(drawToken!==partModelDrawToken || partModelMode.value==='hidden')return
+  instanceStockModels(preparedRoot)
+  // Publish complete models together; never paint neutral boxes while GLBs fit.
+  disposeChildren(partModelsRoot)
+  while(preparedRoot.children.length)partModelsRoot.add(preparedRoot.children[0])
+  loadProgress.value.phase='render'
+  } finally {
+    disposeChildren(preparedRoot)
+    if(drawToken===partModelDrawToken)modelsPreparing.value=false
+  }
 }
 
 async function locatePart(part, requestToken = ++partLocationRequestToken) {
@@ -1669,7 +1701,8 @@ onBeforeUnmount(() => {
 .three-stage :deep(.part-location-card small) { margin-top:4px;color:#d9fff2;font-size:10px;font-weight:800; }
 .three-stage :deep(.east-label-3d) { min-width:34px;padding:5px 10px;border:2px solid #fff;border-radius:999px;color:#fff;background:#c91f2c;box-shadow:0 5px 14px rgba(143,23,32,.3);font-size:13px;font-weight:900;text-align:center; }
 .stock-model-legend{position:absolute;right:16px;bottom:14px;z-index:2;display:flex;gap:10px;padding:7px 10px;border:1px solid rgba(255,255,255,.7);border-radius:8px;color:#566174;background:rgba(255,255,255,.86);font-size:10px;pointer-events:none}.stock-model-legend span{display:flex;align-items:center;gap:4px}.stock-model-legend i{width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 2px #fff}.stock-model-legend i.normal{background:#19a974}.stock-model-legend i.low{background:#d9222f}
-.stage-loading,.stage-error { position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#6b7280;background:rgba(244,245,247,.92); }
+.stage-loading,.stage-error { position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#6b7280;background:#f4f5f7; }
+.three-stage.is-loading :deep(canvas),.three-stage.is-loading :deep(.label-layer){visibility:hidden}
 .stage-loading .el-icon,.stage-error .el-icon { color:var(--crimson);font-size:28px; }.stage-error strong { color:#273244; }.stage-error span { font-size:12px; }
 .shelf-panel { min-width:0;height:742px;display:flex;flex-direction:column;overflow:hidden; }
 .shelf-panel > header { flex:none;height:61px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 16px;border-bottom:1px solid #e6e8ec; }
@@ -1743,6 +1776,7 @@ onBeforeUnmount(() => {
 .model-actions .view-mode-tools .el-button-group{flex:1}
 .model-actions .view-mode-tools .el-button-group .el-button{flex:1}
 }
+.stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
 </style>
 
 <style scoped>
@@ -1776,6 +1810,7 @@ onBeforeUnmount(() => {
 }
 @media(pointer:coarse){.model-title .desktop-scene-help{display:none}.model-title .touch-scene-help{display:block}.touch-reset-button{display:inline-flex}}
 .warehouse-hero{padding:0;margin-bottom:10px;background:transparent;box-shadow:none;color:#475569;justify-content:flex-end;border-radius:0}.warehouse-hero::after{display:none}.warehouse-hero>div:first-child{display:none}.warehouse-hero .el-button{background:#fff;border-color:#dcdfe6;color:#475569}.warehouse-hero .el-button--primary{background:#c6000b;color:#fff}.control-panel{padding:12px;gap:12px;grid-template-columns:minmax(260px,.65fr) minmax(160px,.3fr) minmax(460px,1.25fr);align-items:start}.warehouse-workspace:not(:fullscreen) .three-stage,.warehouse-workspace:not(:fullscreen) .two-stage{height:clamp(330px,calc(100vh - 350px),680px)}@media(max-width:760px){.control-panel{grid-template-columns:1fr}.warehouse-hero{flex-direction:row}.warehouse-workspace:not(:fullscreen) .three-stage{height:420px}}
+.stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
 </style>
 
 <style scoped>
@@ -1791,24 +1826,61 @@ onBeforeUnmount(() => {
   .model-actions .view-mode-tools .el-button-group .el-button{width:100%;margin:0;border-radius:8px!important}
   .model-actions .view-mode-tools .el-button-group .el-button:not(:first-child){border-left-color:var(--el-border-color)}
 }
+.stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
 </style>
 
 <style scoped>
 .warehouse-page .plan-help{position:static;margin:10px 12px;line-height:1.6;background:#f4f6f9;overflow-wrap:anywhere}.entrance-2d,.floor-label,.east-label{pointer-events:none}
+.stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
 </style>
 
 <style scoped>
 .model-toolbar{display:flex;flex-direction:column;align-items:stretch;gap:12px}.model-actions{display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap;padding-top:10px;border-top:1px solid #e5eaf0}.scene-view-menu{margin-left:auto}.model-actions .el-button{margin-left:0;min-height:36px}.stock-detail-panel{padding:16px}.stock-detail-panel>header{display:flex;align-items:center;justify-content:space-between}.stock-detail-panel h3{margin:12px 0 6px;font-size:16px;line-height:1.5}.stock-detail-panel>code{font-size:16px;color:#475569}.stock-detail-panel :deep(.visual-grid){gap:8px}.stock-detail-panel :deep(.visual-grid section){padding:8px}.stock-detail-panel :deep(.visual-grid h3){font-size:12px}.stock-detail-panel :deep(.visual-grid h3 small){display:none}.stock-detail-panel :deep(.model-preview),.stock-detail-panel :deep(.part-photo),.stock-detail-panel :deep(.visual-empty){height:160px!important}.stock-detail-fields{margin:16px 0}.stock-detail-fields>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #edf0f4;font-size:13px}.stock-detail-fields dt{color:#64748b}.stock-detail-fields dd{margin:0;text-align:right}.stock-slot-choices{display:grid;gap:6px;margin:14px 0}.stock-slot-choices>button{padding:8px;border:1px solid #e3e8ef;border-radius:6px;background:white;text-align:left;cursor:pointer}.stock-slot-choices>button.active{border-color:#be203b;background:#fff2f5}.stock-detail-panel>button{width:100%}@media(max-width:760px){.scene-view-menu{margin-left:0}.model-actions{gap:6px}}
+.stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
 </style>
 
 <style scoped>
 .model-toolbar .model-title{flex:none}.stock-detail-panel :deep(.model-preview){min-height:160px}
+.stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
 </style>
 
 <style scoped>
 .shelf-panel.is-stock-detail{align-self:stretch;display:flex;flex-direction:column}.shelf-panel.is-stock-detail .stock-detail-panel{flex:1;display:flex;flex-direction:column;min-height:0}.stock-detail-panel>button:last-child{margin-top:auto}.stock-detail-fields{overflow-wrap:anywhere}
+.stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
 </style>
 
 <style scoped>
 .warehouse-workspace{grid-template-columns:minmax(0,1fr) clamp(360px,24vw,430px)}.shelf-panel.is-stock-detail{height:auto;max-height:none;align-self:stretch}.stock-detail-panel{padding:20px}.stock-detail-panel>header{padding-bottom:14px;border-bottom:1px solid #e7edf3}.stock-detail-panel>header strong{font-size:18px;color:#20364e}.stock-detail-panel>h3{font-size:19px;line-height:1.5;margin:18px 0 12px}.stock-identity-line{display:flex;align-items:center;justify-content:space-between;gap:10px}.stock-identity-line code{font-size:16px;color:#50637b;background:#f2f5f9;border-radius:5px;padding:5px 8px}.stock-detail-panel :deep(.bound-model){font-size:12px;margin:0 0 12px}.stock-detail-panel :deep(.visual-grid section){padding:10px;background:#f8fafc;border-color:#e5ebf2}.stock-detail-panel :deep(.visual-grid h3){font-size:13px;margin:0 0 10px}.stock-detail-fields>div{padding:12px 0;font-size:14px}.stock-detail-fields dd{font-weight:500;color:#20364e}.stock-detail-fields dt{flex:none}.stock-detail-panel>button:last-child{min-height:46px;font-size:15px;border-radius:8px}.stock-detail-panel :deep(.compact-model-note){font-size:11px;color:#8793a4;line-height:1.5;margin:10px 0 0}@media(max-width:980px){.warehouse-workspace{grid-template-columns:1fr}.shelf-panel.is-stock-detail{height:auto}}
+.stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
+</style>
+
+<style scoped>
+.mobile-filter-toggle,.mobile-scene-menu,.mode-short-label{display:none}
+@media(max-width:760px){
+  .warehouse-page .control-panel{padding:12px;gap:10px;grid-template-columns:minmax(0,1fr)}
+  .warehouse-page .control-panel .locator-field>label{display:none}
+  .warehouse-page .mobile-filter-toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px;padding:0;border:0;background:transparent;color:#5d6b80;font:inherit;font-size:12px;text-align:left;cursor:pointer}
+  .mobile-filter-toggle>span{flex:none;color:#be203b;font-weight:600}
+  .control-panel:not(.mobile-filters-open)>.workshop-field,.control-panel:not(.mobile-filters-open)>.group-filter{display:none}
+  .warehouse-page .model-toolbar{padding:12px;gap:8px}
+  .warehouse-page .model-title-heading strong{font-size:15px}
+  .warehouse-page .model-title .touch-scene-help{font-size:11px;line-height:1.5;margin-top:4px}
+  .warehouse-page .model-actions{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;justify-content:stretch;padding-top:8px}
+  .warehouse-page .model-actions .desktop-scene-control{display:none!important}
+  .warehouse-page .model-actions .view-mode-tools{grid-column:auto;min-width:0}
+  .warehouse-page .model-actions .view-mode-tools .el-button-group{gap:0}
+  .warehouse-page .model-actions .view-mode-tools .el-button{font-size:12px;border-radius:0!important;padding:6px 8px}
+  .warehouse-page .model-actions .view-mode-tools .el-button:first-child{border-radius:7px 0 0 7px!important}
+  .warehouse-page .model-actions .view-mode-tools .el-button:last-child{border-radius:0 7px 7px 0!important}
+  .warehouse-page .model-actions>.fullscreen-button,.warehouse-page .model-actions>.mobile-scene-menu{grid-column:auto;width:auto}
+  .warehouse-page .model-actions .el-button{height:38px;min-height:38px;font-size:12px;padding:6px 10px}
+  .warehouse-page .model-actions>.mobile-scene-menu{display:inline-flex}
+  .warehouse-page .model-actions>.mobile-scene-menu .el-button{width:auto;gap:3px}
+  .warehouse-page .warehouse-workspace:not(:fullscreen) .three-stage,.warehouse-page .warehouse-workspace:not(:fullscreen) .two-stage{height:clamp(300px,52dvh,480px)}
+}
+@media(max-width:360px){
+  .mode-full-label{display:none}.mode-short-label{display:inline}
+  .warehouse-page .model-actions .view-mode-tools .el-button{padding:6px 4px}
+}
+.stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
 </style>

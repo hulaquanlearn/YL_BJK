@@ -1,13 +1,13 @@
 <template>
 <section class="part-model-detail">
   <div class="visual-grid">
-    <section><h3><span>{{ part?.categoryModelName || '公共' }}<template v-if="part?.categoryModelId">（ID {{ part.categoryModelId }}）</template>模型</span><small>{{part?.modelQuality || '外观示意'}}</small></h3>
+    <section><h3><span>{{ part?.categoryModelName || '公共' }}模型</span><small>{{part?.modelQuality || '外观示意'}}</small></h3>
       <ModelPreview v-if="modelUrl" :key="modelUrl" :model-url="modelUrl" :initial-angle="0.55" height="300px" />
       <div v-else class="visual-empty">{{ part?.categoryModelName ? '绑定模型待生成' : '此备件尚未绑定模型' }}</div>
       
       <p v-if="modelUrl && !compact">{{ part?.modelQuality || '外观示意' }}；未核实厂家尺寸的模型不用于安装校核。</p>
     </section>
-    <section><h3>实物照片</h3><el-image v-if="photoUrl" :src="photoUrl" :preview-src-list="[photoUrl]" fit="contain" preview-teleported class="part-photo"><template #error><div class="visual-empty">实物照片暂不可用</div></template></el-image><div v-else class="visual-empty photo-empty"><el-icon><Camera /></el-icon><span>尚未上传实物照片</span></div><p v-if="photoUrl">点击照片放大查看</p></section>
+    <section><h3>实物照片</h3><el-image v-if="photoUrl" :src="photoUrl" :preview-src-list="[photoUrl]" fit="contain" preview-teleported class="part-photo"><template #error><div class="visual-empty">实物照片暂不可用</div></template></el-image><div v-else class="visual-empty photo-empty"><el-icon><Camera /></el-icon><span>尚未上传实物照片</span></div></section>
   </div>
   <p v-if="compact && modelUrl" class="compact-model-note">外观示意模型，安装尺寸请以厂家资料为准。</p>
 </section>

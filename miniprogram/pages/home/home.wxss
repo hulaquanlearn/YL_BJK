@@ -63,9 +63,8 @@
   border-radius: 18rpx;
   background: #fff6f6;
 }
-.error-title, .error-desc { display: block; }
+.error-title { display: block; }
 .error-title { color: #9e2028; font-size: 26rpx; font-weight: 650; }
-.error-desc { margin-top: 5rpx; color: #a76d71; font-size: 21rpx; }
 .error-action { color: #c6000b; font-size: 24rpx; font-weight: 650; }
 
 .section { margin-top: 38rpx; }
@@ -190,8 +189,7 @@
 }
 .flow-line { height: 2rpx; flex: 1; margin: 21rpx -17rpx 0; background: #e5e8eb; }
 
-.metric-card:active, .quick-item:active,
-.warning-item:active, .tool-item:active {
+.metric-card:active, .quick-item:active, .warning-item:active, .tool-item:active {
   opacity: 0.72;
   transform: scale(0.985);
 }

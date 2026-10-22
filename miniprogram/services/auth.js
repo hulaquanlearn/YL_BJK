@@ -29,7 +29,10 @@ function canEditAnyWorkshop() { return isAdmin() || Boolean(WORKSHOP_ROLES[getUs
 function canEditWorkshop(workshopCode) {
   return isAdmin() || (Boolean(WORKSHOP_ROLES[getUser()?.role]) && WORKSHOP_ROLES[getUser().role] === String(workshopCode || ''));
 }
+function isRawEmployee(user = getUser()) { return user?.role === 'viewer' && user.staffWorkshopCode === 'raw_grain' && user.staffPosition !== 'shift_leader'; }
+function staffPositionLabel(user) { return user?.staffWorkshopCode === 'raw_grain' ? (user.staffPosition === 'shift_leader' ? '工段长' : '员工') : ({group_leader:'组长',shift_leader:'班长'})[user?.staffPosition] || '人员'; }
 function canSubmitInventory() {
+  if (isRawEmployee()) return false;
   return canEditAnyWorkshop() || (isViewer() && Boolean(userWorkshopCode()));
 }
 function canApproveInventory() { return canEditAnyWorkshop(); }
@@ -49,6 +52,12 @@ function goLogin() {
 function requireLogin(options = {}) {
   if (!getToken() || !getUser()) {
     goLogin();
+    return false;
+  }
+  const pages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
+  const route = pages[pages.length - 1]?.route;
+  if (isRawEmployee() && route && !['pages/login/login','pages/portal/portal','pages/home/home','pages/index/index','pages/detail/detail','pages/locationGuide/locationGuide','pages/webview/webview','pages/account/account'].includes(route)) {
+    wx.reLaunch({url:'/pages/home/home'});
     return false;
   }
   if (options.admin && !isAdmin()) {
@@ -73,6 +82,8 @@ function requireLogin(options = {}) {
 }
 
 module.exports = {
+  isRawEmployee,
+  staffPositionLabel,
   getToken,
   getUser,
   setSession,

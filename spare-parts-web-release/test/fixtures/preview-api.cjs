@@ -2,8 +2,6 @@
 const http = require('node:http');
 const {makePartsTemplate,makeModelBindingsTemplate}=require('../../../server/src/import-workbook');
 const {buildReplenishmentItem}=require('../../../server/src/replenishment');
-const previewPlc = require('./preview-plc.cjs');
-const modelMatching = process.env.PREVIEW_MODEL_MATCHING==='1' ? require('./preview-model-matching.cjs') : null;
 const user = { id: 1, role: 'admin', displayName: '本地界面测试', username: 'preview' };
 const workshops = [{ code:'raw_grain', name:'原粮车间' },{code:'qu_making',name:'制曲车间'},{code:'brewing',name:'酿酒车间'}];
 let parts = [
@@ -28,13 +26,12 @@ if(process.env.PREVIEW_NEW_MODELS==='1') {
 }
 if(process.env.PREVIEW_WAREHOUSE==='1')parts=Array.from({length:536},(_,index)=>{
   const shelf=1+Math.floor(index/96),side=1+Math.floor(index%96/48),layer=1+Math.floor(index%48/12),slot=1+index%12,m=catalog.models[index%7];
-  return {_id:String(index+1),partId:index+1,materialCode:`TEST${index+1}`,materialDesc:m.name,spec:'合成测试数据',unit:index%5===0?'米':'个',price:index%11===0?null:120,partType:index%3===0?'质保件':'易损件',warehouseAreaName:index%2===0?'五粮货区':'输送货区',totalStock:index%3===0?1:5,safetyStock:2,workshopCode:'raw_grain',workshopName:'原粮车间',locationCode:`0${shelf}${side}${layer}${String(slot).padStart(2,'0')}`,shelf,position:side,layer,location:slot,categoryModelUrl:`/models/reference-20260904/${m.model}`,categoryModelName:m.name,categoryModelScale:1.6,categoryFrontRotationY:Number(m.frontRotationY)||0};
+  return {_id:String(index+1),partId:index+1,materialCode:`TEST${index+1}`,materialDesc:m.name,spec:'合成测试数据',unit:index%5===0?'米':'个',price:index%11===0?null:120,partType:index%3===0?'质保件':'易损件',warehouseAreaName:index%2===0?'五粮货区':'输送货区',totalStock:index%3===0?1:5,safetyStock:2,reorderPoint:2,maxStock:6,workshopCode:'raw_grain',workshopName:'原粮车间',locationCode:`0${shelf}${side}${layer}${String(slot).padStart(2,'0')}`,shelf,position:side,layer,location:slot,categoryModelUrl:`/models/reference-20260904/${m.model}`,categoryModelName:m.name,categoryModelScale:1.6,categoryFrontRotationY:Number(m.frontRotationY)||0};
 });
 if(process.env.PREVIEW_LONG_DETAIL==='1') Object.assign(parts[0],{materialDesc:'界面测试：减速机（含联轴器），R77 AM112，速比33.47，输出扭矩820Nm，设备序号25.8191216501.0001.22.21',spec:'减速机（含联轴器），R77 AM112，速比33.47，输出扭矩820Nm，设备序号25.8191216501.0001.22.21',usageDescription:'破曲工段B117关风器、刹克龙关风器、输送线备用驱动装置，长文本布局检查。\n第二行用途说明，确认换行保留。',totalStock:1,unit:'台'});
 const warehouseAreas=[{code:'RAW_GRAIN_MAIN',name:'原粮车间备件库',workshopCode:'raw_grain'},{code:'FIVE',name:'五粮货区',workshopCode:'raw_grain'},{code:'TRANSFER',name:'输送货区',workshopCode:'raw_grain'},{code:'BREWING_MAIN',name:'酿酒车间备件库',workshopCode:'brewing'}];
-http.createServer(async(req,res)=>{
-  if(modelMatching)parts=modelMatching.library();
-  const url=new URL(req.url,'http://127.0.0.1'); let body='';for await(const chunk of req)body+=chunk;
+async function handler(req,res){
+  const url=new URL(req.originalUrl||req.url,'http://127.0.0.1'); let body=req.body?JSON.stringify(req.body):'';if(!req.body)for await(const chunk of req)body+=chunk;
   let data={};try{data=JSON.parse(body||'{}')}catch{}
   const send=(value,status=200)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(value))};
   const ok=data=>send({success:true,data});
@@ -45,9 +42,7 @@ http.createServer(async(req,res)=>{
     res.writeHead(200,{'Content-Type':file.endsWith('.glb')?'model/gltf-binary':file.endsWith('.jpg')?'image/jpeg':file.endsWith('.png')?'image/png':'application/json'});return fs.createReadStream(file).pipe(res);
   }
   if (String(req.headers.authorization).endsWith('-viewer') && !['GET','HEAD','OPTIONS'].includes(req.method)
-    && !['/api/auth/login','/api/auth/logout','/api/auth/change-password','/api/ai/chat'].includes(url.pathname)
-    && !/^\/api\/plc\/projects\/\d+\/analyze$/.test(url.pathname)) return send({msg:'权限不足'},403);
-  if(modelMatching?.handle(url,req.method,data,send))return;
+    && !['/api/auth/login','/api/auth/logout','/api/auth/change-password','/api/ai/chat'].includes(url.pathname)) return send({msg:'权限不足'},403);
   const selected=parts.filter(p=>['workshopCode','warehouseAreaName','partType'].every(key=>!url.searchParams.get(key)||p[key]===url.searchParams.get(key))&&(!(url.searchParams.get('searchKeyword')||url.searchParams.get('search'))||(p.materialCode+p.materialDesc).includes(url.searchParams.get('searchKeyword')||url.searchParams.get('search'))));
   const metricRows=()=>selected.map(p=>({...p,quantity:p.totalStock,safetyStock:p.safetyStock??p.reorderPoint}));
   const metrics=()=>({...summarizeInventory(metricRows()),scopeBreakdown:summarizeInventoryScopes(metricRows(),Object.fromEntries(workshops.map(w=>[w.code,w.name])))});
@@ -61,7 +56,7 @@ http.createServer(async(req,res)=>{
   if(url.pathname==='/api/data-quality')return send({success:true,data:[{...parts[0],issueDetails:[{key:'missing_price',label:'缺少单价',severity:'high'}]}],total:1,summary:{qualityRate:90,healthy:9,affected:1,total:10,issueGroups:[{key:'missing_price',label:'缺少单价',severity:'high',count:1,rate:10}]}});
   if(url.pathname==='/api/replenishment') {
     const rows=selected.filter(p=>p.reorderPoint!=null && p.totalStock<=p.reorderPoint).map(p=>buildReplenishmentItem({...p,quantity:p.totalStock,inventoryId:p._id}));
-    return send({success:true,data:rows,total:rows.length,summary:{total:rows.length,zeroStock:rows.filter(p=>!p.currentStock).length,missingTarget:rows.filter(p=>p.suggestedQuantity==null).length,estimatedAmount:rows.reduce((s,p)=>s+(p.estimatedAmount||0),0),stockAmount:rows.reduce((s,p)=>s+p.currentStock*(p.price||0),0)}});
+    return send({success:true,data:rows.slice(((Number(url.searchParams.get('page'))||1)-1)*(Number(url.searchParams.get('pageSize'))||100),(Number(url.searchParams.get('page'))||1)*(Number(url.searchParams.get('pageSize'))||100)),total:rows.length,summary:{total:rows.length,zeroStock:rows.filter(p=>!p.currentStock).length,missingTarget:rows.filter(p=>p.suggestedQuantity==null).length,estimatedAmount:rows.reduce((s,p)=>s+(p.estimatedAmount||0),0),stockAmount:rows.reduce((s,p)=>s+p.currentStock*(p.price||0),0)}});
   }
   if(url.pathname==='/api/stock-movements')return send({success:true,data:[],total:0});
   if(url.pathname==='/api/knowledge'){const rows=knowledge.filter(k=>(!url.searchParams.get('search')||k.title.includes(url.searchParams.get('search')))&&(!url.searchParams.get('type')||k.entryType===url.searchParams.get('type'))&&(!url.searchParams.get('category')||k.category===url.searchParams.get('category')));return send({success:true,data:rows,total:rows.length})}
@@ -105,6 +100,7 @@ http.createServer(async(req,res)=>{
   }
   if(url.pathname==='/api/dashboard')return ok({dashboard:metrics()});
   if(url.pathname==='/api/movement-reasons')return ok({in:[{value:'other_in',label:'其他入库'}],out:[{value:'other_out',label:'其他出库'}]});
-  const plcResponse=previewPlc(url.pathname,url.searchParams);if(plcResponse)return send(plcResponse);
   send({msg:'本地界面测试未模拟此接口'},404);
-}).listen(Number(process.env.PREVIEW_API_PORT)||3099,'127.0.0.1',()=>console.log(`Synthetic UI fixture API: http://127.0.0.1:${Number(process.env.PREVIEW_API_PORT)||3099}`));
+}
+module.exports={handler,getKnowledgeFixture:id=>knowledge.find(k=>k.id===Number(id))};
+if(require.main===module)http.createServer(handler).listen(Number(process.env.PREVIEW_API_PORT)||3099,'127.0.0.1',()=>console.log(`Synthetic UI fixture API: http://127.0.0.1:${Number(process.env.PREVIEW_API_PORT)||3099}`));

@@ -7,8 +7,7 @@ export function canSubmitInventoryRequest(method, url, workshopCode) {
 export function isBusinessWrite(method, url) {
   if (['GET','HEAD','OPTIONS'].includes(String(method || 'GET').toUpperCase())) return false
   const pathname=String(url || '').split('?')[0]
-  return !(['/auth/login','/auth/logout','/auth/change-password','/ai/chat'].includes(pathname)
-    || /^\/plc\/projects\/\d+\/analyze$/.test(pathname))
+  return !['/auth/login','/auth/logout','/auth/change-password','/auth/profile','/ai/chat'].includes(pathname)
 }
 
 // Keep controls discoverable while stopping mouse, keyboard-generated clicks,

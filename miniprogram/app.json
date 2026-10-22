@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/login/login",
+    "pages/portal/portal",
     "pages/home/home",
     "pages/index/index",
     "pages/addPart/addPart",
@@ -12,7 +13,17 @@
     "pages/aiAgent/aiAgent",
     "pages/locationGuide/locationGuide",
     "pages/account/account",
-    "pages/users/users"
+    "pages/users/users",
+    "pages/webview/webview"
+  ],
+  "subPackages": [
+    {
+      "root": "packages/work",
+      "pages": [
+        "pages/home/home",
+        "pages/detail/detail"
+      ]
+    }
   ],
   "window": {
     "backgroundTextStyle": "light",

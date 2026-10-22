@@ -22,7 +22,7 @@ test('person month reconciles thirty source days, twenty-two shifts and their re
   assert.equal(detail.month,'2026-09');assert.equal(detail.person.id,'G101951');assert.equal(detail.person.name,'王哲')
   assert.deepEqual(detail.person.shiftCounts,{'8:00-16:00':11,'16:00-24:00':10,'10:00-18:00':1})
   assert.equal(detail.person.totalDays,30);assert.equal(detail.person.shiftCount,22);assert.equal(detail.person.restDays,8)
-  assert.deepEqual(detail.summary,{workDays:22,restDays:8,leaveDays:0,blankDays:0,normalShifts:13,earlyShifts:2,reviewShifts:7,unavailableDays:0})
+  assert.deepEqual(detail.summary,{workDays:22,restDays:8,leaveDays:0,blankDays:0,normalShifts:13,earlyShifts:2,lateShifts:0,reviewShifts:7,unavailableDays:0})
   assert.equal(detail.summary.normalShifts+detail.summary.earlyShifts+detail.summary.reviewShifts,detail.summary.workDays)
   assert.equal(detail.summary.workDays+detail.summary.restDays+detail.summary.leaveDays+detail.summary.blankDays,detail.days.length)
   assert.deepEqual(detail.earlyDays.map(day=>day.date),['2026-09-01','2026-09-03'])
@@ -30,6 +30,15 @@ test('person month reconciles thirty source days, twenty-two shifts and their re
   assert.equal(detail.days[21].shift,'10:00-18:00');assert.equal(detail.days[22].type,'rest');assert.equal(detail.days[22].statusCategory,'rest');assert.ok(!detail.days[22].result)
   assert.equal(JSON.stringify(analysis),before,'building a calendar must preserve source metadata and results')
 })
+
+test('late dates and counts coexist with early departures and normal departures for the same person',()=>{
+  const analysis=septemberFixture();
+  for(const number of [1,2])analysis.results.find(r=>r.date===`2026-09-0${number}`).arrival={status:'late',lateSeconds:60};
+  const detail=buildAttendanceMonth(analysis,'G101951');
+  assert.equal(detail.summary.lateShifts,2);assert.equal(detail.summary.earlyShifts,2);assert.equal(detail.summary.normalShifts,13);
+  assert.deepEqual(detail.lateDays.map(d=>d.date),['2026-09-01','2026-09-02']);
+  assert.equal(detail.lateDays[0].statusCategory,'early');assert.equal(detail.lateDays[1].statusCategory,'normal');
+});
 
 test('September 2026 uses a Monday-first calendar with one leading empty cell and unchanged dates',()=>{
   const detail=buildAttendanceMonth(septemberFixture(),'G101951')
@@ -51,7 +60,7 @@ test('February calendars use the actual leap-year month length without generatin
 test('declared blanks, missing dates and work without results remain distinct from rest and normal',()=>{
   const person={id:'G1',name:'甲',totalDays:3,shiftCount:1,restDays:0,leaveDays:1,blankDays:1,shiftCounts:{'8:00-16:00':1},days:[{date:'2026-09-01',type:'blank',label:''},{date:'2026-09-02',type:'leave',label:'年休假'},{date:'2026-09-03',type:'work',shift:'8:00-16:00',label:'8:00-16:00'}]}
   const detail=buildAttendanceMonth({month:'2026-09',people:[person],results:[{id:'G2',date:'2026-09-03',status:'normal'}]},'G1')
-  assert.deepEqual(detail.summary,{workDays:1,restDays:0,leaveDays:1,blankDays:1,normalShifts:0,earlyShifts:0,reviewShifts:1,unavailableDays:27})
+  assert.deepEqual(detail.summary,{workDays:1,restDays:0,leaveDays:1,blankDays:1,normalShifts:0,earlyShifts:0,lateShifts:0,reviewShifts:1,unavailableDays:27})
   assert.equal(detail.days[0].type,'blank');assert.equal(detail.days[0].available,true);assert.equal(detail.days[0].statusCategory,'blank');assert.equal(detail.days[0].label,'')
   assert.equal(detail.days[1].type,'leave');assert.equal(detail.days[1].statusCategory,'leave');assert.equal(detail.days[1].label,'年休假')
   assert.equal(detail.days[2].type,'work');assert.equal(detail.days[2].statusCategory,'review');assert.ok(!detail.days[2].result,'another person’s result cannot supply a normal shift')

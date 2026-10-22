@@ -2,16 +2,16 @@
   <view class="section">
     <view class="section-title">货架位置图</view>
     <view class="image-wrap">
-      <image class="guide-image" src="/images/tb/shelf_location.png" mode="widthFix" bindtap="previewImage" data-index="0"></image>
-      <text class="image-tip">点击图片可放大查看</text>
+      <image class="guide-image" src="/images/tb/shelf_location.png" mode="widthFix" bindtap="previewImage" data-index="0" aria-role="button" aria-label="放大货架位置图"></image>
+
     </view>
   </view>
 
   <view class="section">
     <view class="section-title">物料信息说明书</view>
     <view class="image-wrap">
-      <image class="guide-image" src="/images/tb/material_guide.png" mode="widthFix" bindtap="previewImage" data-index="1"></image>
-      <text class="image-tip">点击图片可放大查看</text>
+      <image class="guide-image" src="/images/tb/material_guide.png" mode="widthFix" bindtap="previewImage" data-index="1" aria-role="button" aria-label="放大物料信息说明书"></image>
+
     </view>
   </view>
 </view>

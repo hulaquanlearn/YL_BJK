@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS warehouse_rooms (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (workshop_code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO warehouse_rooms
   (workshop_code,room_name,width,depth,height,east_axis,entrance_wall,entrance_offset,entrance_width)

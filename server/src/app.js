@@ -26,9 +26,8 @@ app.use(cors({ origin: false }));
 app.use(privateResponse);
 const accessLimits = createAccessLimits();
 app.use(accessLimits.ip);
-// Inspection reports can contain 200 reviewed, long text entries. Keep the larger
-// JSON limit scoped to this authenticated feature instead of raising every API route.
-app.use('/api/inspection-notices', requireAuth, express.json({ limit: '4mb' }));
+// Daily duty entries can include seven days of notes; keep the larger bound scoped.
+app.use('/api/raw-duties', requireAuth, express.json({ limit: '4mb' }));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.text({ type: 'text/plain', limit: '8kb' }));
 // All uploaded and bundled model/reference assets require a live session.
@@ -52,25 +51,20 @@ app.get('/api/health', async (_req, res) => {
 });
 
 app.use('/api/auth', authRouter);
-// Temporarily retired, including agent callbacks and both Siemens/ABB analysis.
-// Keep historical program records and uploads for a possible future restoration.
-app.use(['/api/plc', '/api/program-agent'], (_req, res) => {
-  res.status(410).json({ success: false, msg: 'PLC 和 ABB 程序分析功能已停用' });
-});
-// 已下线的采购/供应商旧地址在认证前直接返回410，让旧客户端获得稳定、明确的停用状态。
-app.use(['/api/suppliers', '/api/suppliers/*', '/api/procurement-orders', '/api/procurement-orders/*'], (_req, res) => {
-  res.status(410).json({ success: false, msg: '采购与供应商功能已停用' });
-});
 app.use('/api', requireAuth);
+app.use('/api', require('./ai-call-audit').auditMiddleware());
+app.use('/api', require('./raw-staff-access').enforceRawEmployeeAccess);
 app.use('/api', accessLimits.account, accessLimits.hourly);
 app.use('/api', (req, res, next) => /\/(download|preview|import-template|export)$/.test(req.path)
   ? accessLimits.download(req, res, next) : next());
-// Separate scoped workflow: assigned staff can write their own work records only.
-// Inventory's viewer restrictions remain unchanged.
-app.use('/api/work', require('./routes/work'));
-app.use('/api/inspection-notices', require('./routes/inspection-notices'));
+// Raw-grain duty and attendance permissions remain separate from inventory access.
+app.use('/api/raw-duties', require('./routes/raw-duties').createRouter(require('./raw-duty-store').createStore(require('./db').pool)));
 app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/work-storage', require('./routes/work-storage'));
+app.use('/api/data-management', require('./routes/data-management').createRouter());
+app.use('/api/robot-program', require('./routes/robot-program').createRouter());
+app.use('/api', require('./routes/ai-call-logs').createRouter());
+app.use('/api/personal-usage', require('./routes/personal-usage').createRouter());
 app.use('/api', enforceReadOnly);
 app.use('/api/users', usersRouter);
 app.use('/api', partsRouter);
@@ -105,14 +99,9 @@ async function start() {
   console.log('MySQL connected');
   await ensureSchema();
   console.log('Schema check complete');
-  const stopScoring = require('./work-score-scheduler').startScheduler({
-    pool: require('./db').pool,
-    generate: require('./routes/work').generateSuggestion
-  });
   const server = app.listen(config.port, '127.0.0.1', () => {
     console.log(`Spare parts API listening on 127.0.0.1:${config.port}`);
   });
-  server.on('close', stopScoring);
   return server;
 }
 

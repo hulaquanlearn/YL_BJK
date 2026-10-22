@@ -27,14 +27,6 @@
   background: rgba(255,255,255,.12);
   font-size: 20rpx;
 }
-.scope-row { display: flex; margin-top: 22rpx; gap: 10rpx; }
-.scope-row text {
-  padding: 8rpx 14rpx;
-  border-radius: 20rpx;
-  color: rgba(255,255,255,.9);
-  background: rgba(91,0,5,.23);
-  font-size: 20rpx;
-}
 
 .input-card,
 .result-card {
@@ -62,7 +54,6 @@
   justify-content: space-between;
   border-top: 1rpx solid #edf0f3;
 }
-.scope-tip { color: #7d8692; font-size: 22rpx; }
 .input-count { margin-left: auto; color: #8e97a2; font-size: 22rpx; }
 .clear-history { margin-left: 16rpx; color: #a81720; font-size: 22rpx; }
 

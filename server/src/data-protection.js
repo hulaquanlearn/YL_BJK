@@ -27,15 +27,4 @@ function createAccessLimits({ ip = 1200, account = 180, hourly = 2400, asset = 6
   };
 }
 
-// Disabled by default even if an existing gateway token is present. A local
-// gateway can forward to a cloud model, so enabling needs a verified offline model.
-function businessAiAllowed(openclaw) {
-  if (!openclaw.contextTransferEnabled) return false;
-  try {
-    const url = new URL(openclaw.apiUrl);
-    return ['http:', 'https:'].includes(url.protocol) && ['127.0.0.1','[::1]'].includes(url.hostname)
-      && !url.username && !url.password;
-  } catch { return false; }
-}
-
-module.exports = { privateResponse, createAccessLimits, businessAiAllowed };
+module.exports = { privateResponse, createAccessLimits };

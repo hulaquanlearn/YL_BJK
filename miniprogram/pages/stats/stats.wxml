@@ -9,7 +9,7 @@
     </view>
 
     <view class="card">
-      <view class="card-heading"><view><text class="section-title">按单位库存</text><text class="section-desc">不同计量单位不再混合相加</text></view></view>
+      <view class="card-heading"><view><text class="section-title">按单位库存</text></view></view>
       <view class="unit-grid" wx:if="{{unitTotals.length}}">
         <view class="unit-item" wx:for="{{unitTotals}}" wx:key="unit">
           <text class="unit-total">{{item.total}}</text><text class="unit-name">{{item.unit}}</text>

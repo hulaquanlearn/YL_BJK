@@ -224,13 +224,6 @@ router.patch('/parts/:id/config', requireAnyWorkshopEditor, asyncHandler(async (
   } finally { connection.release(); }
 }));
 
-// 采购与供应商模块已按业务要求下线。保留明确的 410 响应，避免旧书签或旧前端
-// 在数据库表清理后退化成不明确的 500 错误。
-router.use(['/suppliers', '/suppliers/*', '/procurement-orders', '/procurement-orders/*'], (_req, res) => {
-  res.status(410).json({ success: false, msg: '采购与供应商功能已停用' });
-});
-
-// 采购与供应商模块已按业务要求下线。旧地址由上方 410 兼容拦截统一处理。
 router.get('/equipment/import-template', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
   const buffer = await makeEquipmentTemplate();
   sendXlsx(res, '设备型号与备件关系导入模板.xlsx', buffer);

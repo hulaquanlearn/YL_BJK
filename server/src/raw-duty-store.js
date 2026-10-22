@@ -1,0 +1,35 @@
+const D=require('./raw-duties');
+function createStore(db){
+ const one=async(sql,args=[])=>{const [rows]=await db.query(sql,args);return rows[0]||null};
+ return {
+  async transaction(fn){const conn=await db.getConnection();try{await conn.beginTransaction();const result=await fn(createStore(conn));await conn.commit();return result}catch(e){await conn.rollback();throw e}finally{conn.release()}},
+  async users(){const [rows]=await db.query("SELECT id,display_name AS name,role,staff_position AS staffPosition,staff_workshop_code AS staffWorkshopCode FROM app_users WHERE enabled=1 AND (role='raw_grain' OR (role='viewer' AND staff_workshop_code='raw_grain' AND staff_position='shift_leader')) ORDER BY display_name");return rows},
+  async members(){const [rows]=await db.query('SELECT m.*,u.display_name AS name,u.enabled,u.role,u.staff_position AS staffPosition,u.staff_workshop_code AS staffWorkshopCode,r.display_name AS reviewer_name FROM raw_duty_members m JOIN app_users u ON u.id=m.user_id LEFT JOIN app_users r ON r.id=m.reviewer_id ORDER BY u.display_name');return rows.map(m=>({...m,user_id:Number(m.user_id),reviewer_id:Number(m.reviewer_id),template_id:Number(m.template_id),active:Boolean(m.active),revision:Number(m.revision)}))},
+  async setMember(m,expected){
+   if(expected===0){try{await db.query('INSERT INTO raw_duty_members(user_id,reviewer_id,position_name,team_name,template_id,active) VALUES(?,?,?,?,?,?)',[m.user_id,m.reviewer_id,m.position_name,m.team_name,m.template_id,m.active?1:0]);return}catch(e){if(e.code==='ER_DUP_ENTRY')D.fail(409,'人员分配已更新，请刷新');throw e}}
+   const [r]=await db.query('UPDATE raw_duty_members SET reviewer_id=?,position_name=?,team_name=?,template_id=?,active=?,revision=revision+1 WHERE user_id=? AND revision=?',[m.reviewer_id,m.position_name,m.team_name,m.template_id,m.active?1:0,m.user_id,expected]);if(!r.affectedRows)D.fail(409,'人员分配已更新，请刷新');
+  },
+  async templates(){const [rows]=await db.query('SELECT * FROM raw_duty_templates ORDER BY id DESC');return [...rows.map(t=>({id:Number(t.id),title:t.title,entries:typeof t.entries_json==='string'?JSON.parse(t.entries_json):t.entries_json})),D.defaultTemplate]},
+  async addTemplate(t,actor){const [r]=await db.query('INSERT INTO raw_duty_templates(title,entries_json,created_by) VALUES(?,?,?)',[t.title,JSON.stringify(t.entries),actor]);return {...t,id:r.insertId}},
+  async templateById(id,lock=false){const row=await one(`SELECT * FROM raw_duty_templates WHERE id=?${lock?' FOR UPDATE':''}`,[id]);return row?{id:Number(row.id),title:row.title,entries:typeof row.entries_json==='string'?JSON.parse(row.entries_json):row.entries_json}:null},
+  async updateTemplate(id,t){await db.query('UPDATE raw_duty_templates SET title=?,entries_json=? WHERE id=?',[t.title,JSON.stringify(t.entries),id]);return this.templateById(id)},
+  async deleteTemplate(id){await db.query('DELETE FROM raw_duty_templates WHERE id=?',[id])},
+  async reports(start){const [rows]=await db.query('SELECT * FROM raw_duty_reports WHERE week_start=?',[start]);return rows.map(D.decode)},
+  async reportsForUser(userId,monthStart,end){const [rows]=await db.query("SELECT * FROM raw_duty_reports WHERE user_id=? AND week_start>=DATE_SUB(?,INTERVAL 6 DAY) AND week_start<=? ORDER BY updated_at,id",[userId,monthStart,end]);return rows.map(D.decode)},
+  async report(userId,start,lock=false){return D.decode(await one(`SELECT * FROM raw_duty_reports WHERE user_id=? AND week_start=?${lock?' FOR UPDATE':''}`,[userId,start]))},
+  async reportById(id,lock=false){return D.decode(await one(`SELECT * FROM raw_duty_reports WHERE id=?${lock?' FOR UPDATE':''}`,[id]))},
+  async createReport(userId,start,identity,t){try{const [r]=await db.query('INSERT INTO raw_duty_reports(user_id,week_start,identity_json,template_json,checks_json,summary,feedback,cadence_json) VALUES(?,?,?,?,?,?,?,?)',[userId,start,JSON.stringify(identity),JSON.stringify(t),'[]','','',JSON.stringify({version:2,calendar:{}})]);return this.reportById(r.insertId)}catch(e){if(e.code==='ER_DUP_ENTRY')D.fail(409,'本周材料已创建，请刷新后继续');throw e}},
+  async updateReport(r,expected){const [result]=await db.query('UPDATE raw_duty_reports SET checks_json=?,summary=?,status=?,feedback=?,submitted_at=?,reviewed_by=?,confirmed_at=?,cadence_json=?,revision=revision+1 WHERE id=? AND revision=?',[JSON.stringify(r.checks),r.summary,r.status,r.feedback,r.submitted_at||null,r.reviewed_by||null,r.confirmed_at||null,r.cadence?JSON.stringify(r.cadence):null,r.id,expected]);if(!result.affectedRows)D.fail(409,'材料已被更新，请刷新后重试');return this.reportById(r.id)},
+  async photos(reportId,data=false){const [rows]=await db.query(`SELECT id,report_id,mime,filename,byte_size${data?',image':''} FROM raw_duty_photos WHERE report_id=? ORDER BY id`,[reportId]);return rows.map(p=>({...p,id:Number(p.id),report_id:Number(p.report_id)}))},
+  async photo(id){const p=await one('SELECT * FROM raw_duty_photos WHERE id=?',[id]);return p?{...p,id:Number(p.id),report_id:Number(p.report_id)}:null},
+  async addPhoto(reportId,file){const [r]=await db.query('INSERT INTO raw_duty_photos(report_id,image,mime,filename,byte_size) VALUES(?,?,?,?,?)',[reportId,file.image,file.mime,file.filename,file.image.length]);return r.insertId},
+  async removePhoto(id){await db.query('DELETE FROM raw_duty_photos WHERE id=?',[id])},
+  async lockSummaryUser(userId){await db.query('SELECT id FROM app_users WHERE id=? FOR UPDATE',[userId])},
+  async summaryQuotaUsed(userId,w){const [rows]=await db.query("SELECT COUNT(*) AS used FROM raw_duty_events WHERE actor_id=? AND action IN ('ai_summary_generated','ai_summary_reserved') AND (JSON_UNQUOTE(JSON_EXTRACT(detail,'$.quotaDate'))=? OR (JSON_EXTRACT(detail,'$.quotaDate') IS NULL AND JSON_UNQUOTE(JSON_EXTRACT(detail,'$.generatedAt'))>=? AND JSON_UNQUOTE(JSON_EXTRACT(detail,'$.generatedAt'))<?)) AND (action='ai_summary_generated' OR JSON_UNQUOTE(JSON_EXTRACT(detail,'$.expiresAt'))>?)",[userId,w.date,w.start,w.end,w.now]);return Number(rows[0].used)},
+  async finishSummaryReservation(id,actor,detail){const [r]=await db.query("UPDATE raw_duty_events SET action='ai_summary_generated',detail=? WHERE id=? AND actor_id=? AND action='ai_summary_reserved'",[JSON.stringify(detail),id,actor]);if(!r.affectedRows)D.fail(409,'总结生成状态已变化，请重试')},
+  async releaseSummaryReservation(id,actor){await db.query("UPDATE raw_duty_events SET action='ai_summary_failed' WHERE id=? AND actor_id=? AND action='ai_summary_reserved'",[id,actor])},
+  async event(reportId,actor,action,detail){const [r]=await db.query('INSERT INTO raw_duty_events(report_id,actor_id,action,detail) VALUES(?,?,?,?)',[reportId,actor,action,JSON.stringify(detail)]);return Number(r.insertId)},
+  async events(reportId){const [rows]=await db.query("SELECT e.id,e.action,e.created_at,u.display_name AS actor_name FROM raw_duty_events e LEFT JOIN app_users u ON u.id=e.actor_id WHERE report_id=? AND action NOT IN ('ai_summary_reserved','ai_summary_failed') ORDER BY e.id DESC LIMIT 50",[reportId]);return rows}
+ };
+}
+module.exports={createStore};

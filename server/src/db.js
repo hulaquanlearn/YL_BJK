@@ -41,43 +41,18 @@ async function tableExists(tableName) {
 async function ensureSchema() {
   const conn = await pool.getConnection();
   try {
+    const rawDutySql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_raw_duties_20261015.sql'), 'utf8');
+    for (const statement of rawDutySql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
+    if (!(await columnExists('raw_duty_reports', 'cadence_json'))) await conn.query('ALTER TABLE raw_duty_reports ADD COLUMN cadence_json JSON DEFAULT NULL AFTER checks_json');
+    await require('./username-schema').ensureUsernameCase(conn);
     if (!(await columnExists('app_users', 'staff_workshop_code'))) {
       await conn.query('ALTER TABLE app_users ADD COLUMN staff_workshop_code VARCHAR(30) NULL AFTER role');
     }
     if (!(await columnExists('app_users', 'staff_position'))) {
       await conn.query('ALTER TABLE app_users ADD COLUMN staff_position VARCHAR(30) NULL AFTER staff_workshop_code');
     }
-    const workSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_assessment_20260923.sql'), 'utf8');
-    for (const statement of workSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
-    const scoreSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_score_jobs_20260928.sql'), 'utf8');
-    for (const statement of scoreSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
-    const teamSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_teams_20260928.sql'), 'utf8');
-    for (const statement of teamSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
-    const flowSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_flow_20260929.sql'), 'utf8');
-    for (const statement of flowSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
-    const documentSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_work_documents_20260930.sql'), 'utf8');
-    for (const statement of documentSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
-    const inspectionSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_inspection_notice_20260924.sql'), 'utf8');
-    for (const statement of inspectionSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
     const attendanceSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_attendance_storage_20261009.sql'), 'utf8');
     for (const statement of attendanceSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
-    // Older attachment tables did not record upload time. Start their retention clock
-    // at migration time rather than guessing that a newly uploaded image is old.
-    for(const attachmentTable of ['work_photos','work_task_files']){
-      const [uploadColumns]=await conn.query('SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=? AND COLUMN_NAME=\'created_at\'',[attachmentTable]);
-      if(!Number(uploadColumns[0].cnt))await conn.query(`ALTER TABLE ${attachmentTable} ADD COLUMN created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`);
-    }
-    const [inspectionSizeColumns] = await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='inspection_sources' AND COLUMN_NAME='byte_size'`);
-    if (!Number(inspectionSizeColumns[0].cnt)) {
-      await conn.query('ALTER TABLE inspection_sources ADD COLUMN byte_size INT NOT NULL DEFAULT 0 AFTER image');
-      await conn.query('UPDATE inspection_sources SET byte_size=OCTET_LENGTH(image) WHERE byte_size=0');
-    }
-    for(const [name,definition] of [['retention_until','DATE DEFAULT NULL'],['archived_at','DATETIME DEFAULT NULL']]){
-      const [columns]=await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='inspection_notices' AND COLUMN_NAME=?`,[name]);
-      if(!Number(columns[0].cnt))await conn.query(`ALTER TABLE inspection_notices ADD COLUMN ${name} ${definition}`);
-    }
-    const [workPhotoColumns] = await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='work_photos' AND COLUMN_NAME='task_key'`);
-    if (!Number(workPhotoColumns[0].cnt)) await conn.query('ALTER TABLE work_photos ADD COLUMN task_key VARCHAR(80) DEFAULT NULL AFTER mime');
     await conn.query(`CREATE TABLE IF NOT EXISTS workshops (
       code VARCHAR(30) NOT NULL,
       name VARCHAR(50) NOT NULL,
@@ -87,7 +62,7 @@ async function ensureSchema() {
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (code),
       UNIQUE KEY uk_workshops_name (name)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`);
     await conn.query(`INSERT INTO workshops (code,name,sort_order,active) VALUES
       ('raw_grain','原粮车间',10,1),
       ('qu_making','制曲车间',20,1),
@@ -125,7 +100,7 @@ async function ensureSchema() {
       KEY idx_fermentation_knowledge_type_time (entry_type,status,created_at),
       KEY idx_fermentation_knowledge_category (category,status,created_at),
       KEY idx_fermentation_knowledge_stage (process_stage,status,created_at)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`);
 
     await conn.query(`CREATE TABLE IF NOT EXISTS knowledge_process_stages (
       id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -140,7 +115,7 @@ async function ensureSchema() {
       PRIMARY KEY (id),
       UNIQUE KEY uk_knowledge_process_stage_workshop_name (workshop_code,name),
       KEY idx_knowledge_process_stage_status_sort (status,sort_order,id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`);
 
     await conn.query(`CREATE TABLE IF NOT EXISTS warehouse_rooms (
       workshop_code VARCHAR(30) NOT NULL,
@@ -156,7 +131,7 @@ async function ensureSchema() {
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (workshop_code)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`);
     await conn.query(`INSERT INTO warehouse_rooms
       (workshop_code,room_name,width,depth,height,east_axis,entrance_wall,entrance_offset,entrance_width)
       VALUES
@@ -212,7 +187,7 @@ async function ensureSchema() {
       PRIMARY KEY(id), UNIQUE KEY uq_knowledge_revision(entry_id,revision_no),
       KEY idx_knowledge_revision_time(entry_id,created_at),
       CONSTRAINT fk_knowledge_revision_entry FOREIGN KEY(entry_id) REFERENCES fermentation_knowledge_entries(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`);
 
     const [idxRows] = await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='knowledge_process_stages' AND INDEX_NAME='uk_knowledge_process_stage_name'`);
     if (idxRows[0].cnt > 0) {
@@ -227,16 +202,8 @@ async function ensureSchema() {
       await conn.query(`ALTER TABLE warehouse_shelves ADD COLUMN position_overridden TINYINT(1) NOT NULL DEFAULT 0 AFTER rotation_y`);
     }
 
-    // 解析节点领取任务时写入认领时间；超过 plc-agent 认领超时的任务可被重新领取。
-    if (await tableExists('plc_projects') && !(await columnExists('plc_projects', 'extracting_since'))) {
-      await conn.query(`ALTER TABLE plc_projects ADD COLUMN extracting_since DATETIME DEFAULT NULL AFTER parse_message`);
-    }
-
     if (await tableExists('parts') && !(await columnExists('parts', 'image_url'))) {
       await conn.query(`ALTER TABLE parts ADD COLUMN image_url VARCHAR(500) DEFAULT NULL AFTER remark`);
-    }
-    if (await tableExists('plc_projects') && !(await columnExists('plc_projects', 'extracting_claim_hash'))) {
-      await conn.query('ALTER TABLE plc_projects ADD COLUMN extracting_claim_hash CHAR(64) DEFAULT NULL');
     }
     if (await tableExists('parts') && !(await columnExists('parts', 'model_url'))) {
       await conn.query(`ALTER TABLE parts ADD COLUMN model_url VARCHAR(500) DEFAULT NULL AFTER image_url`);
@@ -259,7 +226,7 @@ async function ensureSchema() {
       PRIMARY KEY (id),
       UNIQUE KEY uk_part_category_model_name (name),
       KEY idx_part_category_model_active_name (active,name)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`);
     if (!(await columnExists('part_category_models', 'image_url'))) {
       await conn.query('ALTER TABLE part_category_models ADD COLUMN image_url VARCHAR(500) DEFAULT NULL');
     }
@@ -297,7 +264,7 @@ async function ensureSchema() {
       sort_order INT NOT NULL DEFAULT 0,
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`);
   } finally {
     conn.release();
   }

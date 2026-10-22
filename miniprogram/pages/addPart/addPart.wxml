@@ -9,7 +9,7 @@
   <view class="form-card">
     <view class="form-group" wx:if="{{currentStep === 1}}">
       <view class="group-title">基础信息</view>
-      <view class="group-desc">填写物料的基本识别信息</view>
+
       <view class="form-item">
         <text class="label">所属车间 <text class="required-mark">*</text></text>
         <picker wx:if="{{isAdmin}}" mode="selector" range="{{workshopNames}}" value="{{workshopIndex}}" bindchange="onWorkshopChange" class="picker">
@@ -166,12 +166,12 @@
         <text class="label">具体位置 <text class="required-mark" wx:if="{{usesWarehouseArea}}">*</text></text>
         <input placeholder="如：破曲楼二楼、六车间、备件库地面" value="{{part.locationNote}}" bindinput="onInputChange" data-field="locationNote" class="input required" />
       </view>
-      <view class="location-tip" wx:if="{{usesWarehouseArea}}">货区代码与库位编码将由系统自动处理</view>
+
     </view>
 
     <view class="form-group" wx:if="{{currentStep === 3}}">
       <view class="group-title">确认并提交</view>
-      <view class="group-desc">请核对物料编码、库存和位置，备注可选填</view>
+
       <view class="review-card">
         <text>物料：{{part.materialCode}} · {{part.materialDesc}}</text>
         <text>库存：{{part.totalStock || 0}}{{part.unit || '个'}}</text>

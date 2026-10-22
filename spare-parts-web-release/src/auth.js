@@ -1,3 +1,5 @@
+import { attendanceReviewCache } from './utils/attendance-review-cache.mjs'
+
 const TOKEN_KEY = 'spare_parts_auth_token'
 const USER_KEY = 'spare_parts_auth_user'
 
@@ -6,18 +8,20 @@ export function getUser() {
   try { return JSON.parse(localStorage.getItem(USER_KEY) || 'null') } catch { return null }
 }
 export function setSession(token, user) {
+  if (token !== getToken()) attendanceReviewCache.clear()
   localStorage.setItem(TOKEN_KEY, token)
   localStorage.setItem(USER_KEY, JSON.stringify(user))
   window.dispatchEvent(new Event('auth-changed'))
 }
 export function clearSession() {
+  attendanceReviewCache.clear()
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
   window.dispatchEvent(new Event('auth-changed'))
 }
 export function isAdmin() { return getUser()?.role === 'admin' }
 export function isViewer() { return getUser()?.role === 'viewer' }
-export function showControl(_allowed) { return Boolean(getUser()) }
+export function showControl(_allowed) { const user=getUser(); return Boolean(user) && !(user.role==='viewer' && user.staffWorkshopCode==='raw_grain' && user.staffPosition!=='shift_leader') }
 export const WORKSHOP_ROLES = Object.freeze({ raw_grain: 'raw_grain', qu_making: 'qu_making', brewing: 'brewing' })
 export function userWorkshopCode() { return getUser()?.workshopCode || WORKSHOP_ROLES[getUser()?.role] || '' }
 export function canEditWorkshop(workshopCode) {

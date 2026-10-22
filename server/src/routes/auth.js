@@ -22,15 +22,15 @@ const passwordChangeLimiter = rateLimit({
 });
 
 router.post('/login', loginLimiter, asyncHandler(async (req, res) => {
-  const username = String(req.body?.username || '').trim().toLowerCase();
+  const username = String(req.body?.username || '').trim();
   const password = String(req.body?.password || '');
   if (!username || !password) throw new ApiError(400, '请输入用户名和密码');
 
   const [rows] = await pool.query(
     `SELECT id, username, password_hash, display_name, role, staff_workshop_code, staff_position,
             enabled, token_version
-     FROM app_users WHERE username = ? LIMIT 1`,
-    [username]
+     FROM app_users WHERE username = ? AND CAST(username AS BINARY) = CAST(? AS BINARY) LIMIT 1`,
+    [username, username]
   );
   const user = rows[0];
   const valid = user ? await verifyPassword(password, user.password_hash) : false;
@@ -46,6 +46,12 @@ router.get('/me', requireAuth, (req, res) => {
   setAssetCookie(req, res);
   res.json({ success: true, data: { user: req.user } });
 });
+
+router.patch('/profile', requireAuth, asyncHandler(async (req, res) => {
+  const displayName = require('../personal-profile').profileName(req.body);
+  await pool.query('UPDATE app_users SET display_name = ? WHERE id = ?', [displayName, req.user.id]);
+  res.json({ success: true, data: { user: { ...req.user, displayName } } });
+}));
 
 router.post('/logout', requireAuth, asyncHandler(async (req, res) => {
   await pool.query('DELETE FROM app_sessions WHERE id = ?', [req.sessionId]);

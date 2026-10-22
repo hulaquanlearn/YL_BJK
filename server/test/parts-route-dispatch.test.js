@@ -37,6 +37,6 @@ test('real Express dispatch downloads the template and fences viewer writes befo
     assert.equal(invalidCategory.status,400);
     assert.equal(queries.length,before,'invalid resource IDs never default to record one');
     const retired=await fetch(base+'/parts/1/model',{method:'POST'});
-    assert.equal(retired.status,410);
+    assert.equal(retired.status,404);
   }finally{pool.query=saved;await new Promise(resolve=>server.close(resolve));}
 });

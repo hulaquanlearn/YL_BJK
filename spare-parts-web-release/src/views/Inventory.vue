@@ -30,28 +30,29 @@
           </el-select>
         </div>
         <div class="filter-actions">
-          <el-button @click="resetFilters">重置</el-button>
-          <el-button type="primary" :loading="loading" @click="search">查询</el-button>
+          <el-button v-if="hasActiveFilters" text @click="resetFilters">重置</el-button>
+          <el-button :loading="loading" @click="search">查询</el-button>
         </div>
       </div>
     </section>
     <div v-if="loadError" class="inventory-load-error panel" role="alert"><strong>库存列表加载失败</strong><span>{{loadError}}；当前显示的数据可能未更新。</span><el-button :disabled="loading" @click="refreshAll">重新加载</el-button></div>
     <details class="inventory-summary" :open="overviewOpen" @toggle="overviewOpen=$event.target.open">
-      <summary>库存概况 <span>{{ formatNumber(dashboard.partTypes) }} 种 · 低库存 {{ formatNumber(dashboard.lowStock) }} 条</span><el-button class="summary-refresh" :loading="loading" aria-label="刷新库存概况和列表" title="刷新库存概况和列表" @click.stop="refreshAll"><el-icon v-if="!loading"><Refresh /></el-icon><span>刷新</span></el-button></summary>
+      <summary>库存概况 <span>{{ formatNumber(dashboard.partTypes) }} 种 · 低库存 {{ formatNumber(dashboard.lowStock) }} 条</span><el-button class="summary-refresh" :loading="loading" aria-label="刷新库存概况和列表" title="刷新库存概况和列表" @click.stop="refreshAll"><el-icon v-if="!loading"><Refresh /></el-icon><span>{{loading?'正在刷新':'刷新概况'}}</span></el-button></summary>
 
       <section class="inventory-metric-grid" aria-label="库存指标">
         <button type="button" class="overview-card" @click="typeBreakdownVisible=true"><div class="overview-top"><span>备件种类</span><span class="overview-icon"><el-icon><Tickets /></el-icon></span></div><div class="overview-value">{{ formatNumber(dashboard.partTypes) }}<small>种</small></div><div class="overview-note">查看类型构成 <el-icon><ArrowRight /></el-icon></div></button>
-        <button type="button" class="overview-card overview-value-card" @click="goStatistics()"><div class="overview-top"><span>{{dashboard.missingPrice?'已知库存价值':'库存总价值'}}</span><span class="overview-icon"><el-icon><Money /></el-icon></span></div><div class="overview-value overview-currency">{{ formatCurrency(dashboard.totalValue) }}</div><div class="overview-note"><span>库存 × 不含税单价<template v-if="dashboard.missingPrice"> · {{ dashboard.missingPrice }} 条缺价格</template></span><el-icon><ArrowRight /></el-icon></div></button>
+        <button v-if="!isRawEmployee(getUser())" type="button" class="overview-card overview-value-card" @click="goStatistics()"><div class="overview-top"><span>{{dashboard.missingPrice?'已知库存价值':'库存总价值'}}</span><span class="overview-icon"><el-icon><Money /></el-icon></span></div><div class="overview-value overview-currency">{{ formatCurrency(dashboard.totalValue) }}</div><div class="overview-note"><span>库存 × 不含税单价<template v-if="dashboard.missingPrice"> · {{ dashboard.missingPrice }} 条缺价格</template></span><el-icon><ArrowRight /></el-icon></div></button>
         <button v-if="dashboard.lowStock || query.lowStock" type="button" class="overview-card overview-alert" @click="showLowStock"><div class="overview-top"><span>低库存预警</span><span class="overview-icon"><el-icon><Warning /></el-icon></span></div><div class="overview-value">{{ formatNumber(dashboard.lowStock) }}<small>条</small></div><div class="overview-note">已达到或低于订购点 <el-icon><ArrowRight /></el-icon></div></button>
-        <button v-if="dashboard.missingReorderPoint" type="button" class="overview-card overview-quality" @click="goScoped('/data-quality', { issue:'missing_reorder_point' })"><div class="overview-top"><span>订购点未配置</span><span class="overview-icon"><el-icon><CircleClose /></el-icon></span></div><div class="overview-value">{{ formatNumber(dashboard.missingReorderPoint) }}<small>条</small></div><div class="overview-note">不参与低库存判断 <el-icon><ArrowRight /></el-icon></div></button>
-        <button v-if="dashboard.pendingApproval" type="button" class="overview-card" @click="goScoped('/check', { status:'待审批' })"><div class="overview-top"><span>待审批盘点</span><span class="overview-icon"><el-icon><DocumentChecked /></el-icon></span></div><div class="overview-value">{{ formatNumber(dashboard.pendingApproval) }}<small>条</small></div><div class="overview-note">进入盘点审批 <el-icon><ArrowRight /></el-icon></div></button>
+        <button v-if="!isRawEmployee(getUser()) && dashboard.missingReorderPoint" type="button" class="overview-card overview-quality" @click="goScoped('/data-quality', { issue:'missing_reorder_point' })"><div class="overview-top"><span>订购点未配置</span><span class="overview-icon"><el-icon><CircleClose /></el-icon></span></div><div class="overview-value">{{ formatNumber(dashboard.missingReorderPoint) }}<small>条</small></div><div class="overview-note">不参与低库存判断 <el-icon><ArrowRight /></el-icon></div></button>
+        <button v-if="!isRawEmployee(getUser()) && dashboard.pendingApproval" type="button" class="overview-card" @click="goScoped('/check', { status:'待审批' })"><div class="overview-top"><span>待审批盘点</span><span class="overview-icon"><el-icon><DocumentChecked /></el-icon></span></div><div class="overview-value">{{ formatNumber(dashboard.pendingApproval) }}<small>条</small></div><div class="overview-note">进入盘点审批 <el-icon><ArrowRight /></el-icon></div></button>
       </section>
-      <button type="button" class="inventory-stock-summary" @click="goStatistics()">
+      <button v-if="!isRawEmployee(getUser())" type="button" class="inventory-stock-summary" @click="goStatistics()">
         <span class="stock-summary-heading"><strong>库存数量</strong><small>按单位分别统计</small></span>
         <span class="stock-unit-grid" :title="unitSummary"><span v-for="item in dashboard.unitTotals" :key="item.unit" class="stock-unit"><strong>{{ formatNumber(item.total) }}</strong><small>{{ item.unit }}</small></span><span v-if="!dashboard.unitTotals.length" class="stock-empty">暂无库存</span></span>
         <span class="stock-summary-link">查看统计 <el-icon><ArrowRight /></el-icon></span>
       </button>
     </details>
+    <el-dialog v-model="columnConfigVisible" title="自定义列" width="min(440px,94vw)" align-center><div class="column-picker"><el-checkbox-group v-model="visibleColumns"><el-checkbox v-for="item in columnOptions" :key="item.value" :value="item.value">{{item.label}}</el-checkbox></el-checkbox-group></div></el-dialog>
     <el-dialog v-model="typeBreakdownVisible" title="备件种类与价值分布" width="min(1240px,96vw)" align-center>
       <p class="scope-dialog-note">按当前筛选统计各车间、货区；数量按单位列出，价值按库存 × 不含税单价计算。相同备件出现在多个货区时，货区种类数不能直接相加。</p>
       <div class="scope-dialog-total"><strong>共 {{ formatNumber(dashboard.partTypes) }} 种</strong><span>已知库存价值 {{ formatCurrency(dashboard.totalValue) }}</span><span v-if="dashboard.missingPrice">{{ dashboard.missingPrice }} 条未填写价格</span></div>
@@ -60,7 +61,7 @@
         <el-table-column v-for="type in ['易损件','质保件']" :key="type" :label="type"><el-table-column label="种类" width="75"><template #default="{row}">{{ scopeType(row,type).partTypes || 0 }}</template></el-table-column><el-table-column label="库存数量" min-width="155"><template #default="{row}">{{ quantities(scopeType(row,type).unitTotals) }}</template></el-table-column><el-table-column label="库存价值" min-width="150"><template #default="{row}">{{ formatCurrency(scopeType(row,type).totalValue) }}<small v-if="scopeType(row,type).missingPrice" class="scope-missing">{{ scopeType(row,type).missingPrice }} 条缺价格</small></template></el-table-column></el-table-column>
         <el-table-column label="合计价值" min-width="145"><template #default="{row}">{{ formatCurrency(row.totalValue) }}</template></el-table-column>
       </el-table>
-      <template #footer><el-button @click="typeBreakdownVisible=false">关闭</el-button><el-button type="primary" @click="goStatistics()">查看统计大屏</el-button></template>
+      <template #footer><el-button @click="typeBreakdownVisible=false">关闭</el-button><el-button v-if="!isRawEmployee(getUser())" type="primary" @click="goStatistics()">查看统计大屏</el-button></template>
     </el-dialog>
 
     <section class="panel table-panel">
@@ -72,10 +73,8 @@
         </div>
         <div class="table-actions">
           <el-button v-write="canEditAny" v-if="$showControl(canEditAny)" type="primary" size="small" @click="openCreate"><el-icon><Plus /></el-icon>新增备件</el-button>
-          <el-button v-write="canEditAny" v-if="$showControl(canEditAny)" type="success" plain size="small" @click="openImport"><el-icon><Upload /></el-icon>导入备件</el-button>
-          <el-button v-write="canEditAny" v-if="$showControl(canEditAny)" size="small" :loading="exporting" :disabled="!total || loading" @click="exportCurrent">导出备件</el-button>
+          <ActionMenu aria-label="库存更多操作" :items="[{key:'import',label:'导入备件',visible:$showControl(canEditAny),disabled:!canEditAny},{key:'export',label:exporting?'正在导出…':'导出备件',visible:$showControl(canEditAny),disabled:!canEditAny || !total || loading || exporting},{key:'columns',label:'自定义列',divided:true}]" @select="inventoryAction" />
           <el-button v-if="query.lowStock" type="danger" plain size="small" @click="clearLowStock">退出预警筛选</el-button>
-          <el-popover placement="bottom-end" :width="220" trigger="click"><template #reference><el-button size="small"><el-icon><Grid /></el-icon>自定义列</el-button></template><div class="column-picker"><strong>显示字段</strong><el-checkbox-group v-model="visibleColumns"><el-checkbox v-for="item in columnOptions" :key="item.value" :value="item.value">{{ item.label }}</el-checkbox></el-checkbox-group></div></el-popover>
         </div>
       </div>
 
@@ -85,8 +84,8 @@
         <button v-if="total > list.length && !allFilteredSelected" type="button" class="select-filtered-link" :disabled="selectingAll || loading" @click="selectAllFiltered">选择全部 {{ total }} 条筛选结果</button>
         <span v-else-if="allFilteredSelected" class="all-selected-label">已选全部筛选结果</span>
         <span class="selection-toolbar-spacer" />
-        <el-dropdown v-write trigger="click" @command="command=>command==='stock'?openBatch():openBatchDelete()">
-          <el-button size="small">批量操作<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button>
+        <el-dropdown trigger="click" @command="command=>command==='stock'?openBatch():openBatchDelete()">
+          <el-button v-write size="small">批量操作<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button>
           <template #dropdown><el-dropdown-menu><el-dropdown-item command="stock">批量出入库</el-dropdown-item><el-dropdown-item command="delete">批量删除</el-dropdown-item></el-dropdown-menu></template>
         </el-dropdown>
         <el-button size="small" text @click="clearSelection">取消选择</el-button>
@@ -96,7 +95,7 @@
         <article v-for="row in list" :key="row._id" class="mobile-part">
           <header><el-checkbox v-if="$showControl(canEditAny)" :disabled="!canEditWorkshop(row.workshopCode)" :aria-label="'选择 '+row.materialDesc" :model-value="selectedRows.some(item=>item._id===row._id)" @change="value=>inventoryTable?.toggleRowSelection(row,value)"/><strong>{{ row.materialDesc || '未命名备件' }}</strong><b :class="{'is-low':isLow(row)}">{{ row.totalStock }} {{ row.unit || '个' }}</b></header>
           <p>{{ row.materialCode }} · {{ row.spec || '规格未填写' }}</p><p>{{ locationText(row) }}</p>
-          <footer><el-tag :type="inventoryHealth(row).type" size="small">{{ inventoryHealth(row).label }}</el-tag><el-button link @click="openDetail(row)">详情</el-button><el-button link @click="locate3d(row)">3D定位</el-button><el-button v-write="canEditWorkshop(row.workshopCode)" v-if="$showControl(canEditWorkshop(row.workshopCode))" link :disabled="canEditWorkshop(row.workshopCode) && row.inventoryStatus === '待审批'" @click="openStock(row)">出入库</el-button></footer>
+          <footer><el-tag :type="inventoryHealth(row).type" size="small">{{ inventoryHealth(row).label }}</el-tag><el-button v-write="canEditWorkshop(row.workshopCode)" v-if="$showControl(canEditWorkshop(row.workshopCode))" link :disabled="canEditWorkshop(row.workshopCode) && row.inventoryStatus === '待审批'" @click="openStock(row)">出入库</el-button><el-button link @click="locate3d(row)">3D定位</el-button><el-button link @click="openDetail(row)">详情</el-button></footer>
         </article><el-empty v-if="!loading&&!list.length" description="没有找到符合条件的备件"/>
       </div>
       <el-table class="desktop-inventory-table" ref="inventoryTable" :data="list" v-loading="loading" row-key="_id" empty-text="没有找到符合条件的备件" @selection-change="onSelectionChange">
@@ -147,15 +146,15 @@
         </el-table-column>
         <el-table-column label="操作" width="235" align="right" fixed="right">
           <template #default="{ row }">
-            <div class="inventory-row-actions"><el-button link type="primary" @click="openDetail(row)">详情</el-button>
+            <div class="inventory-row-actions"><el-button v-write="canEditWorkshop(row.workshopCode)" v-if="$showControl(canEditWorkshop(row.workshopCode))" link type="primary" :disabled="canEditWorkshop(row.workshopCode) && row.inventoryStatus === '待审批'" @click="openStock(row)">出入库</el-button>
             <el-button link type="primary" @click="locate3d(row)">3D定位</el-button>
-            <el-button v-write="canEditWorkshop(row.workshopCode)" v-if="$showControl(canEditWorkshop(row.workshopCode))" link type="primary" :disabled="canEditWorkshop(row.workshopCode) && row.inventoryStatus === '待审批'" @click="openStock(row)">出入库</el-button></div>
+            <el-button link type="primary" @click="openDetail(row)">详情</el-button></div>
           </template>
         </el-table-column>
       </el-table>
 
       <div class="pagination-bar">
-        <span>第 {{ query.page }} 页，每页 {{ query.pageSize }} 条</span>
+
         <el-pagination
           v-model:current-page="query.page"
           v-model:page-size="query.pageSize"
@@ -188,7 +187,7 @@
                 <dl class="detail-fields">
                   <div v-if="currentPart.warehouseAreaName" class="detail-field"><dt>货区</dt><dd>{{ currentPart.warehouseAreaName }}</dd></div>
                   <div v-if="currentPart.workshopName" class="detail-field"><dt>所属车间</dt><dd>{{ currentPart.workshopName }}</dd></div>
-                  <div class="detail-field detail-field-wide"><dt>存放位置</dt><dd>{{ locationText(currentPart) }}</dd></div>
+                  <div class="detail-field detail-field-wide"><dt>{{currentPart.locationCode?'库位编码':'存放位置'}}</dt><dd>{{ currentPart.locationCode || currentPart.locationNote || locationText(currentPart) }}</dd></div>
                   <div v-if="currentPart.shelf" class="detail-field"><dt>货架</dt><dd>{{ valueText(currentPart.shelf, '号') }}</dd></div>
                   <div v-if="currentPart.layer" class="detail-field"><dt>层数</dt><dd>{{ valueText(currentPart.layer, '层') }}</dd></div>
                   <div v-if="currentPart.position" class="detail-field"><dt>方位</dt><dd>{{ sideText(currentPart.position) }}</dd></div>
@@ -273,7 +272,7 @@
     </el-dialog>
 
     <el-dialog v-model="importVisible" title="导入备件台账" class="ledger-entry-dialog" width="min(820px, 96vw)" destroy-on-close>
-      <p class="ledger-dialog-description">导入完整备件台账，包含库存、价格、库位和模型绑定。</p>
+
       <el-form label-position="left" label-width="112px" class="ledger-form import-workshop-form">
         <el-form-item label="导入到车间" required><el-select v-model="importWorkshopCode"><el-option v-for="item in editableWorkshops" :key="item.code" :label="item.name" :value="item.code" /></el-select></el-form-item>
       </el-form>
@@ -281,12 +280,13 @@
       <el-upload v-write ref="importUploadRef" class="ledger-upload" drag :auto-upload="false" :limit="1" accept=".xlsx" :on-change="handleImportFile" :on-remove="clearImportFile">
         <WorkbookUploadMark /><div class="el-upload__text">拖入 .xlsx 文件，或<em>点击选择</em></div>
       </el-upload>
-      <table v-if="!importPreview" class="import-example"><caption>填写示例（仅说明格式，不会导入）</caption><thead><tr><th>物料编码</th><th>物料名称</th><th>模型名称</th></tr></thead><tbody><tr><td>502000268</td><td>微型断路器 IC65N</td><td>微型断路器1P</td></tr><tr><td>502000300</td><td>交流接触器</td><td>交流接触器</td></tr></tbody></table>
-      <div class="import-rule-box"><p><b>1</b> 模型名称留空：保留原绑定；新备件未绑定时使用公共模型。</p><p><b>2</b> 文件有错误：校验提示，修正后再导入；校验通过前不会写入数据。</p></div>
-      <details class="import-field-details"><summary>查看完整模板字段与填写说明</summary><p>物料编码 · 物料名称 · 单位 · 规格型号 · 备件类型 · 库存量 · 订购点 · 最高储备 · 不含税单价 · 用途 · 备注 · 模型名称<template v-if="importWorkshopCode!=='qu_making'"> · 货区 · 六位库位码</template> · 存放位置。单价和储备等选填项留空表示未配置。</p></details>
+      <details class="import-field-details"><summary>填写说明与示例</summary>
+      <table v-if="!importPreview" class="import-example"><caption>填写示例</caption><thead><tr><th>物料编码</th><th>物料名称</th><th>模型名称</th></tr></thead><tbody><tr><td>502000268</td><td>微型断路器 IC65N</td><td>微型断路器1P</td></tr><tr><td>502000300</td><td>交流接触器</td><td>交流接触器</td></tr></tbody></table>
+      <div class="import-rule-box"><p><b>1</b> 模型名称留空：保留原绑定；新备件未绑定时使用公共模型。</p></div>
+      <p>物料编码 · 物料名称 · 单位 · 规格型号 · 备件类型 · 库存量 · 订购点 · 最高储备 · 不含税单价 · 用途 · 备注 · 模型名称<template v-if="importWorkshopCode!=='qu_making'"> · 货区 · 六位库位码</template> · 存放位置。单价和储备等选填项留空表示未配置。</p></details>
       <el-table v-if="importPreview?.sample?.length && !importPreview.errorCount" :data="importPreview.sample" border max-height="240" class="ledger-sample-table"><el-table-column prop="materialCode" label="物料编码" width="145" /><el-table-column prop="materialDesc" label="物料名称" min-width="180" /><el-table-column prop="totalStock" label="库存量" width="85" /><el-table-column prop="modelName" label="模型名称" min-width="150"><template #default="{row}">{{ row.modelName || '未填写，沿用绑定 / 公共模型' }}</template></el-table-column></el-table>
       <div v-if="importPreview" class="import-preview" :class="{'has-errors':importPreview.errorCount}"><div class="import-preview-head"><strong>{{ importPreview.errorCount ? `发现 ${importPreview.errorCount} 个问题` : `校验通过，共 ${importPreview.total} 条` }}</strong><el-button v-if="importPreview.errorCount" type="warning" plain :loading="errorReportDownloading" @click="downloadImportErrorReport">下载错误修正台账</el-button></div><el-table v-if="importPreview.errors?.length" :data="importPreview.errors" size="small" border max-height="220"><el-table-column prop="row" label="行" width="64"/><el-table-column prop="field" label="字段" width="110"/><el-table-column prop="reason" label="原因" min-width="190"/><el-table-column prop="suggestion" label="修改建议" min-width="190"/></el-table></div>
-      <template #footer><el-button @click="importVisible=false">取消</el-button><el-button v-write :loading="importPreviewing" @click="previewImport">校验文件</el-button><el-button v-write type="primary" :disabled="!importPreview||importPreview.errorCount>0" :loading="importSubmitting" @click="submitImport">确认导入</el-button></template>
+      <template #footer><el-button :disabled="importPreviewing || importSubmitting" @click="importVisible=false">取消</el-button><el-button v-if="importPreview && !importPreview.errorCount" v-write type="primary" :loading="importSubmitting" @click="submitImport">确认导入</el-button><el-button v-else v-write type="primary" :disabled="!importFile || !importWorkshopCode" :loading="importPreviewing" @click="previewImport">校验文件</el-button></template>
     </el-dialog>
 
     <el-dialog v-model="deleteVisible" title="批量删除备件" width="min(800px, 96vw)" :close-on-click-modal="!deleteSubmitting" :close-on-press-escape="!deleteSubmitting" :show-close="!deleteSubmitting" destroy-on-close>
@@ -338,6 +338,7 @@
 </style>
 <script setup>
 import PartModelDetail from '../components/PartModelDetail.vue'
+import ActionMenu from '../components/ActionMenu.vue'
 import PartModelBinding from '../components/PartModelBinding.vue'
 import WorkbookUploadMark from '../components/WorkbookUploadMark.vue'
 import WarehouseAreaPicker from '../components/WarehouseAreaPicker.vue'
@@ -348,6 +349,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { batchAssignPartCategoryModel, batchDeleteParts, batchUpdateStock, createPart, deletePart, downloadPartsImportErrorReport, downloadPartsImportTemplate, exportParts, getDashboard, getFilters, getMovementReasons, getPart, getParts, importParts, previewPartsImport, updatePart, updateStock } from '../api'
+import { isRawEmployee } from '../utils/feature-access.mjs'
 import { canEditAnyWorkshop, canEditWorkshop, showControl, getUser } from '../auth'
 import { INVENTORY_SCOPE_KEYS, inventoryScope, inventoryRouteQuery } from '../utils/inventory-scope.mjs'
 
@@ -368,6 +370,7 @@ const filterStorageKey = `spare-parts-inventory-filters:${getUser()?.id || 'unkn
 const savedQuery = hasRouteScope ? {} : readStored(filterStorageKey, {})
 const routeWorkshop = ['raw_grain','qu_making','brewing'].includes(String(route.query.workshopCode || '')) ? String(route.query.workshopCode) : ''
 const query = reactive({ page: 1, pageSize: 20, searchKeyword: '', workshopCode: routeWorkshop, warehouseAreaName: '', partType: '', stockStatus: '', sort: 'name', lowStock: undefined, ...savedQuery, ...(hasRouteScope ? inventoryScope(route.query) : {}) })
+const hasActiveFilters=computed(()=>Boolean(query.searchKeyword || query.workshopCode || query.warehouseAreaName || query.partType || query.stockStatus || query.lowStock || query.sort!=='name'))
 const stockStatusLabel = computed(() => ({zero:'零库存',low:'需要补充',normal:'库存正常',unconfigured:'订购点未配置'}[query.stockStatus] || '已筛选'))
 const typeBreakdownVisible = ref(false)
 function scopeType(row,type){ return row.typeSummaries?.find(item=>item.partType===type) || {} }
@@ -423,6 +426,8 @@ const columnOptions = [
   { value: 'location', label: '货区 / 库位' }, { value: 'reorderPoint', label: '订购点' }, { value: 'status', label: '库存状态' }
 ]
 const visibleColumns = ref(readStored('spare-parts-inventory-columns-v2', ['spec','location','reorderPoint','status']))
+const columnConfigVisible=ref(false)
+function inventoryAction(action){if(action==='import')return openImport();if(action==='export')return exportCurrent();if(action==='columns')columnConfigVisible.value=true}
 const canEditAny = canEditAnyWorkshop()
 const bindingVisible=ref(false), bindingTarget=ref(null), bindingId=ref(null), bindingSaving=ref(false)
 function canBindModel(row){ if(!row || !canEditAnyWorkshop())return false;const scopes=String(row.assetWorkshopCodes || row.workshopCode || '').split(',').filter(Boolean);return scopes.length>0 && scopes.every(canEditWorkshop) }
@@ -770,7 +775,7 @@ onMounted(() => Promise.allSettled([refreshAll(), loadOperationOptions(),openLin
 .stock-summary-heading{display:grid;gap:5px;flex:none}.stock-summary-heading strong{font-size:13px}.stock-summary-heading small{font-size:11px;color:#7b8999}
 .stock-unit-grid{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;flex:1;min-width:0}.stock-unit{display:flex;align-items:baseline;gap:5px;white-space:nowrap}.stock-unit strong{font-size:22px;font-weight:650;font-variant-numeric:tabular-nums}.stock-unit small{font-size:12px;color:#718096}
 .stock-summary-link{display:flex;align-items:center;gap:5px;flex:none;font-size:12px;color:#2f6fae}.stock-empty{font-size:13px;color:#7b8999}
-:deep(.inventory-row-actions .el-button.is-link:not(.is-disabled)),:deep(.mobile-part footer .el-button.is-link:not(.is-disabled)){color:#2f6fae!important}
-:deep(.inventory-row-actions .el-button.is-link:not(.is-disabled):hover),:deep(.mobile-part footer .el-button.is-link:not(.is-disabled):hover){color:#245887!important}
+:deep(.inventory-row-actions .el-button.is-link:not(.is-disabled)),:deep(.mobile-part footer .el-button.is-link:not(.is-disabled)){color:var(--primary,#bd182a)!important}
+:deep(.inventory-row-actions .el-button.is-link:not(.is-disabled):hover),:deep(.mobile-part footer .el-button.is-link:not(.is-disabled):hover){color:#a11325!important}
 @media(max-width:680px){.inventory-summary .inventory-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.overview-card{padding:13px;min-height:142px}.overview-value-card{grid-column:1/-1;grid-row:1}.overview-value{font-size:27px;margin:9px 0 12px}.overview-currency{font-size:28px}.inventory-stock-summary{flex-wrap:wrap;gap:12px;padding:14px}.stock-summary-heading{flex:1}.stock-summary-link{order:1}.stock-unit-grid{flex-basis:100%;order:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px}.stock-unit strong{font-size:20px}}
 </style>

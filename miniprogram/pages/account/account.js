@@ -6,18 +6,18 @@ const workshopLabels={raw_grain:'原粮车间',qu_making:'制曲车间',brewing:
 const positionLabels={group_leader:'组长',shift_leader:'班长'};
 function accountRoleLabel(user) {
   if (user?.role === 'viewer' && user.staffPosition && user.staffWorkshopCode) {
-    return `${workshopLabels[user.staffWorkshopCode] || '车间'}${positionLabels[user.staffPosition] || '人员'}`;
+    return `${workshopLabels[user.staffWorkshopCode] || '车间'}${auth.staffPositionLabel(user)}`;
   }
   return roleLabels[user?.role] || '车间人员';
 }
 
 Page({
-  data: { user: null, userInitial: '用', isAdmin: false, isViewer: false, oldPassword: '', newPassword: '', confirmPassword: '', submitting: false },
+  data: { canManageAccounts:false,user: null, userInitial: '用', isAdmin: false, isViewer: false, oldPassword: '', newPassword: '', confirmPassword: '', submitting: false },
 
   onShow() {
     if (!auth.requireLogin()) return;
     const user = auth.getUser();
-    this.setData({ user, roleLabel:accountRoleLabel(user), userInitial: user?.displayName?.slice(0, 1) || '用', isAdmin: user?.role === 'admin', isViewer: auth.isViewer() });
+    this.setData({ canManageAccounts:auth.canEditAnyWorkshop(),user, roleLabel:accountRoleLabel(user), userInitial: user?.displayName?.slice(0, 1) || '用', isAdmin: user?.role === 'admin', isViewer: auth.isViewer() });
   },
 
   onInput(e) { this.setData({ [e.currentTarget.dataset.field]: e.detail.value }); },

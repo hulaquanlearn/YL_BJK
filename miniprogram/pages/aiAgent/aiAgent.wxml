@@ -5,12 +5,7 @@
         <text class="hero-title">备件与设备助手</text>
         <text class="hero-desc">查库存、找库位、查故障资料</text>
       </view>
-      
-    </view>
-    <view class="scope-row">
-      <text>实时库存</text>
-      <text>库位定位</text>
-      <text>维修保养</text>
+
     </view>
   </view>
 
@@ -24,7 +19,7 @@
       bindinput="handleInput"
     ></textarea>
     <view class="input-footer">
-      <text class="scope-tip">输入名称、编码或故障现象</text>
+
       <text class="input-count">{{userQuestion.length}}/500</text>
       <text class="clear-history" wx:if="{{resultType || messages.length}}" bindtap="clearChatHistory">清空</text>
     </view>
@@ -34,7 +29,7 @@
     {{isLoading ? '正在识别并查询...' : '智能查询'}}
   </button>
 
-  <view class="suggestions">
+  <view class="suggestions" wx:if="{{!resultType && !messages.length}}">
     <text class="suggestion-title">库存查询示例</text>
     <scroll-view class="suggestion-scroll" scroll-x enhanced show-scrollbar="{{false}}">
       <view class="suggestion-row">
@@ -47,8 +42,8 @@
         >{{item}}</view>
       </view>
     </scroll-view>
-    <text class="suggestion-title maintenance-title">维修咨询示例</text>
-    <scroll-view class="suggestion-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+    <text wx:if="{{canUseKnowledgeAI}}" class="suggestion-title maintenance-title">维修咨询示例</text>
+    <scroll-view wx:if="{{canUseKnowledgeAI}}" class="suggestion-scroll" scroll-x enhanced show-scrollbar="{{false}}">
       <view class="suggestion-row">
         <view
           class="suggestion-chip maintenance"

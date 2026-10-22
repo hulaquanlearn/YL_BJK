@@ -61,7 +61,7 @@
     </view>
   </view>
 
-  <view class="card">
+  <view class="card" wx:if="{{!isRawEmployee}}">
     <view class="card-header">库存调整</view>
     <view class="operation-reason">
       <text class="operation-label">操作原因：</text>
@@ -112,5 +112,5 @@
     <view class="remark-content">{{part.remark}}</view>
   </view>
 
-  <button class="archive-btn" bindtap="archivePart">停用该备件记录</button>
+  <button wx:if="{{!isRawEmployee}}" class="archive-btn" bindtap="archivePart">停用该备件记录</button>
 </view>

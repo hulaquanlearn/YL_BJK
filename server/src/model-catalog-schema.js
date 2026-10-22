@@ -54,12 +54,12 @@ async function ensureModelCatalog(db) {
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uk_part_model_name(name)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`);
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`);
   const [[column]] = await db.query("SELECT COUNT(*) AS total FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='parts' AND COLUMN_NAME='bound_model_id'");
   if (!Number(column.total)) await db.query('ALTER TABLE parts ADD COLUMN bound_model_id BIGINT UNSIGNED DEFAULT NULL');
   await db.query(`CREATE TABLE IF NOT EXISTS model_catalog_versions (
     version VARCHAR(80) PRIMARY KEY, applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`);
   await db.beginTransaction();
   try {
     // The version row serializes concurrent starts. Never reseed renamed or

@@ -1,5 +1,5 @@
 // These selectors need a complete scope: silently stopping at the API's 200-row cap loses choices.
-export async function collectParts(fetchPage, params, isCurrent = () => true) {
+export async function collectParts(fetchPage, params, isCurrent = () => true, onProgress = () => {}) {
   const rows = [], seen = new Set()
   for (let page = 1; page <= 50; page++) {
     if (!isCurrent()) return null
@@ -13,6 +13,7 @@ export async function collectParts(fetchPage, params, isCurrent = () => true) {
       if (!seen.has(key)) { seen.add(key); rows.push(item); added++ }
     }
     const total = Number(result.total)
+    onProgress({loaded:rows.length,total:Number.isFinite(total)?total:null,page})
     if ((Number.isFinite(total) && rows.length >= total) || (!Number.isFinite(total) && items.length < 200)) return rows
     if (!items.length || !added) throw new Error('备件列表未完整加载，请刷新重试')
   }

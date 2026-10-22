@@ -6,13 +6,13 @@ function definition(name,api={}){
  return {...page,data:structuredClone(page.data),setData(values,callback){Object.assign(this.data,values);callback?.()}};
 }
 test('all mini-program template button handlers and registered page paths exist',()=>{
- const pages=JSON.parse(fs.readFileSync(path.join(root,'app.json'),'utf8')).pages;let events=0;
+ const app=JSON.parse(fs.readFileSync(path.join(root,'app.json'),'utf8')),pages=app.pages,registered=[...pages,...(app.subPackages||[]).flatMap(p=>p.pages.map(page=>p.root+'/'+page))];let events=0;
  for(const entry of pages){
   assert.ok(fs.existsSync(path.join(root,entry+'.js')),entry);
   const name=entry.split('/')[1],page=definition(name),template=fs.readFileSync(path.join(root,entry+'.wxml'),'utf8');
   for(const match of template.matchAll(/(?:bind|catch)(?::)?[a-z]+\s*=\s*["']([a-zA-Z_$][\w$]*)["']/g)){events++;assert.equal(typeof page[match[1]],'function',`${entry}: ${match[1]}`)}
   const script=fs.readFileSync(path.join(root,entry+'.js'),'utf8');
-  for(const match of script.matchAll(/\/pages\/([a-zA-Z]+)\/([a-zA-Z]+)/g))assert.ok(pages.includes(`pages/${match[1]}/${match[2]}`),match[0]);
+  for(const match of script.matchAll(/\/((?:packages\/[\w-]+\/)?pages\/[\w-]+\/[\w-]+)/g))assert.ok(registered.includes(match[1]),match[0]);
  }
  assert.ok(events>70);
 });

@@ -120,28 +120,46 @@ test('post-end re-entry and conflicting consecutive directions prevent forced no
     assert.equal(r.status,'sequence_review');assert.equal(r.normalExit,null);assert.ok(r.sequenceIssues.length>0);assert.ok(r.findings.length>0);
   }
 });
-test('same-gate face-scan retries within three minutes form one departure and preserve every original scan and source row',()=>{
-  for(const retryTime of ['16:05:39','16:08:34']){
+test('same-direction face-scan retries within two minutes form one departure and preserve every original scan and source row',()=>{
+  for(const retryTime of ['16:05:39','16:07:34']){
     const report=analysis('8:00-16:00',[event('2026-09-17','07:30:00','in'),event('2026-09-17','16:05:34'),event('2026-09-17',retryTime)]),r=report.results[0];
-    assert.equal(report.version,2);assert.equal(report.ruleRevision,4);assert.equal(report.options.retryWindowSeconds,180);assert.equal(r.status,'normal');assert.equal(r.normalExit,`2026-09-17 ${retryTime}`);assert.equal(r.sequenceIssues.length,0);assert.equal(r.retryScanCount,1);assert.equal(r.retryGroups.length,1);
+    assert.equal(report.version,2);assert.equal(report.ruleRevision,7);assert.equal(report.options.retryWindowSeconds,120);assert.equal(r.status,'normal');assert.equal(r.normalExit,`2026-09-17 ${retryTime}`);assert.equal(r.sequenceIssues.length,0);assert.equal(r.retryScanCount,1);assert.equal(r.retryGroups.length,1);
     assert.deepEqual(r.retryGroups[0],{type:'out',gate:'员工通道',from:'2026-09-17 16:05:34',to:`2026-09-17 ${retryTime}`,scanCount:2,sourceRows:[4,5]});
     const rawOut=r.timeline.filter(e=>e.type==='out');assert.equal(rawOut.length,2);assert.deepEqual(rawOut.map(e=>e.sourceRows),[[4],[5]]);assert.ok(rawOut.every(e=>e.retryScan));
   }
   const r=analysis('8:00-16:00',[event('2026-09-17','07:30:00','in'),event('2026-09-17','07:30:05','in'),event('2026-09-17','16:05:34')]).results[0];
   assert.equal(r.status,'normal');assert.equal(r.normalExit,'2026-09-17 16:05:34');assert.equal(r.retryGroups.length,1);assert.equal(r.retryGroups[0].type,'in');assert.equal(r.retryGroups[0].scanCount,2);assert.equal(r.retryScanCount,1);assert.equal(r.timeline.filter(e=>e.type==='in').length,2);
 });
-test('retry grouping requires the same known gate and a maximum three-minute first-scan interval',()=>{
+test('retry grouping allows different or missing gate names and anchors its two minutes to the first scan',()=>{
   const gateEvent=(time,gate)=>{const row=event('2026-09-17',time);row[6]=gate;return row;};
   for(const scans of [
-    [event('2026-09-17','16:05:00'),event('2026-09-17','16:08:01')],
     [gateEvent('16:05:34','通道出口4'),gateEvent('16:05:39','通道出口5')],
     [gateEvent('16:05:34',''),gateEvent('16:05:39','')]
   ]){
     const r=analysis('8:00-16:00',[event('2026-09-17','07:30:00','in'),...scans]).results[0];
-    assert.equal(r.status,'sequence_review');assert.equal(r.normalExit,null);assert.equal(r.retryScanCount,0);assert.equal(r.retryGroups.length,0);
+    assert.equal(r.status,'normal');assert.equal(r.normalExit,'2026-09-17 16:05:39');assert.equal(r.retryScanCount,1);assert.equal(r.retryGroups.length,1);
+    assert.equal(r.timeline.filter(e=>e.type==='out').length,2);
   }
-  const chained=analysis('8:00-16:00',[event('2026-09-17','07:30:00','in'),event('2026-09-17','16:05:00'),event('2026-09-17','16:07:30'),event('2026-09-17','16:10:00')]).results[0];
-  assert.equal(chained.status,'sequence_review');assert.equal(chained.normalExit,null);assert.equal(chained.retryGroups.length,1);assert.equal(chained.retryGroups[0].scanCount,2);assert.equal(chained.retryGroups[0].to,'2026-09-17 16:07:30');assert.equal(chained.retryScanCount,1);assert.equal(chained.timeline.filter(e=>e.type==='out').length,3);
+  const outside=analysis('8:00-16:00',[event('2026-09-17','07:30:00','in'),event('2026-09-17','16:05:00'),event('2026-09-17','16:07:01')]).results[0];
+  assert.equal(outside.status,'sequence_review');assert.equal(outside.retryScanCount,0);
+  const chained=analysis('8:00-16:00',[event('2026-09-17','07:30:00','in'),event('2026-09-17','16:05:00'),event('2026-09-17','16:06:30'),event('2026-09-17','16:08:00')]).results[0];
+  assert.equal(chained.status,'sequence_review');assert.equal(chained.normalExit,null);assert.equal(chained.retryGroups.length,1);assert.equal(chained.retryGroups[0].scanCount,2);assert.equal(chained.retryGroups[0].to,'2026-09-17 16:06:30');assert.equal(chained.retryScanCount,1);assert.equal(chained.timeline.filter(e=>e.type==='out').length,3);
+});
+test('screenshot exits four seconds apart at different gates are one early exit, not a sequence conflict',()=>{
+  const first=event('2026-09-17','07:54:22'),last=event('2026-09-17','07:54:26');
+  first[6]='员工通道出口5';last[6]='员工通道出口4';
+  const r=analysis('1:00-9:00',[event('2026-09-17','00:25:26','in'),first,last,event('2026-09-17','08:00:46','gps')]).results[0];
+  assert.equal(r.status,'early');assert.equal(r.advanceSeconds,3934);assert.equal(r.finalExit,'2026-09-17 07:54:26');
+  assert.equal(r.outingCount,1);assert.equal(r.retryScanCount,1);assert.equal(r.sequenceIssues.length,0);
+  assert.equal(r.retryGroups[0].gate,'员工通道出口5；员工通道出口4');
+  assert.equal(r.timeline.filter(e=>e.type==='out').length,2);assert.equal(r.returnedOutings,0);
+});
+test('entry retries at different gates also form one entry and keep raw scans',()=>{
+  const first=event('2026-09-17','07:54:22','in'),last=event('2026-09-17','07:56:22','in');
+  first[6]='员工通道入口5';last[6]='员工通道入口4';
+  const r=analysis('8:00-16:00',[first,last,event('2026-09-17','16:05:00')]).results[0];
+  assert.equal(r.status,'normal');assert.equal(r.retryScanCount,1);assert.equal(r.sequenceIssues.length,0);
+  assert.equal(r.retryGroups[0].type,'in');assert.equal(r.timeline.filter(e=>e.type==='in').length,2);
 });
 test('opposite gate directions break a retry group while an intervening GPS record does not',()=>{
   const opposite=analysis('8:00-16:00',[event('2026-09-17','07:30:00','in'),event('2026-09-17','16:05:34'),event('2026-09-17','16:05:37','in'),event('2026-09-17','16:05:39')]).results[0];

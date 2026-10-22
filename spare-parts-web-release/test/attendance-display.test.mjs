@@ -66,14 +66,39 @@ test('same-gate retry evidence keeps both raw scans and their source rows in exp
   assert.equal(attendanceEvidence(row).find(e=>e.code==='retry').text,'重复刷脸 1 条（合并核查）')
   assert.equal(attendanceEvidence({retryScanCount:0}).some(e=>e.code==='retry'),false)
 })
-test('reports saved before gate retry grouping require reanalysis',()=>{
+test('late filtering independently includes late+early and late+normal shifts, preserving search and export',()=>{
+  const rows=[{key:'both',id:'G1',name:'甲',shift:'8:00-16:00',status:'early',arrival:{status:'late',lateSeconds:180}},
+    {key:'late',id:'G1',name:'甲',shift:'8:00-16:00',status:'normal',arrival:{status:'late',lateSeconds:60}},
+    {key:'early',id:'G2',name:'乙',shift:'8:00-16:00',status:'early',arrival:{status:'on_time',lateSeconds:0}},
+    {key:'rest',id:'G1',name:'甲',rowType:'schedule',status:'rest'}];
+  assert.deepEqual(filterAttendanceRows(rows,{tab:'late'}).map(r=>r.key),['both','late']);
+  assert.deepEqual(filterAttendanceRows(rows,{tab:'early'}).map(r=>r.key),['both','early']);
+  assert.equal(filterAttendanceRows(rows,{tab:'late',keyword:'乙'}).length,0);
+  assert.equal(attendanceEvidence(rows[0]).find(e=>e.code==='arrival').text,'迟到 3分00秒');
+  assert.match(attendanceCsv([rows[0]]),/"迟到"/);assert.match(attendanceCsv([rows[0]]),/"提前出门"/);
+});
+
+test('phone lateness remains visible beside departure and CSV preserves pairing evidence',()=>{
+  const row={key:'G1|2026-09-17',status:'normal',arrival:{status:'late',basis:'gps',time:'2026-09-17 08:33:31',mobileTime:'2026-09-17 08:33:31',gateTime:'2026-09-17 11:05:56',gapSeconds:9145,paired:false,lateSeconds:2011}};
+  assert.equal(attendanceEvidence(row).find(e=>e.code==='arrival').text,'迟到 33分31秒');
+  const csv=attendanceCsv([row]).split('\r\n').map(line=>line.replace(/^\uFEFF/,'').slice(1,-1).split('\",\"'));
+  const value=label=>csv[1][csv[0].indexOf(label)];
+  assert.equal(value('上班核查依据'),'手机打卡');assert.equal(value('迟到时长（秒）'),'2011');
+  assert.equal(value('手机与闸机间隔（秒）'),'9145');assert.equal(value('30分钟内配对'),'否');
+  assert.equal(value('上班核查时间'),'2026-09-17 08:33:31');
+});
+
+test('reports saved before phone/gate arrival pairing require reanalysis',()=>{
   assert.equal(needsAttendanceReanalysis(null),false)
   assert.equal(needsAttendanceReanalysis({version:1}),true)
   assert.equal(needsAttendanceReanalysis({version:2}),true)
   assert.equal(needsAttendanceReanalysis({version:2,ruleRevision:1}),true)
   assert.equal(needsAttendanceReanalysis({version:2,ruleRevision:2}),true)
   assert.equal(needsAttendanceReanalysis({version:2,ruleRevision:3}),true)
-  assert.equal(needsAttendanceReanalysis({version:2,ruleRevision:4}),false)
+  assert.equal(needsAttendanceReanalysis({version:2,ruleRevision:4}),true)
+  assert.equal(needsAttendanceReanalysis({version:2,ruleRevision:5}),true)
+  assert.equal(needsAttendanceReanalysis({version:2,ruleRevision:6}),true)
+  assert.equal(needsAttendanceReanalysis({version:2,ruleRevision:7}),false)
 })
 test('shift options preserve source order and only expose the searched person’s actual shifts',()=>{
   const analysis={shiftOptions:['16:00-24:00','8:00-16:00','10:00-18:00','7:30-15:30'],people:[{id:'G101951',name:'王哲',totalDays:30,restDays:8,shiftCount:22,shiftCounts:{'8:00-16:00':11,'16:00-24:00':10,'10:00-18:00':1}},{id:'G2',name:'李刚',shiftCount:22,shiftCounts:{'7:30-15:30':22}}]}

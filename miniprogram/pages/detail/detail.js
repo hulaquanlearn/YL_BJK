@@ -25,7 +25,7 @@ Page({
 
   onLoad(options) {
     if (!auth.requireLogin()) return;
-    this.setData({ isAdmin: auth.isAdmin(), isViewer: auth.isViewer() });
+    this.setData({ isRawEmployee: auth.isRawEmployee(), isAdmin: auth.isAdmin(), isViewer: auth.isViewer() });
     if (options.id) {
       this.partId = options.id;
       this.fetchPartByID(options.id);

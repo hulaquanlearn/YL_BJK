@@ -1,0 +1,5 @@
+<resources>
+    <style name="WorkbenchTheme" parent="WorkbenchBase">
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>

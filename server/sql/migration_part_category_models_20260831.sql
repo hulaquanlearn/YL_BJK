@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS part_category_models (
   PRIMARY KEY (id),
   UNIQUE KEY uk_part_category_model_name (name),
   KEY idx_part_category_model_active_name (active,name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 仅初始化空资源库；重新执行不能把管理员改名/停用的模型重新插回。
 SET @seed_category_models := (SELECT COUNT(*)=0 FROM part_category_models);

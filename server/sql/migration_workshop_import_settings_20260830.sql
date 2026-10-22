@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS workshop_inventory_settings (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_inventory_settings_workshop FOREIGN KEY (workshop_code) REFERENCES workshops(code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO workshop_inventory_settings
   (workshop_code, uses_warehouse_area, location_mode, location_schema, part_field_schema)

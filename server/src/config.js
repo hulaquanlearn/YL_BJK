@@ -21,13 +21,20 @@ module.exports = {
     connectionLimit: numberFromEnv('DB_CONNECTION_LIMIT', 10),
     charset: process.env.DB_CHARSET || 'utf8mb4'
   },
-  openclaw: {
-    contextTransferEnabled: process.env.AI_CONTEXT_TRANSFER_ENABLED === 'true',
-    apiUrl: process.env.OPENCLAW_API_URL || 'http://127.0.0.1:14504/v1/chat/completions',
-    token: process.env.OPENCLAW_GATEWAY_TOKEN || '',
-    model: process.env.OPENCLAW_MODEL || 'openclaw/spare-parts-chat',
-    visionModel: process.env.OPENCLAW_VISION_MODEL || '',
-    timeoutMs: numberFromEnv('OPENCLAW_TIMEOUT_MS', 120000)
+  rawDutyAiSummary: {
+    enabled: process.env.RAW_DUTY_AI_SUMMARY_ENABLED === 'true',
+    provider: 'deepseek',
+    apiUrl: 'https://api.deepseek.com/chat/completions',
+    token: process.env.DEEPSEEK_API_KEY || '',
+    model: process.env.RAW_DUTY_AI_MODEL || 'deepseek-flash',
+    timeoutMs: 60000
+  },
+  knowledgeAi: {
+    enabled: process.env.KNOWLEDGE_AI_ENABLED !== 'false',
+    apiUrl: 'https://api.deepseek.com/chat/completions',
+    token: process.env.DEEPSEEK_API_KEY || '',
+    model: process.env.KNOWLEDGE_AI_MODEL || 'deepseek-flash',
+    timeoutMs: 60000
   },
   knowledge: {
     uploadDir: process.env.KNOWLEDGE_UPLOAD_DIR
@@ -36,16 +43,6 @@ module.exports = {
     maxFileSize: Math.min(
       Math.max(numberFromEnv('KNOWLEDGE_MAX_FILE_SIZE', 500 * 1024 * 1024), 1024 * 1024),
       500 * 1024 * 1024
-    )
-  },
-  plc: {
-    agentToken: process.env.PLC_AGENT_TOKEN || '',
-    uploadDir: process.env.PLC_UPLOAD_DIR
-      ? path.resolve(process.env.PLC_UPLOAD_DIR)
-      : path.resolve(__dirname, '../uploads/plc-programs'),
-    maxFileSize: Math.min(
-      Math.max(numberFromEnv('PLC_MAX_FILE_SIZE', 50 * 1024 * 1024), 1024 * 1024),
-      200 * 1024 * 1024
     )
   },
   parts: {

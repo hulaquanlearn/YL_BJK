@@ -14,9 +14,8 @@
 :root .warehouse-hero .el-button{--el-button-bg-color:#fff;--el-button-text-color:#475569;--el-button-border-color:#dcdfe6}
 :root .warehouse-hero .el-button--primary{--el-button-bg-color:#c6000b;--el-button-text-color:#fff}
 :root .control-panel{padding:14px;gap:14px;margin-bottom:14px}
-:root .replenishment-hero,:root .plc-commandbar{padding:18px 22px;min-height:0;border-radius:14px}
-:root .replenishment-hero h2,:root .plc-commandbar h2{font-size:22px;margin:0 0 6px}
-:root .plc-commandbar .compact-stats{margin-top:10px}
+:root .replenishment-hero{padding:18px 22px;min-height:0;border-radius:14px}
+:root .replenishment-hero h2{font-size:22px;margin:0 0 6px}
 :root .replenishment-metrics article{padding:14px;min-height:0}
 :root .module-portal .portal-hero{margin:28px auto 24px}
 :root .module-portal .portal-hero h1{font-size:34px;margin:10px 0}

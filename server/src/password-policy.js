@@ -1,9 +1,9 @@
 const { ApiError } = require('./utils');
 
 function validateUsername(value) {
-  const username = String(value || '').trim().toLowerCase();
-  if (!/^[a-z0-9_]{3,32}$/.test(username)) {
-    throw new ApiError(400, '用户名须为3至32位小写字母、数字或下划线');
+  const username = String(value || '').trim();
+  if (!/^[A-Za-z0-9_]{3,32}$/.test(username)) {
+    throw new ApiError(400, '用户名须为3至32位大小写字母、数字或下划线，区分大小写');
   }
   return username;
 }

@@ -26,6 +26,14 @@ test('natural Chinese questions keep useful equipment and workshop fragments', (
   assert.ok(!tokens.includes('在哪里'));
 });
 
+test('joined AGV alarm names retain the original code and separate equipment and alarm tokens',()=>{
+ for(const query of ['AGVEKK故障怎么处理','agvekk报警','AGV/EKK故障']){
+  const tokens=searchTokens(query).map(v=>v.toUpperCase());assert.ok(tokens.includes('AGV'));assert.ok(tokens.includes('EKK'));
+ }
+ assert.ok(searchTokens('AGVEKK').includes('AGVEKK'));
+ assert.ok(searchTokens('IC65N-C10A').includes('IC65N-C10A'));
+});
+
 test('excerpt is centered around a matched token and remains bounded', () => {
   const excerpt = makeExcerpt([`${'前'.repeat(600)}断路器故障${'后'.repeat(600)}`], ['断路器'], 120);
   assert.ok(excerpt.length <= 122);

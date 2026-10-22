@@ -57,7 +57,7 @@ const { toShelf } = require('../server/src/warehouse-layout');
       assert.equal(await page.locator('a[href="/plc-analysis"]').count(), 0);
       await page.screenshot({ path: path.join(out, `portal-${width}.png`) });
       await page.goto(base + '/plc-analysis?projectId=1');
-      await page.waitForURL(url => url.pathname === '/knowledge');
+      await page.waitForURL(url => url.pathname === '/portal');
       assert.equal(await page.locator('a[href="/plc-analysis"]').count(), 0);
       await page.goto(base + '/model-library');
       await page.getByText('测试备件', { exact: true }).waitFor();

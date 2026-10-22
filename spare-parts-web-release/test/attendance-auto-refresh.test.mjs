@@ -5,6 +5,7 @@ import vm from 'node:vm'
 import {ref,computed,watch,nextTick,effectScope} from 'vue'
 import * as display from '../src/utils/attendance-display.mjs'
 import * as list from '../src/utils/attendance-list.mjs'
+import {createAttendanceReviewCache} from '../src/utils/attendance-review-cache.mjs'
 
 const targetKey='G1|2026-09-29|16:00-24:00'
 const plain=value=>JSON.parse(JSON.stringify(value))
@@ -15,7 +16,7 @@ function monthAnalysis(normalExitHours=2,observationHours=normalExitHours) {
     return workDates.has(index+1)?{date,type:'work',shift:'16:00-24:00',label:'16:00-24:00'}:{date,type:'rest',label:'休息'}
   })
   const results=days.filter(day=>day.type==='work').map(day=>({key:`G1|${day.date}|16:00-24:00`,id:'G1',name:'王哲',date:day.date,shift:day.shift,status:day.date==='2026-09-29'?'missing_exit':'normal',advanceSeconds:null,complete:true,timeline:[],gpsTimes:[],findings:[]}))
-  return {version:2,ruleRevision:4,month:'2026-09',options:{normalExitHours,observationHours,retryWindowSeconds:180},people:[{id:'G1',name:'王哲',totalDays:30,shiftCount:22,restDays:8,leaveDays:0,blankDays:0,shiftCounts:{'16:00-24:00':22},days}],shiftOptions:['16:00-24:00'],results,warnings:[],coverage:{from:'2026-09-01 00:00:00',to:'2026-10-01 12:00:00'},summary:{people:1,matchedPeople:1,eventCount:50,shiftCount:22}}
+  return {version:2,ruleRevision:7,month:'2026-09',options:{normalExitHours,observationHours,retryWindowSeconds:120},people:[{id:'G1',name:'王哲',totalDays:30,shiftCount:22,restDays:8,leaveDays:0,blankDays:0,shiftCounts:{'16:00-24:00':22},days}],shiftOptions:['16:00-24:00'],results,warnings:[],coverage:{from:'2026-09-01 00:00:00',to:'2026-10-01 12:00:00'},summary:{people:1,matchedPeople:1,eventCount:50,shiftCount:22}}
 }
 const savedReport=(normalExitHours=2,observationHours=normalExitHours)=>({id:42,revision:7,analysis:monthAnalysis(normalExitHours,observationHours),notes:{[targetKey]:{note:'已保存备注',actorId:1,updatedAt:'2026-10-13 10:00:00'}}})
 
@@ -25,15 +26,15 @@ class TestFormData {
   get(key){return this.values.find(([name])=>name===key)?.[1]??null}
 }
 
-function review(t,post) {
+function review(t,post,{confirm=async()=>{},cache=createAttendanceReviewCache(),session='review-fixture-session',get,user={role:'admin'}}={}) {
   const calls=[],confirmCalls=[],unmount=[],scope=effectScope()
   const source=fs.readFileSync(new URL('../src/views/AttendanceReview.vue',import.meta.url),'utf8').match(/<script setup>([\s\S]*?)<\/script>/)[1].replace(/^import .+$/gm,'')
-  const context=vm.createContext({...display,...list,ref,computed,watch,nextTick,onMounted(){},onBeforeUnmount(fn){unmount.push(fn)},useRoute:()=>({query:{}}),ElMessage:{success(){},error(){}},ElMessageBox:{confirm:async(...args)=>{confirmCalls.push(args)}},office:{post:async(url,body,options)=>{calls.push({url,body,options});return post(url,body,options)},patch:async(url,body)=>{calls.push({method:'PATCH',url,body});throw new Error('unexpected note write')},get:async()=>({data:[]})},FormData:TestFormData,window:{innerWidth:1280,addEventListener(){},removeEventListener(){}},document:{createElement:()=>({click(){}})},Blob,URL,setTimeout,clearTimeout})
-  scope.run(()=>vm.runInContext(source+'\nthis.review={hours,analysis,report,notes,selectedKey,noteDraft,page,keyword,shiftFilter,resultTab,busy,changeObservation,applyReport,files,period,confirmImport,jumpToShift,personDetailOpen,personDetailId,activeSort,sortField,sortOrder,toggleSort,filtered,paged,resultTabs,listSummary,saveNote};',context))
+  const context=vm.createContext({...display,...list,ref,computed,watch,nextTick,getToken:()=>session,getUser:()=>user,attendanceReviewCache:cache,onMounted(){},onBeforeUnmount(fn){unmount.push(fn)},useRoute:()=>({query:{}}),ElMessage:{success(){},error(){}},ElMessageBox:{confirm:async(...args)=>{confirmCalls.push(args);return confirm(...args)}},office:{post:async(url,body,options)=>{calls.push({url,body,options});return post(url,body,options)},patch:async(url,body)=>{calls.push({method:'PATCH',url,body});throw new Error('unexpected note write')},get:async(url,options)=>{if(get){calls.push({method:'GET',url});return get(url,options)}return {data:[]}}},FormData:TestFormData,window:{innerWidth:1280,addEventListener(){},removeEventListener(){}},document:{createElement:()=>({click(){}})},Blob,URL,setTimeout,clearTimeout})
+  scope.run(()=>vm.runInContext(source+'\nthis.review={hours,analysis,report,notes,selectedKey,noteDraft,page,keyword,shiftFilter,resultTab,busy,changeObservation,applyReport,files,period,confirmImport,jumpToShift,personDetailOpen,personDetailId,activeSort,sortField,sortOrder,toggleSort,filtered,paged,resultTabs,listSummary,saveNote,detailCollapsed,collapseDetail,selectRow,detailPanel,initializeReview,analyze,loadingSaved,feedback};',context))
   let disposed=false
   const dispose=()=>{if(disposed)return;disposed=true;for(const fn of unmount)fn();scope.stop()}
   t.after(dispose)
-  return {state:context.review,calls,confirmCalls,dispose}
+  return {state:context.review,calls,confirmCalls,dispose,viewport:context.window}
 }
 
 async function loadAndEdit(state) {
@@ -42,6 +43,37 @@ async function loadAndEdit(state) {
   state.noteDraft.value='现场核查草稿'
 }
 
+test('raw-grain leaders read saved attendance without starting analysis or writing notes',async t=>{
+ const {state,calls}=review(t,()=>{throw new Error('readonly must not post')},{user:{role:'viewer',staffWorkshopCode:'raw_grain',staffPosition:'shift_leader'},get:async url=>url==='/attendance/reports'?{data:[{id:42,revision:7,title:'已保存考勤'}]}:{data:savedReport()}});
+ await state.initializeReview();assert.equal(state.report.value.id,42);state.hours.value=4;await state.changeObservation();await state.analyze();await state.saveNote();assert.equal(calls.some(c=>c.method==='PATCH'||c.url.includes('reanalyze')||c.url.includes('preview')),false);
+});
+
+test('returning to the page retains report, selected files, viewing state and dirty notes without reanalysis',async t=>{
+  const cache=createAttendanceReviewCache(),first=review(t,async()=>{throw Error('unexpected analysis')},{cache});
+  await loadAndEdit(first.state);first.state.files.value={schedule:{name:'待选排班.xlsx'},attendance:null};first.dispose();
+  const returned=review(t,async()=>{throw Error('unexpected analysis')},{cache,get:async url=>{assert.equal(url,'/attendance/reports');return {data:[{id:42,revision:7}]}}});
+  await returned.state.initializeReview();await nextTick();
+  assert.equal(returned.state.report.value.id,42);assert.equal(returned.state.page.value,2);assert.equal(returned.state.selectedKey.value,targetKey);
+  assert.equal(returned.state.noteDraft.value,'现场核查草稿');assert.equal(returned.state.keyword.value,'王哲');assert.equal(returned.state.files.value.schedule.name,'待选排班.xlsx');
+  assert.deepEqual(returned.calls,[{method:'GET',url:'/attendance/reports'}]);assert.equal(returned.state.busy.value,false);assert.equal(returned.state.loadingSaved.value,false);
+});
+test('unchanged saved files and window reuse the result when Start Analysis is clicked',async t=>{
+  const {state,calls}=review(t,async()=>{throw Error('unexpected analysis')});state.applyReport(savedReport());await nextTick();
+  await state.analyze();assert.equal(calls.length,0);assert.match(state.feedback.value,/继续使用已保存/);
+});
+test('a changed stored revision reloads saved results and keeps the dirty draft without analyzing',async t=>{
+  const cache=createAttendanceReviewCache(),first=review(t,async()=>{throw Error('unexpected')},{cache});await loadAndEdit(first.state);first.dispose();
+  const updated=savedReport();updated.revision=8;
+  const returned=review(t,async()=>{throw Error('unexpected analysis')},{cache,get:async url=>({data:url==='/attendance/reports'?[{id:42,revision:8}]:updated})});
+  await returned.state.initializeReview();assert.equal(returned.state.report.value.revision,8);assert.equal(returned.state.noteDraft.value,'现场核查草稿');assert.equal(returned.state.page.value,2);
+  assert.deepEqual(returned.calls.map(c=>c.url),['/attendance/reports','/attendance/reports/42']);
+});
+test('a deleted report invalidates cached results while session changes cannot reuse private state',async t=>{
+  const cache=createAttendanceReviewCache(),first=review(t,async()=>{throw Error('unexpected')},{cache});first.state.applyReport(savedReport());await nextTick();first.dispose();
+  const other=review(t,async()=>{throw Error('unexpected')},{cache,session:'different-account',get:async()=>({data:[]})});await other.state.initializeReview();assert.equal(other.state.analysis.value,null);
+  const deleted=review(t,async()=>{throw Error('unexpected')},{cache,get:async url=>{if(url==='/attendance/reports')return {data:[]};throw {response:{status:404}}}});
+  await deleted.state.initializeReview();assert.equal(deleted.state.analysis.value,null);assert.equal(deleted.state.report.value,null);assert.match(deleted.state.feedback.value,/当前没有已导入/);assert.equal(cache.read('review-fixture-session'),null);
+});
 test('saved reports read the selected normal-exit window and retain authoritative source people',async t=>{
   const {state}=review(t,async()=>{throw new Error('unexpected request')})
   const report=savedReport(1,4);state.applyReport(report);await nextTick()
@@ -141,12 +173,29 @@ test('the complete month includes read-only rest days while normal, early and re
   const {state,calls}=review(t,async()=>{throw new Error('unexpected request')}),report=savedReport()
   report.analysis.results.forEach((row,index)=>{row.status=index<13?'normal':index<15?'early':'missing_exit';row.advanceSeconds=index>=13&&index<15?300:null})
   state.applyReport(report);state.keyword.value='王哲';await nextTick()
-  assert.deepEqual(plain(state.resultTabs.value).map(tab=>[tab.key,tab.count]),[['all',30],['normal',13],['early',2],['signals',7]]);assert.equal(state.listSummary.value,'当前筛选 30 条 · 上班 22 班 · 休息 8 天')
+  assert.deepEqual(plain(state.resultTabs.value).map(tab=>[tab.key,tab.count]),[['all',30],['late',0],['normal',13],['early',2],['signals',7]]);assert.equal(state.listSummary.value,'当前筛选 30 条 · 上班 22 班 · 休息 8 天')
   const rest=state.filtered.value.find(row=>row.scheduleType==='rest');state.selectedKey.value=rest.key;await nextTick();state.noteDraft.value='不应提交的休息日备注';await state.saveNote()
   assert.equal(calls.length,0);assert.equal(state.report.value.revision,7)
   state.resultTab.value='signals';await nextTick();assert.equal(state.filtered.value.length,7);assert.ok(state.filtered.value.every(row=>row.rowType!=='schedule'))
   state.resultTab.value='all';state.shiftFilter.value='16:00-24:00';await nextTick();assert.equal(state.filtered.value.length,22);assert.ok(state.filtered.value.every(row=>row.rowType!=='schedule'))
 })
+
+test('late tab includes both normal departures and early exits without altering departure counts',async t=>{
+  const {state}=review(t,async()=>{throw new Error('unexpected request')}),report=savedReport();
+  report.analysis.results[0].status='early';report.analysis.results[0].arrival={status:'late',lateSeconds:180};
+  report.analysis.results[1].arrival={status:'late',lateSeconds:60};
+  state.applyReport(report);await nextTick();
+  const counts=Object.fromEntries(plain(state.resultTabs.value).map(tab=>[tab.key,tab.count]));
+  assert.equal(counts.late,2);assert.equal(counts.early,1);assert.equal(counts.normal,20);assert.equal(counts.signals,1);
+  state.resultTab.value='late';await nextTick();assert.equal(state.filtered.value.length,2);
+  assert.ok(state.filtered.value.every(r=>r.arrival.status==='late'));assert.ok(state.filtered.value.some(r=>r.status==='early'));
+});
+
+test('a replaced cached attendance opens the sole current import instead of showing removed history',async t=>{
+ const cache=createAttendanceReviewCache(),first=review(t,async()=>{throw Error('unexpected')},{cache});first.state.applyReport(savedReport());await nextTick();first.dispose();
+ const current={...savedReport(),id:43};const next=review(t,async()=>{throw Error('unexpected')},{cache,get:async url=>{if(url==='/attendance/reports')return {data:[{id:43,revision:current.revision}]};if(url==='/attendance/reports/43')return {data:current};throw {response:{status:404}}}});
+ await next.state.initializeReview();assert.equal(next.state.report.value.id,43);assert.match(next.state.feedback.value,/上一份考勤不再保留/);
+});
 
 test('calendar jump finds the chronological page among thirty days rather than the severity-ordered source index',async t=>{
   const {state,calls,confirmCalls}=review(t,async()=>{throw new Error('unexpected request')}),report=savedReport(),target=report.analysis.results.find(row=>row.key===targetKey)
@@ -154,4 +203,33 @@ test('calendar jump finds the chronological page among thirty days rather than t
   state.applyReport(report);await nextTick();state.personDetailId.value='G1';state.personDetailOpen.value=true;state.toggleSort('date');state.toggleSort('date');assert.equal(state.activeSort.value.order,'desc')
   await state.jumpToShift(targetKey);await nextTick()
   assert.equal(state.keyword.value,'王哲');assert.equal(state.personDetailOpen.value,false);assert.equal(state.selectedKey.value,targetKey);assert.equal(state.filtered.value.length,30);assert.deepEqual(plain(state.activeSort.value),{field:'date',order:'asc'});assert.equal(state.page.value,2);assert.ok(state.paged.value.some(row=>row.key===targetKey));assert.equal(calls.length,0);assert.equal(confirmCalls.length,0)
+})
+
+test('collapsing and reopening the same mobile detail preserves its dirty note without a discard prompt',async t=>{
+  const {state,calls,confirmCalls,viewport}=review(t,async()=>{throw new Error('unexpected request')})
+  viewport.innerWidth=600;await loadAndEdit(state)
+  const scrollCalls=[];state.detailPanel.value={scrollIntoView(options){scrollCalls.push(options)}}
+  state.collapseDetail();await nextTick()
+  assert.equal(state.detailCollapsed.value,true);assert.equal(state.selectedKey.value,targetKey)
+  assert.equal(state.noteDraft.value,'现场核查草稿');assert.equal(state.notes.value[targetKey].note,'已保存备注')
+  assert.equal(confirmCalls.length,0);assert.equal(calls.length,0)
+  await state.selectRow(state.filtered.value.find(row=>row.key===targetKey));await nextTick()
+  assert.equal(state.detailCollapsed.value,false);assert.equal(state.selectedKey.value,targetKey)
+  assert.equal(state.noteDraft.value,'现场核查草稿');assert.equal(confirmCalls.length,0);assert.equal(calls.length,0)
+  assert.equal(scrollCalls.length,1);assert.equal(scrollCalls[0].block,'start')
+})
+
+test('reopening a different mobile record still requires the existing dirty-note decision',async t=>{
+  let cancel=true
+  const {state,calls,confirmCalls,viewport}=review(t,async()=>{throw new Error('unexpected request')},{confirm:async()=>{if(cancel)throw 'cancel'}})
+  viewport.innerWidth=600;await loadAndEdit(state);state.collapseDetail();await nextTick()
+  const other=state.filtered.value.find(row=>row.key!==targetKey&&row.rowType!=='schedule')
+  await state.selectRow(other);await nextTick()
+  assert.equal(confirmCalls.length,1);assert.match(confirmCalls[0][0],/备注尚未保存/)
+  assert.equal(state.detailCollapsed.value,true);assert.equal(state.selectedKey.value,targetKey)
+  assert.equal(state.noteDraft.value,'现场核查草稿');assert.equal(calls.length,0)
+  cancel=false;await state.selectRow(other);await nextTick()
+  assert.equal(confirmCalls.length,2);assert.equal(state.detailCollapsed.value,false)
+  assert.equal(state.selectedKey.value,other.key);assert.equal(state.noteDraft.value,'')
+  assert.equal(state.notes.value[targetKey].note,'已保存备注');assert.equal(calls.length,0)
 })

@@ -11,14 +11,19 @@ function buildQuery(params = {}) {
 
 function request(path, options = {}) {
   const method = options.method || 'GET';
+  const endpoint = path.split('?')[0];
+  if (auth.isRawEmployee() && !endpoint.startsWith('/auth/') && endpoint !== '/health'
+    && !(['GET','HEAD'].includes(method.toUpperCase()) && /^(?:\/parts(?:\/\d+)?|\/filters|\/dashboard|\/warehouse-areas|\/warehouse-layout|\/staging-points|\/part-models|\/part-model-library)$/.test(endpoint))) {
+    return Promise.reject(Object.assign(new Error('原粮车间员工仅可查看备件'), {statusCode:403}));
+  }
   if (auth.isViewer() && !['GET','HEAD','OPTIONS'].includes(method.toUpperCase())
-    && !['/auth/login','/auth/logout','/auth/change-password','/ai/chat',
+    && !['/auth/login','/auth/logout','/auth/change-password','/auth/profile','/ai/chat',
       ...(auth.canSubmitInventory() ? ['/inventory-orders'] : [])].includes(path.split('?')[0])) {
     const error=new Error('权限不足：车间人员可提交所属车间盘点单，但不能修改备件或审批');
     error.statusCode=403;
     return Promise.reject(error);
   }
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}), 'X-Client-Platform':'miniprogram' };
   const token = auth.getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 

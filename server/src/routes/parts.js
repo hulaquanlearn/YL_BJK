@@ -1506,11 +1506,6 @@ async function assertValidGlb(file) {
   }
 }
 
-// Dedicated per-part geometry is retired. Keep legacy data untouched for rollback.
-router.all(['/parts/:partId/model', '/parts/:partId/model-scale'], (_req, res) => {
-  res.status(410).json({success:false,msg:'专用模型功能已停用，请使用类别模型关联'});
-});
-
 router.get('/part-model-library', asyncHandler(async (req, res) => {
   const workshopCode = normalizeWorkshopCode(req.query.workshopCode, '');
   const search = String(req.query.search || '').trim();
@@ -1629,11 +1624,6 @@ function categoryModelPayload(body, requireName = true, fallback = {}) {
     frontRotationY: normalizeFrontRotation(body?.frontRotationY, fallback.front_rotation_y)
   };
 }
-
-// Retired routes cannot interpret cached legacy numeric IDs as new model IDs.
-router.all(['/part-category-models', '/part-category-models/:id', '/parts/batch-category-model', '/part-category-model-matches/preview', '/part-category-model-matches/apply'], requireAnyWorkshopEditor, (_req, res) => {
-  res.status(410).json({ success: false, msg: '旧模型匹配已停用，请刷新页面后按模型名称绑定' });
-});
 
 router.get('/part-models', asyncHandler(async (req, res) => {
   const search = String(req.query?.search || '').trim();

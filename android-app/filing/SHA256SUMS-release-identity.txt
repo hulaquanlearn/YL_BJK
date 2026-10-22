@@ -1,0 +1,5 @@
+066f372db517ca0e4d41adf4c759e3a74b12a1448d53639f0ebba5b21ca38245  app-package-name.txt
+8490ae0a489ca2480d858b40a1e5a900bf8a8c8aa6a6acc6f2e15c7afb010bae  app-public-key.txt
+0ebd650f56798de500acad33b56b0ef2c5798870b5d3d53351cc61293b6e4f87  app-signature-md5.txt
+9791ff38e629e11c29065d4dbf1fab15763a42b36da7937c71748f90c1ad4cc8  release-certificate.der
+40c2fc8c04b90f51da2f138d0d8a62c87a615c9c95dd0b60774b232a7cd8192e  ../app/build/outputs/apk/release/app-release.apk

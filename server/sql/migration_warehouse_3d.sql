@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS warehouse_shelves (
   UNIQUE KEY uk_warehouse_shelves_layout_key (layout_key),
   UNIQUE KEY uk_warehouse_shelves_shelf_no (shelf_no),
   KEY idx_warehouse_shelves_group_order (workshop_group, sort_order)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS warehouse_shelf_audit (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS warehouse_shelf_audit (
   PRIMARY KEY (id),
   KEY idx_warehouse_shelf_audit_shelf_time (shelf_id, created_at),
   KEY idx_warehouse_shelf_audit_operator_time (operator_user_id, created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO warehouse_shelves
   (layout_key, shelf_no, display_name, workshop_group, warehouse_code, is_vendor,

@@ -153,13 +153,6 @@
   line-height: 40rpx;
 }
 
-.location-tip {
-  margin-top: -6rpx;
-  color: #98a2b3;
-  font-size: 22rpx;
-  line-height: 34rpx;
-}
-
 .submit-btn-wrap {
   position: fixed;
   left: 0;

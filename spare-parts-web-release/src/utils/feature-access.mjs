@@ -1,13 +1,23 @@
-const managers = new Set(['admin','raw_grain','qu_making','brewing'])
+export function isRawEmployee(user) {
+  return user?.role === 'viewer' && user.staffWorkshopCode === 'raw_grain' && user.staffPosition !== 'shift_leader'
+}
+export function staffPositionLabel(user) {
+  if (user?.staffWorkshopCode === 'raw_grain') return user.staffPosition === 'shift_leader' ? '工段长' : '员工'
+  return ({group_leader:'组长',shift_leader:'班长'})[user?.staffPosition] || '人员'
+}
 export function canReadFeature(user, path) {
-  if (path === '/attendance') return ['admin','raw_grain'].includes(user?.role)
+  if(path==='/account')return Boolean(user)
+  if(path==='/ai-call-logs')return user?.role==='admin'
+  if (isRawEmployee(user)) return ['/portal','/inventory','/warehouse-3d'].includes(path)
+  if(path === '/robot-program')return Boolean(user)
+  if (path === '/raw-duties') return ['admin','raw_grain'].includes(user?.role) || (user?.role === 'viewer' && user.staffWorkshopCode === 'raw_grain' && user.staffPosition === 'shift_leader')
+  if (path === '/attendance') return ['admin','raw_grain'].includes(user?.role) || (user?.role==='viewer' && user.staffWorkshopCode==='raw_grain' && user.staffPosition === 'shift_leader')
   if (path === '/work-storage') return user?.role === 'admin'
-  if (path === '/work') return managers.has(user?.role) || (user?.role === 'viewer' && user.staffWorkshopCode === 'qu_making' && ['group_leader','shift_leader'].includes(user.staffPosition))
-  if (path === '/inspection-notices') return managers.has(user?.role) || (user?.role === 'viewer' && user.staffWorkshopCode === 'raw_grain')
+  if (path === '/work') return false
   return Boolean(user)
 }
 
-// Choose the relevant starting page without hiding the other feature entries.
-export function preferredWorkPath(user) {
-  return user?.role === 'raw_grain' || user?.staffWorkshopCode === 'raw_grain' ? '/inspection-notices' : '/work'
+// The remaining work module uses the raw-grain permission check at each entrance.
+export function preferredWorkPath() {
+  return '/raw-duties'
 }

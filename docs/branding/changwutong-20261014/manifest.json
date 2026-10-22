@@ -1,0 +1,22 @@
+{
+  "appName": "厂务通",
+  "suggestedDescription": "厂内备件、履职、检查通报与考勤核查工作平台",
+  "status": "用户审阅候选，未修改现有网站名称或图标",
+  "generatedOn": "2026-10-14",
+  "generator": "built-in image_gen.imagegen",
+  "file": "app-icon.png",
+  "format": "PNG",
+  "width": 1254,
+  "height": 1254,
+  "bytes": 1220050,
+  "uploadConstraint": {
+    "format": [
+      "PNG",
+      "JPEG",
+      "JPG"
+    ],
+    "maxBytes": 2000000,
+    "verified": true
+  },
+  "prompt": "Use case: logo-brand. Asset type: one production-ready square Android application icon for a Chinese factory operations management app named 厂务通. This app handles spare-parts inventory, employee work reporting, inspections and attendance review. Create ONE clean app icon only, 1024x1024 pixels, PNG suitable for upload with a file-size limit of 2MB. Edge-to-edge uniform deep industrial blue background (#244AA8), fully opaque square canvas (do not pre-round the outer corners). A distinctive bold white geometric logo centered within the middle 64% safe area: combine a compact factory roof silhouette, an organized warehouse/module shape and a subtle integrated checkmark into ONE cohesive symbol. Professional, calm, practical factory management identity. A small restrained light-blue accent may be integrated into the checkmark. Flat vector-like rendering with exact crisp contours, balanced negative space and strong visibility at 48px. No lettering, no Chinese text, no numbers, no wordmark. No photo, no mockup, no phone, no presentation sheet, no extra icons, no texture, no gradients, no 3D, no complex gear teeth, no decorative circuitry, no shadow, no watermark. Export the icon itself, filling the entire image with the blue square, not an icon sitting on a separate white background."
+}

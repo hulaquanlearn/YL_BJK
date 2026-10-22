@@ -85,11 +85,17 @@ test('mini approval paginates beyond the first page with total counts',async()=>
 
 test('mini AI never sums unlike units and preserves returned evidence',async()=>{
   const api={getDashboard:async()=>({data:{dashboard:{unitTotals:[{unit:'个',total:20},{unit:'米',total:13}]}}}),chat:async()=>({data:{answer:'建议检查轴承',evidence:[{sourceType:'knowledge',sourceId:'7',title:'轴承指南',excerpt:'检查润滑'}]}})};
-  const page=miniPage('aiAgent/aiAgent.js',{'../../services/api.js':api});
+  const page=miniPage('aiAgent/aiAgent.js',{'../../services/api.js':api,'../../services/auth.js':{canEditAnyWorkshop:()=>true}});
   await page.queryInventorySummary('totalStock');
   assert.equal(page.data.resultSummary.value,'');assert.match(page.data.resultSummary.detail,/20 个、13 米/);assert.doesNotMatch(page.data.resultSummary.detail,/33/);
   await page.queryMaintenance('轴承如何保养');
   assert.equal(page.data.resultEvidence.length,1);assert.equal(page.data.resultEvidence[0].typeLabel,'知识文档');
+});
+
+test('mini ordinary staff can query inventory but cannot send maintenance questions to the model',async()=>{
+ let modelCalls=0;const api={getDashboard:async()=>({data:{dashboard:{unitTotals:[{unit:'个',total:2}]}}}),chat:async()=>{modelCalls++;return {data:{answer:'不可调用'}}}};
+ const page=miniPage('aiAgent/aiAgent.js',{'../../services/api.js':api,'../../services/auth.js':{canEditAnyWorkshop:()=>false}});
+ await page.queryInventorySummary('totalStock');assert.match(page.data.resultSummary.detail,/2 个/);await page.queryMaintenance('轴承保养');assert.equal(modelCalls,0);assert.equal(page.data.resultBadge,'权限提示');
 });
 
 test('mini editing controls follow scoped workshop permission, not global admin',()=>{

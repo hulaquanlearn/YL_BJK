@@ -1,0 +1,33 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'cn.digitalworkbench.mobile'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'cn.digitalworkbench.mobile'
+        minSdk 26
+        targetSdk 35
+        versionCode providers.gradleProperty('appVersionCode').getOrElse('5').toInteger()
+        versionName providers.gradleProperty('appVersionName').getOrElse('1.9.10-android.5')
+        testInstrumentationRunner 'cn.digitalworkbench.mobile.CredentialInstrumentation'
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    signingConfigs {
+        release {
+            def releaseKeystore = System.getenv('WORKBENCH_KEYSTORE')
+            if (releaseKeystore) {
+                storeFile file(releaseKeystore)
+                storePassword System.getenv('WORKBENCH_STORE_PASSWORD')
+                keyAlias System.getenv('WORKBENCH_KEY_ALIAS')
+                keyPassword System.getenv('WORKBENCH_KEY_PASSWORD')
+                storeType 'PKCS12'
+            }
+        }
+    }
+    buildTypes {
+        release {
+            debuggable false
+            signingConfig signingConfigs.release
+        }
+    }
+    testBuildType 'release'
+}

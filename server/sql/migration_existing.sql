@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS inventory_orders (
   UNIQUE KEY uk_inventory_no (inventoryNo),
   KEY idx_inventory_date (inventoryDate),
   KEY idx_inventory_status (approveStatus)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS app_sessions (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS app_sessions (
   PRIMARY KEY (id),
   UNIQUE KEY uk_app_sessions_token_hash (token_hash),
   KEY idx_app_sessions_user_expiry (user_id, expires_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 盘点单明细表：对现有 inventory_orders JSON 字段做增量补充，
 -- 用于服务端校验范围、防止重复待审批，并记录提交时的库存快照。
@@ -73,12 +73,12 @@ CREATE TABLE IF NOT EXISTS inventory_order_items (
   PRIMARY KEY (id),
   UNIQUE KEY uk_inventory_order_item (order_id, inventory_id),
   KEY idx_inventory_order_item_inventory (inventory_id, order_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 小程序账号与角色。密码只保存 bcrypt 哈希，不保存明文。
 CREATE TABLE IF NOT EXISTS app_users (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  username VARCHAR(32) NOT NULL,
+  username VARCHAR(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
   display_name VARCHAR(50) NOT NULL,
   role ENUM('user', 'admin') NOT NULL DEFAULT 'user',
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS app_users (
   PRIMARY KEY (id),
   UNIQUE KEY uk_app_users_username (username),
   KEY idx_app_users_role_enabled (role, enabled)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 ALTER TABLE app_users MODIFY COLUMN password_hash VARCHAR(255) NOT NULL;
 
@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS spare_parts_import_runs (
   PRIMARY KEY (id),
   KEY idx_spare_parts_import_runs_hash (source_hash),
   KEY idx_spare_parts_import_runs_status (status, created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 出入库与盘点差异流水。仅新增审计数据结构，不修改现有库存数据。
 CREATE TABLE IF NOT EXISTS stock_movements (
@@ -191,7 +191,7 @@ CREATE TABLE IF NOT EXISTS stock_movements (
   KEY idx_stock_movements_inventory_time (inventory_id, created_at),
   KEY idx_stock_movements_operator_time (operator_user_id, created_at),
   KEY idx_stock_movements_order (related_order_no)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO warehouses (code, name) VALUES
   ('4150_A', '输送货区'),

@@ -37,7 +37,7 @@ router.post('/', asyncHandler(async (req, res) => {
   const role = String(req.body?.role || 'viewer');
   if (!ALLOWED_ROLES.has(role)) throw new ApiError(400, '角色无效');
   const identity = normalizeStaffIdentity(role, req.body?.staffWorkshopCode, req.body?.staffPosition, { required: role === 'viewer' });
-  if(workshopForRole(req.user.role)&&(role!=='viewer'||identity.staffWorkshopCode!==workshopForRole(req.user.role)))throw new ApiError(403,'只能创建自己车间的班长或组长账号');
+  if(workshopForRole(req.user.role)&&(role!=='viewer'||identity.staffWorkshopCode!==workshopForRole(req.user.role)))throw new ApiError(403,'只能创建自己车间的人员账号');
   const passwordHash = await hashPassword(password);
   try {
     const [result] = await pool.query(
@@ -61,7 +61,7 @@ router.patch('/:id', asyncHandler(async (req, res) => {
   if (!existingRows.length) throw new ApiError(404, '账号不存在');
   const existing = existingRows[0];
   const scope=workshopForRole(req.user.role);
-  if(scope&&(existing.role!=='viewer'||existing.staff_workshop_code!==scope||(req.body.role&&req.body.role!=='viewer')||(req.body.staffWorkshopCode&&req.body.staffWorkshopCode!==scope)))throw new ApiError(403,'只能管理自己车间的班长或组长，不能提升权限或转移车间');
+  if(scope&&(existing.role!=='viewer'||existing.staff_workshop_code!==scope||(req.body.role&&req.body.role!=='viewer')||(req.body.staffWorkshopCode&&req.body.staffWorkshopCode!==scope)))throw new ApiError(403,'只能管理自己车间的人员，不能提升权限或转移车间');
   if (req.body?.displayName !== undefined) {
     updates.push('display_name = ?');
     params.push(validateDisplayName(req.body.displayName));

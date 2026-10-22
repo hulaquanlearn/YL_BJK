@@ -4,22 +4,18 @@
       <button type="button" class="metric-card is-clickable check-metric-button" :class="{selected:query.status===''}" :aria-pressed="query.status===''" @click="setStatus('')">
         <div class="metric-top"><span>全部任务</span><span class="metric-icon"><el-icon><Files /></el-icon></span></div>
         <div class="metric-value">{{ orderSummary.total }}</div>
-        <div class="metric-note">当前筛选范围内的盘点单</div>
       </button>
       <button type="button" class="metric-card is-pending is-clickable check-metric-button" :class="{selected:query.status==='待审批'}" :aria-pressed="query.status==='待审批'" @click="setStatus('待审批')">
         <div class="metric-top"><span>待审批</span><span class="metric-icon"><el-icon><Clock /></el-icon></span></div>
         <div class="metric-value">{{ statusCount('待审批') }}</div>
-        <div class="metric-note">需要及时核对处理</div>
       </button>
-      <button type="button" class="metric-card is-clickable check-metric-button" :class="{selected:query.status==='已通过'}" :aria-pressed="query.status==='已通过'" @click="setStatus('已通过')">
-        <div class="metric-top"><span>已通过</span><span class="metric-icon" style="color:#15803d;background:#ecfdf3"><el-icon><CircleCheck /></el-icon></span></div>
+      <button type="button" class="metric-card is-success is-clickable check-metric-button" :class="{selected:query.status==='已通过'}" :aria-pressed="query.status==='已通过'" @click="setStatus('已通过')">
+        <div class="metric-top"><span>已通过</span><span class="metric-icon"><el-icon><CircleCheck /></el-icon></span></div>
         <div class="metric-value">{{ statusCount('已通过') }}</div>
-        <div class="metric-note">库存已完成同步</div>
       </button>
       <button type="button" class="metric-card is-alert is-clickable check-metric-button" :class="{selected:query.status==='已驳回'}" :aria-pressed="query.status==='已驳回'" @click="setStatus('已驳回')">
         <div class="metric-top"><span>已驳回</span><span class="metric-icon"><el-icon><CircleClose /></el-icon></span></div>
         <div class="metric-value">{{ statusCount('已驳回') }}</div>
-        <div class="metric-note">可重新发起盘点</div>
       </button>
     </section>
 
@@ -36,8 +32,8 @@
           <el-date-picker v-model="query.date" type="date" value-format="YYYY-MM-DD" placeholder="选择日期" clearable style="width:100%" @change="searchOrders" />
         </div>
         <div class="filter-actions">
-          <el-button @click="resetFilters">重置</el-button>
-          <el-button type="primary" :loading="loading" @click="searchOrders">查询</el-button>
+          <el-button v-if="query.status || query.date || query.workshopCode!==(isAdmin?'':userWorkshopCode())" text @click="resetFilters">重置</el-button>
+          <el-button :loading="loading" @click="searchOrders">查询</el-button>
         </div>
       </div>
     </section>
@@ -82,7 +78,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <div class="pagination-bar"><span>第 {{ query.page }} 页</span><el-pagination v-model:current-page="query.page" v-model:page-size="query.pageSize" :total="orderTotal" :page-sizes="[20,50,100]" layout="total, sizes, prev, pager, next" @current-change="load" @size-change="searchOrders" /></div>
+      <div class="pagination-bar"><el-pagination v-model:current-page="query.page" v-model:page-size="query.pageSize" :total="orderTotal" :page-sizes="[20,50,100]" layout="total, sizes, prev, pager, next" @current-change="load" @size-change="searchOrders" /></div>
     </section>
 
     <el-drawer v-model="detailVisible" title="盘点单详情" size="min(760px, 94vw)">

@@ -13,13 +13,13 @@ Page({
       const res = await api.getMe();
       auth.setSession(auth.getToken(), res.data.user);
       getApp().globalData.user = res.data.user;
-      wx.reLaunch({ url: '/pages/home/home' });
+      wx.reLaunch({ url: '/pages/portal/portal' });
     } catch (_) {
       auth.clearSession();
     }
   },
 
-  onUsernameInput(e) { this.setData({ username: e.detail.value.trim().toLowerCase(), formError: '' }); },
+  onUsernameInput(e) { this.setData({ username: e.detail.value.trim(), formError: '' }); },
   onPasswordInput(e) { this.setData({ password: e.detail.value, formError: '' }); },
   togglePassword() { this.setData({ showPassword: !this.data.showPassword }); },
 
@@ -35,7 +35,7 @@ Page({
       const res = await api.login({ username: this.data.username, password: this.data.password });
       auth.setSession(res.data.token, res.data.user);
       getApp().globalData.user = res.data.user;
-      wx.reLaunch({ url: '/pages/home/home' });
+      wx.reLaunch({ url: '/pages/portal/portal' });
     } catch (err) {
       this.setData({ formError: err.message || '登录失败，请检查账号信息' });
       wx.showToast({ title: err.message || '登录失败', icon: 'none' });

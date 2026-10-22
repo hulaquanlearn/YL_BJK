@@ -2,10 +2,12 @@ const express=require('express'),multer=require('multer'),crypto=require('node:c
 const {pool}=require('../db');
 const {ApiError,asyncHandler,parseJson}=require('../utils');
 const {analyzeFiles,LIMITS}=require('../attendance-workbook');
+const {canReadAttendance,canManageAttendance}=require('../attendance-access');
+const {IMPORT_LOCK,removePreviousReports}=require('../attendance-current');
 const router=express.Router();
 const ok=(res,data)=>res.json({success:true,data});
 const positiveId=value=>{const n=Number(value);if(!Number.isSafeInteger(n)||n<1)throw new ApiError(400,'记录编号无效');return n;};
-function requireAttendanceAccess(req,_res,next){if(!['admin','raw_grain'].includes(req.user?.role))return next(new ApiError(403,'考勤核查仅供原粮车间管理员和系统管理员使用'));next();}
+function requireAttendanceAccess(req,_res,next){if(!canReadAttendance(req.user))return next(new ApiError(403,'考勤核查仅供原粮授权人员查看'));if(!['GET','HEAD','OPTIONS'].includes(req.method||'GET')&&!canManageAttendance(req.user))return next(new ApiError(403,'工段长和班长可查看考勤，导入、修改和重新分析仅供管理员操作'));next();}
 router.use(requireAttendanceAccess);
 router.use((_req,res,next)=>{res.set('Cache-Control','private, no-store');next();});
 const upload=multer({storage:multer.memoryStorage(),limits:{fileSize:LIMITS.fileBytes,files:2,fields:4,fieldSize:2048}}).fields([{name:'schedule',maxCount:1},{name:'attendance',maxCount:1}]);
@@ -20,11 +22,11 @@ async function analyze(req){
   if(active>=2)throw new ApiError(429,'考勤分析任务较多，请稍后再试');active++;
   try{return await analyzeFiles(req.files?.schedule?.[0],req.files?.attendance?.[0],{month:req.body.month,observationHours:req.body.observationHours,normalExitHours:req.body.normalExitHours});}finally{active--;}
 }
-async function transaction(fn){const db=await pool.getConnection();try{await db.beginTransaction();const r=await fn(db);await db.commit();return r;}catch(e){await db.rollback();throw e;}finally{db.release();}}
+async function transaction(fn,currentImport=false){const db=await pool.getConnection();let locked=false,begun=false;try{if(currentImport){const [rows]=await db.query('SELECT GET_LOCK(?,10) AS acquired',[IMPORT_LOCK]);if(Number(rows[0]?.acquired)!==1)throw new ApiError(409,'另一份考勤正在保存，请稍后重试');locked=true}await db.beginTransaction();begun=true;const r=await fn(db);await db.commit();return r;}catch(e){if(begun)await db.rollback();throw e;}finally{if(locked)try{await db.query('SELECT RELEASE_LOCK(?)',[IMPORT_LOCK])}catch{}db.release();}}
 async function getReport(db,value,lock=false){const [rows]=await db.query(`SELECT * FROM attendance_reports WHERE id=? AND workshop_code='raw_grain'${lock?' FOR UPDATE':''}`,[positiveId(value)]);if(!rows.length)throw new ApiError(404,'考勤分析已被删除或不存在');return rows[0];}
 async function reportData(report){const [notes]=await pool.query('SELECT entry_key,note,actor_id,updated_at FROM attendance_notes WHERE report_id=?',[report.id]);return {id:report.id,title:report.title,revision:report.revision,retentionUntil:report.retention_until,analysis:parseJson(report.analysis_json,{}),notes:Object.fromEntries(notes.map(n=>[n.entry_key,{note:n.note,actorId:n.actor_id,updatedAt:n.updated_at}]))};}
 router.post('/preview',receive,asyncHandler(async(req,res)=>ok(res,await analyze(req))));
-router.get('/reports',asyncHandler(async(_req,res)=>{const [rows]=await pool.query("SELECT id,title,period,revision,retention_until,created_at,updated_at FROM attendance_reports WHERE workshop_code='raw_grain' ORDER BY updated_at DESC,id DESC LIMIT 100");ok(res,rows);}));
+router.get('/reports',asyncHandler(async(_req,res)=>{const [rows]=await pool.query("SELECT id,title,period,revision,retention_until,created_at,updated_at FROM attendance_reports WHERE workshop_code='raw_grain' ORDER BY created_at DESC,id DESC LIMIT 1");ok(res,rows);}));
 router.get('/reports/:id',asyncHandler(async(req,res)=>ok(res,await reportData(await getReport(pool,req.params.id)))));
 router.post('/reports',receive,asyncHandler(async(req,res)=>{
   const analysis=await analyze(req);
@@ -40,8 +42,10 @@ router.post('/reports',receive,asyncHandler(async(req,res)=>{
     const current=await getReport(db,saved.insertId,true);
     const previous=parseJson(current.analysis_json,{});
     if(previous.version!==analysis.version||previous.ruleRevision!==analysis.ruleRevision||previous.options?.observationHours!==analysis.options.observationHours||previous.options?.normalExitHours!==analysis.options.normalExitHours)await db.query('UPDATE attendance_reports SET analysis_json=?,revision=revision+1 WHERE id=?',[JSON.stringify(analysis),saved.insertId]);
+    // Commit the valid replacement and removal together; invalid imports never delete current data.
+    await removePreviousReports(db,Number(saved.insertId));
     return getReport(db,saved.insertId);
-  });ok(res,await reportData(report));
+  },true);ok(res,await reportData(report));
 }));
 router.post('/reports/:id/reanalyze',asyncHandler(async(req,res)=>{
   const report=await getReport(pool,req.params.id);

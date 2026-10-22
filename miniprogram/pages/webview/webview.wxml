@@ -1,0 +1,12 @@
+<web-view wx:if="{{src && !error}}" src="{{src}}" binderror="onError" />
+<view wx:if="{{error}}" class="error">
+  <text class="error-title">{{error}}</text>
+  <text wx:if="{{errorDetail}}" class="error-detail" selectable>{{errorDetail}}</text>
+  <view wx:if="{{src}}" class="error-card">
+    <text class="error-label">访问地址</text>
+    <text class="error-url" selectable>{{src}}</text>
+    <text wx:if="{{domainBlocked}}" class="error-tip">开发调试：重新打开本项目，让本机开发设置生效。正式使用：在当前小程序后台配置业务域名并完成校验；request合法域名是另一项设置。</text>
+    <text wx:else class="error-tip">已配置业务域名仍打不开时，请检查该地址的HTTPS证书、网页部署和网络连通性。</text>
+  </view>
+  <view wx:if="{{src}}" class="error-actions"><button class="retry" bindtap="retry">重新打开</button><button bindtap="copyLink">复制网页地址</button></view>
+</view>

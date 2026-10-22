@@ -19,8 +19,30 @@ for (const file of walk(root).filter(f => f.endsWith('.wxml'))) {
   }
 }
 const app = JSON.parse(fs.readFileSync(path.join(root, 'app.json')));
+// Main-package code must be reachable from app.js or a main-package page.
+// Subpackage-only helpers belong under their package, not in main services.
+const mainUsed = new Set();
+function visitMain(file) {
+  if (mainUsed.has(file)) return;
+  assert.ok(!file.includes(`${path.sep}packages${path.sep}`), `Main package imports subpackage: ${file}`);
+  mainUsed.add(file);
+  const source = fs.readFileSync(file, 'utf8');
+  for (const match of source.matchAll(/\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+    if (!match[1].startsWith('.')) continue;
+    const target = path.resolve(path.dirname(file), match[1]);
+    visitMain(target.endsWith('.js') ? target : target + '.js');
+  }
+}
+for (const entry of ['app', ...app.pages]) visitMain(path.join(root, entry + '.js'));
+for (const file of files.filter(f => !f.includes(`${path.sep}packages${path.sep}`))) {
+  assert.ok(mainUsed.has(file), `Unused JS in main package: ${path.relative(root, file)}`);
+}
 let handlers = 0;
-for (const page of app.pages) {
+const registeredPages = [...app.pages, ...(app.subPackages || []).flatMap(p => p.pages.map(page => `${p.root}/${page}`))];
+for (const page of registeredPages) {
+  for (const extension of ['js', 'json', 'wxml', 'wxss']) {
+    assert.ok(fs.existsSync(path.join(root, page + '.' + extension)), `${page}: missing .${extension}`);
+  }
   const file = path.join(root, page + '.js');
   let definition;
   vm.runInNewContext(fs.readFileSync(file, 'utf8'), { require: createRequire(file), Page: d => { definition = d; }, wx: {}, getApp: () => ({ globalData: {} }), console, setTimeout, clearTimeout }, { filename: file });
@@ -31,4 +53,4 @@ for (const page of app.pages) {
     handlers++;
   }
 }
-console.log(JSON.stringify({ javascriptFiles: files.length, registeredPages: app.pages.length, boundHandlers: handlers, wxmlExpressions: expressions, result: 'passed' }));
+console.log(JSON.stringify({ javascriptFiles: files.length, registeredPages: registeredPages.length, boundHandlers: handlers, wxmlExpressions: expressions, mainPackageUnusedJS: 0, result: 'passed' }));

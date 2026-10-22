@@ -1,8 +1,14 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { validatePassword } = require('../src/password-policy');
+const { validatePassword, validateUsername } = require('../src/password-policy');
 const { getPasswordError } = require('../../miniprogram/services/password-policy');
 const { hashPassword, verifyPassword } = require('../src/password');
+
+test('account validation retains exact letter case',()=>{
+  assert.equal(validateUsername(' Zhang_01 '),'Zhang_01');
+  assert.equal(validateUsername('zhang_01'),'zhang_01');
+  for(const name of ['ab','a b','张三','Ab-1'])assert.throws(()=>validateUsername(name),{status:400});
+});
 
 test('new passwords have no length limit and require all three character types; symbols are optional', () => {
   for (const password of ['Ab1', 'Ab123!', 'A' + 'b'.repeat(500) + '1']) {

@@ -8,8 +8,6 @@ const knowledgeRoute = read('../src/routes/knowledge.js');
 const partsRoute = read('../src/routes/parts.js');
 const db = read('../src/db.js');
 const operationsRoute = read('../src/routes/operations.js');
-const plcRoute = read('../src/routes/plc.js');
-const cleanupMigration = read('../sql/migration_remove_procurement_suppliers_20260829.sql');
 const importWorkbook = read('../src/import-workbook.js');
 const auth = read('../src/auth.js');
 const authRoute = read('../src/routes/auth.js');
@@ -46,7 +44,6 @@ test('named models replace legacy category CRUD and support scoped batch assignm
   assert.match(partsRoute, /router\.post\('\/part-models', requireAnyWorkshopEditor/);
   assert.match(partsRoute, /router\.put\('\/part-models\/:id', requireAnyWorkshopEditor/);
   assert.match(partsRoute, /router\.delete\('\/part-models\/:id', requireAnyWorkshopEditor/);
-  assert.match(partsRoute, /status\(410\)/);
   assert.match(partsRoute, /router\.post\('\/parts\/batch-model', requireAnyWorkshopEditor/);
   assert.match(partsRoute, /withPartAssetWrite\(pool, req.user, partIds/);
   assert.match(partsRoute, /async function assertValidGlb/);
@@ -72,17 +69,11 @@ test('inventory dashboards and statistics accept workshop scope', () => {
   assert.match(partsRoute, /deleteParts\(pool, req\.user/);
 });
 
-test('retired procurement routes contain only a compatibility tombstone and cleanup drops their tables', () => {
-  assert.match(operationsRoute, /采购与供应商功能已停用/);
+test('retired procurement routes have no implementation and startup cannot recreate their tables', () => {
+  assert.doesNotMatch(operationsRoute, /router\.(?:use|get|post).*['"]\/(?:suppliers|procurement-orders)/);
   assert.doesNotMatch(operationsRoute, /INSERT INTO replenishment_orders|FROM suppliers/);
   assert.doesNotMatch(partsRoute, /AS inTransit/);
   assert.doesNotMatch(operationsRoute, /AS inTransit/);
-  assert.match(cleanupMigration, /DROP TABLE IF EXISTS replenishment_order_items/);
-  assert.match(cleanupMigration, /DROP TABLE IF EXISTS suppliers/);
-});
-
-test('PLC project imports are restricted to the system administrator', () => {
-  assert.match(plcRoute, /router\.post\('\/plc\/projects', requireRole\('admin'\)/);
 });
 
 test('bulk imports use downloadable workshop templates and all-or-nothing validation', () => {

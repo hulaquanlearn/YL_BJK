@@ -4,7 +4,7 @@
       <div class="portal-brand"><span><el-icon><Grid /></el-icon></span><div><strong>数字工作台</strong></div></div>
       <el-dropdown trigger="click" @command="handleAccountCommand">
         <button class="portal-account" type="button"><span>{{ initial }}</span><div><strong>{{ user?.displayName }}</strong><small>{{ roleLabel }}</small></div><el-icon><ArrowDown /></el-icon></button>
-        <template #dropdown><el-dropdown-menu><el-dropdown-item command="logout" divided><el-icon><SwitchButton /></el-icon>退出登录</el-dropdown-item></el-dropdown-menu></template>
+        <template #dropdown><el-dropdown-menu><el-dropdown-item command="profile"><el-icon><User /></el-icon>个人中心</el-dropdown-item><el-dropdown-item command="logout" divided><el-icon><SwitchButton /></el-icon>退出登录</el-dropdown-item></el-dropdown-menu></template>
       </el-dropdown>
     </header>
 
@@ -12,51 +12,45 @@
       <article class="module-card spare-card">
         <div class="module-card-top"><span class="module-icon"><el-icon><Box /></el-icon></span><span class="module-status">库存与现场</span></div>
         <div><h2>备件管理中心</h2><p>查库存、找备件，掌握现场库位与补货需求。</p></div>
-        
+
         <router-link class="module-enter" to="/inventory">进入备件管理 <el-icon><Right /></el-icon></router-link>
         <nav class="workspace-links" aria-label="备件常用功能">
           <router-link to="/warehouse-3d"><el-icon><Location /></el-icon><span>3D 库位</span><el-icon><ArrowRight /></el-icon></router-link>
-          <router-link to="/replenishment"><el-icon><ShoppingCartFull /></el-icon><span>补货清单</span><el-icon><ArrowRight /></el-icon></router-link>
-          <router-link to="/check"><el-icon><DocumentChecked /></el-icon><span>盘点管理</span><el-icon><ArrowRight /></el-icon></router-link>
+          <router-link v-if="canReadFeature(user,'/replenishment')" to="/replenishment"><el-icon><ShoppingCartFull /></el-icon><span>补货清单</span><el-icon><ArrowRight /></el-icon></router-link>
+          <router-link v-if="canReadFeature(user,'/check')" to="/check"><el-icon><DocumentChecked /></el-icon><span>盘点管理</span><el-icon><ArrowRight /></el-icon></router-link>
         </nav>
       </article>
 
-      <article class="module-card knowledge-card">
+      <article v-if="canReadFeature(user,'/knowledge')" class="module-card knowledge-card">
         <div class="module-card-top"><span class="module-icon"><el-icon><Reading /></el-icon></span><span class="module-status">资料与经验</span></div>
-        <div><h2>智能工程中心</h2><p>查阅工程资料与故障经验。</p></div>
-        
-        <router-link class="module-enter" to="/knowledge">进入工程知识 <el-icon><Right /></el-icon></router-link>
-        <nav class="workspace-links" aria-label="工程常用功能">
-          <router-link to="/knowledge"><el-icon><Reading /></el-icon><span>工程知识库</span><el-icon><ArrowRight /></el-icon></router-link>
+        <div><h2>智能工程中心</h2><p>分析机器人程序，查阅工程资料与故障经验。</p></div>
 
+        <router-link class="module-enter" to="/robot-program">进入智能工程 <el-icon><Right /></el-icon></router-link>
+        <nav class="workspace-links" aria-label="工程常用功能">
+          <router-link v-if="canReadFeature(user,'/robot-program')" to="/robot-program"><el-icon><DocumentChecked /></el-icon><span>机器人程序智能分析</span><el-icon><ArrowRight /></el-icon></router-link>
+          <router-link to="/knowledge"><el-icon><Reading /></el-icon><span>工程知识库</span><el-icon><ArrowRight /></el-icon></router-link>
         </nav>
       </article>
-      <article class="module-card work-card">
+      <article v-if="canReadFeature(user,preferredWorkPath(user))" class="module-card work-card">
         <div class="module-card-top"><span class="module-icon"><el-icon><DocumentChecked /></el-icon></span><span class="module-status">填报与考评</span></div>
-        <div><h2>工作管理中心</h2><p>制曲考评 · 原粮通报与考勤核查。</p></div>
+        <div><h2>工作管理中心</h2><p>履职填报与考勤核查。</p></div>
         <router-link class="module-enter" :to="preferredWorkPath(user)">进入工作管理 <el-icon><Right /></el-icon></router-link>
-        <nav class="workspace-links" aria-label="工作管理常用功能"><router-link to="/work"><el-icon><DocumentChecked /></el-icon><span>制曲 · 组长履职考评{{ workRole==='shift_leader'?'（班长复核）':'' }}</span><el-icon><ArrowRight /></el-icon></router-link><router-link to="/inspection-notices"><el-icon><DocumentChecked /></el-icon><span>原粮 · 检查通报{{ canEditNotice?'整理':'查看' }}</span><el-icon><ArrowRight /></el-icon></router-link><router-link v-if="canReadFeature(user,'/attendance')" to="/attendance"><el-icon><Calendar /></el-icon><span>原粮 · 考勤核查</span><el-icon><ArrowRight /></el-icon></router-link><router-link v-if="user?.role==='admin'" to="/work-storage"><el-icon><FolderOpened /></el-icon><span>工作资料管理</span><el-icon><ArrowRight /></el-icon></router-link></nav>
+        <nav class="workspace-links" aria-label="工作管理常用功能"><router-link v-if="canReadFeature(user,'/raw-duties')" to="/raw-duties"><el-icon><DocumentChecked /></el-icon><span>工段长履职考评</span><el-icon><ArrowRight /></el-icon></router-link><router-link v-if="canReadFeature(user,'/attendance')" to="/attendance"><el-icon><Calendar /></el-icon><span>考勤核查</span><el-icon><ArrowRight /></el-icon></router-link></nav>
       </article>
     </section>
   </main>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
 import { logout } from '../api'
 import { clearSession, getUser } from '../auth'
-import { work } from '../api/work'
-import { preferredWorkPath, canReadFeature } from '../utils/feature-access.mjs'
+import { preferredWorkPath, canReadFeature, staffPositionLabel } from '../utils/feature-access.mjs'
 
 const router = useRouter()
 const user = getUser()
-const canEditNotice = ['admin', 'raw_grain'].includes(user?.role)
-const canViewNotice = ['admin','raw_grain','qu_making','brewing'].includes(user?.role) || (user?.role==='viewer' && user?.staffWorkshopCode==='raw_grain')
-const workRole=ref('')
-const canUseWork = computed(() => ['admin','raw_grain','qu_making','brewing'].includes(user?.role) || (user?.role==='viewer' && user?.staffWorkshopCode==='qu_making' && user?.staffPosition==='shift_leader') || Boolean(workRole.value))
-onMounted(async()=>{if(user?.role!=='viewer'||user.staffWorkshopCode!=='qu_making'||!['group_leader','shift_leader'].includes(user.staffPosition))return;try{const response=await work.get('/context');workRole.value=response.data.workRole||''}catch{workRole.value=''}})
 const initial = computed(() => user?.displayName?.slice(0, 1) || '用')
 const roleLabel = computed(() => ({
   admin: '总管理员',
@@ -64,11 +58,12 @@ const roleLabel = computed(() => ({
   qu_making: '制曲车间管理员',
   brewing: '酿酒车间管理员',
   viewer: user?.staffWorkshopCode && user?.staffPosition
-    ? `${({raw_grain:'原粮车间',qu_making:'制曲车间',brewing:'酿酒车间'})[user.staffWorkshopCode]||'车间'}${({group_leader:'组长',shift_leader:'班长'})[user.staffPosition]||'人员'}`
-    : workRole.value==='shift_leader'?'制曲车间班长':workRole.value==='group_leader'?'制曲车间组长':'车间人员（岗位待分配）'
+    ? `${({raw_grain:'原粮车间',qu_making:'制曲车间',brewing:'酿酒车间'})[user.staffWorkshopCode]||'车间'}${staffPositionLabel(user)}`
+    : '车间人员（岗位待分配）'
 }[user?.role] || '只读用户'))
 
 async function handleAccountCommand(command) {
+  if (command === 'profile') { router.push('/account'); return }
   if (command !== 'logout') return
   try {
     await ElMessageBox.confirm('确定退出当前账号吗？', '退出登录', { confirmButtonText: '退出', cancelButtonText: '取消', type: 'warning' })

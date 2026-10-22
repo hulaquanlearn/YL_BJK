@@ -30,4 +30,4 @@ CREATE TABLE IF NOT EXISTS fermentation_knowledge_entries (
   KEY idx_fermentation_knowledge_type_time (entry_type, status, created_at),
   KEY idx_fermentation_knowledge_category (category, status, created_at),
   KEY idx_fermentation_knowledge_stage (process_stage, status, created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

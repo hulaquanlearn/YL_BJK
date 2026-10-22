@@ -8,14 +8,14 @@ const WORKSHOPS = Object.freeze([
 
 const WORKSHOP_CODES = new Set(WORKSHOPS.map(item => item.code));
 const EDIT_ROLES = new Set(['admin', 'raw_grain', 'qu_making', 'brewing']);
-const ROLE_LABELS = Object.freeze({admin:'系统管理员',raw_grain:'原粮车间管理员',qu_making:'制曲车间管理员',brewing:'酿酒车间管理员',viewer:'车间人员（班长 / 组长，备件只读）'});
+const ROLE_LABELS = Object.freeze({admin:'系统管理员',raw_grain:'原粮车间管理员',qu_making:'制曲车间管理员',brewing:'酿酒车间管理员',viewer:'车间人员（按车间分配岗位）'});
 
 function enforceReadOnly(req, _res, next) {
   if (['GET','HEAD','OPTIONS'].includes(req.method) || EDIT_ROLES.has(req.user?.role)) return next();
   if (req.method === 'POST' && req.path === '/inventory-orders' && req.user?.role === 'viewer'
     && WORKSHOP_CODES.has(req.user.workshopCode)) return next();
   // Questions produce answers and internal usage records, not business changes.
-  if (req.method === 'POST' && (req.path === '/ai/chat' || /^\/plc\/projects\/\d+\/analyze$/.test(req.path))) return next();
+  if (req.method === 'POST' && req.path === '/ai/chat') return next();
   next(new ApiError(403, '权限不足：车间人员可提交所属车间盘点单，但不能修改备件或审批'));
 }
 
@@ -31,6 +31,7 @@ function inventoryOrderScope(user, requestedWorkshopCode = '') {
 }
 
 function assertInventoryOrderSubmit(user, workshopCode) {
+  if (require('./raw-staff-access').isRawEmployee(user)) throw new ApiError(403, '原粮车间员工仅可查看备件');
   const assigned = inventoryOrderScope(user);
   if (assigned && assigned !== normalizeWorkshopCode(workshopCode)) {
     throw new ApiError(403, '只能提交所属车间的盘点单');

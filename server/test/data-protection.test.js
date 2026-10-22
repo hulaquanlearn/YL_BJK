@@ -1,6 +1,6 @@
 const test=require('node:test'),assert=require('node:assert/strict'),express=require('express'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os'),{once}=require('node:events');
 const {pool}=require('../src/db'),config=require('../src/config');
-const {createAccessLimits,privateResponse,businessAiAllowed}=require('../src/data-protection');
+const {createAccessLimits,privateResponse}=require('../src/data-protection');
 const listen=async app=>{const server=app.listen(0,'127.0.0.1');await once(server,'listening');return {server,base:`http://127.0.0.1:${server.address().port}`}};
 const stop=server=>new Promise(resolve=>{server.close(resolve);server.closeAllConnections()});
 
@@ -11,12 +11,6 @@ test('production route chain protects business APIs and uploaded assets, revokes
  const {server,base}=await listen(require('../src/app'));
  try{
   for(const url of ['/models/reference-20260904/manifest.json','/models/categories/motor.glb','/api/parts','/api/users','/api/part-model-library','/api/knowledge/1/download','/api/knowledge/1/preview','/uploads/part-images/private.jpg','/uploads/part-models/private.glb']){const res=await fetch(base+url);assert.equal(res.status,401,url);assert.match(res.headers.get('cache-control'),/no-store/)}
-  for(const url of ['/api/plc/projects/1','/api/program-agent/jobs']){
-    for(const method of ['GET','POST']){
-      const res=await fetch(base+url,{method});assert.equal(res.status,410,url);
-      assert.match((await res.json()).msg,/已停用/);assert.match(res.headers.get('cache-control'),/no-store/);
-    }
-  }
   assert.equal(queries,0,'anonymous requests must stop before DB access');
   const token='A'.repeat(43),cookie=`spare_parts_asset_session=${token}`,headers={Authorization:`Bearer ${token}`};
   assert.equal((await fetch(base+'/api/users',{headers:{cookie}})).status,401,'asset cookie must not authorize APIs');
@@ -37,19 +31,15 @@ test('account throttling survives changed IPs, keeps other users available, retu
  }finally{await stop(server)}
 });
 
-test('business AI egress is opt-in, literal loopback only, and retrieval does not call the gateway when protection is enabled',async()=>{
- for(const options of [{},{contextTransferEnabled:false,apiUrl:'http://127.0.0.1:14504'},{contextTransferEnabled:true,apiUrl:'https://external.example'},{contextTransferEnabled:true,apiUrl:'http://localhost.evil'},{contextTransferEnabled:true,apiUrl:'http://secret@127.0.0.1'},{contextTransferEnabled:true,apiUrl:'file:///private'}])assert.equal(businessAiAllowed(options),false);
- assert.equal(businessAiAllowed({contextTransferEnabled:true,apiUrl:'http://127.0.0.1:14504/v1/chat/completions'}),true);
- const saved=pool.query,oldMode=config.openclaw.contextTransferEnabled,oldToken=config.openclaw.token,savedFetch=global.fetch;let outbound=0;
- config.openclaw.contextTransferEnabled=false;config.openclaw.token='synthetic-gateway-token';pool.query=async sql=>{
-  if(sql.includes('FROM plc_projects'))return [[{id:1,name:'Private fixture',parseStatus:'parsed'}]];
-  if(sql.includes('FROM plc_program_items'))return [[{id:1,itemType:'block',name:'Main',contentText:'private_program',metadata:'{}'}]];
+test('knowledge AI disabled by admin uses retrieval without model egress',async()=>{
+ const saved=pool.query,oldMode=config.knowledgeAi.enabled,oldToken=config.knowledgeAi.token,savedFetch=global.fetch;let outbound=0;
+ config.knowledgeAi.enabled=false;config.knowledgeAi.token='synthetic-provider-key';pool.query=async sql=>{
   if(sql.includes('FROM fermentation_knowledge_entries'))return [[{id:1,title:'设备维修',summary:'private_knowledge',revisionNo:1}]];
   return [[]];
  };
- const app=express();app.use(express.json());app.use((req,_res,next)=>{req.user={id:1,role:'viewer'};next()});app.use(require('../src/routes/ai'),require('../src/routes/plc'));app.use((err,_req,res,_next)=>res.status(err.status||500).json({msg:err.message}));const {server,base}=await listen(app);
+ const app=express();app.use(express.json());app.use((req,_res,next)=>{req.user={id:1,role:'admin'};next()});app.use(require('../src/routes/ai'));app.use((err,_req,res,_next)=>res.status(err.status||500).json({msg:err.message}));const {server,base}=await listen(app);
  global.fetch=(url,options)=>{if(String(url).startsWith(base+'/'))return savedFetch(url,options);outbound++;throw new Error('No egress allowed')};
  try{
-  for(const [url,body] of [['/ai/chat',{messages:[{role:'user',content:'设备维修怎么处理'}]}],['/plc/projects/1/analyze',{question:'Main 程序用途'}]]){const response=await fetch(base+url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});assert.equal(response.status,200);const data=(await response.json()).data;assert.equal(data.degraded,true);assert.ok(data.evidence.length>0);assert.match(data.answer,/数据保护/)}assert.equal(outbound,0);
- }finally{global.fetch=savedFetch;await stop(server);pool.query=saved;config.openclaw.contextTransferEnabled=oldMode;config.openclaw.token=oldToken}
+  for(const [url,body] of [['/ai/chat',{messages:[{role:'user',content:'设备维修怎么处理'}]}]]){const response=await fetch(base+url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});assert.equal(response.status,200);const data=(await response.json()).data;assert.equal(data.degraded,true);assert.ok(data.evidence.length>0);assert.match(data.answer,/关闭了 AI/)}assert.equal(outbound,0);
+ }finally{global.fetch=savedFetch;await stop(server);pool.query=saved;config.knowledgeAi.enabled=oldMode;config.knowledgeAi.token=oldToken}
 });

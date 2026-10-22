@@ -24,6 +24,13 @@ function cjkFragments(value) {
 function searchTokens(value, limit = 12) {
   const raw = normalizeText(value, 12000);
   const codes = raw.match(/[A-Za-z0-9][A-Za-z0-9_.\/-]{2,}/g) || [];
+  // Operators often join an equipment acronym and its alarm without a separator.
+  // Preserve the complete identifier as well as its searchable components.
+  const components = codes.flatMap(code => {
+    const split = code.split(/[_.\/-]+/).filter(part => part.length >= 2);
+    const joined = code.match(/^(AGV|AMR)([A-Za-z]{2,})(\d*)$/i);
+    return [...split, ...(joined ? [joined[1], joined[2], joined[2] + joined[3]] : [])];
+  });
   let cleaned = raw;
   for (const word of STOP_WORDS) cleaned = cleaned.replaceAll(word, ' ');
   const words = cleaned
@@ -32,7 +39,7 @@ function searchTokens(value, limit = 12) {
     .map(item => item.trim())
     .filter(item => item.length >= 2 && !STOP_WORDS.has(item));
   const fragments = cjkFragments(cleaned);
-  return [...new Set([...codes, ...words, ...fragments])]
+  return [...new Set([...codes, ...components, ...words, ...fragments])]
     .filter(item => item.length >= 2 && !STOP_WORDS.has(item))
     .slice(0, limit);
 }

@@ -22,3 +22,5 @@ page { background: #f4f5f7; }
 .primary-btn { display:flex;height:88rpx;margin-top:8rpx;padding:0;align-items:center;justify-content:center;border:0;border-radius:15rpx;color:#fff;background:#c6000b;line-height:1.2;font-size:29rpx;font-weight:700; }
 .primary-btn::after,.logout-btn::after { border:0; }
 .logout-btn { display:flex;height:88rpx;margin-top:28rpx;padding:0;align-items:center;justify-content:center;border:2rpx solid #e2a2a7;border-radius:15rpx;color:#b41924;background:#fff;line-height:1.2;font-size:29rpx; }
+
+.profile-main{min-width:0}.profile-name,.profile-meta{overflow-wrap:break-word}.role-badge{flex-shrink:0;max-width:210rpx;white-space:normal;line-height:1.5}.section-tip{line-height:1.8}

@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS knowledge_tags (
   PRIMARY KEY (id),
   UNIQUE KEY uk_knowledge_tags_workshop_name (workshop_code, name),
   KEY idx_knowledge_tags_workshop_status (workshop_code, status, sort_order)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 SET @sql = IF((SELECT COUNT(*) FROM information_schema.COLUMNS
   WHERE TABLE_SCHEMA=@db_name AND TABLE_NAME='workshop_equipment' AND COLUMN_NAME='workshop_code')=0,

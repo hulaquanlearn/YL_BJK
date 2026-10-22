@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-14",
+  "appName": "厂务通",
+  "candidate": "A",
+  "direction": "灵动蓝紫",
+  "tool": "built-in image_gen.imagegen",
+  "intent": "generate",
+  "transparent_background": false,
+  "prompt": "Use case: logo-brand\nAsset type: final square Android application icon, opaque PNG for a Chinese factory-work management app named 厂务通, without any written text.\nPrimary request: Create one entirely new, youthful and sophisticated app icon with outstanding small-size readability. A very simple, beautifully rounded continuous folded ribbon forms an open orbital loop with a distinctive generous negative-space center; imply connection and organized collaboration, almost a soft open C without being an actual letter. Make the silhouette original and confident, with an asymmetrical smooth opening toward the upper right. The ribbon consists of two broad interlocking curved surfaces and at most three large color areas, white to icy blue with a restrained violet accent at one fold. The form should feel playful yet precise and mature, like a beautifully designed native productivity app.\nScene/backdrop: perfectly flat, solid deep electric blue background, filling the entire square edge to edge. No rounded outer corners: Android will provide its own icon mask.\nStyle/medium: exceptionally clean vector-like graphic logo, no mockup, crisp antialiased edges, mostly flat design, only a subtle blue-violet color transition inside the central mark. A straight-on 2D graphic, not an object photographed or rendered.\nComposition/framing: square 1024x1024, one centered symbol occupying 60-65 percent of width and height, ample balanced safe margin, no border, no additional objects.\nText: none.\nConstraints: PNG, opaque background; simple flat solid background and limited detail so the file is preferably under 2MB. Exactly one icon only.\nAvoid: factory silhouette, chimney, gear, warehouse, box, checkmark, person, Chinese characters, letters, words, number, watermark, thin lines, circuit traces, metal, glass, complicated 3D, drop shadows, glowing speckles, decorative patterns, icon presentation boards, grids, UI screens, phones, gradients on background.",
+  "source": "C:/Users/Lenovo/.codex/generated_images/01a137f6-4f6e-73d2-9baf-ae703fb9bbe2/exec-71553609-4a07-40ce-a12f-f8958de353e4.png",
+  "path": "D:/wx_xiangm/xiangmu/docs/branding/changwutong-20261014-modern/01-blue-orbit.png",
+  "width": 1254,
+  "height": 1254,
+  "bytes": 1208523,
+  "pngColorType": 2,
+  "sha256": "7D722A276DEF74F57408E0E0D458E3FED02282CCDD53450749C4F67D9F35BC4F",
+  "description": "纯电蓝方形满底，中央冰蓝至白色宽带组成开放轨道环，右侧小段为淡紫色；圆润负空间，整张无文字、边框、实体物件、厂房或齿轮。"
+}

@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS knowledge_process_stages (
   PRIMARY KEY (id),
   UNIQUE KEY uk_knowledge_process_stage_name (name),
   KEY idx_knowledge_process_stage_status_sort (status, sort_order, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO knowledge_process_stages (name, sort_order, status)
 VALUES

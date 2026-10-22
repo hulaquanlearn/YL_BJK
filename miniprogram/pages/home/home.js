@@ -27,6 +27,7 @@ Page({
     if (!auth.requireLogin()) return;
     const user = auth.getUser();
     this.setData({
+      isRawEmployee: auth.isRawEmployee(),
       isAdmin: user?.role === 'admin',
       canEditParts: auth.canEditAnyWorkshop(), isViewer: auth.isViewer(),
       canSubmitInventory: auth.canSubmitInventory(), canApproveInventory: auth.canApproveInventory()
@@ -65,7 +66,7 @@ Page({
   gotoApprove() { wx.navigateTo({ url: '/pages/approve/approve' }); },
   gotoaiAgent() { wx.navigateTo({ url: '/pages/aiAgent/aiAgent' }); },
   gotoLocationGuide() { wx.navigateTo({ url: '/pages/locationGuide/locationGuide' }); },
-  gotoAccount() { wx.navigateTo({ url: '/pages/account/account' }); },
+  gotoWarehouse3D() { wx.navigateTo({ url: '/pages/webview/webview?feature=warehouse3d' }); },
 
   gotoPartDetail(e) {
     const id = e.currentTarget.dataset.id;

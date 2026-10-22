@@ -33,12 +33,6 @@
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
 }
 
-.image-tip {
-  font-size: 24rpx;
-  color: #999;
-  margin-top: 16rpx;
-}
-
 .preview-modal {
   position: fixed;
   top: 0;
