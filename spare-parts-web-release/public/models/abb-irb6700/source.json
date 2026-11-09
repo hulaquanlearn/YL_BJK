@@ -1,0 +1,138 @@
+{
+  "model": "ABB IRB 6700-150/3.20",
+  "axes": 6,
+  "payloadKg": 150,
+  "reachM": 3.2,
+  "source": "IRB6700_150_320__04.rslib",
+  "sourceSha256": "fd38e5e90f80a5fa0e41392c305d9ad0ea61255faa313a1a985193e767de8085",
+  "author": "ABB",
+  "revision": "04",
+  "units": "metres",
+  "upAxis": "Y",
+  "pose": "Original CAD assembly coordinates; no live robot or controller connection",
+  "conversion": "Display level 1 triangles; original diffuse colors, normals and component coordinates retained. Wire overlays and collision hulls omitted.",
+  "specification": "https://library.e.abb.com/public/3963df8a9b254840b2d73e0a173daddf/3HAC044265%20PS%20IRB%206700%20on%20IRC5-en.pdf",
+  "glbSha256": "0ec07eed43799dafb94488b6aa60bc3f4943117cb68f7c7affbbd845c5458a9e",
+  "parts": [
+    {
+      "id": "base",
+      "triangles": 9938,
+      "sourceDefinition": "21",
+      "sourceStream": "ba198908020244da8109e8b88f23e9e1"
+    },
+    {
+      "id": "axis1",
+      "triangles": 14332,
+      "sourceDefinition": "23",
+      "sourceStream": "42f295558f21420ba65f2a6de3c0e733"
+    },
+    {
+      "id": "cable1",
+      "triangles": 14330,
+      "sourceDefinition": "24",
+      "sourceStream": "4606fa7954c64f18b7a2d4a4fffd98e6"
+    },
+    {
+      "id": "axis2",
+      "triangles": 5158,
+      "sourceDefinition": "26",
+      "sourceStream": "087afedec1104edd9052879b7fae311e"
+    },
+    {
+      "id": "cable2",
+      "triangles": 4400,
+      "sourceDefinition": "27",
+      "sourceStream": "acd690d65eca47a8aa635048b06647b7"
+    },
+    {
+      "id": "axis3",
+      "triangles": 6728,
+      "sourceDefinition": "29",
+      "sourceStream": "cb6cb97bf78744ccb37e9cb774ba2277"
+    },
+    {
+      "id": "cable3",
+      "triangles": 7336,
+      "sourceDefinition": "30",
+      "sourceStream": "0004001af2eb4426b1e7743f9be50855"
+    },
+    {
+      "id": "axis4",
+      "triangles": 9118,
+      "sourceDefinition": "31",
+      "sourceStream": "7bbfa03cfaea413cbf480ab9df4c4744"
+    },
+    {
+      "id": "axis5",
+      "triangles": 2392,
+      "sourceDefinition": "32",
+      "sourceStream": "e48f8a57bb2640b3b6f37b1638dc76c6"
+    },
+    {
+      "id": "axis6",
+      "triangles": 1814,
+      "sourceDefinition": "33",
+      "sourceStream": "02e447a01e904eb59dba54d3f267ec04"
+    },
+    {
+      "id": "balance1",
+      "triangles": 1506,
+      "sourceDefinition": "34",
+      "sourceStream": "a131e24ce28e44618e0959ea359d8090"
+    },
+    {
+      "id": "balance2",
+      "triangles": 736,
+      "sourceDefinition": "35",
+      "sourceStream": "a5907054f1154a19b3d6996ac019ed03"
+    }
+  ],
+  "frames": {
+    "base": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "x": [
+        1,
+        0,
+        0
+      ],
+      "y": [
+        0,
+        0,
+        -1
+      ],
+      "z": [
+        0,
+        1,
+        0
+      ]
+    },
+    "flange": {
+      "parent": "axis6",
+      "position": [
+        2.1125,
+        2.26,
+        0
+      ],
+      "x": [
+        0,
+        -1,
+        0
+      ],
+      "y": [
+        0,
+        0,
+        -1
+      ],
+      "z": [
+        1,
+        0,
+        0
+      ]
+    },
+    "source": "PIM.xml MechanismDef 19 Flanges wrist OffsetTransform; original CAD assembly pose"
+  }
+}

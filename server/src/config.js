@@ -23,17 +23,18 @@ module.exports = {
   },
   rawDutyAiSummary: {
     enabled: process.env.RAW_DUTY_AI_SUMMARY_ENABLED === 'true',
-    provider: 'deepseek',
-    apiUrl: 'https://api.deepseek.com/chat/completions',
-    token: process.env.DEEPSEEK_API_KEY || '',
-    model: process.env.RAW_DUTY_AI_MODEL || 'deepseek-flash',
+    get provider() { return require('./ai-settings').currentSettings(process.env,'rawSummary').provider; },
+    get apiUrl() { return require('./ai-settings').currentSettings(process.env,'rawSummary').apiUrl; },
+    get token() { return require('./ai-settings').currentKey(process.env,'rawSummary'); },
+    get model() { const active=require('./ai-settings').currentSettings(process.env,'rawSummary');return active.configuredOverride?active.model:process.env.RAW_DUTY_AI_MODEL||'deepseek-flash'; },
     timeoutMs: 60000
   },
   knowledgeAi: {
     enabled: process.env.KNOWLEDGE_AI_ENABLED !== 'false',
-    apiUrl: 'https://api.deepseek.com/chat/completions',
-    token: process.env.DEEPSEEK_API_KEY || '',
-    model: process.env.KNOWLEDGE_AI_MODEL || 'deepseek-flash',
+    get provider() { return require('./ai-settings').currentSettings(process.env,'knowledge').provider; },
+    get apiUrl() { return require('./ai-settings').currentSettings(process.env,'knowledge').apiUrl; },
+    get token() { return require('./ai-settings').currentKey(process.env,'knowledge'); },
+    get model() { const active=require('./ai-settings').currentSettings(process.env,'knowledge');return active.configuredOverride?active.model:process.env.KNOWLEDGE_AI_MODEL||'deepseek-flash'; },
     timeoutMs: 60000
   },
   knowledge: {

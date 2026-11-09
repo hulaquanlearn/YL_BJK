@@ -10,6 +10,7 @@ const { requireRole } = require('../auth');
 const { WORKSHOPS, normalizeWorkshopCode, canWriteWorkshop, assertWorkshopWrite, requireAnyWorkshopEditor } = require('../workshop-scope');
 const { ApiError, asyncHandler, positiveInt } = require('../utils');
 const { cleanText, knowledgePayload, safeExtension, normalizeUploadFilename } = require('../knowledge-utils');
+const { referenceMetadata, metadataWithFileHash } = require('../knowledge-reference');
 const { extractDocumentText, getDocumentCapabilities, previewDocument } = require('../document-service');
 
 const router = express.Router();
@@ -113,6 +114,7 @@ async function buildIndexResult(file, manualText = '') {
 }
 
 function toEntry(row, user) {
+  row={...row};for(const field of ['title','category','processStage','equipmentName','summary','faultSymptom','faultCause','solution','preventiveAction','contentText','tags','originalFilename'])row[field]=require('../agv-terms').normalizeAgvTerms(row[field]);
   return {
     id: String(row.id),
     workshopCode: row.workshopCode || 'raw_grain',
@@ -140,6 +142,7 @@ function toEntry(row, user) {
     revisionNo: Number(row.revisionNo) || 1,
     indexStatus: row.indexStatus || (row.storedFilename ? 'pending' : (row.contentText ? 'ready' : 'empty')),
     indexMessage: row.indexMessage || '',
+    referenceMetadata: referenceMetadata(row.referenceMetadata),
     indexedAt: row.indexedAt || null,
     canEdit: canManageEntry(row, user),
     canDelete: canManageEntry(row, user)
@@ -152,20 +155,20 @@ const ENTRY_SELECT = `
          fault_cause AS faultCause, solution, preventive_action AS preventiveAction,
          content_text AS contentText, tags, original_filename AS originalFilename,
          stored_filename AS storedFilename, mime_type AS mimeType, file_size AS fileSize,
-         uploaded_by AS uploadedBy, uploaded_by_name AS uploadedByName, view_count AS viewCount,
+         uploaded_by AS uploadedBy, COALESCE(NULLIF(ku.display_name,''),NULLIF(ku.username,''),k.uploaded_by_name) AS uploadedByName, view_count AS viewCount,
          revision_no AS revisionNo,index_status AS indexStatus,index_message AS indexMessage,indexed_at AS indexedAt,
-         k.created_at AS createdAt, k.updated_at AS updatedAt
-  FROM fermentation_knowledge_entries k LEFT JOIN workshops ws ON ws.code=k.workshop_code`;
+         k.reference_metadata AS referenceMetadata, k.created_at AS createdAt, k.updated_at AS updatedAt
+  FROM fermentation_knowledge_entries k LEFT JOIN workshops ws ON ws.code=k.workshop_code LEFT JOIN app_users ku ON ku.id=k.uploaded_by`;
 
 const ENTRY_LIST_SELECT = `
   SELECT k.id, k.workshop_code AS workshopCode, ws.name AS workshopName, entry_type AS entryType, title, category, process_stage AS processStage,
          equipment_name AS equipmentName, summary,
          LEFT(fault_symptom, 350) AS faultSymptom,
          tags, original_filename AS originalFilename, stored_filename AS storedFilename,
-         mime_type AS mimeType, file_size AS fileSize, uploaded_by AS uploadedBy, uploaded_by_name AS uploadedByName,
+         mime_type AS mimeType, file_size AS fileSize, uploaded_by AS uploadedBy, COALESCE(NULLIF(ku.display_name,''),NULLIF(ku.username,''),k.uploaded_by_name) AS uploadedByName,
          view_count AS viewCount,revision_no AS revisionNo,index_status AS indexStatus,index_message AS indexMessage,indexed_at AS indexedAt,
-         k.created_at AS createdAt, k.updated_at AS updatedAt
-  FROM fermentation_knowledge_entries k LEFT JOIN workshops ws ON ws.code=k.workshop_code`;
+         k.reference_metadata AS referenceMetadata, k.created_at AS createdAt, k.updated_at AS updatedAt
+  FROM fermentation_knowledge_entries k LEFT JOIN workshops ws ON ws.code=k.workshop_code LEFT JOIN app_users ku ON ku.id=k.uploaded_by`;
 
 async function requireActiveProcessStage(name, workshopCode, database = pool) {
   if (!name) return;
@@ -181,10 +184,10 @@ async function snapshotEntry(connection, id, revisionNo, user, changeKind, chang
     `INSERT INTO knowledge_entry_revisions
      (entry_id,revision_no,workshop_code,entry_type,title,category,process_stage,equipment_name,summary,
       fault_symptom,fault_cause,solution,preventive_action,content_text,tags,original_filename,stored_filename,
-      mime_type,file_size,index_status,index_message,indexed_at,change_kind,change_summary,created_by,created_by_name)
+      mime_type,file_size,index_status,index_message,indexed_at,reference_metadata,change_kind,change_summary,created_by,created_by_name)
      SELECT id,revision_no,workshop_code,entry_type,title,category,process_stage,equipment_name,summary,
       fault_symptom,fault_cause,solution,preventive_action,content_text,tags,original_filename,stored_filename,
-      mime_type,file_size,index_status,index_message,indexed_at,?,?,?,?
+      mime_type,file_size,index_status,index_message,indexed_at,reference_metadata,?,?,?,?
      FROM fermentation_knowledge_entries WHERE id=? AND revision_no=?`,
     [changeKind, cleanText(changeSummary, 500) || null, Number(user?.id) || null,
       user?.displayName || user?.username || '系统用户', id, revisionNo]
@@ -223,7 +226,7 @@ async function sendDocumentPreview(res, fullPath, originalFilename) {
 
 router.get('/knowledge/stats', asyncHandler(async (req, res) => {
   const workshopCode = req.query.workshopCode ? normalizeWorkshopCode(req.query.workshopCode) : '';
-  const workshopWhere = workshopCode ? ' AND workshop_code=?' : '';
+  const workshopWhere = workshopCode ? " AND (workshop_code=? OR (category='备件资料' AND JSON_UNQUOTE(JSON_EXTRACT(reference_metadata,'$.applicability'))='shared'))" : '';
   const workshopParams = workshopCode ? [workshopCode] : [];
   const [countResult, categoryResult, stageResult, tagResult] = await Promise.all([
     pool.query(`SELECT COUNT(*) AS total,
@@ -401,24 +404,33 @@ router.put('/knowledge/process-stages', requireAnyWorkshopEditor, asyncHandler(a
   } finally { connection.release(); }
 }));
 
+router.get('/knowledge/reference-facets', asyncHandler(async (_req,res) => {
+  const [rows]=await pool.query("SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(reference_metadata,'$.manufacturer')) AS manufacturer FROM fermentation_knowledge_entries WHERE status='active' AND category='备件资料' AND reference_metadata IS NOT NULL ORDER BY manufacturer");
+  const {FAMILIES,KINDS}=require('../knowledge-reference');
+  res.json({success:true,data:{families:FAMILIES,kinds:KINDS,manufacturers:rows.map(row=>row.manufacturer).filter(Boolean)}});
+}));
+
 router.get('/knowledge', asyncHandler(async (req, res) => {
   const page = positiveInt(req.query.page, 1, 100000);
   const pageSize = positiveInt(req.query.pageSize, 12, 50);
   const type = ['document', 'fault'].includes(req.query.type) ? req.query.type : '';
   const category = cleanText(req.query.category, 80);
   const stage = cleanText(req.query.processStage, 80);
-  const search = cleanText(req.query.search, 100);
+  const search = require('../agv-terms').normalizeAgvTerms(cleanText(req.query.search, 100));
   const conditions = ["k.status='active'"];
   const params = [];
-  if (req.query.workshopCode) { conditions.push('k.workshop_code=?'); params.push(normalizeWorkshopCode(req.query.workshopCode)); }
+  if (req.query.workshopCode) { conditions.push("(k.workshop_code=? OR (category='备件资料' AND JSON_UNQUOTE(JSON_EXTRACT(k.reference_metadata,'$.applicability'))='shared'))"); params.push(normalizeWorkshopCode(req.query.workshopCode)); }
   if (type) { conditions.push('entry_type=?'); params.push(type); }
   if (category) { conditions.push('category=?'); params.push(category); }
   if (stage) { conditions.push('process_stage=?'); params.push(stage); }
+  for (const [queryKey,field] of [['referenceFamily','family'],['referenceManufacturer','manufacturer'],['documentKind','documentKind']]) {
+    const value=cleanText(req.query[queryKey],100);
+    if(value){conditions.push("category='备件资料' AND JSON_UNQUOTE(JSON_EXTRACT(k.reference_metadata,'$."+field+"'))=?");params.push(value);}
+  }
   if (search) {
-    conditions.push(`(title LIKE ? OR summary LIKE ? OR equipment_name LIKE ? OR fault_symptom LIKE ?
-      OR fault_cause LIKE ? OR solution LIKE ? OR content_text LIKE ? OR tags LIKE ?)`);
+    conditions.push('('+['title','summary','equipment_name','fault_symptom','fault_cause','solution','content_text','tags','CAST(k.reference_metadata AS CHAR)'].map(field=>`REPLACE(REPLACE(${field},'背负式AGV','潜伏式AGV'),'背负式 AGV','潜伏式AGV') LIKE ?`).join(' OR ')+')');
     const keyword = `%${search}%`;
-    params.push(keyword, keyword, keyword, keyword, keyword, keyword, keyword, keyword);
+    params.push(keyword, keyword, keyword, keyword, keyword, keyword, keyword, keyword, keyword);
   }
   const where = `WHERE ${conditions.join(' AND ')}`;
   const [countResult, listResult] = await Promise.all([
@@ -449,7 +461,7 @@ router.get('/knowledge/:id/revisions', asyncHandler(async (req, res) => {
   const [rows] = await pool.query(
     `SELECT revision_no AS revisionNo,title,original_filename AS originalFilename,file_size AS fileSize,
             index_status AS indexStatus,change_kind AS changeKind,change_summary AS changeSummary,
-            created_by_name AS createdByName,created_at AS createdAt
+            reference_metadata AS referenceMetadata,created_by_name AS createdByName,created_at AS createdAt
      FROM knowledge_entry_revisions WHERE entry_id=? ORDER BY revision_no DESC`,
     [id]
   );
@@ -476,7 +488,7 @@ router.get('/knowledge/:id/revisions/:revisionNo', asyncHandler(async (req, res)
             content_text AS contentText,tags,original_filename AS originalFilename,stored_filename AS storedFilename,
             mime_type AS mimeType,file_size AS fileSize,index_status AS indexStatus,index_message AS indexMessage,
             indexed_at AS indexedAt,change_kind AS changeKind,change_summary AS changeSummary,
-            created_by_name AS createdByName,created_at AS createdAt
+            reference_metadata AS referenceMetadata,created_by_name AS createdByName,created_at AS createdAt
      FROM knowledge_entry_revisions WHERE entry_id=? AND revision_no=? LIMIT 1`,
     [id, revisionNo]
   );
@@ -485,14 +497,15 @@ router.get('/knowledge/:id/revisions/:revisionNo', asyncHandler(async (req, res)
   res.json({ success: true, data: {
     ...row, id: String(row.id), revisionNo: Number(row.revisionNo), fileSize: Number(row.fileSize) || 0,
     tags: row.tags ? row.tags.split(',').filter(Boolean) : [], hasFile: Boolean(row.storedFilename),
-    originalFilename: normalizeUploadFilename(row.originalFilename)
+    originalFilename: normalizeUploadFilename(row.originalFilename),referenceMetadata:referenceMetadata(row.referenceMetadata)
   } });
 }));
 
 router.put('/knowledge/:id', authorizeKnowledgeManage, uploadLimiter, receiveUpload, asyncHandler(async (req, res) => {
   const id = positiveInt(req.params.id, 0, Number.MAX_SAFE_INTEGER);
   if (!id) { removeUploadedFile(req.file); throw new ApiError(400, '知识条目ID无效'); }
-  const payload = knowledgePayload(req.body);
+  let payload;
+  try { payload = knowledgePayload(req.body); } catch(error) { removeUploadedFile(req.file);throw error; }
   const newFileIndex = req.file ? await buildIndexResult(req.file, payload.contentText) : null;
   const connection = await pool.getConnection();
   try {
@@ -503,7 +516,7 @@ router.put('/knowledge/:id', authorizeKnowledgeManage, uploadLimiter, receiveUpl
               solution,preventive_action AS preventiveAction,content_text AS contentText,tags,
               original_filename AS originalFilename,stored_filename AS storedFilename,mime_type AS mimeType,
               file_size AS fileSize,uploaded_by AS uploadedBy,revision_no AS revisionNo,
-              index_status AS indexStatus,index_message AS indexMessage,indexed_at AS indexedAt
+              index_status AS indexStatus,index_message AS indexMessage,indexed_at AS indexedAt,reference_metadata AS referenceMetadata
        FROM fermentation_knowledge_entries WHERE id=? AND status='active' FOR UPDATE`,
       [id]
     );
@@ -533,7 +546,7 @@ router.put('/knowledge/:id', authorizeKnowledgeManage, uploadLimiter, receiveUpl
     await connection.query(
       `UPDATE fermentation_knowledge_entries SET workshop_code=?,entry_type=?,title=?,category=?,process_stage=?,
        equipment_name=?,summary=?,fault_symptom=?,fault_cause=?,solution=?,preventive_action=?,content_text=?,tags=?,
-       original_filename=?,stored_filename=?,mime_type=?,file_size=?,revision_no=?,index_status=?,index_message=?,indexed_at=?
+       original_filename=?,stored_filename=?,mime_type=?,file_size=?,revision_no=?,index_status=?,index_message=?,indexed_at=?,reference_metadata=?
        WHERE id=?`,
       [workshopCode, payload.entryType, payload.title, payload.category, payload.processStage || null,
         payload.equipmentName || null, payload.summary || null, payload.faultSymptom || null,
@@ -541,7 +554,8 @@ router.put('/knowledge/:id', authorizeKnowledgeManage, uploadLimiter, receiveUpl
         indexResult.contentText || null, payload.tags || null, originalFilename || null,
         req.file?.filename || current.storedFilename || null, req.file?.mimetype || current.mimeType || null,
         req.file?.size || current.fileSize || null, nextRevision, indexResult.indexStatus,
-        indexResult.indexMessage || null, indexResult.indexedAt || null, id]
+        indexResult.indexMessage || null, indexResult.indexedAt || null,
+        await metadataWithFileHash(Object.hasOwn(req.body,'referenceMetadata') ? payload.referenceMetadata : payload.category==='备件资料' ? referenceMetadata(current.referenceMetadata) : null,req.file?.path,current.referenceMetadata), id]
     );
     await connection.commit();
     res.json({
@@ -608,13 +622,13 @@ router.post('/knowledge/:id/revisions/:revisionNo/restore', asyncHandler(async (
     await connection.query(
       `UPDATE fermentation_knowledge_entries SET workshop_code=?,entry_type=?,title=?,category=?,process_stage=?,
        equipment_name=?,summary=?,fault_symptom=?,fault_cause=?,solution=?,preventive_action=?,content_text=?,tags=?,
-       original_filename=?,stored_filename=?,mime_type=?,file_size=?,revision_no=?,index_status=?,index_message=?,indexed_at=?
+       original_filename=?,stored_filename=?,mime_type=?,file_size=?,revision_no=?,index_status=?,index_message=?,indexed_at=?,reference_metadata=?
        WHERE id=?`,
       [revision.workshop_code, revision.entry_type, revision.title, revision.category, revision.process_stage,
         revision.equipment_name, revision.summary, revision.fault_symptom, revision.fault_cause, revision.solution,
         revision.preventive_action, revision.content_text, revision.tags, revision.original_filename,
         revision.stored_filename, revision.mime_type, revision.file_size, nextRevision, revision.index_status,
-        revision.index_message, revision.indexed_at, id]
+        revision.index_message, revision.indexed_at, revision.reference_metadata ? JSON.stringify(referenceMetadata(revision.reference_metadata)) : null, id]
     );
     await connection.commit();
     res.json({ success: true, msg: `已将 V${revisionNo} 恢复为当前 V${nextRevision}`, data: { revisionNo: nextRevision } });
@@ -625,8 +639,8 @@ router.post('/knowledge/:id/revisions/:revisionNo/restore', asyncHandler(async (
 }));
 
 router.post('/knowledge', requireAnyWorkshopEditor, uploadLimiter, receiveUpload, asyncHandler(async (req, res) => {
-  const payload = knowledgePayload(req.body);
   try {
+    const payload = knowledgePayload(req.body);
     const workshopCode = normalizeWorkshopCode(req.body?.workshopCode, 'raw_grain');
     assertWorkshopWrite(req.user, workshopCode);
     if (!payload.title) throw new ApiError(400, '请填写知识标题');
@@ -643,15 +657,16 @@ router.post('/knowledge', requireAnyWorkshopEditor, uploadLimiter, receiveUpload
       `INSERT INTO fermentation_knowledge_entries
        (workshop_code,entry_type,title,category,process_stage,equipment_name,summary,fault_symptom,fault_cause,
         solution,preventive_action,content_text,tags,original_filename,stored_filename,mime_type,file_size,
-        uploaded_by,uploaded_by_name,revision_no,index_status,index_message,indexed_at)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        uploaded_by,uploaded_by_name,revision_no,index_status,index_message,indexed_at,reference_metadata)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [workshopCode, payload.entryType, payload.title, payload.category, payload.processStage || null,
         payload.equipmentName || null, payload.summary || null, payload.faultSymptom || null,
         payload.faultCause || null, payload.solution || null, payload.preventiveAction || null,
         indexResult.contentText || null, payload.tags || null, req.file?.originalname || null,
         req.file?.filename || null, req.file?.mimetype || null, req.file?.size || null,
         Number(req.user.id) || null, req.user.displayName || req.user.username,
-        1, indexResult.indexStatus, indexResult.indexMessage, indexResult.indexedAt]
+        1, indexResult.indexStatus, indexResult.indexMessage, indexResult.indexedAt,
+        await metadataWithFileHash(payload.referenceMetadata,req.file?.path)]
     );
     res.status(201).json({
       success: true,

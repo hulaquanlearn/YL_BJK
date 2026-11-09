@@ -1,0 +1,324 @@
+{
+  "At": "2026-11-05T01:57:36.8767541+08:00",
+  "Method": "Windows system recycle bin",
+  "PermanentDeletion": false,
+  "TrashEmptied": false,
+  "Rows": [
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\attendance-preview-state.json",
+      "Bytes": 8807539,
+      "Files": 1,
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\attendance-review-20261013.json",
+      "Bytes": 53854,
+      "Files": 1,
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\attendance-review-sources.json",
+      "Bytes": 554,
+      "Files": 1,
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\.local\\app-media-20261102",
+      "Bytes": 0,
+      "Files": 0,
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\server\\.local\\control-password-tests",
+      "Bytes": 51884,
+      "Files": 56,
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\node_modules\\.vite",
+      "Bytes": 37563693,
+      "Files": 94,
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\joint-review-native-P73N11",
+      "Bytes": 20341,
+      "Files": 24,
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\joint-review-native-tyLJ6G",
+      "Bytes": 20341,
+      "Files": 24,
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105",
+      "Bytes": 326567372,
+      "Files": 1219,
+      "Status": "recycled",
+      "Children": [
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\build-temp",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\deployment-payload",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\01-pdf-fit.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\02-pdf-wheel.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\03-pdf-phone.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\04-program-phone-before.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\05-program-phone-after.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\06-pendant-live.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\07-portal-phone.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\08-inventory-phone.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\09-app-workspace.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\10-app-fire-preview-boundary.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\11-knowledge-pdf.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\12-knowledge-pdf-phone.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\13-run-after-technical.png",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\activation-script.sh",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\activation.json",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\android-tests.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\audit-focused.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\build-receipt.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\build.cjs",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\build.err.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\build.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\deploy-preflight.cjs",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\deployment-manifest.json",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\deployment-payload.tar.gz",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\emulator-error.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\emulator-out.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\emulator-pid.txt",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\find-required-fixtures.ps1",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\fire-bootstrap-tests.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\inventory.cjs",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\mini-login-tests.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\mini-regression.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\model-final-acceptance.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\openclaw-cleanup.json",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\pc-cleanup-plan.json",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\pc-cleanup-receipt.json",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\pc-cleanup.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\pc-inventory.json",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\pc-inventory.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\plan-pc-cleanup.cjs",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\portable-model-tests.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\prepare-deployment.cjs",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\publish.cjs",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\publish.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\recycle-pc.ps1",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\required-fixture-recycle-paths.json",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\retain-test-fingerprints.mjs",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\server-before.json",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\server-cleanup-extra-receipt.json",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\server-cleanup-extra.cjs",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\server-cleanup-extra.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\server-cleanup-extra.sh",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\server-cleanup-inventory.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\server-cleanup-receipt.json",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\server-cleanup.cjs",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\server-cleanup.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\server-cleanup.sh",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\session-audit-tests.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\source-freeze.json",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\ssh.cjs",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\web-tests-after-cleanup.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\web-tests-final.log",
+          "Status": "recycled"
+        },
+        {
+          "Source": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105\\web-tests.log",
+          "Status": "recycled"
+        }
+      ]
+    }
+  ]
+}

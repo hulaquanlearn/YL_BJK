@@ -1,0 +1,42 @@
+/* App-only composition. Desktop components and design tokens stay independent. */
+body.workbench-mobile{--mobile-header:calc(56px + env(safe-area-inset-top,0px));--el-color-primary:#aa3147;--el-color-primary-light-9:#fcf0f3;--el-text-color-primary:#233044;--el-text-color-regular:#56667a}
+body.workbench-mobile #app .app-task-page{--mobile-bottom:0px;padding-bottom:env(safe-area-inset-bottom,0px)}
+body.workbench-mobile .mobile-app-header{min-height:var(--mobile-header);padding-top:calc(6px + env(safe-area-inset-top,0px));padding-bottom:6px;gap:8px}
+body.workbench-mobile .mobile-app-title h1{font-size:18px;line-height:24px}
+body.workbench-mobile .mobile-icon-button{background:transparent;border-radius:10px}
+body.workbench-mobile #app .mobile-feature-grid>a{font-size:14px;line-height:21px}
+body.workbench-mobile #app .app-task-page .page-content{padding:12px 14px 24px}
+body.workbench-mobile .app-robot-toolbar{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #e4e9ef;border-radius:12px;background:#fff;margin-bottom:10px;min-width:0}
+body.workbench-mobile .app-robot-toolbar>label{flex:1;min-width:0}
+body.workbench-mobile .app-robot-toolbar>label>span{display:block;font-size:11px;color:#798696;margin-bottom:3px}
+body.workbench-mobile .app-robot-toolbar select{min-height:36px;width:100%;min-width:0;border:0;background:#fff;color:#23384d;font:inherit;font-size:14px;overflow:hidden;text-overflow:ellipsis;padding-right:5px}
+body.workbench-mobile .app-more-button{display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:9px;background:#f4f6f9;color:#52667b;cursor:pointer;font-size:20px}
+body.workbench-mobile #app .robot-program .mobile-reader-switch{margin:0 0 10px;padding:4px;border-radius:11px}
+body.workbench-mobile #app .robot-program .mobile-reader-switch button{min-height:44px;padding:8px 12px;text-align:center;font-size:14px}
+body.workbench-mobile #app .robot-program .mobile-reader-switch span{display:none}
+body.workbench-mobile #app .robot-program .source-panel{padding:10px;border-radius:12px;box-shadow:none}
+body.workbench-mobile #app .robot-program .reader-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin-bottom:8px}
+body.workbench-mobile #app .robot-program .reader-tabs{grid-column:1/-1;min-width:0}
+body.workbench-mobile #app .robot-program .compact-file-picker{grid-column:1;width:100%;min-width:0;max-width:none}
+body.workbench-mobile #app .robot-program .code-viewport{height:calc(100vh - 330px);height:calc(100dvh - 330px);max-height:none;min-height:280px}
+body.workbench-mobile #app .robot-program .assistant-panel{border-radius:12px;box-shadow:none}
+body.workbench-mobile #app .robot-program .agent-heading{padding:12px}
+body.workbench-mobile #app .robot-program .agent-heading p{display:none}
+body.workbench-mobile .robot-reader-fullscreen .code-viewport{flex:1;height:auto;min-height:0;max-height:none}
+body.workbench-mobile #app .knowledge-page .type-navigation button{min-height:48px;border-radius:9px;font-size:13px}
+body.workbench-mobile #app .knowledge-page .type-navigation button b{flex-basis:auto;font-size:12px}
+body.workbench-mobile #app .knowledge-page .knowledge-filter{padding:10px;border-radius:12px}
+body.workbench-mobile #app .knowledge-page .knowledge-grid .knowledge-card{padding:14px;border-radius:12px;gap:8px}
+body.workbench-mobile #app .personal-center .identity-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+body.workbench-mobile #app .personal-center .identity-grid>div{min-width:0}
+body.workbench-mobile #app .personal-center .identity-grid strong{line-height:1.6;overflow-wrap:anywhere}
+body.workbench-mobile #app .personal-center .personal-panel{padding:18px;border-radius:12px}
+body.workbench-mobile #app .personal-center .personal-tabs>.el-tabs__content{padding-top:0}
+body.workbench-mobile .fire-mobile .fire-camera-launch{min-height:72px;padding:12px 16px;border-radius:12px;background:#aa3147;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;text-align:center}
+body.workbench-mobile .fire-mobile .fire-camera-launch>strong{font-size:17px}body.workbench-mobile .fire-mobile .fire-camera-launch>.el-icon{font-size:27px}body.workbench-mobile .fire-mobile .fire-camera-launch>span{font-size:12px}
+body.workbench-mobile .fire-mobile .recognition-completed{display:flex;align-items:center;gap:10px;padding:12px;margin:4px 0 16px;border:1px solid #cbe7d8;border-radius:10px;background:#f0faf4}
+body.workbench-mobile .fire-mobile .recognition-completed>.el-icon{font-size:24px;flex:none}body.workbench-mobile .fire-mobile .recognition-completed>div{flex:1;min-width:0}body.workbench-mobile .fire-mobile .recognition-completed strong{display:block;font-size:14px}body.workbench-mobile .fire-mobile .recognition-completed span{display:block;font-size:12px;margin-top:5px;color:#4e7b65}body.workbench-mobile .fire-mobile .recognition-completed>.el-button{color:#176c49;padding:4px;min-height:44px}
+body.workbench-mobile .fire-mobile .mobile-status-tabs{padding:4px;background:#e9edf2;border:0;border-radius:10px;gap:4px;margin-bottom:12px}body.workbench-mobile .fire-mobile .mobile-status-tabs>button{border:0;border-radius:7px;color:#627386}body.workbench-mobile .fire-mobile .mobile-status-tabs>button.active{background:#fff;color:#9f2940;box-shadow:0 1px 4px #20364d08}
+.app-fire-asset{display:flex;align-items:center;gap:12px;padding:14px;background:#fff;border:1px solid #e2e8ee;border-radius:12px;width:100%;min-width:0;font:inherit;text-align:left;color:#20384e;cursor:pointer}
+.app-fire-asset>div{flex:1;min-width:0}.app-fire-asset header{display:flex;align-items:center;justify-content:space-between;gap:12px}.app-fire-asset strong{font-size:19px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.app-fire-asset>div>span{display:block;margin-top:3px;font-size:12px;color:#6d7f90}.app-fire-asset p{margin:5px 0 0;line-height:1.6;font-size:12px;color:#718295;overflow-wrap:anywhere}.app-fire-asset>.el-icon{flex:none;color:#9aabba;font-size:13px}
+@media(max-width:360px){body.workbench-mobile #app .mobile-feature-grid{grid-template-columns:1fr}body.workbench-mobile .mobile-app-title h1{font-size:16px}}

@@ -16,60 +16,53 @@
           <div class="result-toolbar">
             <div class="filter-tabs">
               <button :class="{active:filter==='all'}" @click="filter='all'">全部 {{ parts.length }}</button>
-              <button :class="{active:filter==='category'}" @click="filter='category'">备件模型 {{ withCategoryModel }}</button><button :class="{active:filter==='none'}" @click="filter='none'">未绑定 / 待生成 {{ withoutAnyModel }}</button>
+              <button :class="{active:filter==='category'}" @click="filter='category'">已绑定 {{ withCategoryModel }}</button><button :class="{active:filter==='none'}" @click="filter='none'">未绑定 / 待生成 {{ withoutAnyModel }}</button>
             </div>
             <div v-if="$showControl(canEditAny)" class="selection-tools"><el-button text size="small" @click="selectVisible">全选筛选结果</el-button><el-button v-if="selected.size" text size="small" @click="selected.clear()">取消选择</el-button><ActionMenu :disabled="!canEditAny" aria-label="模型绑定更多操作" :items="[{key:'import',label:'导入模型名称绑定'}]" @select="openImportBindings"/></div>
           </div>
 
           <div v-if="selected.size" class="batch-workbench">
             <div><strong>已选 {{ selected.size }} 种物料</strong></div>
-            <el-select v-model="batchCategoryId" filterable clearable :filter-method="searchBatchModels" placeholder="搜索并选择备件模型" @visible-change="batchCategorySearch=''" @clear="batchCategorySearch=''"><el-option v-for="item in batchCategoryOptions" :key="item.id" :label="item.name" :value="item.id" /></el-select>
+            <el-select v-model="batchCategoryId" filterable clearable :filter-method="searchBatchModels" placeholder="搜索并选择备件模型" @visible-change="batchCategorySearch=''" @clear="batchCategorySearch=''"><el-option v-for="item in batchCategoryOptions" :key="item.id" :label="`${item.name} · ${modelDisplayStatus(item).label}`" :value="item.id" /></el-select><p v-if="batchSelectedModel" class="batch-model-status" role="status">{{ modelDisplayStatus(batchSelectedModel).description }}</p>
             <el-button v-write type="primary" :disabled="!batchCategoryId" :loading="batchAssigning" @click="assignCategoryModel">关联备件模型</el-button>
             <el-button v-write :loading="batchAssigning" @click="clearCategoryModel">解除模型绑定</el-button>
           </div>
 
-          <div v-loading="loading" class="ml-grid">
+          <el-tag v-if="bindingModelFilter" closable class="binding-filter" @close="bindingModelFilter=null">模型：{{ categoryModels.find(m=>Number(m.id)===Number(bindingModelFilter))?.name }}</el-tag>
+          <el-alert v-if="partsError" :title="partsError" type="error" :closable="false"><el-button link @click="loadParts">重新加载</el-button></el-alert>
+          <div v-loading="loading" class="binding-list">
             <article v-for="item in pagedParts" :key="item.id" class="ml-card" :class="{selected:selected.has(item.id),readonly:!canEditPart(item)}">
-              <el-checkbox v-if="$showControl(canEditPart(item))" :disabled="!canEditPart(item)" class="card-check" :model-value="selected.has(item.id)" @change="toggleSelect(item)" /><span v-else class="readonly-badge">只读</span>
+              <div class="binding-selection"><el-checkbox v-if="$showControl(canEditPart(item))" :disabled="!canEditPart(item)" :aria-label="`选择${item.code}`" :model-value="selected.has(item.id)" @change="toggleSelect(item)" /></div>
               <header class="part-card-heading"><strong :title="item.name">{{ item.name }}</strong><code>{{ item.code }}</code></header>
-              <div class="part-media-grid">
-                <section class="part-media">
-                  <span class="media-label">3D 示意模型</span>
-                  <button v-if="displayedPartModel(item)" type="button" class="media-view" :aria-label="`查看${item.name}3D模型`" @click="openPartPreview(item)">
-                    <ModelThumbnail :model-url="displayedPartModel(item)" :front-rotation-y="Number(item.categoryFrontRotationY)||0" :alt="`${item.name}3D示意模型`" />
-                  </button>
-                  <div v-else class="media-empty"><el-icon><Box /></el-icon><span>{{ item.categoryModelId ? '模型待生成' : '尚未绑定模型' }}</span><small>{{ item.categoryModelId ? '生成后可查看 3D' : '请选择对应备件模型' }}</small></div>
-                </section>
-                <section class="part-media photo-pane">
-                  <span class="media-label">实物照片</span>
-                  <button v-if="item.partImageUrl && !failedPhotos.has(item.partImageUrl)" type="button" class="media-view" :aria-label="`放大${item.name}实物照片`" @click="openPhoto(item)"><img :src="item.partImageUrl" :alt="`${item.name}实物照片`" loading="lazy" @error="failedPhotos.add(item.partImageUrl)" /></button>
-                  <div v-else class="media-empty"><el-icon><Camera /></el-icon><span>{{ item.partImageUrl ? '实物照片加载失败' : '尚未上传实物图' }}</span>
-                    <el-button v-if="item.partImageUrl" link type="primary" @click="failedPhotos.delete(item.partImageUrl)">重新加载</el-button>
-                  </div>
-                </section>
+              <div class="binding-visuals">
+                <button v-if="displayedPartModel(item)" class="binding-visual model-visual" type="button" :aria-label="`查看${item.name}${partModelNeedsReview(item) ? '待核对外形预览' : '三维模型'}`" @click="openPartPreview(item)">
+                  <span class="visual-title">{{ partModelNeedsReview(item) ? '待核对外形预览' : partModelReviewed(item) ? '已核对模型' : '3D 示意模型' }}</span>
+                  <ModelThumbnail class="binding-thumbnail" :model-url="displayedPartModel(item)" :front-rotation-y="Number(item.categoryFrontRotationY)||0" :alt="`${item.name}三维模型缩略图`" />
+                  <small v-if="partModelNeedsReview(item)" class="visual-review">{{ partModelStatus(item).label }}</small>
+                </button>
+                <div v-else class="binding-visual model-visual"><span class="visual-title">3D 示意模型</span><div class="visual-empty"><el-icon><Box /></el-icon><span>{{ item.categoryModelId ? '缺少三维文件' : '尚未绑定模型' }}</span></div></div>
+                <button v-if="item.partImageUrl" class="binding-visual photo-visual" type="button" :aria-label="failedPhotos.has(item.partImageUrl) ? `重试${item.name}实物照片` : `放大${item.name}实物照片`" @click="failedPhotos.has(item.partImageUrl) ? failedPhotos.delete(item.partImageUrl) : openPhoto(item)">
+                  <span class="visual-title">实物照片</span><img v-if="!failedPhotos.has(item.partImageUrl)" :src="item.partImageUrl" :alt="`${item.name}实物照片`" loading="lazy" @error="failedPhotos.add(item.partImageUrl)" /><span v-else class="visual-empty"><el-icon><Camera /></el-icon><span>照片加载失败<br />点击重试</span></span>
+                </button>
+                <div v-else class="binding-visual photo-visual"><span class="visual-title">实物照片</span><div class="visual-empty"><el-icon><Camera /></el-icon><span>尚未上传实物图</span></div></div>
               </div>
-              <div class="ml-card-info"><p class="category-line" :title="item.categoryModelName"><template v-if="item.categoryModelId">{{ item.categoryModelName }}<span v-if="!item.categoryModelUrl">（待生成）</span></template><template v-else>公共模型 · 未关联专属模型</template></p><p :title="item.spec">{{ item.spec || '未填写规格' }}</p></div>
+              <div class="binding-model"><strong :title="item.categoryModelName || ''">{{ item.categoryModelName || '尚未绑定模型' }}</strong><small v-if="partModelNeedsReview(item)" class="binding-review">{{ partModelStatus(item).label }}</small><small v-else-if="partModelReviewed(item)">人工核对通过</small><small v-else-if="item.categoryModelId&&!displayedPartModel(item)">缺少三维文件</small><p class="binding-spec" :title="item.spec || ''">{{ item.spec || '规格型号未填写' }}</p></div>
+
               <div v-write="canEditPart(item)" v-if="$showControl(canEditPart(item))" class="card-actions">
                 <el-button link type="primary" @click="openSingleBinding(item)">{{ item.categoryModelId ? '更换模型' : '绑定模型' }}</el-button><el-upload v-write :show-file-list="false" :before-upload="file=>handleSingleUpload(item,file)" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp"><el-button link type="primary">{{ item.partImageUrl?'更换照片':'上传实物图' }}</el-button></el-upload>
               </div>
             </article>
-          </div><el-pagination v-if="filteredParts.length" v-model:current-page="modelPage" :page-size="24" :total="filteredParts.length" layout="total, prev, pager, next" class="model-pagination"/><el-empty v-if="!loading&&!filteredParts.length" description="没有符合条件的备件" />
+          </div><el-pagination v-if="filteredParts.length" v-model:current-page="modelPage" :page-size="24" :total="filteredParts.length" layout="total, prev, pager, next" class="model-pagination"/><el-empty v-if="!loading&&!partsError&&!filteredParts.length" description="没有符合条件的备件" />
         </section>
       </el-tab-pane>
 
-      <el-tab-pane label="模型目录" name="categories">
+      <el-tab-pane label="模型展示台" name="categories">
         <section class="workbench-head panel category-head">
 
           <div class="search-row category-search"><el-input v-model="categorySearch" clearable placeholder="搜索名称、搜索词或说明" @keyup.enter="loadCategoryModels" @clear="loadCategoryModels"><template #prefix><el-icon><Search /></el-icon></template></el-input><el-button @click="loadCategoryModels">查询</el-button><el-button v-write="canEditAny" v-if="$showControl(canEditAny)" type="primary" @click="openCategoryDialog()">新增备件模型</el-button></div>
         </section>
-        <div v-loading="categoryLoading" class="category-grid">
-          <article v-for="item in visibleCategoryModels" :key="item.id" class="category-card">
-            <button type="button" class="category-image" :aria-label="`查看${item.name}3D模型`" @click="openPreview(item)"><ModelReferenceImage :src="item.imageUrl||''" :model-url="item.modelUrl" :alt="`${item.name}参考图`" /><b>3D</b></button>
-            <div class="category-copy"><strong :title="item.name">{{ item.name }}</strong><p v-if="!item.modelUrl">模型待生成</p><p v-if="item.description">{{ item.description }}</p></div>
-            <dl><div><dt>关联物料</dt><dd>{{ item.associatedParts||0 }} 种</dd></div></dl>
-            <footer v-if="$showControl(canMaintainModel(item))"><el-button v-write="canMaintainModel(item)" link type="primary" @click="openCategoryDialog(item)">编辑/替换</el-button><el-button v-if="!admin" v-write="canMaintainModel(item)" link type="danger" @click="removeCategoryModel(item)">删除</el-button></footer>
-          </article>
-        </div><el-empty v-if="!categoryLoading&&!visibleCategoryModels.length" description="没有找到备件模型" />
+        <el-alert v-if="categoryError" :title="categoryError" type="error" :closable="false"><el-button link @click="loadCategoryModels">重新加载</el-button></el-alert><el-alert v-if="catalogPartsError" :title="catalogPartsError" type="warning" :closable="false"><el-button link @click="loadCatalogParts">重新加载关联备件</el-button></el-alert>
+        <div v-loading="categoryLoading"><ModelCatalogShowroom v-if="activeTab==='categories'" :models="visibleCategoryModels" :parts="catalogParts" :can-maintain="canMaintainModel" :can-remove="!admin" @edit="openCategoryDialog" @bindings="showModelBindings" @remove="removeCategoryModel" @reviewed="modelsReviewed" /></div><el-empty v-if="!categoryLoading&&!categoryError&&!visibleCategoryModels.length" description="没有找到备件模型" />
       </el-tab-pane>
     </el-tabs>
     <el-button class="library-refresh" :loading="loading || categoryLoading" aria-label="刷新模型库" title="刷新模型库" @click="reloadCurrent"><el-icon><Refresh /></el-icon><span>刷新模型库</span></el-button>
@@ -102,10 +95,11 @@
           <el-form-item :label="categoryDialog.id?'替换模型参考图（可选）':'模型参考图'" ><input class="native-file" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp" @change="captureCategoryImage" /><small v-if="categoryDialog.imageFile">已选择：{{ categoryDialog.imageFile.name }}</small><small v-else>{{ categoryDialog.id?'未选择时保留原参考图':'用于模型参考展示；实物照片需单独上传' }}</small></el-form-item>
         </el-form>
         <section class="front-editor">
-          <strong>设置模型正面</strong><p>绿色“正面”标记代表 3D 库位的查看方向。点击左右旋转，保存后货架两侧会自动相向翻转。</p>
-          <ModelPreview :model-url="categoryModelPreviewUrl" :front-rotation-y="categoryDialog.frontRotationY" />
+          <strong>设置模型正面</strong><p>预览以当前正面方向复位。点击下方左右转90°调整，保存后货架两侧会自动相向翻转。</p>
+          <p v-if="modelDisplayStatus(categoryModelPreviewUrl).key==='pending' && !categoryReviewActive" class="binding-review">{{ modelDisplayStatus(categoryModelPreviewUrl).description }}<el-button v-if="!categoryDialog.inspectLegacy" link @click="categoryDialog.inspectLegacy=true">预览当前外形</el-button></p>
+          <ModelPreview :model-url="categoryModelPreviewUrl" :front-rotation-y="categoryDialog.frontRotationY" :allow-unreviewed="categoryDialog.inspectLegacy || categoryReviewActive" object-only />
           <div class="front-controls"><el-button @click="rotateCategory(-1)">左转 90°</el-button><span>{{ frontDegrees }}°</span><el-button @click="rotateCategory(1)">右转 90°</el-button></div>
-          <div v-if="categoryImagePreviewUrl||categoryModelPreviewUrl" class="reference-thumb"><ModelReferenceImage :src="categoryImagePreviewUrl" :model-url="categoryModelPreviewUrl" /><span>模型参考图</span></div>
+          <div v-if="categoryImagePreviewUrl || referenceImageForModel(categoryModelPreviewUrl)" class="reference-thumb"><ModelReferenceImage :src="categoryImagePreviewUrl" :model-url="categoryModelPreviewUrl" zoomable /><span>模型参考图</span></div>
         </section>
       </div>
       <template #footer><el-button @click="categoryDialog.visible=false">取消</el-button><el-button v-write type="primary" :loading="categoryDialog.saving" @click="saveCategoryModel">保存模型</el-button></template>
@@ -115,29 +109,35 @@
       <el-image class="photo-enlarged" :src="photoDialog.url" fit="contain" :preview-src-list="[photoDialog.url]" preview-teleported><template #error><span>照片无法加载，请关闭后重新加载。</span></template></el-image>
     </el-dialog>
     <el-dialog v-model="previewDialog.visible" :title="previewDialog.name" width="min(760px,94vw)" destroy-on-close>
-      <ModelPreview :model-url="previewDialog.modelUrl" :front-rotation-y="previewDialog.frontRotationY" height="420px" />
-      <div class="preview-caption"><ModelReferenceImage :src="previewDialog.imageUrl" :model-url="previewDialog.modelUrl" :alt="`${previewDialog.name}参考图`" /><strong>模型参考图</strong></div>
+      <p v-if="previewDialog.requiresReview" class="binding-review">当前外形待核对，仅供对照查看；预览不会改变核对结论。</p>
+      <ModelPreview :model-url="previewDialog.modelUrl" :front-rotation-y="previewDialog.frontRotationY" :allow-unreviewed="previewDialog.requiresReview || previewDialog.reviewed" object-only height="420px" />
+      <p>拖动可查看底面，滚轮或双指缩放。</p>
+      <div v-if="previewDialog.imageUrl || referenceImageForModel(previewDialog.modelUrl)" class="preview-caption"><ModelReferenceImage :src="previewDialog.imageUrl" :model-url="previewDialog.modelUrl" :alt="`${previewDialog.name}参考图`" zoomable /><strong>模型参考图</strong></div>
     </el-dialog>
 
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import WorkbookUploadMark from '../components/WorkbookUploadMark.vue'
 import ActionMenu from '../components/ActionMenu.vue'
-import { Picture, Refresh, Search, Box, Camera, UploadFilled } from '@element-plus/icons-vue'
-import ModelThumbnail from '../components/ModelThumbnail.vue'
+import { Refresh, Search, Box, Camera, Download, ArrowRight } from '@element-plus/icons-vue'
+import ModelCatalogShowroom from '../components/ModelCatalogShowroom.vue'
 import ModelPreview from '../components/ModelPreview.vue'
+import ModelThumbnail from '../components/ModelThumbnail.vue'
 import ModelReferenceImage from '../components/ModelReferenceImage.vue'
 import PartModelBinding from '../components/PartModelBinding.vue'
 import { downloadModelBindingsTemplate, previewModelBindings, importModelBindings, batchAssignPartCategoryModel, createPartCategoryModel, deletePartCategoryModel, getPartCategoryModels, getPartModelLibrary, updatePartCategoryModel, uploadPartImage, } from '../api'
 import { canEditWorkshop, canEditAnyWorkshop, isAdmin, getUser, showControl } from '../auth'
-import { displayedPartModel } from '../utils/public-part-model.mjs'
+import { displayedPartModel, partModelReviewed, partModelNeedsReview, partModelStatus, partPhotoUrl } from '../utils/bound-part-model.mjs'
+import { modelReviewConfirmed } from '../utils/model-review.mjs'
+import {modelDisplayStatus} from '../utils/model-display-status.mjs'
+import {modelRequestFailure} from '../utils/model-request-failure.mjs'
 import { normalizeModelRotation } from '../utils/model-fit.mjs'
-import { prepareCategoryCatalog, searchCategoryCatalog } from '../utils/category-catalog.mjs'
+import { prepareCategoryCatalog, searchCategoryCatalog, referenceImageForModel } from '../utils/category-catalog.mjs'
 
 const workshops = [{ code: 'raw_grain', name: '原粮车间' }, { code: 'qu_making', name: '制曲车间' }, { code: 'brewing', name: '酿酒车间' }]
 const MAX_BATCH_SIZE = 500
@@ -148,7 +148,10 @@ function canMaintainModel(model){return admin || (canEditAnyWorkshop() && model.
 const activeTab = ref('parts')
 const query = reactive({ workshopCode: '', search: '' })
 const parts = ref([])
+const catalogParts = ref([]), bindingModelFilter=ref(null)
 const loading = ref(false)
+const partsError=ref(''),categoryError=ref(''),catalogPartsError=ref('')
+let partsRequest=0,categoryRequest=0,catalogPartsRequest=0,catalogGeneration=0
 const filter = ref('all')
 const selected = reactive(new Set())
 const canEditAny = canEditAnyWorkshop()
@@ -159,6 +162,7 @@ const categorySearch = ref('')
 const categoryLoading = ref(false)
 const batchCategorySearch = ref('')
 const batchCategoryOptions = computed(() => searchCategoryCatalog(categoryModels.value,batchCategorySearch.value))
+const batchSelectedModel=computed(()=>categoryModels.value.find(model=>Number(model.id)===Number(batchCategoryId.value)))
 const visibleCategoryModels = computed(() => searchCategoryCatalog(categoryModels.value,categorySearch.value))
 function searchBatchModels(text) { batchCategorySearch.value=text }
 
@@ -167,7 +171,7 @@ const withoutAnyModel = computed(() => parts.value.filter(item => !item.category
 const modelPage = ref(1)
 const pagedParts = computed(()=>filteredParts.value.slice((modelPage.value-1)*24,modelPage.value*24))
 watch(()=>[query.workshopCode,query.search,filter.value],()=>{modelPage.value=1})
-const filteredParts = computed(() => parts.value.filter(item => filter.value === 'category' ? Boolean(item.categoryModelId) : filter.value === 'none' ? (!item.categoryModelId || !item.categoryModelUrl) : true))
+const filteredParts = computed(() => parts.value.filter(item => (!bindingModelFilter.value || Number(item.categoryModelId)===Number(bindingModelFilter.value)) && (filter.value === 'category' ? Boolean(item.categoryModelId && item.categoryModelUrl) : filter.value === 'none' ? (!item.categoryModelId || !item.categoryModelUrl) : true)))
 
 watch(()=>filteredParts.value.length, count=>{modelPage.value=Math.min(modelPage.value,Math.max(1,Math.ceil(count/24)))})
 
@@ -183,7 +187,7 @@ function normalizePartRows(rows) {
     const item = { ...source }
     const codes = Array.isArray(item.workshopCodes) ? item.workshopCodes : String(item.workshopCodes || item.workshopCode || '').split(',').filter(Boolean)
     item.workshopCodes = [...new Set(codes)]
-    item.partImageUrl = Object.prototype.hasOwnProperty.call(item, 'partImageUrl') ? (item.partImageUrl || null) : (item.imageSource === 'category' || item.imageUrl === item.categoryImageUrl ? null : item.imageUrl || null)
+    item.partImageUrl = partPhotoUrl(item) || null
     item.imageUrl = item.partImageUrl || item.categoryImageUrl || item.imageUrl || null
     const existing = byId.get(String(item.id))
     if (!existing) byId.set(String(item.id), item)
@@ -192,9 +196,32 @@ function normalizePartRows(rows) {
   return [...byId.values()]
 }
 
-async function loadParts() { loading.value = true; try { const result = await getPartModelLibrary({ workshopCode: query.workshopCode, search: query.search }); parts.value = normalizePartRows(result.data); modelPage.value=1; selected.clear() } finally { loading.value = false } }
-async function loadCategoryModels() { categoryLoading.value = true; try { const result = await getPartCategoryModels(); categoryModels.value = prepareCategoryCatalog(result.data || []) } finally { categoryLoading.value = false } }
-async function reloadCurrent() { if (activeTab.value === 'categories') await loadCategoryModels(); else await Promise.all([loadParts(), loadCategoryModels()]) }
+async function loadParts() {
+  const token=++partsRequest,criteria={workshopCode:query.workshopCode,search:query.search},catalogToken=++catalogGeneration
+  const isCurrent=()=>token===partsRequest && criteria.workshopCode===query.workshopCode && criteria.search===query.search
+  loading.value=true;partsError.value='';parts.value=[];selected.clear()
+  try { const result=await getPartModelLibrary(criteria);if(!isCurrent())return;parts.value=normalizePartRows(result.data);if(!criteria.workshopCode&&!criteria.search&&catalogToken===catalogGeneration){catalogParts.value=parts.value;catalogPartsError.value=''}modelPage.value=1;selected.clear() }
+  catch(error){if(isCurrent()){parts.value=[];selected.clear();partsError.value=error?.response?.data?.msg||'备件绑定读取失败，请重新加载'}}
+  finally{if(token===partsRequest)loading.value=false}
+}
+async function loadCatalogParts(){
+  const token=++catalogPartsRequest,generation=++catalogGeneration
+  let phase='request'
+  catalogPartsError.value=''
+  try{const result=await getPartModelLibrary({});phase='data';if(token===catalogPartsRequest&&generation===catalogGeneration)catalogParts.value=normalizePartRows(result.data)}
+  catch(error){if(token===catalogPartsRequest&&generation===catalogGeneration){catalogParts.value=[];catalogPartsError.value=modelRequestFailure(error,{scope:'associated-parts',label:'关联备件',phase})}}
+}
+async function showModelBindings(model){bindingModelFilter.value=model.id;filter.value='all';query.workshopCode='';query.search='';activeTab.value='parts';await loadParts()}
+async function loadCategoryModels() {
+  const token=++categoryRequest
+  let phase='request'
+  categoryLoading.value=true;categoryError.value=''
+  try{const result=await getPartCategoryModels();phase='data';if(token===categoryRequest)categoryModels.value=prepareCategoryCatalog(result.data||[])}
+  catch(error){if(token===categoryRequest){categoryModels.value=[];categoryError.value=modelRequestFailure(error,{scope:'model-catalog',label:'模型目录',phase})}}
+  finally{if(token===categoryRequest)categoryLoading.value=false}
+}
+async function reloadCurrent() { if (activeTab.value === 'categories') await Promise.all([loadCategoryModels(),loadCatalogParts()]); else await Promise.all([loadParts(), loadCategoryModels()]) }
+async function modelsReviewed(){await Promise.all([loadCategoryModels(),loadCatalogParts(),loadParts()])}
 function toggleSelect(item) { if (canEditPart(item)) selected.has(item.id) ? selected.delete(item.id) : selected.add(item.id) }
 function selectVisible() { for (const item of filteredParts.value) if (canEditPart(item)) selected.add(item.id); if (!selected.size) ElMessage.warning('当前结果没有可修改的备件') }
 
@@ -224,12 +251,13 @@ function openImportBindings(){Object.assign(bindingImport,{visible:true,file:nul
 function bindingImportData(){const data=new FormData();data.append('file',bindingImport.file);return data}
 async function checkBindingImport(){bindingImport.loading=true;try{const result=await previewModelBindings(bindingImportData());bindingImport.plan=result.data}finally{bindingImport.loading=false}}
 async function applyBindingImport(){if(!bindingImport.plan || bindingImport.plan.errors.length)return;bindingImport.saving=true;try{const result=await importModelBindings(bindingImportData());ElMessage.success(result.msg);bindingImport.visible=false;await reloadCurrent()}finally{bindingImport.saving=false}}
-const categoryDialog = reactive({ visible: false, saving: false, id: null, name: '', keywords: '', description: '', modelScale: 1, frontRotationY: 0, file: null, imageFile: null, currentModelUrl: '', currentImageUrl: '', modelObjectUrl: '', imageObjectUrl: '' })
+const categoryDialog = reactive({ visible: false, saving: false, inspectLegacy:false, id: null, name: '', keywords: '', description: '', modelScale: 1, frontRotationY: 0, file: null, imageFile: null, currentModelUrl: '', currentImageUrl: '', modelObjectUrl: '', imageObjectUrl: '' })
 const categoryModelPreviewUrl = computed(() => categoryDialog.modelObjectUrl || categoryDialog.currentModelUrl)
 const categoryImagePreviewUrl = computed(() => categoryDialog.imageObjectUrl || categoryDialog.currentImageUrl)
+const categoryReviewActive=computed(()=>{const model=categoryModels.value.find(item=>Number(item.id)===Number(categoryDialog.id));return modelReviewConfirmed(model)&&!categoryDialog.file&&!categoryDialog.imageFile&&categoryModelPreviewUrl.value===model.modelUrl&&normalizeModelRotation(categoryDialog.frontRotationY)===normalizeModelRotation(model.frontRotationY)})
 const frontDegrees = computed(() => Math.round(normalizeModelRotation(categoryDialog.frontRotationY) * 180 / Math.PI))
 function revokeObjectUrls() { if (categoryDialog.modelObjectUrl) URL.revokeObjectURL(categoryDialog.modelObjectUrl); if (categoryDialog.imageObjectUrl) URL.revokeObjectURL(categoryDialog.imageObjectUrl) }
-function resetCategoryDialog() { revokeObjectUrls(); Object.assign(categoryDialog, { saving: false, id: null, name: '', keywords: '', description: '', modelScale: 1, frontRotationY: 0, file: null, imageFile: null, currentModelUrl: '', currentImageUrl: '', modelObjectUrl: '', imageObjectUrl: '' }) }
+function resetCategoryDialog() { revokeObjectUrls(); Object.assign(categoryDialog, { saving: false, inspectLegacy:false, id: null, name: '', keywords: '', description: '', modelScale: 1, frontRotationY: 0, file: null, imageFile: null, currentModelUrl: '', currentImageUrl: '', modelObjectUrl: '', imageObjectUrl: '' }) }
 function openCategoryDialog(item = null) { resetCategoryDialog(); if (item) Object.assign(categoryDialog, { id: item.id, name: item.name, keywords: item.keywords || '', description: item.description || '', modelScale: Number(item.modelScale) || 1, frontRotationY: Number(item.frontRotationY) || 0, currentModelUrl: item.modelUrl || '', currentImageUrl: item.imageUrl || '' }); categoryDialog.visible = true }
 function captureCategoryFile(event) { const file = event.target.files?.[0] || null; if (file && !validateGlb(file)) { event.target.value = ''; return } if (categoryDialog.modelObjectUrl) URL.revokeObjectURL(categoryDialog.modelObjectUrl); categoryDialog.file = file; categoryDialog.modelObjectUrl = file ? URL.createObjectURL(file) : '' }
 function captureCategoryImage(event) { const file = event.target.files?.[0] || null; if (file && !validateImage(file)) { event.target.value = ''; return } if (categoryDialog.imageObjectUrl) URL.revokeObjectURL(categoryDialog.imageObjectUrl); categoryDialog.imageFile = file; categoryDialog.imageObjectUrl = file ? URL.createObjectURL(file) : '' }
@@ -245,41 +273,25 @@ async function downloadBindingTemplate() {
 const failedPhotos = reactive(new Set())
 const photoDialog = reactive({ visible: false, name: '', url: '' })
 function openPhoto(item) { Object.assign(photoDialog, { visible: true, name: `${item.name} · 实物照片`, url: item.partImageUrl }) }
-function openPartPreview(item) { openPreview({ name: `${item.name} · ${item.categoryModelName || '3D示意模型'}`, modelUrl: displayedPartModel(item), imageUrl: item.categoryImageUrl, frontRotationY: item.categoryFrontRotationY }) }
-const previewDialog = reactive({ visible: false, name: '', modelUrl: '', imageUrl: '', frontRotationY: 0 })
-function openPreview(item) { Object.assign(previewDialog, { visible: true, name: item.name, modelUrl: item.modelUrl, imageUrl: item.imageUrl || '', frontRotationY: Number(item.frontRotationY) || 0 }) }
+function openPartPreview(item) { openPreview({ name: `${item.name} · ${item.categoryModelName || '3D示意模型'}`, modelUrl: displayedPartModel(item), imageUrl: item.categoryImageUrl, frontRotationY: item.categoryFrontRotationY, reviewed:partModelReviewed(item), requiresReview:partModelNeedsReview(item) }) }
+const previewDialog = reactive({ visible: false, name: '', modelUrl: '', imageUrl: '', frontRotationY: 0,reviewed:false,requiresReview:false })
+function openPreview(item) { Object.assign(previewDialog, { visible: true, name: item.name, modelUrl: item.modelUrl, imageUrl: item.imageUrl || '', frontRotationY: Number(item.frontRotationY) || 0,reviewed:!!item.reviewed,requiresReview:!!item.requiresReview }) }
 
 onMounted(async () => { query.workshopCode = String(route.query.workshopCode || ''); query.search = String(route.query.search || ''); await Promise.all([loadParts(), loadCategoryModels()]) })
+onBeforeUnmount(()=>{partsRequest++;categoryRequest++;catalogPartsRequest++;catalogGeneration++;revokeObjectUrls()})
 </script>
 
 <style scoped>
-.model-library{padding:18px 22px}.library-tabs-wrap{position:relative}.library-tabs:deep(.el-tabs__header){margin-bottom:14px;padding-right:90px}.library-refresh{position:absolute;right:0;top:0;z-index:2}.library-refresh span{margin-left:4px}.workbench-head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:14px;padding:16px 18px}.search-row{display:grid;grid-template-columns:150px minmax(260px,380px) auto;gap:8px}.category-search{grid-template-columns:minmax(260px,420px) auto auto}.result-panel{padding:14px}.result-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.filter-tabs,.selection-tools{display:flex;gap:6px}.filter-tabs button{padding:7px 13px;border:1px solid #dfe4ec;border-radius:8px;color:#586274;background:#fff;cursor:pointer}.filter-tabs button.active{border-color:#2563eb;color:#fff;background:#2563eb}.batch-workbench{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px 14px;border:1px solid #b9d9f8;border-radius:10px;background:#f2f8ff}.batch-workbench>div{margin-right:auto}.batch-workbench strong,.batch-workbench span{display:block}.batch-workbench span{margin-top:2px;color:#667085;font-size:11px}.batch-workbench .el-select{width:190px}.ml-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}.ml-card{position:relative;overflow:hidden;border:1px solid #e1e6ed;border-radius:12px;background:#fff}.ml-card.selected{border-color:#2563eb;box-shadow:0 0 0 3px #2563eb22}.card-check{position:absolute;right:8px;top:8px;z-index:3}.readonly-badge{position:absolute;right:8px;top:8px;z-index:3;padding:2px 7px;border-radius:999px;color:#687386;background:#eef1f4;font-size:10px}.ml-card-info{padding:11px 12px}.ml-card-info strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ml-card-info code{display:inline-block;margin-top:4px;padding:2px 5px;border-radius:4px;color:#2563eb;background:#eef5ff;font-size:11px}.ml-card-info p{margin:5px 0 0;overflow:hidden;color:#6c7687;text-overflow:ellipsis;white-space:nowrap;font-size:11px}.category-line{color:#2563eb!important}.card-actions{display:flex;align-items:center;justify-content:center;gap:5px;min-height:38px;padding:6px 9px;border-top:1px solid #edf0f4;flex-wrap:wrap}.category-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}.category-card{display:grid;grid-template-columns:108px minmax(0,1fr);overflow:hidden;border:1px solid #dce3eb;border-radius:14px;background:#fff}.category-image{position:relative;grid-row:1/3;min-height:150px;padding:0;border:0;border-right:1px solid #edf0f4;background:#f5f8fc;cursor:pointer}.category-image img{width:100%;height:100%;min-height:150px;object-fit:contain}.category-image>span{display:grid;place-items:center;gap:6px;height:100%;color:#9aa4b3;font-size:11px}.category-image .el-icon{font-size:28px}.category-image b{position:absolute;left:7px;top:7px;padding:2px 7px;border-radius:999px;color:#fff;background:#168361;font-size:10px}.category-copy{min-width:0;padding:12px 12px 7px}.category-copy strong,.category-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.category-copy small{margin-top:3px;color:#8791a0;font-size:10px}.category-copy p{height:32px;margin:7px 0 0;overflow:hidden;color:#667085;font-size:11px;line-height:1.45}.category-card dl{grid-column:2;display:grid;grid-template-columns:1.3fr .8fr .8fr;margin:0;padding:0 12px 10px}.category-card dl div{min-width:0}.category-card dt{color:#8791a0;font-size:9px}.category-card dd{margin:3px 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:700}.category-card footer{grid-column:1/3;display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:7px 10px;border-top:1px solid #edf0f4}.category-card footer>:first-child{margin-right:auto}.dialog-tip{margin:0 0 18px;color:#687386}.native-file{width:100%;padding:8px;border:1px dashed #c9d1dc;border-radius:8px}.el-form-item small{display:block;margin-top:6px;color:#687386}.category-editor-layout{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(360px,1.2fr);gap:22px}.front-editor>strong{display:block;font-size:14px}.front-editor>p{margin:5px 0 10px;color:#687386;font-size:11px;line-height:1.5}.front-controls{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:9px}.front-controls span{min-width:52px;text-align:center;font-weight:700}.reference-thumb{display:flex;align-items:center;gap:9px;margin-top:10px;padding:7px;border:1px solid #e4e9ef;border-radius:10px}.reference-thumb img{width:54px;height:42px;object-fit:contain}.reference-thumb span{color:#687386;font-size:11px}.preview-caption{display:flex;align-items:center;gap:12px;margin-top:12px}.preview-caption img{width:88px;height:66px;border:1px solid #e1e6ed;border-radius:8px;object-fit:contain}.preview-caption strong,.preview-caption span{display:block}.preview-caption span{margin-top:3px;color:#687386;font-size:11px}@media(max-width:1000px){.workbench-head{align-items:stretch;flex-direction:column}.search-row,.category-search{width:100%}.batch-workbench{align-items:stretch;flex-wrap:wrap}.category-editor-layout{grid-template-columns:1fr}}@media(max-width:680px){.search-row,.category-search{grid-template-columns:1fr}.result-toolbar{align-items:flex-start;flex-direction:column}.filter-tabs{flex-wrap:wrap}.category-grid{grid-template-columns:1fr}.category-card{grid-template-columns:94px minmax(0,1fr)}}
-</style>
-
-<style scoped>
-.selection-tools{flex-wrap:wrap;justify-content:flex-end}.selection-tools .el-button{margin:0}.batch-workbench .el-select{width:230px;flex-shrink:0}
-.category-image{height:168px;min-height:168px}.reference-thumb>.reference-image{flex:none;width:54px;height:42px}.preview-caption>.reference-image{flex:none;width:88px;height:66px;border:1px solid #e1e6ed;border-radius:8px}
-@media(max-width:680px){.model-library{padding:12px}.selection-tools{justify-content:flex-start}.batch-workbench .el-select{width:100%}}
-</style>
-<style scoped>
-.ml-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-.part-card-heading{padding:16px 38px 12px 14px;min-height:84px;box-sizing:border-box}.part-card-heading strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14px;line-height:1.5;height:42px}.part-card-heading code{display:block;margin-top:4px;color:#7a8799;font-size:12px}.card-check{top:12px;right:12px}
-.part-media-grid{display:grid;grid-template-columns:1fr 1fr;margin:0 12px;border:1px solid #e9edf3;border-radius:8px;overflow:hidden}.part-media{position:relative;min-width:0;background:#f5f7fa}.photo-pane{border-left:1px solid #e9edf3;background:#fff}.media-label{position:absolute;top:10px;left:10px;z-index:1;color:#657389;font-size:11px;pointer-events:none}.media-view{position:relative;display:block;width:100%;height:190px;padding:26px 5px 25px;border:0;background:transparent;cursor:pointer}.media-view:hover{background:#e8eef633}.media-view:focus-visible{outline:2px solid #bf203c;outline-offset:-2px}.media-view>img{width:100%;height:100%;object-fit:contain}.media-empty{height:190px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#8995a7;font-size:12px;box-sizing:border-box;padding:28px 6px 8px;text-align:center}.media-empty .el-icon{font-size:30px}.media-empty small{font-size:10px}.ml-card-info{padding:10px 14px 14px}.ml-card-info p{font-size:12px;line-height:1.6}.category-line{color:#56677f!important}.card-actions{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:10px 0;min-height:42px}.card-actions>button{margin:0}.card-actions>:last-child{border-left:1px solid #e9edf3;text-align:center}.photo-enlarged{display:block;width:100%;height:min(65vh,600px)}
-@media(max-width:1250px){.ml-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:950px){.ml-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.ml-grid{grid-template-columns:1fr}.media-view,.media-empty{height:210px}}
-</style>
-
-<style scoped>
-.binding-import-tools{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}.binding-import-tools>span{color:#64748b;font-size:13px}
-</style>
-
-<style scoped>
-.binding-import-dialog :deep(.el-dialog__header){border-bottom:1px solid #e5eaf0;padding-bottom:16px}.binding-import-dialog :deep(.el-dialog__footer){border-top:1px solid #e5eaf0;padding-top:16px;margin-top:18px}.binding-import-dialog>p{color:#64748b;font-size:13px;line-height:1.7}
-</style>
-
-<style scoped>
-.binding-import-tools .binding-template-download{color:#be203b;background:#fff;border-color:#be203b}.binding-import-tools .binding-template-download:hover,.binding-import-tools .binding-template-download:focus-visible{color:#a71930;background:#fff1f4;border-color:#a71930}
-.result-toolbar,.filter-tabs{flex-wrap:wrap}.filter-tabs button{white-space:nowrap}.selection-tools{margin-left:auto}
-@media(max-width:680px){.selection-tools{margin-left:0}}
+.model-library{padding:0}.library-tabs-wrap{position:relative}.library-tabs:deep(.el-tabs__header){margin-bottom:14px;padding-right:120px}.library-refresh{position:absolute;right:0;top:0;z-index:2}.library-refresh span{margin-left:4px}
+.workbench-head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 18px;margin-bottom:12px}.search-row{display:grid;grid-template-columns:180px minmax(260px,560px) auto;gap:8px}.category-search{grid-template-columns:minmax(260px,560px) auto auto}.result-panel{padding:16px 18px}.result-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}.filter-tabs,.selection-tools{display:flex;gap:6px;flex-wrap:wrap}.filter-tabs button{padding:7px 13px;border:1px solid #dfe4ec;border-radius:8px;color:#586274;background:#fff;cursor:pointer;white-space:nowrap}.filter-tabs button.active{border-color:#be203b;color:#fff;background:#be203b}.selection-tools{justify-content:flex-end;margin-left:auto}.selection-tools .el-button{margin:0}.binding-filter{margin-bottom:12px}
+.batch-workbench{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding:12px 14px;border:1px solid #b9d9f8;border-radius:10px;background:#f2f8ff}.batch-workbench>div{margin-right:auto}.batch-workbench strong,.batch-workbench span{display:block}.batch-workbench .el-select{width:230px;flex-shrink:0}.batch-model-status{flex-basis:100%;margin:0;font-size:12px;color:#687386}
+.binding-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;min-height:120px}.ml-card{position:relative;min-width:0;display:flex;flex-direction:column;overflow:hidden;border:1px solid #e1e7ef;border-radius:12px;background:#fff;transition:border-color .15s,box-shadow .15s}.ml-card:hover{border-color:#bdcbd9;box-shadow:0 3px 12px #26394d08}.ml-card.selected{border-color:#be203b;box-shadow:0 0 0 2px #be203b17}.binding-selection{position:absolute;top:10px;right:12px;z-index:2}.binding-selection .el-checkbox{height:26px}.part-card-heading{padding:14px 40px 10px 14px;min-height:85px;box-sizing:border-box}.part-card-heading strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.6;height:42px;color:#243e56;overflow-wrap:anywhere}.part-card-heading code{display:block;margin-top:5px;color:#8391a1;font-size:11px}
+.binding-visuals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0 13px;border:1px solid #e7ecf2;border-radius:8px;overflow:hidden}.binding-visual{position:relative;min-width:0;height:156px;padding:26px 8px 8px;box-sizing:border-box;border:0;background:#f5f7fa;color:#8c9aab;font:inherit;text-align:center}.binding-visual+.binding-visual{border-left:1px solid #e7ecf2}.binding-visual:is(button){cursor:pointer}.binding-visual:is(button):hover{background:#eef3f8}.binding-visual:is(button):focus-visible{outline:2px solid #be203b;outline-offset:-3px}.photo-visual{background:#fff}.photo-visual img{display:block;width:100%;height:100%;object-fit:contain}.visual-title{position:absolute;top:10px;left:10px;right:7px;font-size:10px;line-height:1.4;text-align:left;color:#8797aa}.binding-thumbnail{height:100%;width:100%}.binding-thumbnail :deep(span){font-size:10px;line-height:1.6;padding:5px}.visual-review{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:2px 6px;border-radius:4px;color:#95600d;background:#fff4d9;font-size:10px}.visual-empty{display:flex;height:100%;align-items:center;justify-content:center;flex-direction:column;gap:8px;font-size:11px;line-height:1.6}.visual-empty .el-icon{font-size:25px;color:#97a7b9}
+.binding-model{padding:12px 14px;flex:1;min-width:0;font-size:12px;line-height:1.6}.binding-model strong{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:500;color:#596d83}.binding-model small{font-size:10px;color:#8593a4}.binding-model .binding-review,.binding-review{color:#a46b24}.binding-spec{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;margin:5px 0 0;color:#8491a1;font-size:11px;overflow-wrap:anywhere}.card-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding:10px 0;border-top:1px solid #edf0f4;min-height:42px;box-sizing:border-box;align-items:center}.card-actions .el-button{margin:0;font-size:12px}.card-actions>:last-child{border-left:1px solid #edf0f4;text-align:center}.card-actions :deep(.el-upload){display:inline-flex;max-width:100%;justify-content:center}.model-pagination{margin-top:18px;justify-content:flex-end}.photo-enlarged{display:block;width:100%;height:min(65vh,600px)}
+.native-file{width:100%;padding:8px;border:1px dashed #c9d1dc;border-radius:8px}.el-form-item small{display:block;margin-top:6px;color:#687386}.category-editor-layout{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(360px,1.2fr);gap:22px}.front-editor>strong{display:block;font-size:14px}.front-editor>p{margin:5px 0 10px;color:#687386;font-size:11px;line-height:1.5}.front-controls{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:9px}.front-controls span{min-width:52px;text-align:center;font-weight:700}.reference-thumb{display:flex;align-items:center;gap:9px;margin-top:10px;padding:7px;border:1px solid #e4e9ef;border-radius:10px}.reference-thumb>.reference-image{flex:none;width:54px;height:42px}.reference-thumb span{color:#687386;font-size:11px}.preview-caption{display:flex;align-items:center;gap:12px;margin-top:12px}.preview-caption>.reference-image{flex:none;width:88px;height:66px;border:1px solid #e1e6ed;border-radius:8px}.preview-caption strong,.preview-caption span{display:block}.preview-caption span{margin-top:3px;color:#687386;font-size:11px}
+.binding-import-tools{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}.binding-import-dialog :deep(.el-dialog__header){border-bottom:1px solid #e5eaf0;padding-bottom:16px}.binding-import-dialog :deep(.el-dialog__footer){border-top:1px solid #e5eaf0;padding-top:16px;margin-top:18px}.binding-import-dialog>p{color:#64748b;font-size:13px;line-height:1.7}.binding-import-tools .binding-template-download{color:#be203b;background:#fff;border-color:#be203b}.binding-import-tools .binding-template-download:hover,.binding-import-tools .binding-template-download:focus-visible{color:#a71930;background:#fff1f4;border-color:#a71930}
+@media(min-width:1600px){.binding-list{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:1080px){.binding-list{grid-template-columns:repeat(2,minmax(0,1fr))}.workbench-head{align-items:stretch;flex-direction:column}.search-row,.category-search{width:100%}.category-editor-layout{grid-template-columns:1fr}}
+@media(max-width:680px){.search-row,.category-search{grid-template-columns:1fr}.result-panel{padding:12px}.binding-list{gap:12px}.binding-visuals{margin:0 10px}.binding-visual{height:140px;padding-inline:5px}.part-card-heading{padding-left:11px}.binding-model{padding:10px 11px}.result-toolbar{align-items:flex-start}.selection-tools{justify-content:flex-start;margin-left:0}.batch-workbench .el-select{width:100%}.library-tabs:deep(.el-tabs__header){padding-right:38px}.library-refresh span{display:none}.library-refresh{padding:8px}}
+@media(max-width:540px){.binding-list{grid-template-columns:minmax(0,1fr)}.binding-visual{height:168px}.part-card-heading{min-height:79px}.card-actions{min-height:44px}}
 </style>

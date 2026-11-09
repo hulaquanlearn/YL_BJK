@@ -1,0 +1,155 @@
+{
+  "method": "new-compiled-fire-chunk-with-existing-production-modules",
+  "fireModule": "assets/FireInspection-BdOe1DDY.js",
+  "renames": {
+    "assets/FireInspection-CptCUNlB-fc20261106v6.js": "assets/FireInspection-CptCUNlB-fc20261106v7.js",
+    "assets/index-Sn4Rp854-fc20261106v6.js": "assets/index-Sn4Rp854-fc20261106v7.js",
+    "assets/stock-health-WUpCD__e-fc20261106v6.js": "assets/stock-health-WUpCD__e-fc20261106v7.js",
+    "assets/AbbProgramControl-BpmBwvUq-fc20261106v6.js": "assets/AbbProgramControl-BpmBwvUq-fc20261106v7.js",
+    "assets/AbbRobotGuide-BW8SkK22-fc20261106v6.js": "assets/AbbRobotGuide-BW8SkK22-fc20261106v7.js",
+    "assets/AbbRobotViewer-DEnRHG6b-fc20261106v6.js": "assets/AbbRobotViewer-DEnRHG6b-fc20261106v7.js",
+    "assets/Account-C9cKNH7B-fc20261106v6.js": "assets/Account-C9cKNH7B-fc20261106v7.js",
+    "assets/ActionMenu-DFeNBrCU-fc20261106v6.js": "assets/ActionMenu-DFeNBrCU-fc20261106v7.js",
+    "assets/AgvVehicles-CC_cSJoS-fc20261106v6.js": "assets/AgvVehicles-CC_cSJoS-fc20261106v7.js",
+    "assets/AiModelInfo-B6cTNEle-fc20261106v6.js": "assets/AiModelInfo-B6cTNEle-fc20261106v7.js",
+    "assets/Check-qLrv7DWI-fc20261106v6.js": "assets/Check-qLrv7DWI-fc20261106v7.js",
+    "assets/ControlPasswords-HnAesO0J-fc20261106v6.js": "assets/ControlPasswords-HnAesO0J-fc20261106v7.js",
+    "assets/DataQuality-BFKFFipM-fc20261106v6.js": "assets/DataQuality-BFKFFipM-fc20261106v7.js",
+    "assets/Equipment-DxvQQ5Ro-fc20261106v6.js": "assets/Equipment-DxvQQ5Ro-fc20261106v7.js",
+    "assets/FireParkModel-DKOdZyyL-fc20261106v6.js": "assets/FireParkModel-DKOdZyyL-fc20261106v7.js",
+    "assets/Inventory-D2tMpzBf-fc20261106v6.js": "assets/Inventory-D2tMpzBf-fc20261106v7.js",
+    "assets/Knowledge-CiLcwiGv-fc20261106v6.js": "assets/Knowledge-CiLcwiGv-fc20261106v7.js",
+    "assets/Login-DIh-wLdj-fc20261106v6.js": "assets/Login-DIh-wLdj-fc20261106v7.js",
+    "assets/ModelLibrary-CFGqtx5q-fc20261106v6.js": "assets/ModelLibrary-CFGqtx5q-fc20261106v7.js",
+    "assets/ModelPreview-Cm21dDWD-fc20261106v6.js": "assets/ModelPreview-Cm21dDWD-fc20261106v7.js",
+    "assets/Movements-DQIntz2D-fc20261106v6.js": "assets/Movements-DQIntz2D-fc20261106v7.js",
+    "assets/PdfReader-Apc6kUsn-fc20261106v6.js": "assets/PdfReader-Apc6kUsn-fc20261106v7.js",
+    "assets/Portal-hlSolPPD-fc20261106v6.js": "assets/Portal-hlSolPPD-fc20261106v7.js",
+    "assets/RawDuties-C6luh36s-fc20261106v6.js": "assets/RawDuties-C6luh36s-fc20261106v7.js",
+    "assets/Replenishment-CuK1S16I-fc20261106v6.js": "assets/Replenishment-CuK1S16I-fc20261106v7.js",
+    "assets/RobotProgram-DqhY521I-fc20261106v6.js": "assets/RobotProgram-DqhY521I-fc20261106v7.js",
+    "assets/Statistics-BXVVIFwn-fc20261106v6.js": "assets/Statistics-BXVVIFwn-fc20261106v7.js",
+    "assets/Warehouse3D-CVe1Z8d5-fc20261106v6.js": "assets/Warehouse3D-CVe1Z8d5-fc20261106v7.js",
+    "assets/WorkbookUploadMark-Bu49uWan-fc20261106v6.js": "assets/WorkbookUploadMark-Bu49uWan-fc20261106v7.js"
+  },
+  "unrelatedModulesVerified": true,
+  "sharedCoreChange": "only fireMobileAssets inspected-result filter; exact unique binding replacement",
+  "abbWorkerUnchanged": true,
+  "css": {
+    "oldScopesRemoved": [
+      "data-v-8c39bd07"
+    ],
+    "newScopesAdded": [
+      "data-v-71ad7ae3"
+    ],
+    "removedCssRules": 52,
+    "addedCssRules": 68,
+    "unrelatedCssPreserved": true
+  },
+  "coreExportRemap": [
+    {
+      "newAlias": "b",
+      "productionAlias": "b",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "n",
+      "productionAlias": "n",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "o",
+      "productionAlias": "o",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "d",
+      "productionAlias": "d",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "q",
+      "productionAlias": "q",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "t",
+      "productionAlias": "v",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "v",
+      "productionAlias": "w",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "w",
+      "productionAlias": "x",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "x",
+      "productionAlias": "y",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "y",
+      "productionAlias": "B",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "z",
+      "productionAlias": "C",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "A",
+      "productionAlias": "E",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "_",
+      "productionAlias": "_",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "B",
+      "productionAlias": "G",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "C",
+      "productionAlias": "H",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "D",
+      "productionAlias": "I",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "e",
+      "productionAlias": "e",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "E",
+      "productionAlias": "J",
+      "equivalentMatches": 1
+    }
+  ],
+  "referencesChecked": 318,
+  "source": {
+    "src/components/fire/FirePhotoRecognition.vue": "8625589d78691739fd4c727e9ac03b6ff2a8a82d5cd1f71ea191065d82fc4a90",
+    "src/components/fire/FirePointDetail.vue": "8ee1688cff528d5280b3893b1673a9ab678800e669502a383731e7cfc9880b62",
+    "src/components/fire/fire-clarity.css": "cffb6c829bf8f92e964790d7929525c457f7ee54168aa893802c178d346cf0e1",
+    "src/components/fire/fire-inspection.css": "cb3584d64de05e60e8d92f1efbf65640d602d3973886707324cf0cfdd8076f89",
+    "src/app/AppFireInspection.vue": "0b1d322b119165b527df80a986ffaabaadb95995e53da807eee6daaeb136351e",
+    "src/utils/fire-inspection.mjs": "bc8e2d74246d8a8105298f12987d3cf0522c593505ed4a75e0f1735f7fc32898",
+    "src/utils/fire-inspection-controller.mjs": "46e92e75fb4aa4f4a076c8c765509587c014bc99efcc302f3d6a9b6bf9087563"
+  },
+  "api": {
+    "src/fire-store.js": "11085e018523a87553f236631d2cc592aab2758331241e13adbb088180b25060",
+    "test/fire-inspection.test.js": "2ba39ab35bc74d7047b07362b9f861f026ce60d6d63a6b6980a6cb772d6dd166"
+  }
+}

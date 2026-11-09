@@ -7,6 +7,15 @@ async function bytes(name='Main'){
  zip.append(`MODULE ${name}\nPROC main()\nWaitDI diReady,1;\nENDPROC\nENDMODULE`,{name:`RAPID/TASK1/PROGMOD/${name}.mod`});await zip.finalize();return done;
 }
 async function fixture(t){const root=await fs.mkdtemp(path.join(os.tmpdir(),'robot-delete-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));return createLibrary(root)}
+
+test('repeated simulation reads reuse parsed backups while metadata stays fresh and changed ZIPs are revalidated',async t=>{
+ const lib=await fixture(t),saved=await lib.upload(await bytes('Cached'),'cached.zip'),first=await lib.get(saved.id),second=await lib.get(saved.id)
+ assert.equal(first.report,second.report)
+ await lib.rename(saved.id,'新名称',saved.revision);const renamed=await lib.get(saved.id)
+ assert.equal(renamed.displayName,'新名称');assert.equal(renamed.revision,saved.revision+1);assert.equal(renamed.report,first.report)
+ await fs.appendFile(path.join(lib.root,saved.id,'backup.zip'),Buffer.from('tamper'))
+ await assert.rejects(lib.get(saved.id),/校验失败/)
+})
 test('batch accumulation exceeds 2000 notes and 2MB without losing earlier notes, and survives restart/export',async t=>{
  const lib=await fixture(t),zip=archiver('zip'),chunks=[];const done=new Promise((resolve,reject)=>{zip.on('data',c=>chunks.push(c));zip.on('end',()=>resolve(Buffer.concat(chunks)));zip.on('error',reject)});
  zip.append(['MODULE Main','PROC main()',...Array.from({length:3700},()=> 'WaitTime 0.1;'),'ENDPROC','ENDMODULE'].join('\n'),{name:'RAPID/TASK1/PROGMOD/Main.mod'});await zip.finalize();let saved=await lib.upload(await done,'large.zip');const fileId=saved.report.files[0].id;
@@ -26,7 +35,7 @@ test('DeepSeek defaults use only the provider key; direct analysis validates sou
  assert.equal(validChannel(agentConfig({DEEPSEEK_API_KEY:'test'})),false); // explicit switch still required
 });
 test('connection diagnostics identify missing configuration and never expose upstream credentials or bodies',async()=>{
- const missing=agentConfig({});assert.deepEqual(channelStatus(missing).issues.map(i=>i.setting),['ROBOT_AGENT_ENABLED=true','DEEPSEEK_API_KEY']);
+ const missing=agentConfig({});assert.deepEqual(channelStatus(missing).issues.map(i=>i.setting),['ROBOT_AGENT_ENABLED=true','AI 配置']);
  assert.equal((await checkConnection(missing,{fetchImpl:async()=>assert.fail('disabled channel must not call upstream')})).ready,false);
  const c=agentConfig({ROBOT_AGENT_ENABLED:'true',DEEPSEEK_API_KEY:'secret-not-for-ui'});
  for(const status of [401,402,403,404,429,500]){const r=await checkConnection(c,{fetchImpl:async()=>({ok:false,status,text:async()=>{throw Error('must not read secret body')}})});assert.equal(r.ready,false);assert.ok(!JSON.stringify(r).includes(c.token))}

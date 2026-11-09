@@ -20,7 +20,7 @@ function tryParseInventoryId(value) {
 }
 
 function parseNonNegativeQuantity(value, label = '实盘库存') {
-  if (value === '' || value === null || value === undefined || typeof value === 'boolean') {
+  if (!['number', 'string'].includes(typeof value) || (typeof value === 'string' && !value.trim())) {
     throw new ApiError(400, `${label}无效`);
   }
   const quantity = Number(value);
@@ -49,22 +49,31 @@ function normalizeInventoryOrderLists(allList, abnormalList) {
     return { ...item, partId: String(id), snapshotStock, sysStockNum: snapshotStock };
   });
 
-  const abnormalIdSet = new Set();
-  const actualQuantityById = new Map();
-  const normalizedAbnormalList = abnormalList.map((item, index) => {
+  const submittedAbnormalById = new Map();
+  abnormalList.forEach((item, index) => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) {
       throw new ApiError(400, `第${index + 1}条异常备件无效`);
     }
     const id = parseInventoryId(item.inventoryId ?? item.partId, `第${index + 1}条异常库存记录ID`);
     if (!allIdSet.has(id)) throw new ApiError(400, `异常库存记录${id}不在本次盘点范围内`);
-    if (abnormalIdSet.has(id)) throw new ApiError(400, `异常库存记录${id}重复`);
+    if (submittedAbnormalById.has(id)) throw new ApiError(400, `异常库存记录${id}重复`);
 
     const actualQuantity = parseNonNegativeQuantity(item.actualStock, `库存记录${id}的实盘库存`);
-    abnormalIdSet.add(id);
-    actualQuantityById.set(id, actualQuantity);
-    const snapshotStock = normalizedAllList.find(row => row.partId === String(id)).snapshotStock;
-    return { ...item, partId: String(id), snapshotStock, sysStockNum: snapshotStock, actualStock: actualQuantity };
+    submittedAbnormalById.set(id, { ...item, actualStock: actualQuantity });
   });
+  const abnormalIdSet = new Set(), actualQuantityById = new Map(), normalizedAbnormalList = [];
+  for (const item of normalizedAllList) {
+    const id = Number(item.partId), submitted = submittedAbnormalById.get(id);
+    const ownActual = item.actualStock === undefined ? null : parseNonNegativeQuantity(item.actualStock, `库存记录${id}的实盘库存`);
+    if (submitted && ownActual !== null && Math.abs(ownActual - submitted.actualStock) > 1e-9) throw new ApiError(400, `库存记录${id}的实盘数量记录不一致`);
+    const actual = submitted ? submitted.actualStock : ownActual === null ? item.snapshotStock : ownActual;
+    item.actualStock = actual;
+    actualQuantityById.set(id, actual);
+    if (Math.abs(actual - item.snapshotStock) > 1e-9) {
+      abnormalIdSet.add(id);
+      normalizedAbnormalList.push({ ...item, ...submitted, partId: String(id), snapshotStock: item.snapshotStock, sysStockNum: item.snapshotStock, actualStock: actual });
+    }
+  }
 
   return {
     inventoryIds: [...inventoryIds].sort((a, b) => a - b),

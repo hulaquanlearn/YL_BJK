@@ -1,0 +1,32 @@
+[
+  {
+    "id": "irb6700-spec",
+    "title": "IRB 6700 产品规格",
+    "number": "3HAC044265",
+    "type": "pdf",
+    "url": "/documents/abb/irb6700-spec.pdf",
+    "pages": 170,
+    "sha256": "679d3618f024b14e6bb143648f4834122b8d6addbe7a7b16d21374b246048dc9",
+    "source": "https://search.abb.com/library/Download.aspx?DocumentID=3HAC044265-001&LanguageCode=en&DocumentPartId=&Action=Launch"
+  },
+  {
+    "id": "irb6700-product",
+    "title": "IRB 6700 产品手册",
+    "number": "3HAC044266",
+    "type": "pdf",
+    "url": "/documents/abb/irb6700-product.pdf",
+    "pages": 834,
+    "sha256": "c21b65072d489ab9442baa01500b17fbb72a9c1242a86e165933759c34b14e49",
+    "source": "https://search.abb.com/library/Download.aspx?DocumentID=3HAC044266-010&LanguageCode=zh&DocumentPartId=&Action=Launch"
+  },
+  {
+    "id": "irc5-flexpendant",
+    "title": "带 FlexPendant 的 IRC5",
+    "number": "3HAC050941-010",
+    "type": "html",
+    "url": "/documents/abb/irc5-flexpendant/doc1.html",
+    "chapters": "/documents/abb/irc5-flexpendant/chapters.json",
+    "source": "本机 RobotStudio 官方中文手册 3HAC050941.chm，修订 G / RobotWare 6.08",
+    "sha256": "bc57fd6331157e9987244ea23020a96923f3766fdf3bc41f996baa8c6e2a90ad"
+  }
+]

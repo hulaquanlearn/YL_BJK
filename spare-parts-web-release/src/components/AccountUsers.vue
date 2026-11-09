@@ -2,19 +2,21 @@
  <section class="account-users" v-loading="loading">
   <div class="users-toolbar">
    <el-input v-model="keyword" placeholder="账号或姓名" clearable aria-label="查找账号" />
-   <span class="users-count">{{filtered.length}} 个账号</span>
+   <el-select v-model="workshopFilter" class="users-workshop-filter" clearable placeholder="全部车间" aria-label="按车间筛选账号"><el-option v-for="option in workshopOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select>
+   <el-button v-if="keyword||workshopFilter" text :disabled="busy" @click="keyword='';workshopFilter=''">清除筛选</el-button>
+   <span class="users-count">{{filtered.length}}<template v-if="keyword||workshopFilter"> / {{users.length}}</template> 个账号</span>
    <el-button :icon="Refresh" circle aria-label="刷新账号" :disabled="busy" @click="load" />
    <el-button type="primary" :disabled="busy" @click="openEditor()">新增账号</el-button>
   </div>
   <p v-if="error" role="alert" class="users-error">{{error}}</p>
   <div class="user-list">
-   <article v-for="person in filtered" :key="person.id" class="user-row">
+   <article v-for="person in filtered" :key="person.id" class="user-row" :class="{'is-self':String(person.id)===String(self.id)}" :aria-label="person.displayName+'的账号'">
     <div class="user-identity"><strong>{{person.displayName}}</strong><small>{{person.username}}{{String(person.id)===String(self.id)?' · 本人':''}}</small></div>
     <div class="user-role">{{identity(person)}}</div>
     <span :class="['user-status',person.enabled?'enabled':'']">{{person.enabled?'已启用':'已停用'}}</span>
     <div class="user-actions"><el-button text :disabled="busy" @click="openEditor(person)">编辑</el-button><ActionMenu :items="actions(person)" :disabled="busy" :aria-label="person.displayName+'的账号操作'" @select="command($event,person)" /></div>
    </article>
-   <el-empty v-if="!filtered.length&&!loading" description="暂无账号" :image-size="64" />
+   <el-empty v-if="!filtered.length&&!loading" :description="keyword||workshopFilter?'未找到符合条件的账号':'暂无账号'" :image-size="64" />
   </div>
   <el-dialog v-model="editorOpen" :title="editing?'编辑账号':'新增账号'" width="min(480px, calc(100vw - 28px))" :close-on-click-modal="!busy" :show-close="!busy" :close-on-press-escape="!busy" @closed="clearForm">
    <el-form label-position="top" @submit.prevent="save">
@@ -41,19 +43,27 @@ import {ElMessage,ElMessageBox} from 'element-plus'
 import {Refresh} from '@element-plus/icons-vue'
 import {getUsers,createUser,updateUser,resetUserPassword} from '../api'
 import {getUser} from '../auth'
+import {staffPositionLabel} from '../utils/feature-access.mjs'
 import ActionMenu from './ActionMenu.vue'
 const self=getUser()||{},users=ref([]),keyword=ref(''),loading=ref(false),busy=ref(false),error=ref(''),editorOpen=ref(false),editing=ref(null),resetOpen=ref(false),resetPerson=ref(null),resetPassword=ref('')
 const roles={admin:'系统管理员',raw_grain:'原粮车间管理员',qu_making:'制曲车间管理员',brewing:'酿酒车间管理员',viewer:'车间人员'}
 const workshops={raw_grain:'原粮车间',qu_making:'制曲车间',brewing:'酿酒车间'}
+const workshopFilter=ref('')
+function accountWorkshop(person){if(person.role==='admin')return 'system';if(workshops[person.role])return person.role;const code=person.staffWorkshopCode||person.workshopCode;return workshops[code]?code:'unassigned'}
+const workshopOptions=computed(()=>[
+ ...Object.entries(workshops).filter(([code])=>self.role==='admin'||self.role===code||users.value.some(person=>accountWorkshop(person)===code)).map(([value,label])=>({value,label})),
+ ...(self.role==='admin'||users.value.some(person=>person.role==='admin')?[{value:'system',label:'系统管理员'}]:[]),
+ ...(users.value.some(person=>accountWorkshop(person)==='unassigned')?[{value:'unassigned',label:'未分配车间'}]:[])
+])
 const fresh=()=>({username:'',displayName:'',role:'viewer',staffWorkshopCode:'raw_grain',staffPosition:'employee',password:''})
 const form=ref(fresh())
-const positions=computed(()=>form.value.staffWorkshopCode==='raw_grain'?[{value:'employee',label:'员工'},{value:'shift_leader',label:'工段长'}]:[{value:'group_leader',label:'组长'},{value:'shift_leader',label:'班长'}])
-const filtered=computed(()=>users.value.filter(p=>(p.username+' '+p.displayName).toLowerCase().includes(keyword.value.trim().toLowerCase())))
-function identity(p){if(p.role!=='viewer')return roles[p.role]||p.role;const position=p.staffWorkshopCode==='raw_grain'?{employee:'员工',group_leader:'员工',shift_leader:'工段长'}:{group_leader:'组长',shift_leader:'班长'};return [workshops[p.staffWorkshopCode],position[p.staffPosition]].filter(Boolean).join(' · ')||'岗位待分配'}
+const positions=computed(()=>[{value:'employee',label:'员工'},{value:'group_leader',label:'线长 / 组长'},{value:'shift_leader',label:'班长 / 工段长'},{value:'maintenance',label:'维修人员（车间）'},{value:'manufacturer_maintenance',label:'维修人员（厂家）'}])
+const filtered=computed(()=>users.value.filter(p=>(!workshopFilter.value||accountWorkshop(p)===workshopFilter.value)&&(p.username+' '+p.displayName).toLowerCase().includes(keyword.value.trim().toLowerCase())))
+function identity(p){if(p.role!=='viewer')return roles[p.role]||p.role;return [workshops[p.staffWorkshopCode],p.staffPosition?staffPositionLabel(p):'岗位待分配'].filter(Boolean).join(' · ')}
 function normalizePosition(){if(!positions.value.some(p=>p.value===form.value.staffPosition))form.value.staffPosition=positions.value[0].value}
 async function load(){if(loading.value)return;loading.value=true;error.value='';try{users.value=(await getUsers()).data}catch{error.value='账号读取失败，请重试'}finally{loading.value=false}}
 function clearForm(){form.value=fresh();editing.value=null}
-function openEditor(person){if(busy.value)return;editing.value=person||null;form.value=person?{...fresh(),...person,password:'',staffWorkshopCode:person.staffWorkshopCode||'raw_grain',staffPosition:person.staffWorkshopCode==='raw_grain'&&person.staffPosition==='group_leader'?'employee':person.staffPosition||'employee'}:fresh();normalizePosition();editorOpen.value=true}
+function openEditor(person){if(busy.value)return;editing.value=person||null;form.value=person?{...fresh(),...person,password:'',staffWorkshopCode:person.staffWorkshopCode||'raw_grain',staffPosition:person.staffPosition||'employee'}:fresh();normalizePosition();editorOpen.value=true}
 const validPassword=value=>/[A-Z]/.test(value)&&/[a-z]/.test(value)&&/\d/.test(value)
 async function save(){
  if(busy.value)return
@@ -76,6 +86,8 @@ async function saveReset(){if(busy.value||!resetPerson.value||String(resetPerson
 onMounted(load)
 </script>
 <style scoped>
+.users-toolbar>.users-workshop-filter{width:170px;flex:0 0 170px}
+@media(max-width:650px){.users-toolbar>.users-workshop-filter{width:100%;flex:1 1 150px}}
 .account-users{padding:20px;background:white;border:1px solid #dfe6ed;border-radius:12px;color:#243b50}.users-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:12px}.users-toolbar .el-input{max-width:250px}.users-count{flex:1;font-size:13px;color:#8290a0}.users-toolbar .el-button+.el-button{margin-left:0}.user-row{display:grid;grid-template-columns:minmax(140px,1fr) minmax(140px,1.3fr) 70px 140px;align-items:center;gap:18px;padding:20px 4px;border-bottom:1px solid #edf1f5}.user-row:last-child{border:0}.user-identity strong,.user-identity small{display:block;overflow-wrap:anywhere}.user-identity strong{font-size:14px}.user-identity small{margin-top:5px;font-size:12px;color:#8492a1}.user-role{font-size:13px;color:#607487}.user-status{font-size:12px;color:#97a0ad}.user-status.enabled{color:#278361}.user-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px}.user-password-help{display:block;font-size:12px;color:#8492a1;line-height:1.7;margin-top:6px}.user-staff-fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}.account-users :deep(.el-select){width:100%}.users-error{color:#bd2438;font-size:13px}
 @media(max-width:650px){.account-users{padding:16px}.users-toolbar{flex-wrap:wrap}.users-toolbar .el-input{width:100%;max-width:none}.user-row{grid-template-columns:1fr auto;gap:12px}.user-identity{grid-column:1}.user-role{grid-column:1;grid-row:2}.user-status{grid-column:2;grid-row:1;text-align:right}.user-actions{grid-column:2;grid-row:2}.user-staff-fields{grid-template-columns:1fr}.user-actions :deep(.el-button){min-height:40px}}
 </style>

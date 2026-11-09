@@ -25,6 +25,8 @@ test('web runtime serves navigation, protects accidentally copied private files 
   const page = await fetch(base + '/inventory', { headers: { Accept: 'text/html' } })
   assert.equal(page.status, 200); assert.match(await page.text(), /fixture/)
   assert.match(page.headers.get('content-security-policy'), /connect-src 'self'/)
+  assert.match(page.headers.get('content-security-policy'), /script-src 'self' 'wasm-unsafe-eval'/)
+  assert.ok(!page.headers.get('content-security-policy').includes("'unsafe-eval'"),'WebAssembly decoding must not enable JavaScript eval')
   assert.match(page.headers.get('x-robots-tag'), /noindex/)
   assert.equal(page.headers.get('referrer-policy'),'no-referrer')
   assert.match(await (await fetch(base+'/robots.txt')).text(), /Disallow: \//)

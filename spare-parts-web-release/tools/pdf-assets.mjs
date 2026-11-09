@@ -1,0 +1,4 @@
+import fs from 'node:fs'
+import path from 'node:path'
+import {fileURLToPath} from 'node:url'
+export function pdfAssets(){const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../node_modules/pdfjs-dist');return {name:'pdf-reader-assets',generateBundle(){for(const folder of ['cmaps','standard_fonts'])for(const name of fs.readdirSync(path.join(root,folder)))if(!name.endsWith('.LICENSE')&&name!=='LICENSE')this.emitFile({type:'asset',fileName:`pdfjs/${folder}/${name}`,source:fs.readFileSync(path.join(root,folder,name))})},configureServer(server){server.middlewares.use('/pdfjs',(req,res,next)=>{const rel=decodeURIComponent((req.url||'').split('?')[0]);if(!/^\/(cmaps|standard_fonts)\/[A-Za-z0-9_.-]+$/.test(rel))return next();const target=path.join(root,rel);if(!fs.existsSync(target))return next();res.setHeader('Content-Type','application/octet-stream');fs.createReadStream(target).pipe(res)})}}}

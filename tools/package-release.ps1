@@ -22,6 +22,10 @@ $guideDoc = Join-Path $output "USER_GUIDE_$version.md"
 foreach ($required in @($deployDoc, $guideDoc, (Join-Path $output "QA_$version.md"), (Join-Path $root 'README.md'), (Join-Path $root 'spare-parts-web-release\dist\index.html'))) {
   if (-not (Test-Path -LiteralPath $required)) { throw "缺少发布文件：$required" }
 }
+$releaseDocs = @(Get-Content -LiteralPath (Join-Path $PSScriptRoot 'release-documents.json') -Raw | ConvertFrom-Json)
+foreach ($relative in $releaseDocs) {
+  if ($relative -match '^[/\\]|(^|[/\\])\.\.([/\\]|$)' -or -not (Test-Path -LiteralPath (Join-Path $root "docs/$relative") -PathType Leaf)) { throw "缺少或无效的发布文档：$relative" }
+}
 if (Test-Path -LiteralPath $package) { throw "发布目录已存在，请先人工核对：$package" }
 if (Test-Path -LiteralPath $archive) { throw "发布压缩包已存在，请先人工核对：$archive" }
 
@@ -41,6 +45,11 @@ foreach ($directory in @('src', 'scripts', 'sql', 'nginx')) {
 foreach ($file in @('.env.example', 'package.json', 'package-lock.json', 'README.md')) {
   Copy-Item -LiteralPath (Join-Path $root "server\$file") -Destination (Join-Path $package 'server')
 }
+# AI credentials and their rollback snapshots remain exclusively on the host.
+# The explicit server allowlist above must never copy .env.ai-settings or .private/.
+foreach ($privatePath in @('server\.env.ai-settings', 'server\.env.gpt-settings', 'server\.private')) {
+  if (Test-Path -LiteralPath (Join-Path $package $privatePath)) { throw 'AI private settings must not enter a release package' }
+}
 New-Item -ItemType Directory -Path (Join-Path $package 'server\data') | Out-Null
 # Runtime seed catalog only; never ship inventory ledgers, uploads, or configured secrets.
 Copy-Item -LiteralPath (Join-Path $root 'server\data\ledger-model-catalog.json') -Destination (Join-Path $package 'server\data')
@@ -50,10 +59,12 @@ foreach ($file in @('server.js', 'package.json', 'package-lock.json')) {
 }
 if (Test-Path -LiteralPath (Join-Path $root 'docs')) {
   New-Item -ItemType Directory -Path (Join-Path $package 'docs') | Out-Null
-  # Ship maintained operational references and this release's audit evidence; exclude unrelated ledgers.
-  Get-ChildItem -LiteralPath (Join-Path $root 'docs') -File |
-    Where-Object { $_.Name -in @('DOCUMENT_PREVIEW_V1.4.0.md', 'OPENCLAW_MODEL_MATCHING.md', 'LOCAL_AUDIT_REMEDIATION_20260924.md', 'PROJECT_REVIEW_SECURITY_20260930.md', 'PROJECT_DECISIONS.md', 'RELEASE_AUDIT_20261009.md', 'RELEASE_AUDIT_20261013.md', 'ATTENDANCE_REVIEW_20261009.md', 'ATTENDANCE_V2_LOCAL_20261013.md', 'ROBOT_PROGRAM_AGENT.md', 'CLEANUP_20261016.md', 'RETIRED_FEATURES_20261018.md', 'AI_CALL_RECORDS_20261018.md', 'UI_SIMPLIFICATION_20261018.md', 'TOOLBAR_CLEANUP_REVIEW_20261018.md', 'ACCOUNT_STORAGE_REVIEW_20261018.md', 'KNOWLEDGE_AGENT_REVIEW_20261018.md', 'RELEASE_AUDIT_20261018.md') } |
-    Copy-Item -Destination (Join-Path $package 'docs')
+  # Explicit maintained documents, including nested attribution and referenced images.
+  foreach ($relative in $releaseDocs) {
+    $destination = Join-Path $package "docs/$relative"
+    New-Item -ItemType Directory -Path ([IO.Path]::GetDirectoryName($destination)) -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $root "docs/$relative") -Destination $destination
+  }
 }
 Copy-Item -Path (Join-Path $root 'miniprogram\*') -Destination (Join-Path $package 'miniprogram') -Recurse
 Copy-Item -LiteralPath (Join-Path $root 'project.config.json') -Destination $package
@@ -62,7 +73,6 @@ Copy-Item -LiteralPath (Join-Path $root 'README.md') -Destination (Join-Path $pa
 if (Test-Path -LiteralPath (Join-Path $root 'AGENTS.md')) {
   Copy-Item -LiteralPath (Join-Path $root 'AGENTS.md') -Destination $package
 }
-Copy-Item -LiteralPath (Join-Path $root 'design-qa.md') -Destination (Join-Path $package 'design-qa.md')
 Copy-Item -LiteralPath (Join-Path $root 'VERSION') -Destination $package
 if ($AndroidRelease) {
   $androidTarget = Join-Path $package 'app-updates\android'
@@ -81,6 +91,7 @@ if (Test-Path -LiteralPath $qaDoc) { Copy-Item -LiteralPath $qaDoc -Destination 
 
 $checksumLines = foreach ($file in (Get-ChildItem -LiteralPath $package -Recurse -File | Sort-Object FullName)) {
   $relative = $file.FullName.Substring($package.Length + 1).Replace('\', '/')
+  if ($relative -match '^server/(?:\.env\.(?:ai|gpt)-settings(?:\..*)?|\.private)(?:/|$)') { throw 'AI private settings must not enter a release package' }
   $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
   "$hash  $relative"
 }

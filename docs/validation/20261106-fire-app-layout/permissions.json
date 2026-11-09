@@ -1,0 +1,85 @@
+{
+  "at": "2026-11-06T08:06:14.215Z",
+  "roles": [
+    {
+      "role": "admin::",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "brewing::",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "raw_grain::",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "viewer:qu_making:shift_leader",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:raw_grain:group_leader",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "viewer:qu_making:group_leader",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:raw_grain:shift_leader",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "viewer:qu_making:maintenance",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:qu_making:manufacturer_maintenance",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:qu_making:employee",
+      "authorized": false,
+      "httpStatus": 403
+    }
+  ],
+  "capabilityVersion": "fire-card-20261106-v6",
+  "automaticMonth": "2026-11",
+  "businessBefore": {
+    "fire_cycles": 2,
+    "fire_cycle_points": 1990,
+    "fire_points": 1003,
+    "fire_assets": 1003,
+    "fire_records": 423,
+    "fire_photos": 442,
+    "fire_record_assets": 423,
+    "fire_issues": 13,
+    "inventory_orders": 1,
+    "inventory": 584
+  },
+  "businessAfter": {
+    "fire_cycles": 2,
+    "fire_cycle_points": 1990,
+    "fire_points": 1003,
+    "fire_assets": 1003,
+    "fire_records": 423,
+    "fire_photos": 442,
+    "fire_record_assets": 423,
+    "fire_issues": 13,
+    "inventory_orders": 1,
+    "inventory": 584
+  },
+  "businessCountsPreserved": true,
+  "standaloneManualEndpoint": 410,
+  "temporarySessionsRemoved": true,
+  "aiCalls": false
+}

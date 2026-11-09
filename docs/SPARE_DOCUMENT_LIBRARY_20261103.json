@@ -1,0 +1,2210 @@
+{
+  "schema": 1,
+  "at": "2026-11-02T18:10:56.700Z",
+  "documents": 97,
+  "classifications": {
+    "传动与减速机": 15,
+    "气动元件": 4,
+    "电气与供电": 38,
+    "轴承与轴承座": 40
+  },
+  "entries": [
+    {
+      "id": "105",
+      "title": "Demag ZBA 电机",
+      "fileSha256": "7dfac109366612cc8c760e9680f24dedb6c44e167a669321e69f56c19ba4052c",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "选型手册",
+        "manufacturer": "DEMAG / 德马格",
+        "models": [
+          "ZBA"
+        ],
+        "sourceUrl": "https://gholizadehcranes.com/wp-content/uploads/2023/10/Demag-ZBA-motors.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共84页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共84页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 制动器/电机完整后缀与配套减速箱须单独核对。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "7dfac109366612cc8c760e9680f24dedb6c44e167a669321e69f56c19ba4052c"
+      }
+    },
+    {
+      "id": "106",
+      "title": "SEW DRU180M4 电机",
+      "fileSha256": "a6467ba507f91656adb7ddb74039365c668cf1da1f676790cd0ae5a247c4eaf9",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "产品数据表",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "DRU180M4"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/pdf/20089740.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共29页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共29页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 单一订货版本不能套用其他减速箱或电机组合。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "a6467ba507f91656adb7ddb74039365c668cf1da1f676790cd0ae5a247c4eaf9"
+      }
+    },
+    {
+      "id": "107",
+      "title": "SEW FA57 原厂尺寸图",
+      "fileSha256": "3f1a21d4c33f90f66b771d80f05b5a6a101f684d12276b69fbdc741e8cb3d8d8",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "FA57"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/36028822547278603.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "3f1a21d4c33f90f66b771d80f05b5a6a101f684d12276b69fbdc741e8cb3d8d8"
+      }
+    },
+    {
+      "id": "108",
+      "title": "SEW FA77 原厂尺寸图",
+      "fileSha256": "b33d80eb1cdf757f2cc807be293768288b963457e072af8019a04fd6420af176",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "FA77"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/36028822547301899.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "b33d80eb1cdf757f2cc807be293768288b963457e072af8019a04fd6420af176"
+      }
+    },
+    {
+      "id": "109",
+      "title": "SEW KA47 原厂尺寸图",
+      "fileSha256": "4f0b8af5a1295763fef6c8cfe9be8b91d02139578c54a2e42a75578a6bcc6f87",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "KA47"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025780363.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "4f0b8af5a1295763fef6c8cfe9be8b91d02139578c54a2e42a75578a6bcc6f87"
+      }
+    },
+    {
+      "id": "110",
+      "title": "SEW KA57 原厂尺寸图",
+      "fileSha256": "4fa34ec9eb5574b283b468c9d2714a99c895cf5c81e1ec23d27b0623b0cc848d",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "KA57"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025797003.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "4fa34ec9eb5574b283b468c9d2714a99c895cf5c81e1ec23d27b0623b0cc848d"
+      }
+    },
+    {
+      "id": "111",
+      "title": "SEW KAZ107 原厂尺寸图",
+      "fileSha256": "a2ecfa9071c6e8d1afa65f476571e0a40e3ad4f3ee1fce8da7dd4e382acf008f",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "KAZ107"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025856907.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "a2ecfa9071c6e8d1afa65f476571e0a40e3ad4f3ee1fce8da7dd4e382acf008f"
+      }
+    },
+    {
+      "id": "112",
+      "title": "SEW KAZ47 原厂尺寸图",
+      "fileSha256": "3897d10ada461519bbbd18a3a5136c289832ebb7eb097319fecf8b91d44d3d60",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "KAZ47"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025782027.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "3897d10ada461519bbbd18a3a5136c289832ebb7eb097319fecf8b91d44d3d60"
+      }
+    },
+    {
+      "id": "113",
+      "title": "SEW KAZ57 原厂尺寸图",
+      "fileSha256": "1d7314e56ed17ba4ed63b0fc5e17234edc901001288b844f5f402af09b22a918",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "KAZ57"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025798667.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "1d7314e56ed17ba4ed63b0fc5e17234edc901001288b844f5f402af09b22a918"
+      }
+    },
+    {
+      "id": "114",
+      "title": "SEW KAZ67 原厂尺寸图",
+      "fileSha256": "bc409a7d357c4d262a4124fc3722e873b18172a24808e8db0ee15ef2462e0048",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "KAZ67"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025810315.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "bc409a7d357c4d262a4124fc3722e873b18172a24808e8db0ee15ef2462e0048"
+      }
+    },
+    {
+      "id": "115",
+      "title": "SEW KAZ77 原厂尺寸图",
+      "fileSha256": "29630ddc47b9394e251be29b320d5a3fd5324217e1353111ce2e2d429e95cb3b",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "KAZ77"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025821963.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "29630ddc47b9394e251be29b320d5a3fd5324217e1353111ce2e2d429e95cb3b"
+      }
+    },
+    {
+      "id": "116",
+      "title": "SEW KAZ87 原厂尺寸图",
+      "fileSha256": "993cfcb41f158092e017fde56c9e8084d2df87fb77c5f4d692469634d96db0d1",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "KAZ87"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025833611.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "993cfcb41f158092e017fde56c9e8084d2df87fb77c5f4d692469634d96db0d1"
+      }
+    },
+    {
+      "id": "117",
+      "title": "SEW KAZ97 原厂尺寸图",
+      "fileSha256": "1e926a511419e268b9079676e7577d24d516d0ff4a8a280ebe6a271e2e5f0eea",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "KAZ97"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025845259.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "1e926a511419e268b9079676e7577d24d516d0ff4a8a280ebe6a271e2e5f0eea"
+      }
+    },
+    {
+      "id": "118",
+      "title": "SEW SA37 原厂尺寸图",
+      "fileSha256": "da1f21cfa4b1d131fda8adba503f4eae124f52b9241988f706c0dc9fc996d32a",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "SA37"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424024912395.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "da1f21cfa4b1d131fda8adba503f4eae124f52b9241988f706c0dc9fc996d32a"
+      }
+    },
+    {
+      "id": "119",
+      "title": "SEW SF37 原厂尺寸图",
+      "fileSha256": "da52a1283d541c267099ad0fc0fbd55e39faf100fb83967917cde6b742e23653",
+      "referenceMetadata": {
+        "family": "传动与减速机",
+        "documentKind": "尺寸图",
+        "manufacturer": "SEW-EURODRIVE",
+        "models": [
+          "SF37"
+        ],
+        "sourceUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424024910731.pdf",
+        "documentVersion": "02/2026，33346739在线样本",
+        "sourcePages": "独立PDF第1页",
+        "verification": "partial",
+        "verifiedScope": "保留原厂型号尺寸图、箱体/输出轴/安装外形与DRN电机表。",
+        "limitations": "台账包含皖南YFB4配套电机，图中DRN总长不能冒充皖南电机精确尺寸；安装型式/附件及订货号按实际原件核对。SA37/SF37不等同SAF37。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "da52a1283d541c267099ad0fc0fbd55e39faf100fb83967917cde6b742e23653"
+      }
+    },
+    {
+      "id": "120",
+      "title": "亚德客 4V 电磁阀",
+      "fileSha256": "ae1f40f361d528a5e922b2ac57629b50f426547e61e3efabdaeac5d14a27b79f",
+      "referenceMetadata": {
+        "family": "气动元件",
+        "documentKind": "选型手册",
+        "manufacturer": "AirTAC / 亚德客",
+        "models": [
+          "4V"
+        ],
+        "sourceUrl": "https://us-en.airtac.com/upload/4V-Series-Solenoid-Valve-202212151018184956.PDF",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共14页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共14页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 当前已采集页未核实所有外形图，不用选型页自行补写安装孔和尺寸。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "ae1f40f361d528a5e922b2ac57629b50f426547e61e3efabdaeac5d14a27b79f"
+      }
+    },
+    {
+      "id": "121",
+      "title": "亚德客 AFC/BFC 二联件",
+      "fileSha256": "b1fe27b75249ece77757bbc790bad81cd6e48bd3cf19a9ec01610ae6a0a97c21",
+      "referenceMetadata": {
+        "family": "气动元件",
+        "documentKind": "选型手册",
+        "manufacturer": "AirTAC / 亚德客",
+        "models": [
+          "AFC",
+          "BFC"
+        ],
+        "sourceUrl": "https://www.fonray.com/download/1-Filter-Regulator-Lubricator/AFC_BFC.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共1页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共1页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 当前已采集页未核实所有外形图，不用选型页自行补写安装孔和尺寸。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "b1fe27b75249ece77757bbc790bad81cd6e48bd3cf19a9ec01610ae6a0a97c21"
+      }
+    },
+    {
+      "id": "41",
+      "title": "亚德客 SAI / SAIL / BSAI / SAIF 气缸样本",
+      "fileSha256": "b77057589430eb1ca8a7f3c170b098b45e3189fc36e62f4b2e1508d88d78ef9e",
+      "referenceMetadata": {
+        "family": "气动元件",
+        "documentKind": "选型手册",
+        "manufacturer": "AirTAC / 亚德客",
+        "models": [
+          "SAI",
+          "SAIL",
+          "BSAI",
+          "SAIF",
+          "SAI32",
+          "SAI40",
+          "SAI50",
+          "SAI63",
+          "SAI80",
+          "SAI100",
+          "SAI125",
+          "SAI160",
+          "SAI200"
+        ],
+        "sourceUrl": "https://www.airtac.com/upload/SAI+SAIL+BSAI+SAIF-202409240313001916.PDF",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第3页 / 印刷第23页；其余型号见原件",
+        "verification": "partial",
+        "verifiedScope": "Codex已查看PDF第3页尺寸图与零件表。SAI为型材缸体，无外露拉杆；SAI100：A229、B115、D25mm；SAI160：A332、B180、D40mm。 A+行程表示图示总长。",
+        "limitations": "图像页未全文OCR，AI仅可引用核实摘要。完整行程、附件、牙型、磁石、安装方式须按具体订货型号查表；不将下载地址日期当作资料修订号。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "b77057589430eb1ca8a7f3c170b098b45e3189fc36e62f4b2e1508d88d78ef9e"
+      }
+    },
+    {
+      "id": "42",
+      "title": "亚德客 SC / SCL / SCF / SCT / BSC 气缸样本",
+      "fileSha256": "f673f689b8d9322a4f8d66c64b0520a1d40fe14171d994bdbf18d40eee73f34c",
+      "referenceMetadata": {
+        "family": "气动元件",
+        "documentKind": "选型手册",
+        "manufacturer": "AirTAC / 亚德客",
+        "models": [
+          "SC",
+          "SCL",
+          "SCF",
+          "SCT",
+          "BSC",
+          "SC32",
+          "SC40",
+          "SC50",
+          "SC63",
+          "SC80",
+          "SC100",
+          "SC125",
+          "SC160",
+          "SC200"
+        ],
+        "sourceUrl": "https://www.airtac.com/upload/SC+SCL+SCF+SCT+BSC-202409240316027226.PDF",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第3页 / 印刷第39页；其余型号见原件",
+        "verification": "partial",
+        "verifiedScope": "Codex已查看PDF第3页尺寸图与零件表。SC有外露拉杆；SC40：A142、B50、D16mm，杆端M12×1.25，气口PT1/4。 A+行程表示图示总长。",
+        "limitations": "图像页未全文OCR，AI仅可引用核实摘要。完整行程、附件、牙型、磁石、安装方式须按具体订货型号查表；不将下载地址日期当作资料修订号。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "f673f689b8d9322a4f8d66c64b0520a1d40fe14171d994bdbf18d40eee73f34c"
+      }
+    },
+    {
+      "id": "122",
+      "title": "Kübler 8.5000 编码器",
+      "fileSha256": "06f0449ad5488442234574b8f1523077e1dc05a80d5a38d75da6f36a52575249",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Kübler / 库伯勒",
+        "models": [
+          "8.5000"
+        ],
+        "sourceUrl": "https://files.kempstoncontrols.com/files/fd72a14004ed6243db66e801bd891843/8.5000.8558.0050.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共14页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共14页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 原件为系列样本时，后缀、线缆、附件及接口版本须另外核对，不能自动适用所有同类备件。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "06f0449ad5488442234574b8f1523077e1dc05a80d5a38d75da6f36a52575249"
+      }
+    },
+    {
+      "id": "43",
+      "title": "劳易测 BPS348i SM100 D 条码定位系统数据表",
+      "fileSha256": "9e19dfd3a8cdc3ccd85fbb96a5ea0687844f97df1c52129056cbcff1663b5ba1",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Leuze / 劳易测",
+        "models": [
+          "BPS348i SM100 D",
+          "50124982"
+        ],
+        "sourceUrl": "https://excelautomationinc.com/wp-content/uploads/2023/05/DS_BPS-348i-SM-100-D_eng_50124982.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共8页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共8页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "9e19dfd3a8cdc3ccd85fbb96a5ea0687844f97df1c52129056cbcff1663b5ba1"
+      }
+    },
+    {
+      "id": "44",
+      "title": "劳易测 HT46C/4P-M12 光电传感器数据表",
+      "fileSha256": "68f3a83f3ebc12feec3ed3aa79ff82ad2ce4b9bf04f388e91aec32cc51dcd69f",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Leuze / 劳易测",
+        "models": [
+          "HT46C/4P-M12",
+          "50127048"
+        ],
+        "sourceUrl": "https://www.powerswitchgears.com/datasheets/leuze/diffuse-sensor-with-background-suppression/leuze-ht46c-4p-m12-50127048.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共7页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共7页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "68f3a83f3ebc12feec3ed3aa79ff82ad2ce4b9bf04f388e91aec32cc51dcd69f"
+      }
+    },
+    {
+      "id": "45",
+      "title": "劳易测 LSR46B Ex 系列说明 50111616",
+      "fileSha256": "862962c0a5e763d8b054d7994141db7382d9c18c04a2fb7fac899863c18c5d23",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Leuze / 劳易测",
+        "models": [
+          "LSR46B Ex"
+        ],
+        "sourceUrl": "https://www.quad-industry.com/titan_img/leuze/pdf/DS_LSR46B66S_en_50111616_P.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共2页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共2页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 系列资料不证明LSER46B/66,200-S12 S-EX n（50111520）的精确孔位和尺寸。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "862962c0a5e763d8b054d7994141db7382d9c18c04a2fb7fac899863c18c5d23"
+      }
+    },
+    {
+      "id": "123",
+      "title": "劳易测 LSR46B Ex 系列说明 50112942",
+      "fileSha256": "d652347fa166041d884c4696261fac609e4d9d71e4b0015f30621cd2ae31f777",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Leuze / 劳易测",
+        "models": [
+          "LSR46B Ex"
+        ],
+        "sourceUrl": "https://files.leuze.com/Volumes/Volume0/opasdata/d100001/medias/docus/546/%24v12/PAL_LSR46BSExn_en_50112942.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共3页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共3页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 系列资料不证明LSER46B/66,200-S12 S-EX n（50111520）的精确孔位和尺寸。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "d652347fa166041d884c4696261fac609e4d9d71e4b0015f30621cd2ae31f777"
+      }
+    },
+    {
+      "id": "46",
+      "title": "劳易测 LSR46B Ex 系列说明 50112942",
+      "fileSha256": "bfdea68e8bd1e9af426ff5b4c4b33bb2875f30dbf80f67f84d1c73e6e89ca4a7",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Leuze / 劳易测",
+        "models": [
+          "LSR46B Ex"
+        ],
+        "sourceUrl": "https://files.valinonline.com/userfiles/documents/leuze-lsr-46b-ex-n.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共4页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 系列资料不证明LSER46B/66,200-S12 S-EX n（50111520）的精确孔位和尺寸。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "bfdea68e8bd1e9af426ff5b4c4b33bb2875f30dbf80f67f84d1c73e6e89ca4a7"
+      }
+    },
+    {
+      "id": "47",
+      "title": "明纬 NDR-240 导轨电源数据表",
+      "fileSha256": "383b37857443a4921952fc42b43b7dad456f150c670882d6f5e89e79f62446a1",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "MEAN WELL / 明纬",
+        "models": [
+          "NDR-240",
+          "NDR-240-24"
+        ],
+        "sourceUrl": "https://www.meanwell.com/Upload/PDF/NDR-240/NDR-240-SPEC.PDF",
+        "documentVersion": "原件首页 2026-04-03",
+        "sourcePages": "PDF第4页 / Mechanical Specification",
+        "verification": "partial",
+        "verifiedScope": "已核对PDF第4页外形尺寸；W×H×D：63×125.2×113.5mm。",
+        "limitations": "系列数据表包含多个输出版本，电气额定值须核对完整后缀；机械轮廓示意不代表端子内部结构。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "383b37857443a4921952fc42b43b7dad456f150c670882d6f5e89e79f62446a1"
+      }
+    },
+    {
+      "id": "48",
+      "title": "明纬 NDR-480 导轨电源数据表",
+      "fileSha256": "f077c7787d0203eefe95cc6772f70353b68b8e506c8722334e3aca6c870f87c5",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "MEAN WELL / 明纬",
+        "models": [
+          "NDR-480",
+          "NDR-480-24"
+        ],
+        "sourceUrl": "https://www.meanwell.com/Upload/PDF/NDR-480/NDR-480-SPEC.PDF",
+        "documentVersion": "原件首页 2025-01-10",
+        "sourcePages": "PDF第4页 / Mechanical Specification",
+        "verification": "partial",
+        "verifiedScope": "已核对PDF第4页外形尺寸；W×H×D：85.5×125.2×128.5mm。",
+        "limitations": "系列数据表包含多个输出版本，电气额定值须核对完整后缀；机械轮廓示意不代表端子内部结构。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "f077c7787d0203eefe95cc6772f70353b68b8e506c8722334e3aca6c870f87c5"
+      }
+    },
+    {
+      "id": "124",
+      "title": "ACT100 订货号30529620 中文版本核实记录",
+      "fileSha256": "5172dbf8ac3bcac6ed8185007b0698ec3606f59129230fc2b906aac6222c1999",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "研究整理",
+        "manufacturer": "METTLER TOLEDO / 梅特勒托利多",
+        "models": [
+          "ACT100",
+          "30529620",
+          "ATC100DIN"
+        ],
+        "sourceUrl": "https://www.mt.com/dam/product_organizations/industry/Load_Cells/Downloads/Transmitter/act100/quickguides%26manuals/20210609_30529357_MAN_UM_ACT100_EN_R03.pdf",
+        "documentVersion": "30529357 Rev.03，06/2021",
+        "sourcePages": "用户手册PDF第15页 / 印刷第9页，表1-1",
+        "verification": "partial",
+        "verifiedScope": "原厂手册表1-1明确30529620是ACT100中文版本，30529622才是ACT100xx中文危险区版本。结合已归档数据表PDF第2页，外廓宽40×高110×深100mm。",
+        "limitations": "台账ATC100DIN文字保持不变；这份手册本机下载循环重定向，未保存本地原件或伪造原件哈希。本记录是带出处的研究整理，不能冒充厂家原版手册。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "5172dbf8ac3bcac6ed8185007b0698ec3606f59129230fc2b906aac6222c1999"
+      }
+    },
+    {
+      "id": "49",
+      "title": "梅特勒 ACT100 / ACT100xx 称重变送器数据表",
+      "fileSha256": "6938fca96d2e45eef625412f664b0807a7fdbc39fc1e5c4e9ae3bc393aef421d",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "METTLER TOLEDO / 梅特勒托利多",
+        "models": [
+          "ACT100",
+          "ACT100xx"
+        ],
+        "sourceUrl": "https://www.mt.com/dam/product_organizations/industry/Load_Cells/Downloads/Transmitter/act100/datasheets/30462590_A_MAR_DS_ACT100_EN.pdf",
+        "documentVersion": "06/2020，30462590",
+        "sourcePages": "PDF第2页",
+        "verification": "partial",
+        "verifiedScope": "Codex已查看PDF第2页，ACT100/ACT100xx宽40×高110×深100mm、DIN导轨安装。",
+        "limitations": "原厂ACT100用户手册30529357 Rev03（06/2021）PDF第15页表1-1已证实订货号30529620为ACT100中文版本，区别于30529622的ACT100xx中文防爆版本。台账ATC100DIN原文字保持不变；安装与接线按完整订货版本核对。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "6938fca96d2e45eef625412f664b0807a7fdbc39fc1e5c4e9ae3bc393aef421d"
+      }
+    },
+    {
+      "id": "125",
+      "title": "Moxa EDS-G308 工业交换机",
+      "fileSha256": "13dc1fdca88820462af1f6159db7f02b426a605405ba7f59bd60adccf0159f1f",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "MOXA / 摩莎",
+        "models": [
+          "EDS-G308"
+        ],
+        "sourceUrl": "https://moxa.com/getmedia/7fb1c24f-3a1d-4152-bfad-fdbbc2872771/moxa-eds-g308-series-datasheet-v2.2.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共5页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共5页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 原件为系列样本时，后缀、线缆、附件及接口版本须另外核对，不能自动适用所有同类备件。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "13dc1fdca88820462af1f6159db7f02b426a605405ba7f59bd60adccf0159f1f"
+      }
+    },
+    {
+      "id": "126",
+      "title": "Omron D4MC 限位开关",
+      "fileSha256": "714b8dc2b3877ff01b080036220ea747f145c17ef1744d00d85c20627a088a22",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "OMRON / 欧姆龙",
+        "models": [
+          "D4MC"
+        ],
+        "sourceUrl": "https://files.omron.eu/downloads/latest/datasheet/en/d4mc_enclosed_switch_datasheet_en.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共6页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共6页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 原件为系列样本时，后缀、线缆、附件及接口版本须另外核对，不能自动适用所有同类备件。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "714b8dc2b3877ff01b080036220ea747f145c17ef1744d00d85c20627a088a22"
+      }
+    },
+    {
+      "id": "127",
+      "title": "SICK S30B 安全激光扫描器",
+      "fileSha256": "34ea63fe0409b6804d8a1091c769dd5f8172a4450efbebb8329fccfd718bbc32",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "SICK / 西克",
+        "models": [
+          "S30B"
+        ],
+        "sourceUrl": "https://www.sick.com/media/pdf/9/49/849/dataSheet_S30B-3011DA_1056429_en.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共9页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共9页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 原件为系列样本时，后缀、线缆、附件及接口版本须另外核对，不能自动适用所有同类备件。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "34ea63fe0409b6804d8a1091c769dd5f8172a4450efbebb8329fccfd718bbc32"
+      }
+    },
+    {
+      "id": "128",
+      "title": "施耐德 ATV310HU15N4A 产品数据表",
+      "fileSha256": "2241bbcdedb4b2ec71725d5ef0c18687c556ee3e7ae53da1da3462287d3c3747",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Schneider Electric / 施耐德",
+        "models": [
+          "ATV310HU15N4A"
+        ],
+        "sourceUrl": "https://document.moglix.com/catalog/product/documents/ATV310HU15N4E_1674552269889.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共7页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共7页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "2241bbcdedb4b2ec71725d5ef0c18687c556ee3e7ae53da1da3462287d3c3747"
+      }
+    },
+    {
+      "id": "50",
+      "title": "施耐德 EZD100 产品数据表",
+      "fileSha256": "0a35fd4152a93c88c1b5b322d4a15cb927da1199ff463f5813770e12c05be82f",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Schneider Electric / 施耐德",
+        "models": [
+          "EZD100"
+        ],
+        "sourceUrl": "https://docs.rs-online.com/d11f/0900766b81682494.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共2页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共2页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "0a35fd4152a93c88c1b5b322d4a15cb927da1199ff463f5813770e12c05be82f"
+      }
+    },
+    {
+      "id": "51",
+      "title": "施耐德 GV2ME06 产品数据表",
+      "fileSha256": "8b37621cd7b89c59e979a87a9badf6212ee94e17f994b1355d6f72f5f67cf2a7",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Schneider Electric / 施耐德",
+        "models": [
+          "GV2ME06"
+        ],
+        "sourceUrl": "https://schneidersanat.com/wp-content/uploads/2021/12/TeSys-Deca-frame-2_GV2ME06.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共9页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共9页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 此原件为GV2ME06，不能将电流范围和脱扣参数套给其他GV2ME后缀。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "8b37621cd7b89c59e979a87a9badf6212ee94e17f994b1355d6f72f5f67cf2a7"
+      }
+    },
+    {
+      "id": "129",
+      "title": "施耐德 LADN20 产品数据表",
+      "fileSha256": "1a35eba87c002a3fc9bc9c898923eeb17c0c071f257fb82058bc67521e06d505",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Schneider Electric / 施耐德",
+        "models": [
+          "LADN20"
+        ],
+        "sourceUrl": "https://files.kempstoncontrols.com/files/1fc84ec22009393678bb787b243d5957/LADN20.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共3页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共3页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "1a35eba87c002a3fc9bc9c898923eeb17c0c071f257fb82058bc67521e06d505"
+      }
+    },
+    {
+      "id": "130",
+      "title": "施耐德 LC1N0910M5N 产品数据表",
+      "fileSha256": "c047571705f72b96579bf283efa3025fd4b03fbdba48c5764226c84ae95242d2",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Schneider Electric / 施耐德",
+        "models": [
+          "LC1N0910M5N"
+        ],
+        "sourceUrl": "https://docs.rs-online.com/df2b/A700000009936738.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共3页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共3页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "c047571705f72b96579bf283efa3025fd4b03fbdba48c5764226c84ae95242d2"
+      }
+    },
+    {
+      "id": "52",
+      "title": "施耐德 LC1N0910M5N 产品数据表",
+      "fileSha256": "55eacdd2789fd68d04756953f0ee34eb9f69f049358d9f0d15210796f6581280",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Schneider Electric / 施耐德",
+        "models": [
+          "LC1N0910M5N"
+        ],
+        "sourceUrl": "https://docs.rs-online.com/95e0/0900766b81685bd8.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共8页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共8页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "55eacdd2789fd68d04756953f0ee34eb9f69f049358d9f0d15210796f6581280"
+      }
+    },
+    {
+      "id": "131",
+      "title": "施耐德 RSL1AB4BD 产品数据表",
+      "fileSha256": "dc155cbfe5c2607a52e9449dcfe89dc7db9acbb2a9ebe5dd81aed7da9f414cea",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Schneider Electric / 施耐德",
+        "models": [
+          "RSL1AB4BD"
+        ],
+        "sourceUrl": "https://www.mouser.com/datasheet/3/187/26/RSL1AB4BD_document.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共6页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共6页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "dc155cbfe5c2607a52e9449dcfe89dc7db9acbb2a9ebe5dd81aed7da9f414cea"
+      }
+    },
+    {
+      "id": "53",
+      "title": "Siemens AI 8xI 模块 / 6ES7134-6GF00-0AA1",
+      "fileSha256": "ac1067e0d8236c3052e445cab85b0a5153bcf8aa6ebaad308dfba637370ce82f",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "6ES7134-6GF00-0AA1"
+        ],
+        "sourceUrl": "https://assets.euautomation.com/uploads/parts/pdf/6es71346gf000aa1.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共4页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "ac1067e0d8236c3052e445cab85b0a5153bcf8aa6ebaad308dfba637370ce82f"
+      }
+    },
+    {
+      "id": "54",
+      "title": "Siemens AQ 4xU/I 模块 / 6ES7135-6HD00-0BA1",
+      "fileSha256": "a7c42e20989c20e33ce8eefaeb63dcc847155f0cd468dae2b93dbed18604abfd",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "6ES7135-6HD00-0BA1",
+          "6ES71356HD000BA1"
+        ],
+        "sourceUrl": "https://data.spangler-automation.org/ENGLISH/DATA-SHEETS/Siemens/SIE.O.6ES7135-6HD00-0BA1.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共4页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "a7c42e20989c20e33ce8eefaeb63dcc847155f0cd468dae2b93dbed18604abfd"
+      }
+    },
+    {
+      "id": "55",
+      "title": "Siemens CP 1543-1 / 6GK7543-1AX10-0XE0",
+      "fileSha256": "bfef56427d803e5b9c81dc6e1e96df63a27e917e103e42a2746fff266bc72bb8",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "6GK7543-1AX10-0XE0",
+          "6GK75431AX100XE0"
+        ],
+        "sourceUrl": "https://docs.rs-online.com/56b4/A700000014301980.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共4页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "bfef56427d803e5b9c81dc6e1e96df63a27e917e103e42a2746fff266bc72bb8"
+      }
+    },
+    {
+      "id": "132",
+      "title": "Siemens CPU 1214C / 6ES7214-1AG40-0XB0",
+      "fileSha256": "01054a025403373d131248fa95aad1b814c64e468d109e3c0efe06afb95f27d6",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "6ES7214-1AG40-0XB0",
+          "6ES72141AG400XB0"
+        ],
+        "sourceUrl": "https://eriksdigitalcdn.azureedge.net/hlr-system/siemens/eclerx/documents/6es7214-1ag40-0xb0_en_ds.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共8页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共8页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "01054a025403373d131248fa95aad1b814c64e468d109e3c0efe06afb95f27d6"
+      }
+    },
+    {
+      "id": "56",
+      "title": "Siemens DI16 manual",
+      "fileSha256": "1a92c8a1a2b4b9929bbbea668c97b7bc16732e68b0ed962917e986ce2327b009",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Siemens / 西门子",
+        "models": [],
+        "sourceUrl": "https://cache.industry.siemens.com/dl/files/540/59753540/att_882649/v1/et200sp_di_16x24vdc_st_manual_en-US_en-US.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共32页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共32页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "1a92c8a1a2b4b9929bbbea668c97b7bc16732e68b0ed962917e986ce2327b009"
+      }
+    },
+    {
+      "id": "57",
+      "title": "Siemens DI16 数据表 / 6ES7131-6BH01-0BA0",
+      "fileSha256": "0409aa9c967e8df0e1854aee37d51337630b4148be7ef21d5d41402c75b81edd",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "6ES7131-6BH01-0BA0",
+          "6ES71316BH010BA0"
+        ],
+        "sourceUrl": "https://www.hmi-plc.com/wp-content/uploads/pdf/6ES7131-6BH01-0BA0.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共4页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "0409aa9c967e8df0e1854aee37d51337630b4148be7ef21d5d41402c75b81edd"
+      }
+    },
+    {
+      "id": "58",
+      "title": "Siemens DQ32 manual",
+      "fileSha256": "6b60c8d4abe79dee5ed70f3d1d5c8c9cf76137a94b147b51c30cd39f26fb95c5",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "说明书",
+        "manufacturer": "Siemens / 西门子",
+        "models": [],
+        "sourceUrl": "https://cache.industry.siemens.com/dl/files/716/109480716/att_902641/v1/s71500_dq_32x24vdc_0_5a_hf_manual_en-US_en-US.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共45页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共45页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "6b60c8d4abe79dee5ed70f3d1d5c8c9cf76137a94b147b51c30cd39f26fb95c5"
+      }
+    },
+    {
+      "id": "59",
+      "title": "Siemens DQ32 数据表 / 6ES7522-1BL01-0AB0",
+      "fileSha256": "47125bfd70d962117fb7b909c9811a67962606a58f304f3536ae4aa4459bf1e5",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "6ES7522-1BL01-0AB0",
+          "6ES75221BL010AB0"
+        ],
+        "sourceUrl": "https://www.hmi-plc.com/wp-content/uploads/pdf/6ES7522-1BL01-0AB0.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共4页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "47125bfd70d962117fb7b909c9811a67962606a58f304f3536ae4aa4459bf1e5"
+      }
+    },
+    {
+      "id": "60",
+      "title": "Siemens G120 CU 数据表 / 6SL3246-0BA22-1FA0",
+      "fileSha256": "41d8862327c73a711428028b69db915f34fc5bade404635a2d013351cb4bc405",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "6SL3246-0BA22-1FA0"
+        ],
+        "sourceUrl": "https://turll.com/manuals/Turll-Siemens-6SL3246-0BA22-1FA0-Datasheet.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共2页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共2页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "41d8862327c73a711428028b69db915f34fc5bade404635a2d013351cb4bc405"
+      }
+    },
+    {
+      "id": "61",
+      "title": "Siemens PM340 数据表 / 6SL3210-1PE21-8UL0",
+      "fileSha256": "4020ba86ceb40b920a2ac018e98fa4b211fcfa6bee4e7a435f708b482ce4fa11",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "6SL3210-1PE21-8UL0"
+        ],
+        "sourceUrl": "https://assets.euautomation.com/uploads/parts/datasheet/03/6sl32101pe218ul0.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共2页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共2页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "4020ba86ceb40b920a2ac018e98fa4b211fcfa6bee4e7a435f708b482ce4fa11"
+      }
+    },
+    {
+      "id": "62",
+      "title": "Siemens PS 25W 电源模块 / 6ES7505-0KA00-0AB0",
+      "fileSha256": "56502ca252ff6c3969279339752dfbe5332610fd6c0015a1289b80c99ab347ea",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "6ES7505-0KA00-0AB0"
+        ],
+        "sourceUrl": "https://assets.rs-online.com/v1699978792/Datasheets/3516d0d01bec932470a979755eb710f5.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共2页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共2页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "56502ca252ff6c3969279339752dfbe5332610fd6c0015a1289b80c99ab347ea"
+      }
+    },
+    {
+      "id": "63",
+      "title": "Siemens SCALANCE XB008 / 6GK5008-0BA10-1AB2",
+      "fileSha256": "2bffda2f950f711e9e09e936fe5cc915cb3d73be395f9b3e4ecf7d2f85639c4f",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "6GK5008-0BA10-1AB2"
+        ],
+        "sourceUrl": "https://assets.euautomation.com/uploads/parts/pdf/6gk50080ba101ab2.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共4页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "2bffda2f950f711e9e09e936fe5cc915cb3d73be395f9b3e4ecf7d2f85639c4f"
+      }
+    },
+    {
+      "id": "64",
+      "title": "西门子 IM155-6 PN/3 HF 接口模块手册",
+      "fileSha256": "e7e4341028662c30c1500fc673d64cb01f6024efa1d2adbf7ecde7b2963c8f2a",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "说明书",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "IM155-6 PN/3 HF",
+          "6ES7155-6AU30-0CN0"
+        ],
+        "sourceUrl": "https://cache.industry.siemens.com/dl/files/838/109761838/att_966247/v1/et200sp_im_155_6_pn_3_hf_manual_en_US_en-US.pdf",
+        "documentVersion": "10/2018，A5E44899355-AA",
+        "sourcePages": "PDF第53页 / 印刷52页",
+        "verification": "partial",
+        "verifiedScope": "Codex实际查看PDF第53页（印刷52），表头完整订货号6ES7155-6AU30-0CN0，W100×H117×D74mm。",
+        "limitations": "不能使用6AU01型号的50mm宽参数替代；BusAdapter及附件外形计入范围须查相应装配图。220g旁without BusAdapter是重量注释。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "e7e4341028662c30c1500fc673d64cb01f6024efa1d2adbf7ecde7b2963c8f2a"
+      }
+    },
+    {
+      "id": "133",
+      "title": "西门子 SIWAREX WP321 手册与尺寸差异记录",
+      "fileSha256": "7c302af1b3813fc0eff8ce98e7c761a0a2804a28e12a4abcd4dfd4ae44228144",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "说明书",
+        "manufacturer": "Siemens / 西门子",
+        "models": [
+          "SIWAREX WP321",
+          "7MH4138-6AA00-0BA0"
+        ],
+        "sourceUrl": "https://cache.industry.siemens.com/dl/files/691/109995691/att_1344761/v1/A5E33715669Aen_WP321_M_en-US.pdf",
+        "documentVersion": "08/2024，A5E33715669A-AE",
+        "sourcePages": "PDF第123页 / 印刷123页",
+        "verification": "conflicting",
+        "verifiedScope": "Codex实际查看原手册第123页，型号7MH4138-6AA00-0BA0；表列宽15、高57、深72mm。",
+        "limitations": "同订货号的Siemens官方CAD目录字段另列高73、深58mm，与本手册存在真实冲突。不能拼合数字或声称安装外形已经确认；应按所选资料标明参考范围。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "7c302af1b3813fc0eff8ce98e7c761a0a2804a28e12a4abcd4dfd4ae44228144"
+      }
+    },
+    {
+      "id": "134",
+      "title": "Turck Ni15-G30SK 接近开关",
+      "fileSha256": "54155096ab6f884800ad06774edf729c3e4e394e4eba47721cec066963ce0fe3",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "TURCK / 图尔克",
+        "models": [
+          "Ni15-G30SK-AP6X"
+        ],
+        "sourceUrl": "https://www.turck.us/datasheet/_us/edb_46707_eng_us.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共3页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共3页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 原件为系列样本时，后缀、线缆、附件及接口版本须另外核对，不能自动适用所有同类备件。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "54155096ab6f884800ad06774edf729c3e4e394e4eba47721cec066963ce0fe3"
+      }
+    },
+    {
+      "id": "65",
+      "title": "VAHLE CPS140kHz 无接触供电系统目录",
+      "fileSha256": "de4a4e03b019f5bab8969657d89253f6707fea185700cde5333be7cbdfdcbb83",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "选型手册",
+        "manufacturer": "VAHLE / 法勒",
+        "models": [
+          "vPOWER",
+          "CPS140kHz"
+        ],
+        "sourceUrl": "https://www.vahle.com/fileadmin/cavok_upload/Energie%C3%BCbertragung/Ber%C3%BChrungslose%20Energie%C3%BCbertragung/CPS%20140kHz/Englisch/Cat_05b_en_CPS_140kHz.pdf",
+        "documentVersion": "EN 2023",
+        "sourcePages": "PDF共32页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共32页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 仅可了解系列功能，未提供已核实的具体台账长订货号外形尺寸，不用此文件猜装配孔位。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "de4a4e03b019f5bab8969657d89253f6707fea185700cde5333be7cbdfdcbb83"
+      }
+    },
+    {
+      "id": "66",
+      "title": "VAHLE E400 产品说明",
+      "fileSha256": "d59ff8da0e4228686ac23b68b169ec1ceee890941c7dacfce51846236735c55d",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "VAHLE / 法勒",
+        "models": [
+          "vPOWER",
+          "CPS140kHz",
+          "E400"
+        ],
+        "sourceUrl": "https://www.vahle.com/fileadmin/cavok_upload/Energie%C3%BCbertragung/Ber%C3%BChrungslose%20Energie%C3%BCbertragung/CPS%20140kHz/Englisch/Fly-en-E400.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共2页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共2页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 仅可了解系列功能，未提供已核实的具体台账长订货号外形尺寸，不用此文件猜装配孔位。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "d59ff8da0e4228686ac23b68b169ec1ceee890941c7dacfce51846236735c55d"
+      }
+    },
+    {
+      "id": "67",
+      "title": "VAHLE RE400 产品说明",
+      "fileSha256": "c7237e1923504a4770632bd0907db115de6a5eb74c6f6341e57cdadaf54df4b2",
+      "referenceMetadata": {
+        "family": "电气与供电",
+        "documentKind": "产品数据表",
+        "manufacturer": "VAHLE / 法勒",
+        "models": [
+          "vPOWER",
+          "CPS140kHz",
+          "RE400"
+        ],
+        "sourceUrl": "https://www.vahle.com/fileadmin/cavok_upload/Energie%C3%BCbertragung/Ber%C3%BChrungslose%20Energie%C3%BCbertragung/CPS%20140kHz/Englisch/Fly-en-RE400.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共2页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共2页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 仅可了解系列功能，未提供已核实的具体台账长订货号外形尺寸，不用此文件猜装配孔位。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "c7237e1923504a4770632bd0907db115de6a5eb74c6f6341e57cdadaf54df4b2"
+      }
+    },
+    {
+      "id": "68",
+      "title": "JTEKT/Koyo SUCP206 尺寸研究摘录",
+      "fileSha256": "09da81be31f2a0864209df50d48c2ea8467fedfb8e53acae7873de76f4b3dbdb",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "SUCP206"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=SUCP206",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo SUCP206尺寸表：shaftD=30, width=48, H=42.9, H1=17, H2=84, L=165, J=121, N=17, N1=21, B=38.1, S=15.9",
+        "limitations": "台账品牌（不锈钢带座，未标注品牌）；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对（不锈钢带座，未标注品牌）实物或原厂图纸，不能当作（不锈钢带座，未标注品牌）厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "09da81be31f2a0864209df50d48c2ea8467fedfb8e53acae7873de76f4b3dbdb"
+      }
+    },
+    {
+      "id": "69",
+      "title": "JTEKT/Koyo SUCP213 尺寸研究摘录",
+      "fileSha256": "f7299e811bc0e389ed28a6f75bb7769170f9d7ec185cba4e631f43b8c4fbe235",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "SUCP213"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=SUCP213",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo SUCP213尺寸表：shaftD=65, width=70, H=76.2, H1=27, H2=150, L=265, J=203, N=25, N1=30, B=65.1, S=25.4",
+        "limitations": "台账品牌（不锈钢带座，未标注品牌）；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对（不锈钢带座，未标注品牌）实物或原厂图纸，不能当作（不锈钢带座，未标注品牌）厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "f7299e811bc0e389ed28a6f75bb7769170f9d7ec185cba4e631f43b8c4fbe235"
+      }
+    },
+    {
+      "id": "70",
+      "title": "JTEKT/Koyo UCF205 尺寸研究摘录",
+      "fileSha256": "1c87c1918727cd7ada52bd313b8e6d2d5b70dba9a9f9c8aa18ddd7e4dcda7244",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCF205"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCF205",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCF205尺寸表：shaftD=25, L=95, width=27, J=70, N=12, B=34.1, S=14.3, flangeThickness=13, depth=35.8, centreFromEnd=16",
+        "limitations": "台账品牌SKF；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对SKF实物或原厂图纸，不能当作SKF厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "1c87c1918727cd7ada52bd313b8e6d2d5b70dba9a9f9c8aa18ddd7e4dcda7244"
+      }
+    },
+    {
+      "id": "71",
+      "title": "JTEKT/Koyo UCF210 尺寸研究摘录",
+      "fileSha256": "445e0b1916b2e253b526f28b246fcd83449def9ef3680b2402bf5f444219c0c8",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCF210"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCF210",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCF210尺寸表：shaftD=50, L=143, width=40, J=111, N=16, B=51.6, S=19, flangeThickness=16, depth=54.6, centreFromEnd=22",
+        "limitations": "台账品牌（未标注品牌）；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对（未标注品牌）实物或原厂图纸，不能当作（未标注品牌）厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "445e0b1916b2e253b526f28b246fcd83449def9ef3680b2402bf5f444219c0c8"
+      }
+    },
+    {
+      "id": "72",
+      "title": "JTEKT/Koyo UCF211 尺寸研究摘录",
+      "fileSha256": "c632f70915fa0104d090c7e4301744a41997cf76b33eb905a9704f2e1a1e1fbb",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCF211"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCF211",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCF211尺寸表：shaftD=55, L=162, width=43, J=130, N=19, B=55.6, S=22.2, flangeThickness=18, depth=58.4, centreFromEnd=25",
+        "limitations": "台账品牌NSK；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对NSK实物或原厂图纸，不能当作NSK厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "c632f70915fa0104d090c7e4301744a41997cf76b33eb905a9704f2e1a1e1fbb"
+      }
+    },
+    {
+      "id": "73",
+      "title": "JTEKT/Koyo UCF213 尺寸研究摘录",
+      "fileSha256": "c74f30ca7f63e65917ea2653763d842d502230d80274ebedd453f5d6a39b1389",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCF213"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCF213",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCF213尺寸表：shaftD=65, L=187, width=50, J=149, N=19, B=65.1, S=25.4, flangeThickness=22, depth=69.7, centreFromEnd=30",
+        "limitations": "台账品牌NSK；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对NSK实物或原厂图纸，不能当作NSK厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "c74f30ca7f63e65917ea2653763d842d502230d80274ebedd453f5d6a39b1389"
+      }
+    },
+    {
+      "id": "74",
+      "title": "JTEKT/Koyo UCF307 尺寸研究摘录",
+      "fileSha256": "643f525daa58ff015a67dff53aff03cbf406950701d5629e25e6f4e61beb40eb",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCF307"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCF307",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCF307尺寸表：shaftD=35, L=135, width=36, J=100, N=19, B=48, S=19, flangeThickness=16, depth=49, centreFromEnd=20",
+        "limitations": "台账品牌SKF；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对SKF实物或原厂图纸，不能当作SKF厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "643f525daa58ff015a67dff53aff03cbf406950701d5629e25e6f4e61beb40eb"
+      }
+    },
+    {
+      "id": "75",
+      "title": "JTEKT/Koyo UCF308 尺寸研究摘录",
+      "fileSha256": "35f8e0bce6c1d97849c19bcfde2e5f22fec6498accc3d562c3ea80edd966a1ea",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCF308"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCF308",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCF308尺寸表：shaftD=40, L=150, width=40, J=112, N=19, B=52, S=19, flangeThickness=17, depth=56, centreFromEnd=23",
+        "limitations": "台账品牌SKF；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对SKF实物或原厂图纸，不能当作SKF厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "35f8e0bce6c1d97849c19bcfde2e5f22fec6498accc3d562c3ea80edd966a1ea"
+      }
+    },
+    {
+      "id": "76",
+      "title": "JTEKT/Koyo UCF310 尺寸研究摘录",
+      "fileSha256": "442b6e562190dc2b2f5fe4c6b04a3edcbbdb05c0b9915a1d9fa59311d6f0b5fb",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCF310"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCF310",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCF310尺寸表：shaftD=50, L=175, width=48, J=132, N=23, B=61, S=22, flangeThickness=19, depth=67, centreFromEnd=28",
+        "limitations": "台账品牌SKF；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对SKF实物或原厂图纸，不能当作SKF厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "442b6e562190dc2b2f5fe4c6b04a3edcbbdb05c0b9915a1d9fa59311d6f0b5fb"
+      }
+    },
+    {
+      "id": "77",
+      "title": "JTEKT/Koyo UCFL204 尺寸研究摘录",
+      "fileSha256": "32254a02d09be31892c0939c6f00f8329618ecaf2d0f9967dfc53cad6d3f7ce1",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCFL204"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCFL204",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCFL204尺寸表：shaftD=20, H=113, L=60, width=25.5, J=90, N=12, B=31, S=12.7, flangeThickness=11, depth=33.3, centreFromEnd=15",
+        "limitations": "台账品牌（未标注品牌）；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对（未标注品牌）实物或原厂图纸，不能当作（未标注品牌）厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "32254a02d09be31892c0939c6f00f8329618ecaf2d0f9967dfc53cad6d3f7ce1"
+      }
+    },
+    {
+      "id": "78",
+      "title": "JTEKT/Koyo UCFL205 尺寸研究摘录",
+      "fileSha256": "dea57a9dd68586d144fea49abd7a2a87a91db63c90ff8075d8a7e1e7c08f9ddc",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCFL205"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCFL205",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCFL205尺寸表：shaftD=25, H=130, L=68, width=27, J=99, N=16, B=34.1, S=14.3, flangeThickness=13, depth=35.8, centreFromEnd=16",
+        "limitations": "台账品牌福山；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对福山实物或原厂图纸，不能当作福山厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "dea57a9dd68586d144fea49abd7a2a87a91db63c90ff8075d8a7e1e7c08f9ddc"
+      }
+    },
+    {
+      "id": "79",
+      "title": "JTEKT/Koyo UCFL207 尺寸研究摘录",
+      "fileSha256": "730e4e4d289d30f2217ebe8fd91d83b8a8fcc258c3433eee752ecfed64b433b0",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCFL207"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCFL207",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCFL207尺寸表：shaftD=35, H=161, L=90, width=34, J=130, N=16, B=42.9, S=17.5, flangeThickness=14, depth=44.4, centreFromEnd=19",
+        "limitations": "台账品牌SKF；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对SKF实物或原厂图纸，不能当作SKF厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "730e4e4d289d30f2217ebe8fd91d83b8a8fcc258c3433eee752ecfed64b433b0"
+      }
+    },
+    {
+      "id": "80",
+      "title": "JTEKT/Koyo UCFL208 尺寸研究摘录",
+      "fileSha256": "2e3df67846f4ccbad3c63f070fec5288547a1f277a4ff76919f00eab987bc67c",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCFL208"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCFL208",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCFL208尺寸表：shaftD=40, H=175, L=100, width=36, J=144, N=16, B=49.2, S=19, flangeThickness=14, depth=51.2, centreFromEnd=21",
+        "limitations": "台账品牌福山；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对福山实物或原厂图纸，不能当作福山厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "2e3df67846f4ccbad3c63f070fec5288547a1f277a4ff76919f00eab987bc67c"
+      }
+    },
+    {
+      "id": "81",
+      "title": "JTEKT/Koyo UCP207 尺寸研究摘录",
+      "fileSha256": "4e5d5e2c44fa5288fbda8b74b5d025f8868532c975b3481ae691005dc34fa69e",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCP207"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCP207",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCP207尺寸表：shaftD=35, width=48, H=47.6, H1=18, H2=95, L=167, J=127, N=17, N1=21, B=42.9, S=17.5",
+        "limitations": "台账品牌SKF；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对SKF实物或原厂图纸，不能当作SKF厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "4e5d5e2c44fa5288fbda8b74b5d025f8868532c975b3481ae691005dc34fa69e"
+      }
+    },
+    {
+      "id": "82",
+      "title": "JTEKT/Koyo UCP208 尺寸研究摘录",
+      "fileSha256": "870cb2a9332f23c1fafa2bbee3cdd8264cf7cf2e9f349cb6c5694171a161b963",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCP208"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCP208",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCP208尺寸表：shaftD=40, width=54, H=49.2, H1=18, H2=98, L=184, J=137, N=17, N1=21, B=49.2, S=19",
+        "limitations": "台账品牌哈轴/瓦轴/洛轴；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对哈轴/瓦轴/洛轴实物或原厂图纸，不能当作哈轴/瓦轴/洛轴厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "870cb2a9332f23c1fafa2bbee3cdd8264cf7cf2e9f349cb6c5694171a161b963"
+      }
+    },
+    {
+      "id": "83",
+      "title": "JTEKT/Koyo UCP213 尺寸研究摘录",
+      "fileSha256": "d0a1c26218190aeb86d87d30dad05c1891302f425fc9aa8c2ffdec6a8de04e21",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCP213"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCP213",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCP213尺寸表：shaftD=65, width=70, H=76.2, H1=27, H2=150, L=265, J=203, N=25, N1=30, B=65.1, S=25.4",
+        "limitations": "台账品牌NSK；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对NSK实物或原厂图纸，不能当作NSK厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "d0a1c26218190aeb86d87d30dad05c1891302f425fc9aa8c2ffdec6a8de04e21"
+      }
+    },
+    {
+      "id": "84",
+      "title": "JTEKT/Koyo UCP214 尺寸研究摘录",
+      "fileSha256": "fbccfd68b85763d67263d23af16e985a4ef499c31deb5314ea4991215073239d",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCP214"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCP214",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCP214尺寸表：shaftD=70, width=72, H=79.4, H1=27, H2=157, L=266, J=210, N=25, N1=30, B=74.6, S=30.2",
+        "limitations": "台账品牌（未标注品牌）；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对（未标注品牌）实物或原厂图纸，不能当作（未标注品牌）厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "fbccfd68b85763d67263d23af16e985a4ef499c31deb5314ea4991215073239d"
+      }
+    },
+    {
+      "id": "85",
+      "title": "JTEKT/Koyo UCP218 尺寸研究摘录",
+      "fileSha256": "c493534de0102425320f826b16039c84e788864f5b50c57b416102c970945503",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "JTEKT/Koyo",
+        "models": [
+          "UCP218"
+        ],
+        "sourceUrl": "https://www.jtekt.co.jp/products/bearing/en/p/detail/?pno=UCP218",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取JTEKT/Koyo UCP218尺寸表：shaftD=90, width=88, H=101.6, H1=33, H2=198, L=327, J=262, N=27, N1=40, B=96, S=39.7",
+        "limitations": "台账品牌NSK；尺寸取自JTEKT/Koyo同编号公开尺寸表，属跨品牌参考，未核对NSK实物或原厂图纸，不能当作NSK厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "c493534de0102425320f826b16039c84e788864f5b50c57b416102c970945503"
+      }
+    },
+    {
+      "id": "135",
+      "title": "LYC UCFU206 原厂数据冲突记录",
+      "fileSha256": "bb9387cb288928d6edb312a49cb9535674cc15b52266cf57fd005e3a907e2392",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "LYC / 洛阳轴承",
+        "models": [
+          "UCFU206",
+          "FU206"
+        ],
+        "sourceUrl": "https://www.lycbearing.com/products/UCFU206.shtml",
+        "documentVersion": "公开产品页，采集于2026-11-03",
+        "sourcePages": "产品页尺寸表与类型字段",
+        "verification": "conflicting",
+        "verifiedScope": "原厂列有UCFU206独立系列；页面同时写d30、配套轴承Types为UC206-18、E为402mm，来源本身存在不一致。",
+        "limitations": "不自行把402改为40.2，不采用这组异常数据声称精确重建。LYC资料不能证明NSK台账项的外廓、凸台或安装尺寸等同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "bb9387cb288928d6edb312a49cb9535674cc15b52266cf57fd005e3a907e2392"
+      }
+    },
+    {
+      "id": "136",
+      "title": "LYC UCFU207 尺寸与跨品牌限制",
+      "fileSha256": "acd8d55a2a8901bf22ccac5b350583a66c2ac49775b503f467e018d83e5aa182",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "LYC / 洛阳轴承",
+        "models": [
+          "UCFU207",
+          "FU207",
+          "UC207"
+        ],
+        "sourceUrl": "https://www.lycbearing.com/products/UCFU207.shtml",
+        "documentVersion": "公开产品页，采集于2026-11-03",
+        "sourcePages": "产品页尺寸表",
+        "verification": "partial",
+        "verifiedScope": "LYC产品页尺寸表：d35、J92、L117、A34、A1=15、A2=19、E44.4、S17.5、N14；安装螺栓M12，座FU207、轴承UC207。尺寸符号以原厂图定义为准。",
+        "limitations": "本记录仅说明LYC版本；不将其改称NSK已确认尺寸，不与UCF系列混用。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "acd8d55a2a8901bf22ccac5b350583a66c2ac49775b503f467e018d83e5aa182"
+      }
+    },
+    {
+      "id": "137",
+      "title": "SKF 22212 E 尺寸与结构研究记录",
+      "fileSha256": "c256407c903c18296e3044b672d2ce97ab277c1ef75f0839b75e4cae3ee0ec90",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "SKF",
+        "models": [
+          "22212 E",
+          "22212E"
+        ],
+        "sourceUrl": "https://www.emarketplace.in.skf.com/spherical-roller-bearing/22212-e",
+        "documentVersion": "SKF原厂产品页，读取于2026-11-03",
+        "sourcePages": "Technical specification参数区",
+        "verification": "partial",
+        "verifiedScope": "SKF原厂产品页确认22212 E为双列调心滚子轴承，圆柱孔d60mm、外径D110mm、宽B28mm、无密封。",
+        "limitations": "E圆柱孔不与EK锥孔混同。外廓比例可据此核对；滚子数量、保持架窗口和滚道曲面仍是结构示意，未取得厂家三维CAD。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "c256407c903c18296e3044b672d2ce97ab277c1ef75f0839b75e4cae3ee0ec90"
+      }
+    },
+    {
+      "id": "86",
+      "title": "SKF SNL 2/3/5/6 系列 选型手册",
+      "fileSha256": "ae17f934492b1dce1dde8a21c841fb7a4f8152c1bc23f9c7996441f9e3de96e6",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "选型手册",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL2",
+          "SNL3",
+          "SNL5",
+          "SNL6"
+        ],
+        "sourceUrl": "https://cdn.skfmediahub.skf.com/api/public/0901d196803969af/pdf_preview_medium/0901d196803969af_pdf_preview_medium.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共781页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共781页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 大规格SNL30/31/32与SNL2/3/5/6系列不能混用。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "ae17f934492b1dce1dde8a21c841fb7a4f8152c1bc23f9c7996441f9e3de96e6"
+      }
+    },
+    {
+      "id": "87",
+      "title": "SKF SNL 212 轴承座数据表",
+      "fileSha256": "49ae03d2a1ba0f06115491d681cd1715d51652e58b3fb16156bda7675a3cbbd8",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 212",
+          "SNL212"
+        ],
+        "sourceUrl": "https://docs.rs-online.com/5d17/A700000007292522.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–4页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 212，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "49ae03d2a1ba0f06115491d681cd1715d51652e58b3fb16156bda7675a3cbbd8"
+      }
+    },
+    {
+      "id": "88",
+      "title": "SKF SNL 216 轴承座数据表",
+      "fileSha256": "a95e40d0972a189e75d57bfc6069603765288de2f88e251ffb36298727881f19",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 216",
+          "SNL216"
+        ],
+        "sourceUrl": "https://docs.rs-online.com/05eb/A700000007337657.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–4页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 216，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "a95e40d0972a189e75d57bfc6069603765288de2f88e251ffb36298727881f19"
+      }
+    },
+    {
+      "id": "89",
+      "title": "SKF SNL 30/31/32 大座 选型手册",
+      "fileSha256": "665c4c35b89eb7842aca55a97ff08a3e62acdaf8ea887584db87c481b53fecc9",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "选型手册",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL30",
+          "SNL31",
+          "SNL32"
+        ],
+        "sourceUrl": "http://www.brg-catalogues.com/Catalogue_store/SKF/6101%20EN%20Plummer-block-housings.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共112页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共112页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 大规格SNL30/31/32与SNL2/3/5/6系列不能混用。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "665c4c35b89eb7842aca55a97ff08a3e62acdaf8ea887584db87c481b53fecc9"
+      }
+    },
+    {
+      "id": "90",
+      "title": "SKF SNL 512-610 轴承座数据表",
+      "fileSha256": "02255bb8785608b6464670d75e4cd9ae37e69105953a8db9fc13974ca714ead7",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 512-610",
+          "SNL512-610"
+        ],
+        "sourceUrl": "https://docs.rs-online.com/0aa2/A700000008643505.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–4页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 512-610，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "02255bb8785608b6464670d75e4cd9ae37e69105953a8db9fc13974ca714ead7"
+      }
+    },
+    {
+      "id": "91",
+      "title": "SKF SNL 515-612 轴承座数据表",
+      "fileSha256": "3883a1f41c7f9727d221506ac3abb2263a4639da544940fbe53c986c378de0d4",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 515-612",
+          "SNL515-612"
+        ],
+        "sourceUrl": "https://docs.rs-online.com/682d/A700000007292737.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–4页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 515-612，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "3883a1f41c7f9727d221506ac3abb2263a4639da544940fbe53c986c378de0d4"
+      }
+    },
+    {
+      "id": "92",
+      "title": "SKF SNL 516-613 轴承座数据表",
+      "fileSha256": "ff835d39366dc8da28ba21ab841c8179ed325e27f0903afb6db2e0d8831153b3",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 516-613",
+          "SNL516-613"
+        ],
+        "sourceUrl": "https://docs.rs-online.com/fe75/A700000007337741.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–4页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共4页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 516-613，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "ff835d39366dc8da28ba21ab841c8179ed325e27f0903afb6db2e0d8831153b3"
+      }
+    },
+    {
+      "id": "93",
+      "title": "SKF SNL 517 轴承座数据表",
+      "fileSha256": "caac65f77d5360e80d2be9224bef2c11bb3380ced64a13d2aff63acdd3b1aee6",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 517",
+          "SNL517"
+        ],
+        "sourceUrl": "https://documents.klium.com/b68ace5a-ed05-438b-ab0a-b9e87970ef29/en/technical-data-sheet-skf-snl-517-snl-517-en.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–5页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共5页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 517，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "caac65f77d5360e80d2be9224bef2c11bb3380ced64a13d2aff63acdd3b1aee6"
+      }
+    },
+    {
+      "id": "94",
+      "title": "SKF SNL 518-615 轴承座数据表",
+      "fileSha256": "42bd6b1808e5c24834506185079dceb4fc7271ce285c83a840ebed737100b74a",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 518-615",
+          "SNL518-615"
+        ],
+        "sourceUrl": "https://documents.klium.nl/2b7df97f-be75-4172-8c6f-c36f7a85f76b/en/technical-data-sheet-skf-snl-518-615-snl-518--615-en.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–5页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共5页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 518-615，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "42bd6b1808e5c24834506185079dceb4fc7271ce285c83a840ebed737100b74a"
+      }
+    },
+    {
+      "id": "95",
+      "title": "SKF SNL 518-615 轴承座数据表",
+      "fileSha256": "0b6a52e4fe7bb90d60c4829b9dd0c90a8ae44908a4d5da0ff77374405d099dd8",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 518-615",
+          "SNL518-615"
+        ],
+        "sourceUrl": "https://en.tradebearings.com/data/pdf/e1/1b/SNL_518_615_%28_22218_K_%29-273154.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–2页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共2页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 518-615，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "0b6a52e4fe7bb90d60c4829b9dd0c90a8ae44908a4d5da0ff77374405d099dd8"
+      }
+    },
+    {
+      "id": "96",
+      "title": "SKF SNL 519-616 轴承座数据表",
+      "fileSha256": "2dccc4874586e418d062e930818686203005706e341de8d940d6c60a9b34bb7c",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 519-616",
+          "SNL519-616"
+        ],
+        "sourceUrl": "https://docs.rs-online.com/39b4/A700000009346847.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–5页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共5页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 519-616，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "2dccc4874586e418d062e930818686203005706e341de8d940d6c60a9b34bb7c"
+      }
+    },
+    {
+      "id": "97",
+      "title": "SKF SNL 520-617 轴承座数据表",
+      "fileSha256": "4482215e11dca041b0e610f00904f45bdf2ab6ca9b6f67bafc9cd45b43ade673",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 520-617",
+          "SNL520-617"
+        ],
+        "sourceUrl": "https://documents.klium.com/a6bac693-a6aa-44c7-af8e-5b0639bbe517/en/technical-data-sheet-skf-snl-520-617-snl-520--617-en.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–5页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共5页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 520-617，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "4482215e11dca041b0e610f00904f45bdf2ab6ca9b6f67bafc9cd45b43ade673"
+      }
+    },
+    {
+      "id": "98",
+      "title": "SKF SNL 522-619 轴承座数据表",
+      "fileSha256": "4d1e561173d322933aadfc414be7dc537a0ad34e95ba2dc3965c17522a397ade",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 522-619",
+          "SNL522-619"
+        ],
+        "sourceUrl": "https://documents.klium.nl/cdb9e722-855e-46e3-8393-d5d71416b103/en/technical-data-sheet-skf-snl-522-619-snl-522--619-en.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–5页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共5页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 522-619，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "4d1e561173d322933aadfc414be7dc537a0ad34e95ba2dc3965c17522a397ade"
+      }
+    },
+    {
+      "id": "99",
+      "title": "SKF SNL 524-620 轴承座数据表",
+      "fileSha256": "204d2e7c5270198b7394bf52b5ffa6dcf8ada210e4b404d9b8a7dec242ada73e",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 524-620",
+          "SNL524-620"
+        ],
+        "sourceUrl": "https://documents.klium.com/4a2102b0-78fe-4721-a44c-da5b80f42467/en/technical-data-sheet-skf-snl-524-620-v-snl-524--620-v-en.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–5页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共5页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 524-620，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "204d2e7c5270198b7394bf52b5ffa6dcf8ada210e4b404d9b8a7dec242ada73e"
+      }
+    },
+    {
+      "id": "100",
+      "title": "SKF SNL 528 轴承座数据表",
+      "fileSha256": "8a4ed73c18e2d3129699de9df10133c58f69d159c8ad672552144f42ac159a52",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "产品数据表",
+        "manufacturer": "SKF",
+        "models": [
+          "SNL 528",
+          "SNL528"
+        ],
+        "sourceUrl": "https://documents.klium.com/15105a5c-a93a-4f86-9595-5a14c61b6046/en/technical-data-sheet-skf-snl-528-snl-528-en.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF第1–5页，尺寸定义与表格",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共5页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 本文件实际型号为SNL 528，不证明台账SN旧型号或其他厂家的尺寸相同。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "8a4ed73c18e2d3129699de9df10133c58f69d159c8ad672552144f42ac159a52"
+      }
+    },
+    {
+      "id": "101",
+      "title": "SKF 滚动轴承 选型手册",
+      "fileSha256": "65e0919bee24975b9563ca0d9adf721a9e7efcf6d0fa32c18b8d119d37b190b2",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "选型手册",
+        "manufacturer": "SKF",
+        "models": [
+          "滚动轴承"
+        ],
+        "sourceUrl": "https://cdn.skfmediahub.skf.com/api/public/0901d196802809de/pdf_preview_medium/0901d196802809de_pdf_preview_medium.pdf",
+        "documentVersion": "原件未明确标注版本；采集于2026-11-03",
+        "sourcePages": "PDF共1152页，详见原件目录",
+        "verification": "partial",
+        "verifiedScope": "已保留可读取的原始PDF与首页型号；共1152页。仅完成来源与型号归档。",
+        "limitations": "尚未逐页独立复核全部参数；具体选型、接线和安装须查看完整型号对应原图。 大规格SNL30/31/32与SNL2/3/5/6系列不能混用。",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "65e0919bee24975b9563ca0d9adf721a9e7efcf6d0fa32c18b8d119d37b190b2"
+      }
+    },
+    {
+      "id": "102",
+      "title": "Timken UCP308 尺寸研究摘录",
+      "fileSha256": "1f25bcc43e2943f8d019e9f936367a4375212bda5e44da89fd5e3695326c07d3",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "Timken",
+        "models": [
+          "UCP308"
+        ],
+        "sourceUrl": "https://cad.timken.com/item/u-series---pillow-block-mounted-bearings--ucp-200-/ucp-pillow-block-units-2/ucp308",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取Timken UCP308尺寸表：shaftD=40, width=60, H=60, H1=19, H2=118, L=220, J=170, N=17, N1=27, B=52, S=19",
+        "limitations": "台账品牌SKF；尺寸取自Timken同编号公开尺寸表，属跨品牌参考，未核对SKF实物或原厂图纸，不能当作SKF厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "1f25bcc43e2943f8d019e9f936367a4375212bda5e44da89fd5e3695326c07d3"
+      }
+    },
+    {
+      "id": "103",
+      "title": "Timken UCP310 尺寸研究摘录",
+      "fileSha256": "796845c684d1bfa0c77d9909f38c033d54a6b23cd65bdd7f666924ace5b0bf11",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "Timken",
+        "models": [
+          "UCP310"
+        ],
+        "sourceUrl": "https://cad.timken.com/item/u-series---pillow-block-mounted-bearings--ucp-200-/ucp-pillow-block-units-2/ucp310",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取Timken UCP310尺寸表：shaftD=50, width=75, H=75, H1=24, H2=148, L=275, J=212, N=20, N1=35, B=61, S=22",
+        "limitations": "台账品牌SKF；尺寸取自Timken同编号公开尺寸表，属跨品牌参考，未核对SKF实物或原厂图纸，不能当作SKF厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "796845c684d1bfa0c77d9909f38c033d54a6b23cd65bdd7f666924ace5b0bf11"
+      }
+    },
+    {
+      "id": "104",
+      "title": "Timken UCP312 尺寸研究摘录",
+      "fileSha256": "d0c1b8c53f3a1f4e820d6320a29ffac7a89e20e6ee3f03d13340214ce6665fc1",
+      "referenceMetadata": {
+        "family": "轴承与轴承座",
+        "documentKind": "研究整理",
+        "manufacturer": "Timken",
+        "models": [
+          "UCP312"
+        ],
+        "sourceUrl": "https://cad.timken.com/item/u-series---pillow-block-mounted-bearings--ucp-200-/ucp-pillow-block-units-2/ucp312",
+        "documentVersion": "公开产品页；采集 2026-11-02",
+        "sourcePages": "产品页尺寸表摘录",
+        "verification": "partial",
+        "verifiedScope": "DSH已提取Timken UCP312尺寸表：shaftD=60, width=85, H=85, H1=29, H2=167, L=330, J=250, N=25, N1=38, B=71, S=26",
+        "limitations": "台账品牌SKF；尺寸取自Timken同编号公开尺寸表，属跨品牌参考，未核对SKF实物或原厂图纸，不能当作SKF厂家资料已核实。 未核实：球面座半径、内圈外径（OD）、密封型式与材料、润滑嘴位置、铸件圆角/凸台直径、锁紧螺钉规格",
+        "schema": 1,
+        "applicability": "shared",
+        "fileSha256": "d0c1b8c53f3a1f4e820d6320a29ffac7a89e20e6ee3f03d13340214ce6665fc1"
+      }
+    }
+  ]
+}

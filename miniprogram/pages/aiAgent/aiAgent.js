@@ -48,6 +48,10 @@ function formatLocation(item) {
 Page({
   data: {
     canUseKnowledgeAI: false,
+    aiChoices: [],
+    aiChoiceLabels: [],
+    aiProvider: 'deepseek',
+    aiChoiceIndex: 0,
     userQuestion: '',
     isLoading: false,
     messages: [],
@@ -69,8 +73,15 @@ Page({
 
   onLoad() {
     if (!auth.requireLogin()) return;
-    this.setData({canUseKnowledgeAI:auth.canEditAnyWorkshop()});
     this.loadInventoryContext();
+  },
+
+  onShow() {
+    if (!auth.requireLogin()) return;
+    const user=auth.getUser(),account=JSON.stringify([user?.id,user?.username,user?.role]);
+    if(this.aiAccount!==account){this.aiAccount=account;this.aiChannelRead=(this.aiChannelRead||0)+1;this.setData({aiModelLabel:'',messages:[],userQuestion:'',...EMPTY_RESULT});}
+    const allowed=auth.canEditAnyWorkshop();this.setData({canUseKnowledgeAI:allowed});
+    if(allowed)this.loadAiChannels();else this.setData({aiModelLabel:''});
   },
 
   async loadInventoryContext() {
@@ -85,6 +96,7 @@ Page({
       console.warn('AI查询筛选上下文加载失败：', err);
     }
   },
+  async loadAiChannels(){const read=this.aiChannelRead=(this.aiChannelRead||0)+1,token=auth.getToken();try{const res=await api.aiChannels();if(read!==this.aiChannelRead||token!==auth.getToken())return;const choice=(res.data?.choices||[]).find(c=>c.id==='deepseek');this.setData({aiModelLabel:choice?choice.label+' · '+choice.model:''});}catch{if(read===this.aiChannelRead&&token===auth.getToken())this.setData({aiModelLabel:''});}},
 
   handleInput(e) {
     this.setData({ userQuestion: e.detail.value || '' });
@@ -297,7 +309,7 @@ Page({
         ...EMPTY_RESULT,
         resultType: 'maintenance',
         resultTitle: '设备维修建议',
-        resultBadge: 'AI辅助判断',
+        resultBadge: res.data?.ai?`${res.data.ai.label} · ${res.data.ai.model}`:'AI辅助判断',
         resultText: answer,
         resultEvidence: (res.data?.evidence || []).map(item => ({...item, typeLabel: ({knowledge:'知识文档',part:'备件库存',equipment:'设备型号'})[item.sourceType] || '依据'})),
         messages: [...newMessages, { role: 'assistant', content: answer }].slice(-6),

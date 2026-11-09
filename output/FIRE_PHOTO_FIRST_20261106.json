@@ -1,0 +1,255 @@
+{
+  "at": "2026-11-06T07:38:59.562Z",
+  "id": "fire-manual-checks-20261106",
+  "status": "deployed-and-verified",
+  "checks": 8758,
+  "webFiles": 1055,
+  "changedWebFiles": 30,
+  "removedObsoleteWebFiles": 29,
+  "apiFiles": 9,
+  "protectedFiles": 989,
+  "protectedPreserved": true,
+  "androidUnchanged": true,
+  "webProcessesPreserved": true,
+  "restarted": [
+    "spare-parts-api"
+  ],
+  "rollback": "/opt/spare-parts/rollback/fire-manual-checks-20261106",
+  "version": "V1.9.10",
+  "webTests": 700,
+  "apiTests": 472,
+  "fireWebTests": 65,
+  "fireApiTests": 80,
+  "serverFireTests": 52,
+  "buildPassed": true,
+  "sourceHashes": {
+    "src/components/fire/FirePhotoRecognition.vue": "bf99a01e3f6cb6993f4f01a55e02e2e605a06872a0519e83b69530631ca26269",
+    "src/components/fire/FirePointDetail.vue": "210393698bce6cb5f865e4eac29eb48ef502003c9ba412fd94f978f20c3338de",
+    "src/components/fire/FireRecordEvidence.vue": "bed5657b0a0da046470bebb7b4c4f9f627a83c8f60294e00d9ba9019e70d19b8",
+    "src/app/AppFireRecordEvidence.vue": "669053dd1c417c53977479f80e77f875fe3d0e7af58558ced6c6c54e5343df16",
+    "src/utils/fire-inspection-controller.mjs": "c9a8e34822b633653b1cde3a25e6fac9fc3cf6604360dcbac0f8f86cadaa4937",
+    "src/utils/fire-inspection.mjs": "a30e968907b31c2a838b5e9e1c900b9ef863029396068b577731beb23f63479a",
+    "src/api-fire-inspection.js": "2c08c119eb20945cffc99ffdf97ccb0ec16255c658dfe72c27dbf97ef26c0060",
+    "src/components/fire/fire-inspection.css": "39bb3d8715fea1bbf6a1e5f7e06424ddaf00676ffd0ee66c02ad4efd5d636b49",
+    "src/components/fire/fire-clarity.css": "8a209903c89323d3f7a3aa992ff015cb84edb5d2369f73a0d785d49a0b22159d"
+  },
+  "apiHashes": {
+    "src/fire-recognition.js": "0ea5b6a30716c471d86051876f3bd89fe8124df78eb16f74aef793cd8f3a467c",
+    "src/fire-photo-confirmation.js": "270e4a83b9ab892d1949dc531ded9fc8d3f7ac9f5a741f07addb9d58a9636447",
+    "src/fire-photo-workflow.js": "ce651dd5a5e51d9e98323827d13e08d0f07db78574099bd6f303185510a6f3bc",
+    "src/fire-inspection.js": "a454a5dddd1814431c304a23004b06a92ea4ff2de529a6cb67e7191c1a5e65f0",
+    "src/routes/fire-inspection.js": "5185567a2bfe8923838c72918f42d938b9491e3de1cffa3c22fdfee8d79d940f",
+    "test/fire-photo.test.js": "0336434bb3348a42b854ebe55858649defe7c3851d3e26c9731a7a023620f4b0",
+    "test/fire-inspection.test.js": "e811e1cccea8728774b92c9f6e3684ae02c292a505fdccaf6608faade05d754c",
+    "test/fire-router.test.js": "7417e01d7ef24bc4207e461b5536ce809abb6c705a97d391c996f6846f741db9",
+    "test/ai-consumer-compatible.test.js": "479dc0de3e7832550892b8d98a878891967c9addedf74f6eb26da6c44e3a9b0b"
+  },
+  "android": {
+    "versionCode": 24,
+    "versionName": "1.9.10-android.24",
+    "sha256": "e41eeb3e970e84f1a6f400ab29aa2cd07df7834d681f29196a7dbfa2eeceaeb2",
+    "url": "https://czsdsg.cn/app-updates/android/digital-workbench-1.9.10-android.24.apk"
+  },
+  "permissionsVerified": [
+    {
+      "role": "admin::",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "brewing::",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "raw_grain::",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "viewer:qu_making:shift_leader",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:raw_grain:group_leader",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "viewer:qu_making:group_leader",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:raw_grain:shift_leader",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "viewer:qu_making:maintenance",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:qu_making:manufacturer_maintenance",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:qu_making:employee",
+      "authorized": false,
+      "httpStatus": 403
+    }
+  ],
+  "automaticMonth": "2026-11",
+  "businessCountsPreserved": true,
+  "unrelatedFrontendCodePreserved": true,
+  "unrelatedCssPreserved": true,
+  "abbWorkerUnchanged": true,
+  "standaloneManualEndpoint": 410,
+  "deliveryDocument": "docs/FIRE_PHOTO_FIRST_20261106.md",
+  "previousDeployment": "output/FIRE_MONTH_SELECTION_20261106.json",
+  "assembly": {
+    "method": "new-compiled-fire-chunk-with-existing-production-modules",
+    "fireModule": "assets/FireInspection-BKd4cH84.js",
+    "renames": {
+      "assets/FireInspection-CptCUNlB-fc20261106v5.js": "assets/FireInspection-CptCUNlB-fc20261106v6.js",
+      "assets/index-Sn4Rp854-fc20261106v5.js": "assets/index-Sn4Rp854-fc20261106v6.js",
+      "assets/stock-health-WUpCD__e-fc20261106v5.js": "assets/stock-health-WUpCD__e-fc20261106v6.js",
+      "assets/AbbProgramControl-BpmBwvUq-fc20261106v5.js": "assets/AbbProgramControl-BpmBwvUq-fc20261106v6.js",
+      "assets/AbbRobotGuide-BW8SkK22-fc20261106v5.js": "assets/AbbRobotGuide-BW8SkK22-fc20261106v6.js",
+      "assets/AbbRobotViewer-DEnRHG6b-fc20261106v5.js": "assets/AbbRobotViewer-DEnRHG6b-fc20261106v6.js",
+      "assets/Account-C9cKNH7B-fc20261106v5.js": "assets/Account-C9cKNH7B-fc20261106v6.js",
+      "assets/ActionMenu-DFeNBrCU-fc20261106v5.js": "assets/ActionMenu-DFeNBrCU-fc20261106v6.js",
+      "assets/AgvVehicles-CC_cSJoS-fc20261106v5.js": "assets/AgvVehicles-CC_cSJoS-fc20261106v6.js",
+      "assets/AiModelInfo-B6cTNEle-fc20261106v5.js": "assets/AiModelInfo-B6cTNEle-fc20261106v6.js",
+      "assets/Check-qLrv7DWI-fc20261106v5.js": "assets/Check-qLrv7DWI-fc20261106v6.js",
+      "assets/ControlPasswords-HnAesO0J-fc20261106v5.js": "assets/ControlPasswords-HnAesO0J-fc20261106v6.js",
+      "assets/DataQuality-BFKFFipM-fc20261106v5.js": "assets/DataQuality-BFKFFipM-fc20261106v6.js",
+      "assets/Equipment-DxvQQ5Ro-fc20261106v5.js": "assets/Equipment-DxvQQ5Ro-fc20261106v6.js",
+      "assets/FireParkModel-DKOdZyyL-fc20261106v5.js": "assets/FireParkModel-DKOdZyyL-fc20261106v6.js",
+      "assets/Inventory-D2tMpzBf-fc20261106v5.js": "assets/Inventory-D2tMpzBf-fc20261106v6.js",
+      "assets/Knowledge-CiLcwiGv-fc20261106v5.js": "assets/Knowledge-CiLcwiGv-fc20261106v6.js",
+      "assets/Login-DIh-wLdj-fc20261106v5.js": "assets/Login-DIh-wLdj-fc20261106v6.js",
+      "assets/ModelLibrary-CFGqtx5q-fc20261106v5.js": "assets/ModelLibrary-CFGqtx5q-fc20261106v6.js",
+      "assets/ModelPreview-Cm21dDWD-fc20261106v5.js": "assets/ModelPreview-Cm21dDWD-fc20261106v6.js",
+      "assets/Movements-DQIntz2D-fc20261106v5.js": "assets/Movements-DQIntz2D-fc20261106v6.js",
+      "assets/PdfReader-Apc6kUsn-fc20261106v5.js": "assets/PdfReader-Apc6kUsn-fc20261106v6.js",
+      "assets/Portal-hlSolPPD-fc20261106v5.js": "assets/Portal-hlSolPPD-fc20261106v6.js",
+      "assets/RawDuties-C6luh36s-fc20261106v5.js": "assets/RawDuties-C6luh36s-fc20261106v6.js",
+      "assets/Replenishment-CuK1S16I-fc20261106v5.js": "assets/Replenishment-CuK1S16I-fc20261106v6.js",
+      "assets/RobotProgram-DqhY521I-fc20261106v5.js": "assets/RobotProgram-DqhY521I-fc20261106v6.js",
+      "assets/Statistics-BXVVIFwn-fc20261106v5.js": "assets/Statistics-BXVVIFwn-fc20261106v6.js",
+      "assets/Warehouse3D-CVe1Z8d5-fc20261106v5.js": "assets/Warehouse3D-CVe1Z8d5-fc20261106v6.js",
+      "assets/WorkbookUploadMark-Bu49uWan-fc20261106v5.js": "assets/WorkbookUploadMark-Bu49uWan-fc20261106v6.js"
+    },
+    "unrelatedModulesVerified": true,
+    "abbWorkerUnchanged": true,
+    "css": {
+      "oldScopesRemoved": [
+        "data-v-5907b30d",
+        "data-v-5fb8a97b"
+      ],
+      "newScopesAdded": [
+        "data-v-8c39bd07",
+        "data-v-3a47dccd"
+      ],
+      "removedCssRules": 13,
+      "addedCssRules": 41,
+      "unrelatedCssPreserved": true
+    },
+    "coreExportRemap": [
+      {
+        "newAlias": "b",
+        "productionAlias": "b",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "n",
+        "productionAlias": "n",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "o",
+        "productionAlias": "o",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "d",
+        "productionAlias": "d",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "q",
+        "productionAlias": "q",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "t",
+        "productionAlias": "v",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "v",
+        "productionAlias": "w",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "w",
+        "productionAlias": "x",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "x",
+        "productionAlias": "y",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "y",
+        "productionAlias": "B",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "z",
+        "productionAlias": "C",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "A",
+        "productionAlias": "E",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "_",
+        "productionAlias": "_",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "B",
+        "productionAlias": "G",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "C",
+        "productionAlias": "H",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "D",
+        "productionAlias": "I",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "e",
+        "productionAlias": "e",
+        "equivalentMatches": 1
+      },
+      {
+        "newAlias": "E",
+        "productionAlias": "J",
+        "equivalentMatches": 1
+      }
+    ]
+  }
+}

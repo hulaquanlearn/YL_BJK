@@ -1,0 +1,40 @@
+BODY {
+	font-family: verdana;
+	font-size: 11px;
+	text-align:right;
+	margin-left: 30px;
+	margin-right: 50px
+}
+
+.infoprod-type {
+	display: block;
+	font-weight: bold;
+	font-size: 14px;
+	padding-top: 5px;
+	margin-top: 50px;
+	margin-bottom: 0px;
+}
+
+.prod-decl {
+	display: block;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.ident-decl {
+	display: block;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+.prod-name {
+	display: block;
+	font-weight: bold;
+	font-size: 14px;
+	margin-top: 5px;
+	margin-bottom: 10px;
+}
+.prod-version {
+	display: block;
+	margin-top: 0px;
+	margin-bottom: 20px;
+}

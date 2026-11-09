@@ -39,18 +39,22 @@ router.post('/login', loginLimiter, asyncHandler(async (req, res) => {
   await pool.query('UPDATE app_users SET last_login_at = NOW() WHERE id = ?', [user.id]);
   const token = await createSession(user.id);
   setAssetCookie({get:()=>`Bearer ${token}`}, res);
-  res.json({ success: true, data: { token, user: publicUser(user) } });
+  const account = publicUser(user);
+  account.fireAccess = await require('../fire-access').loadFireAccess(account, pool);
+  res.json({ success: true, data: { token, user: account } });
 }));
 
-router.get('/me', requireAuth, (req, res) => {
+router.get('/me', requireAuth, asyncHandler(async (req, res) => {
   setAssetCookie(req, res);
-  res.json({ success: true, data: { user: req.user } });
-});
+  const user = { ...req.user, fireAccess: await require('../fire-access').loadFireAccess(req.user, pool) };
+  res.json({ success: true, data: { user } });
+}));
 
 router.patch('/profile', requireAuth, asyncHandler(async (req, res) => {
   const displayName = require('../personal-profile').profileName(req.body);
   await pool.query('UPDATE app_users SET display_name = ? WHERE id = ?', [displayName, req.user.id]);
-  res.json({ success: true, data: { user: { ...req.user, displayName } } });
+  const user = { ...req.user, displayName, fireAccess: await require('../fire-access').loadFireAccess(req.user, pool) };
+  res.json({ success: true, data: { user } });
 }));
 
 router.post('/logout', requireAuth, asyncHandler(async (req, res) => {

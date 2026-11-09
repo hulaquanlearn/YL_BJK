@@ -49,7 +49,8 @@ function knowledgePayload(body = {}) {
     solution: cleanText(body.solution, 20000),
     preventiveAction: cleanText(body.preventiveAction, 4000),
     contentText: cleanText(body.contentText, 50000),
-    tags: normalizeTags(body.tags)
+    tags: normalizeTags(body.tags),
+    referenceMetadata: body.category === '备件资料' ? require('./knowledge-reference').referenceMetadata(body.referenceMetadata, { strict:true }) : null
   };
 }
 

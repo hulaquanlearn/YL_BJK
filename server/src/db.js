@@ -51,8 +51,6 @@ async function ensureSchema() {
     if (!(await columnExists('app_users', 'staff_position'))) {
       await conn.query('ALTER TABLE app_users ADD COLUMN staff_position VARCHAR(30) NULL AFTER staff_workshop_code');
     }
-    const attendanceSql = require('fs').readFileSync(require('path').join(__dirname, '../sql/migration_attendance_storage_20261009.sql'), 'utf8');
-    for (const statement of attendanceSql.split(';').map(s => s.trim()).filter(Boolean)) await conn.query(statement);
     await conn.query(`CREATE TABLE IF NOT EXISTS workshops (
       code VARCHAR(30) NOT NULL,
       name VARCHAR(50) NOT NULL,
@@ -189,6 +187,13 @@ async function ensureSchema() {
       CONSTRAINT fk_knowledge_revision_entry FOREIGN KEY(entry_id) REFERENCES fermentation_knowledge_entries(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`);
 
+    // Provenance stays with the same knowledge entry and its revision snapshot.
+    for (const table of ['fermentation_knowledge_entries','knowledge_entry_revisions']) {
+      if (!(await columnExists(table,'reference_metadata'))) {
+        await conn.query(`ALTER TABLE ${table} ADD COLUMN reference_metadata JSON DEFAULT NULL`);
+      }
+    }
+
     const [idxRows] = await conn.query(`SELECT COUNT(*) AS cnt FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='knowledge_process_stages' AND INDEX_NAME='uk_knowledge_process_stage_name'`);
     if (idxRows[0].cnt > 0) {
       await conn.query(`ALTER TABLE knowledge_process_stages DROP INDEX uk_knowledge_process_stage_name`);
@@ -265,6 +270,8 @@ async function ensureSchema() {
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci`);
+    // Only additive fire_* tables; existing stock, duties and uploads stay intact.
+    await require('./fire-schema').initializeFireSchema(conn);
   } finally {
     conn.release();
   }

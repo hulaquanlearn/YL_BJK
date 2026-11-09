@@ -38,7 +38,8 @@ test('changing replenishment filters explicitly clears remembered selections',()
   assert.match(source,/reserve-selection/)
   assert.match(source,/function search\(\) \{[^\n]*clearSelection\(\); selectedRows.value=\[\]/)
   assert.match(source,/function reset\(\)[^\n]*clearSelection\(\); selectedRows.value=\[\]/)
-  assert.doesNotMatch(source,/toggleRowSelection\(row,\s*true\)/)
+  assert.match(source,/selectedRowsFromIds\(wantedIds, rows\)/)
+  assert.match(source,/collectParts\(getReplenishment, params/)
 })
 
 test('data quality preserves all inventory filters, clears stale area and watches route changes',async()=>{

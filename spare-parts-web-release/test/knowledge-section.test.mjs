@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {knowledgeSection} from '../src/utils/knowledge-section.mjs';
+test('knowledge reasons become distinct bullets and repeated section titles are removed',()=>{assert.equal(knowledgeSection('原因分析：\n接口损坏\n线路脱焊','原因分析'),'- 接口损坏\n- 线路脱焊');assert.equal(knowledgeSection('**处理方法：**\n- 1. 更换接口\n- 2. 检查接线','处理方法',true),'1. 更换接口\n2. 检查接线')});
+test('existing structure and technical code remain intact',()=>{assert.equal(knowledgeSection('单个原因','原因分析'),'单个原因');const code='```\n原因分析\nx=1\n```';assert.equal(knowledgeSection(code,'处理方法',true),code);assert.equal(knowledgeSection('故障类型：接口故障\n故障现象：\n- 接口损坏','故障现象'),'故障类型：接口故障\n- 接口损坏')});

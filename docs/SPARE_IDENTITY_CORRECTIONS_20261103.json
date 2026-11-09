@@ -1,0 +1,473 @@
+{
+  "at": "2026-11-03T06:11:33.990Z",
+  "scope": "Binding/functional identity audit, not certification of installation dimensions",
+  "items": [
+    {
+      "id": 8,
+      "url": "/models/ledger-20261008/8.glb",
+      "before": "f6aed95468ff9fa97785c7b4ad8c1c5e1c9d38c8195ae3c768eda849fb079c29",
+      "after": "1bbe6c87e74eeee4a904fbe2a5c10ee7aea918090e6766535edac64e920abca8",
+      "productModel": "LADN20C 辅助触头",
+      "parts": {
+        "body": "辅助触头壳体",
+        "actuator": "接触器联动推杆",
+        "terminals": "触点接线端",
+        "screws": "接线螺钉",
+        "mount": "前装卡接部"
+      },
+      "spec": {
+        "family": "identity-auxiliary-contact",
+        "productModel": "LADN20C 辅助触头",
+        "dimensionSource": {
+          "type": "manufacturer-datasheet",
+          "manufacturer": "Schneider",
+          "document": "schneider-ladn20.pdf",
+          "url": "https://files.kempstoncontrols.com/files/1fc84ec22009393678bb787b243d5957/LADN20.pdf",
+          "sha256": "1a35eba87c002a3fc9bc9c898923eeb17c0c071f257fb82058bc67521e06d505",
+          "retrieved": "2026-11-03",
+          "caveat": "尺寸按厂家数据表；端子/显示/内部结构为示意"
+        },
+        "unknown": [
+          "触点内部结构",
+          "卡接细节和端子版本"
+        ],
+        "confirmedDimensionsMm": "未核实安装尺寸，结构示意"
+      }
+    },
+    {
+      "id": 38,
+      "url": "/models/ledger-20261008/38.glb",
+      "before": "9aa48fac21c1eb05b6dd759b87578c43d29e103e6ec6dabaf96897cefde2004a",
+      "after": "817f515a982497552a5631abd309db4b65f894ada2752914f96e55b36be2dc20",
+      "productModel": "JL90T / JL90-LT 阻旋式料位器",
+      "parts": {
+        "head": "驱动与接线壳体",
+        "cover": "接线腔盖",
+        "process": "过程安装连接",
+        "shaft": "探测转轴",
+        "paddle": "测量叶片",
+        "gland": "电缆接头"
+      },
+      "spec": {
+        "family": "identity-rotary-level",
+        "productModel": "JL90T / JL90-LT 阻旋式料位器",
+        "dimensionSource": {
+          "type": "category-reference",
+          "url": "https://www.siemens.com/en-gb/products/sitrans/lps200/",
+          "caveat": "仅参照同类阻旋检测的功能组成，非JL90厂家外形或尺寸。",
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "JL90原厂外形",
+          "探测轴长度",
+          "过程螺纹和叶片形式"
+        ],
+        "confirmedDimensionsMm": "未核实安装尺寸，结构示意"
+      }
+    },
+    {
+      "id": 39,
+      "url": "/models/ledger-20261008/39.glb",
+      "before": "0f0c3c7c1cc1881dfcc60b69ec29e698d50959dda3ad95ca47df344381502797",
+      "after": "eadf9c61cc69dcaabd0381bdfe4d0e91e76445654309ca3f9a644937de07e72b",
+      "productModel": "MX3100610 压差变送器",
+      "parts": {
+        "body": "压差测量壳体",
+        "display": "数显窗口",
+        "high-port": "高压取压口",
+        "low-port": "低压取压口",
+        "gland": "电缆接头",
+        "cover-screws": "盖板螺钉"
+      },
+      "spec": {
+        "family": "identity-differential-pressure",
+        "productModel": "MX3100610 压差变送器",
+        "dimensionSource": {
+          "type": "ledger-functional-structure",
+          "caveat": "原厂MX3100610尺寸图尚未取得；不套用DIN模块。",
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "壳体尺寸",
+          "过程接口与安装孔位",
+          "具体厂家版本"
+        ],
+        "confirmedDimensionsMm": "未核实安装尺寸，结构示意"
+      }
+    },
+    {
+      "id": 40,
+      "url": "/models/ledger-20261008/40.glb",
+      "before": "d26c49fab157121e8d6149dcc3d6a9ca2f66326999e68bb62a82e49bbda89667",
+      "after": "d91dc2ea711861dd88b47adc95b3ae281db901676e0a8b64ffdfa03c189aa682",
+      "productModel": "VAHLE RE400 · 10023622",
+      "parts": {
+        "base": "安装底板",
+        "cover": "通风金属护罩",
+        "end": "连接端面",
+        "input": "同轴输入接口",
+        "terminals": "接线端子"
+      },
+      "spec": {
+        "family": "identity-regulator",
+        "productModel": "VAHLE RE400 · 10023622",
+        "dimensionSource": {
+          "type": "manufacturer-catalog",
+          "manufacturer": "VAHLE",
+          "url": "https://www.vahle.com/fileadmin/cavok_upload/US%20Catalogs/vPOWER%2005b%20CPS%20140kHz%20Inductive%20Power.pdf",
+          "document": "vahle-cps140.pdf",
+          "pages": [
+            12,
+            13
+          ],
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "通风槽片数和内部电路",
+          "端子针脚细节"
+        ],
+        "confirmedDimensionsMm": "245×156×90 mm"
+      }
+    },
+    {
+      "id": 41,
+      "url": "/models/ledger-20261008/41.glb",
+      "before": "2ca27e83cf09a48110577ad188d8d79560d0c9bc131d94ad130b9dbb1f8cd7e5",
+      "after": "070924b98bcca527ec7110d3db6a91963df45758da7cdeace7ab0c1118627d89",
+      "productModel": "VAHLE E400 · 10023621",
+      "parts": {
+        "case": "取电器封装壳体",
+        "core": "E形磁芯与取能槽",
+        "mount": "安装固定孔位示意",
+        "cable": "同轴出线接头"
+      },
+      "spec": {
+        "family": "identity-pickup",
+        "productModel": "VAHLE E400 · 10023621",
+        "dimensionSource": {
+          "type": "manufacturer-catalog",
+          "manufacturer": "VAHLE",
+          "url": "https://www.vahle.com/fileadmin/cavok_upload/US%20Catalogs/vPOWER%2005b%20CPS%20140kHz%20Inductive%20Power.pdf",
+          "document": "vahle-cps140.pdf",
+          "pages": [
+            12,
+            13
+          ],
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "磁芯精确截面",
+          "线圈内部结构",
+          "接头尺寸"
+        ],
+        "confirmedDimensionsMm": "166.6×159.6×109.5 mm"
+      }
+    },
+    {
+      "id": 60,
+      "url": "/models/ledger-20261008/60.glb",
+      "before": "eae697f2dd07a421d18559d2bcaa1b82961d9355bcbe4a11c6cac3e79f12cbb0",
+      "after": "bad55322556e74396600a103778dbc341db65884af3dd141c0585481e3d7d90c",
+      "productModel": "FH2088 压力变送器",
+      "parts": {
+        "head": "电子接线壳体",
+        "cover": "接线腔盖",
+        "sensor": "压力测量接头",
+        "process": "过程引压接口",
+        "gland": "电缆接头"
+      },
+      "spec": {
+        "family": "identity-pressure-transmitter",
+        "productModel": "FH2088 压力变送器",
+        "dimensionSource": {
+          "type": "ledger-functional-structure",
+          "caveat": "FH2088原厂外形图尚未取得；壳体和接口为类别示意。",
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "原厂外形尺寸",
+          "螺纹与壳体版本",
+          "是否有现场显示"
+        ],
+        "confirmedDimensionsMm": "未核实安装尺寸，结构示意"
+      }
+    },
+    {
+      "id": 76,
+      "url": "/models/ledger-20261008/76.glb",
+      "before": "df3e02126a9d80afa2cddb73799c31a521eafa218ab0c20f68e8d46ee96f9f81",
+      "after": "47bb23c8cb865446bc74586b27ee6dba0776b084cf799d77c60f7b731748dcce",
+      "productModel": "RL-DTLJ-KB 薄膜按键面板",
+      "parts": {
+        "film": "薄膜面板",
+        "keys": "薄膜按键示意",
+        "tail": "柔性引出排线"
+      },
+      "spec": {
+        "family": "identity-membrane-keypad",
+        "productModel": "RL-DTLJ-KB 薄膜按键面板",
+        "dimensionSource": {
+          "type": "ledger-functional-structure",
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "按键布局与面板尺寸",
+          "柔性排线端接"
+        ],
+        "confirmedDimensionsMm": "未核实安装尺寸，结构示意"
+      }
+    },
+    {
+      "id": 79,
+      "url": "/models/ledger-20261008/79.glb",
+      "before": "0b7baff2ab776e45a9bd2987ca51f14c0e3bf7996463decd89cf3c7532e40511",
+      "after": "e6d8a22703c8054a823179a80d7228bdb28aa8c4baa4b66b820ed7a0481fd249",
+      "productModel": "Milesight UF51 5G CPE",
+      "parts": {
+        "body": "内置天线防护外壳",
+        "base": "底盖与密封接合面",
+        "led": "状态与蜂窝网络指示灯",
+        "ethernet": "底部双以太网接口",
+        "terminals": "接线端子",
+        "usb": "底部USB-C接口"
+      },
+      "spec": {
+        "family": "identity-uf51",
+        "productModel": "Milesight UF51 5G CPE",
+        "dimensionSource": {
+          "type": "manufacturer-datasheet",
+          "manufacturer": "Milesight",
+          "url": "https://resource.milesight.com/milesight/iot/document/uf51-datasheet-en.pdf",
+          "document": "milesight-uf51.pdf",
+          "pages": [
+            1,
+            6,
+            7
+          ],
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "台账UF51的硬件修订未注明",
+          "接口孔和密封件细节",
+          "187mm和旧中文资料188.5mm版本差异"
+        ],
+        "confirmedDimensionsMm": "资料2025版无防水接头φ105×110×187mm，现场版本待核"
+      }
+    },
+    {
+      "id": 88,
+      "url": "/models/named-20261009/88.glb",
+      "before": "0ae6410bf0d5f469264426dbd5cec7dfb3807bca5411bbd13098f74b8b8cba5d",
+      "after": "f73313f4e6872dc8ce016cddee9065459e8f9d7cdd23d78adf29a06745b9fb05",
+      "productModel": "SKF 22216 EK",
+      "parts": {
+        "outer": "外圈",
+        "inner": "1:12锥孔内圈",
+        "rollers": "双列鼓形滚子",
+        "cage": "钢板保持架"
+      },
+      "spec": {
+        "family": "identity-spherical-bearing",
+        "productModel": "SKF 22216 EK",
+        "dimensionSource": {
+          "type": "manufacturer-product",
+          "manufacturer": "SKF",
+          "url": "https://www.emarketplace.in.skf.com/spherical-roller-bearing/22216-ek",
+          "document": "skf-22216-ek.html",
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "滚子数和滚道曲率为示意",
+          "游隙与制造公差",
+          "原厂保持架细部"
+        ],
+        "confirmedDimensionsMm": "80×140×33 mm，1:12锥孔",
+        "bore": 0.08,
+        "outer": 0.14,
+        "width": 0.033
+      }
+    },
+    {
+      "id": 142,
+      "url": "/models/ledger-20261008/142.glb",
+      "before": "c2783a1cdd1b3ac6d97f02cdd82be1f55eba7c8e57de3764aafcfcc7e0db3ff4",
+      "after": "a41609959d81fb18a3f8a17b8401fc27dd1e4cadb2258eac7c15a8a255665797",
+      "productModel": "德马格 AG3 电缆线",
+      "parts": {
+        "jacket": "电缆绝缘护套"
+      },
+      "spec": {
+        "family": "identity-electric-cable",
+        "productModel": "德马格 AG3 电缆线",
+        "dimensionSource": {
+          "type": "ledger-functional-structure",
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "电缆芯数与护套规格",
+          "两端接头",
+          "盘绕形态"
+        ],
+        "confirmedDimensionsMm": "未核实安装尺寸，结构示意"
+      }
+    },
+    {
+      "id": 154,
+      "url": "/models/ledger-20261008/154.glb",
+      "before": "20c92a194a4e46cdd69f8dc482e950ba13f8abeed26bed3aca2ffbe6d3660f17",
+      "after": "99555967674cddd36bbba446dc28914616acc5aa51226e563364cb7620111678",
+      "productModel": "FSFS2×11C137-22 玻璃钢吊杆",
+      "parts": {
+        "rod": "玻璃钢吊杆"
+      },
+      "spec": {
+        "family": "identity-fiberglass-rod",
+        "productModel": "FSFS2×11C137-22 玻璃钢吊杆",
+        "dimensionSource": {
+          "type": "ledger-functional-structure",
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "原厂尺寸",
+          "端部连接方式"
+        ],
+        "confirmedDimensionsMm": "未核实安装尺寸，结构示意"
+      }
+    },
+    {
+      "id": 171,
+      "url": "/models/ledger-20261008/171.glb",
+      "before": "3dd66635e6915d5af439c0cd2c0ac0d9cf3cbf5bd6b2c7b24a4343aedea8aad2",
+      "after": "2b64b6cb068cc07b8a82cb14489ccdbb8d98657b8227d2667bb95bcb59363d26",
+      "productModel": "AZ 15/16-B1 直型操作件",
+      "parts": {
+        "actuator": "直型安全开关操作件"
+      },
+      "spec": {
+        "family": "identity-safety-actuator",
+        "productModel": "AZ 15/16-B1 直型操作件",
+        "dimensionSource": {
+          "type": "ledger-functional-structure",
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "厂家尺寸图未取得",
+          "孔位和金属片具体轮廓"
+        ],
+        "confirmedDimensionsMm": "未核实安装尺寸，结构示意"
+      }
+    },
+    {
+      "id": 180,
+      "url": "/models/ledger-20261008/180.glb",
+      "before": "265d8a34058d2b43765a8f3c42e17dc1eaf05d5c4eeb5c99ae9cf12ac7238fec",
+      "after": "a4f33844cf36315b9b522efe6b6b875798f505271e09b9f85d5b9dab3f307516",
+      "productModel": "TBLMy除尘器弹性圈",
+      "parts": {
+        "elastic": "除尘器弹性圈"
+      },
+      "spec": {
+        "family": "identity-elastic-ring",
+        "productModel": "TBLMy除尘器弹性圈",
+        "dimensionSource": {
+          "type": "ledger-functional-structure",
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "除尘器原厂弹性圈截面",
+          "材料与尺寸"
+        ],
+        "confirmedDimensionsMm": "未核实安装尺寸，结构示意"
+      }
+    },
+    {
+      "id": 183,
+      "url": "/models/ledger-20261008/183.glb",
+      "before": "3f95ccd6ec0e12c83d05ebaa378d000093c21a25c33b265e83a94a013660bcab",
+      "after": "74deaaf791a220e66d990df985c50ce2a1d052350197cfbaa835377848027a96",
+      "productModel": "磁棒 φ32×730",
+      "parts": {
+        "rod": "磁棒不锈钢外管",
+        "ends": "端部封口"
+      },
+      "spec": {
+        "family": "identity-magnetic-rod",
+        "productModel": "磁棒 φ32×730",
+        "dimensionSource": {
+          "type": "ledger-dimensions",
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "内部磁芯布置",
+          "表面磁场不由外观证明",
+          "端部封口细节"
+        ],
+        "confirmedDimensionsMm": "φ32×730 mm"
+      }
+    },
+    {
+      "id": 194,
+      "url": "/models/supplement-20261009/capacitor-compensation-box.glb",
+      "before": "08fac787a58cb5ba3c86fe04bdacb4026579e711f267ee75efcbe007c5c040bc",
+      "after": "72c726582f9a80f22015f41c42b45179b217da77104257874ca6d0976c491ff7",
+      "productModel": "VAHLE TPCB.2-140-045-F · 10027809",
+      "parts": {
+        "case": "补偿盒封闭壳体",
+        "cover": "密封盖板",
+        "screws": "盖板螺钉",
+        "connections": "一次侧电缆进出接头"
+      },
+      "spec": {
+        "family": "identity-track-box",
+        "productModel": "VAHLE TPCB.2-140-045-F · 10027809",
+        "dimensionSource": {
+          "type": "manufacturer-catalog",
+          "manufacturer": "VAHLE",
+          "url": "https://www.vahle.com/fileadmin/cavok_upload/US%20Catalogs/vPOWER%2005b%20CPS%20140kHz%20Inductive%20Power.pdf",
+          "document": "vahle-cps140.pdf",
+          "pages": [
+            8
+          ],
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "盒体尺寸",
+          "电缆接头规格",
+          "内部电容结构"
+        ],
+        "confirmedDimensionsMm": "未核实安装尺寸，结构示意"
+      }
+    },
+    {
+      "id": 195,
+      "url": "/models/supplement-20261009/timer-relay-socket.glb",
+      "before": "0a81c35eb782a6d37133e3b188e944c50f789b1d3f8fff93edbfd27efd69ba74",
+      "after": "0f34655a7cfd89b144967ff308c7d82df630e9da3cb270e1fbafe791c4acd7a2",
+      "productModel": "正泰时间继电器底座",
+      "parts": {
+        "base": "绝缘安装底座",
+        "socket": "继电器插接座",
+        "terminals": "接线端子",
+        "screws": "接线螺钉",
+        "contacts": "插接触点孔示意",
+        "mount": "安装卡座"
+      },
+      "spec": {
+        "family": "identity-relay-socket",
+        "productModel": "正泰时间继电器底座",
+        "dimensionSource": {
+          "type": "manufacturer-category-reference",
+          "manufacturer": "CHINT",
+          "url": "https://www.chintglobal.com/global/en/products/low-voltage/iec/industrial-control/relay-socket.html",
+          "retrieved": "2026-11-03"
+        },
+        "unknown": [
+          "具体型号与针数",
+          "底座尺寸",
+          "端子布置为示意"
+        ],
+        "confirmedDimensionsMm": "未核实安装尺寸，结构示意"
+      }
+    }
+  ]
+}

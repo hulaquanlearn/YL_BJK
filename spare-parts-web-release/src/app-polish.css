@@ -1,0 +1,21 @@
+/* Phone business views share the native shell's quieter surface and rhythm. */
+body.workbench-android{--el-color-primary:#aa3147;--el-color-primary-light-3:#c66d7d;--el-color-primary-light-5:#db9ca7;--el-color-primary-light-7:#eed0d7;--el-color-primary-light-9:#fcf0f3;--el-border-radius-base:10px;--el-text-color-primary:#233044;--el-text-color-regular:#59687d;background:#f4f6f9}
+body.workbench-android .page-content{padding:16px;background:#f4f6f9}
+body.workbench-android :is(.panel,.el-card){border-color:#e9edf3;border-radius:15px;box-shadow:none}
+body.workbench-android .el-button{min-height:42px;border-radius:10px;font-weight:500;box-shadow:none}
+body.workbench-android .el-button.is-text{background:transparent}
+body.workbench-android .el-input__wrapper{min-height:42px;border-radius:10px;background:#fff}
+body.workbench-android .el-select__wrapper{min-height:42px;border-radius:10px}
+body.workbench-android .el-textarea__inner{border-radius:10px;line-height:1.8;padding:12px}
+body.workbench-android .el-dialog{border-radius:18px;overflow:hidden}
+body.workbench-android .el-dialog__title{font-size:19px;font-weight:600;color:#233044}
+body.workbench-android .el-form-item__label{color:#637187;line-height:1.6;padding-bottom:7px}
+body.workbench-android .el-empty{padding:35px 12px}
+body.workbench-android :is(button,a,input:not(.el-input__inner),textarea:not(.el-textarea__inner)):focus-visible{outline:2px solid #aa3147;outline-offset:2px}
+body.workbench-android .el-message{max-width:calc(100vw - 32px);border-radius:12px}
+body.workbench-android .el-pagination button{min-width:36px;min-height:40px}
+
+body.workbench-android #app .app-shell{--brand:#aa3147;--brand-dark:#8d2338;--brand-soft:#fcf0f3;--el-color-primary:#aa3147;--el-color-primary-light-9:#fcf0f3}
+
+/* Element Plus owns the field focus border; do not draw another ring on its inner input. */
+body.workbench-android :is(.el-input__inner,.el-textarea__inner):focus-visible{outline:none}

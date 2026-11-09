@@ -8,10 +8,10 @@ test('原粮员工仅显示备件查询和库位，工段长与其他车间班�
     const user={role:'viewer',staffWorkshopCode:'raw_grain',staffPosition}
     for (const path of ['/inventory','/warehouse-3d','/portal']) assert.equal(canReadFeature(user,path),true)
     for (const path of ['/raw-duties','/attendance','/work','/check','/knowledge','/robot-program','/statistics','/replenishment','/movements']) assert.equal(canReadFeature(user,path),false,path)
-    assert.equal(staffPositionLabel(user),'员工')
+    assert.equal(staffPositionLabel(user),staffPosition==='group_leader'?'线长 / 组长':staffPosition==='employee'?'员工':'人员')
   }
-  assert.equal(staffPositionLabel({staffWorkshopCode:'raw_grain',staffPosition:'shift_leader'}),'工段长')
-  assert.equal(staffPositionLabel({staffWorkshopCode:'qu_making',staffPosition:'shift_leader'}),'班长')
+  assert.equal(staffPositionLabel({staffWorkshopCode:'raw_grain',staffPosition:'shift_leader'}),'班长 / 工段长')
+  assert.equal(staffPositionLabel({staffWorkshopCode:'qu_making',staffPosition:'shift_leader'}),'班长 / 工段长');assert.equal(staffPositionLabel({staffWorkshopCode:'qu_making',staffPosition:'maintenance'}),'维修人员（车间）');assert.equal(staffPositionLabel({staffWorkshopCode:'qu_making',staffPosition:'manufacturer_maintenance'}),'维修人员（厂家）')
 })
 
 test('visible work entrances do not grant unassigned or other-workshop staff data access', () => {
@@ -31,9 +31,10 @@ test('visible work entrances do not grant unassigned or other-workshop staff dat
   for (const role of ['qu_making','brewing','viewer']) assert.equal(canReadFeature({role}, '/raw-duties'), false)
   assert.equal(canReadFeature({role:'viewer',staffWorkshopCode:'qu_making'}, '/raw-duties'), false)
   assert.equal(preferredWorkPath({role:'raw_grain'}), '/raw-duties')
-  assert.equal(preferredWorkPath({role:'viewer',staffWorkshopCode:'raw_grain'}), '/raw-duties')
-  assert.equal(canReadFeature({role:'qu_making'}, preferredWorkPath({role:'qu_making'})), false)
-  for(const staffPosition of ['shift_leader'])assert.equal(canReadFeature({role:'viewer',staffWorkshopCode:'raw_grain',staffPosition},'/attendance'),true)
+  assert.equal(preferredWorkPath({role:'viewer',staffWorkshopCode:'raw_grain'}), '/fire-inspection')
+  assert.equal(preferredWorkPath({role:'qu_making'}), '/agv-vehicles')
+  assert.equal(canReadFeature({role:'qu_making'}, '/agv-repairs'), false)
+  for(const staffPosition of ['shift_leader'])assert.equal(canReadFeature({role:'viewer',staffWorkshopCode:'raw_grain',staffPosition},'/attendance'),false)
   for(const user of [{role:'viewer',staffWorkshopCode:'raw_grain'},{role:'viewer',staffWorkshopCode:'qu_making',staffPosition:'shift_leader'},{role:'brewing'}])assert.equal(canReadFeature(user,'/attendance'),false)
 })
 

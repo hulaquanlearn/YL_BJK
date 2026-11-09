@@ -1,0 +1,182 @@
+{
+  "at": "2026-11-06T05:26:19.880Z",
+  "id": "abb-local-speed-20261106",
+  "status": "deployed-and-verified",
+  "checks": 8714,
+  "webFiles": 1055,
+  "changedWebFiles": 31,
+  "removedObsoleteWebFiles": 29,
+  "apiFiles": 4,
+  "protectedFiles": 989,
+  "protectedPreserved": true,
+  "androidUnchanged": true,
+  "webProcessesPreserved": true,
+  "restarted": [
+    "spare-parts-api"
+  ],
+  "rollback": "/opt/spare-parts/rollback/abb-local-speed-20261106",
+  "version": "V1.9.10",
+  "webTests": 692,
+  "apiTests": 452,
+  "buildPassed": true,
+  "sourceHashes": {
+    "src/components/agv/AbbRobotViewer.vue": "b26c6abfe56a9486ea1151549a6bf6b3d676719534e5157a9fe78ce423d19b72",
+    "src/components/agv/AbbPendantControl.vue": "1f465ffd51f4c14ffb0abdd245680006d48d953695e803ea4ef3cf8847a1db55",
+    "src/components/agv/AbbProgramControl.vue": "890ce438a042b9b530121844e3828a507c6da8a4224a95fc77d0159b25282d02",
+    "src/api/index.js": "dfc16c0bf97c292dc4215b14c7196c2f451c4d711a50fe6f761cdd84ab8c4533",
+    "src/utils/robot-simulation-transfer.mjs": "9e5353934f0838ad75268e1634658e7ca95cf32fd84d00cceea668e20c0dde9e",
+    "src/utils/abb-local-program.mjs": "2ce160f58476b2041c20643db0c22d0982fa1ecccef836a2ee7484f3daf5bbb9",
+    "src/utils/abb-program-worker.mjs": "966543a3ca40e85b3c3a85b2cf9bda7b22274419a1b5de3619a91177e269a2a0",
+    "src/utils/abb-program-motion.mjs": "6ccd77a4804040d2c932a85995a9e30a867af4bc524f8c3797cb4d06bf9a733a",
+    "src/utils/abb-kinematics.mjs": "e2f8410cf2432ce310576bdfddfa41d885d856ebdc8f3bab81a250c19d65732c",
+    "src/utils/abb-kinematics-data.mjs": "2543627f40132c56e5ab0c35c8efe1cc02e7306cca5b08cb5a91e658aa7efa4c",
+    "src/utils/abb-inverse-kinematics.mjs": "9e16d22f6cf0bb9eb6603145721a4669ce4afc9e8052a62b6cbedcb60691b109",
+    "tools/abb-program-worker.mjs": "2826fbefd3e4bd7bda42a01e3db537b1e78a28baf399f2ec86824da62f676d45",
+    "vite.config.js": "6fcee29daf3973869f1b3458a41e547c60ded5a0434cf400746dc127ff247b4c"
+  },
+  "apiHashes": {
+    "src/robot-code.js": "b4f9b09463b31d35b4b6cab974a823dead541ce215b6007f7c718f54aaab6412",
+    "src/robot-backup.js": "d478c40c8a94745cca96ad6a3d418f9d6642cad95bdc741b6555e84ff9e2e55b",
+    "src/robot-motion.js": "79bb5b64001f82e83891e4f6b2a226e53f77930ac6284447cb9128fc977acc68",
+    "src/robot-sim.js": "d00d1d917af34d64508e03a2ca81b5d4b7c6d279a7fed8f90fb476ac50ce04f8"
+  },
+  "android": {
+    "versionCode": 24,
+    "versionName": "1.9.10-android.24",
+    "sha256": "e41eeb3e970e84f1a6f400ab29aa2cd07df7834d681f29196a7dbfa2eeceaeb2",
+    "url": "https://czsdsg.cn/app-updates/android/digital-workbench-1.9.10-android.24.apk"
+  },
+  "permissionsVerified": [
+    "admin",
+    "brewing",
+    "raw_grain",
+    "viewer"
+  ],
+  "temporaryTestSessionsRemoved": true,
+  "browser": {
+    "at": "2026-11-06T05:24:27.084Z",
+    "complete": true,
+    "heightMm": 40,
+    "speedPercent": 100,
+    "playbackRate": 1,
+    "status": "全流程完成：已装填至 40 mm，收尾完成\nModMain.mod · 第 339 行\nEXIT;",
+    "simulateHttpRequests": 0,
+    "consoleErrors": []
+  },
+  "equivalence": {
+    "at": "2026-11-06T05:24:51.463Z",
+    "sourceHash": "01b7a45ee4996486ec6c300d249b1f1628ad152d23c1530c5fe31e42362406ad",
+    "heightMm": 120,
+    "barrel": "left",
+    "sameFinalCell": true,
+    "sameMotions": 1391,
+    "sameSourceSeconds": 147.77727493959398,
+    "fillCount": 6,
+    "complete": true,
+    "oldInterpreterCalls": 3720,
+    "workerMessages": 2331
+  },
+  "full800": {
+    "execution": "direct interpreter path after cache cleanup; not a Worker run",
+    "left": true,
+    "right": true,
+    "motionsPerSide": 8622,
+    "fillsPerSide": 37
+  },
+  "dsh": {
+    "report": "docs/ABB_DSH_FINDINGS_20261106.md",
+    "sha256": "d65f86d0711492a03a7415301f58dfe9c650fe85060ef9e06e77a74f52618edc",
+    "readOnly": true,
+    "independentlyVerified": true
+  },
+  "productionHttp": {
+    "at": "2026-11-06T05:29:10.329Z",
+    "pageStatus": 200,
+    "workerStatus": 200,
+    "workerContentType": "text/javascript; charset=utf-8",
+    "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; media-src 'self' blob:; frame-src 'self' blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'",
+    "productionInteractiveBrowser": "not completed: browser tab creation timed out; local full browser flow and production HTTP/asset hashes verified"
+  },
+  "productionInteractiveBrowserVerified": false,
+  "nativeRuntimeVerified": false,
+  "realControllerVerified": false,
+  "localBuildDirectory": "spare-parts-web-release/dist",
+  "preview": "http://127.0.0.1:8534/agv-vehicles?family=abb",
+  "previewKeptAtUserRequest": true,
+  "cleanup": {
+    "local": [
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\dist",
+        "bytes": 214596373,
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-interactions-20261106\\web-dist",
+        "bytes": 214598441,
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-interactions-20261106\\web-dist-r2",
+        "bytes": 214598884,
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-interactions-20261106\\temp",
+        "bytes": 2184264,
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-interactions-20261106\\temp-r2",
+        "bytes": 2184320,
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-interactions-20261106\\temp-worker",
+        "bytes": 2190408,
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-interactions-20261106\\payload",
+        "bytes": 2805987,
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-interactions-20261106\\payload-r2",
+        "bytes": 2891864,
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-interactions-20261106\\payload-worker",
+        "bytes": 3285476,
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-interactions-20261106\\transport.tar.gz",
+        "bytes": 853754,
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-interactions-20261106\\transport-worker.tar.gz",
+        "bytes": 981469,
+        "method": "Windows Recycle Bin"
+      }
+    ],
+    "server": [
+      {
+        "at": "2026-11-06T05:31:22.067Z",
+        "source": "/opt/spare-parts/staging/abb-interactions-20261106",
+        "target": "/opt/spare-parts/recycle-bin/abb-interactions-20261106/staging",
+        "method": "project private recycle directory",
+        "restore": "Move staging back only for inspection. Current web/dist, API and rollback remain active and unchanged."
+      },
+      {
+        "at": "2026-11-06T05:31:22.068Z",
+        "source": "/opt/spare-parts/staging/abb-local-speed-20261106",
+        "target": "/opt/spare-parts/recycle-bin/abb-local-speed-20261106/staging",
+        "method": "project private recycle directory",
+        "restore": "Move staging back only for inspection. Current web/dist, API and rollback remain active and unchanged."
+      }
+    ]
+  },
+  "localBuildFilesVerified": 1055
+}

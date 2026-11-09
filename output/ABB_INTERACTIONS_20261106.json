@@ -1,0 +1,56 @@
+{
+  "at": "2026-11-06T05:03:59.795Z",
+  "id": "abb-interactions-20261106",
+  "status": "deployed-and-verified",
+  "checks": 7559,
+  "webFiles": 1054,
+  "changedWebFiles": 30,
+  "removedObsoleteWebFiles": 29,
+  "apiFiles": 0,
+  "protectedFiles": 983,
+  "protectedPreserved": true,
+  "apiUnchanged": true,
+  "androidUnchanged": true,
+  "servicesRestarted": false,
+  "rollback": "/opt/spare-parts/rollback/abb-interactions-20261106",
+  "version": "V1.9.10",
+  "webTests": 686,
+  "buildPassed": true,
+  "apiTestsRerun": false,
+  "permissionsVerified": [
+    "admin",
+    "brewing",
+    "raw_grain",
+    "viewer"
+  ],
+  "temporaryTestSessionsRemoved": true,
+  "sourceHashes": {
+    "src/components/agv/AbbRobotViewer.vue": "3c19112a8051de3429a39df215016183b79b2f153f325a4b8dc65b2d38540351",
+    "src/components/agv/AbbRobotGuide.vue": "d8fa37adc5dc5c4689c2294747ded7fb6f01511b70304101780f3ade8a689294",
+    "src/utils/abb-service-panel.mjs": "ac8b1acc736ff220d7e5f9d40a927ea9fa28857e83581360aadd8b35760444b3",
+    "src/utils/model-click-pan.mjs": "99ab9fafa021802553cc5e9dd60b118af10173a80e591bc35fccc1d39997e124"
+  },
+  "android": {
+    "versionCode": 24,
+    "versionName": "1.9.10-android.24",
+    "sha256": "e41eeb3e970e84f1a6f400ab29aa2cd07df7834d681f29196a7dbfa2eeceaeb2",
+    "url": "https://czsdsg.cn/app-updates/android/digital-workbench-1.9.10-android.24.apk"
+  },
+  "nativeRuntimeVerified": false,
+  "realControllerVerified": false,
+  "browser": {
+    "localIsolated": true,
+    "batterySelectionHasNoDocumentButton": true,
+    "rightClickHoverPan": true,
+    "escapeExit": true,
+    "leftOccupiedRightCloses": true,
+    "leftOccupiedCloseBlocked": true,
+    "consoleErrors": 0
+  },
+  "speedIssue": {
+    "status": "under-investigation",
+    "assigned": "DSH independent read-only investigation; Codex integration pending",
+    "notClaimedFixed": true
+  },
+  "localBuildDirectory": ".local/abb-interactions-20261106/web-dist"
+}

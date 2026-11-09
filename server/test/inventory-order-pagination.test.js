@@ -11,6 +11,7 @@ function listHandler(pool) {
   const mocks = {
     express: {Router:()=>router}, '../db':{pool},
     '../utils': {...utils, asyncHandler:fn=>fn},
+    '../inventory-order-view': require('../src/inventory-order-view'),
     '../inventory-guards': {}, '../auth':{requireRole:()=>()=>{}},
     '../workshop-scope': require('../src/workshop-scope')
   };
@@ -24,6 +25,7 @@ test('inventory orders page beyond 200 carries separate unfiltered status counts
     calls.push({sql,params:[...params]});
     if(sql.includes('AS pending'))return [[{total:601,pending:401,approved:180,rejected:20}]];
     if(sql.startsWith('SELECT COUNT'))return [[{total:401}]];
+    if(sql.startsWith('SELECT order_id,inventory_id'))return [[]];
     return [[{id:221,approveStatus:'待审批',inventoryAllList:'[]',abnormalList:'[]',filterParams:'{}'}]];
   }});
   let body;

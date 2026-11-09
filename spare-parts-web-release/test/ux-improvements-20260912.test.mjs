@@ -43,10 +43,12 @@ test('mini low stock shortcut opens the actionable inventory list',()=>{
 test('mini count filter validates required choices then navigates once without a second confirmation',()=>{
  const urls=[];const toasts=[]
  const page=miniPage('filter/filter.js',{}, {navigateTo:args=>urls.push(args.url),showToast:args=>toasts.push(args.title)})
+ page.data.selectedWorkshopCode='raw_grain'
  page.data.selectedWorkshop='全部';page.confirmFilter();assert.equal(urls.length,0)
  page.data.selectedWorkshop='五粮货区';page.data.selectedShelfNo='全部';page.confirmFilter();assert.equal(urls.length,0)
  page.data.selectedShelfNo='1号';page.data.selectedLayer='2层';page.confirmFilter();assert.equal(urls.length,1)
  assert.equal(new URL(urls[0],'https://local.test').searchParams.get('workshop'),'五粮货区')
  assert.equal(new URL(urls[0],'https://local.test').searchParams.get('shelf'),'1号')
+ assert.equal(new URL(urls[0],'https://local.test').searchParams.get('workshopCode'),'raw_grain')
  assert.equal(toasts.length,2)
 })

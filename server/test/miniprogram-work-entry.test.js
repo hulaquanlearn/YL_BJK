@@ -6,14 +6,14 @@ test('小程序功能入口与网页权限一致，首页整卡进入对应功�
  let page;const urls=[],auth={requireLogin:()=>true,getUser:()=>({role:'admin',displayName:'模拟管理员'})};
  vm.runInNewContext(fs.readFileSync(require.resolve('../../miniprogram/pages/portal/portal.js'),'utf8'),{require:n=>n.endsWith('auth')?auth:work,Page:p=>page=p,wx:{navigateTo:o=>urls.push(o.url)}});
  page.setData=p=>page.data={...page.data,...p};page.onShow();assert.equal(page.data.groups.length,2);assert.equal(work.features({role:'admin'}).some(f=>f.id==='qu'),false);
- page.openFeature({currentTarget:{dataset:{id:'raw'}}});page.openFeature({currentTarget:{dataset:{id:'attendance'}}});assert.deepEqual(urls,['/packages/work/pages/home/home','/pages/webview/webview?feature=attendance']);
+ page.openFeature({currentTarget:{dataset:{id:'raw'}}});page.openFeature({currentTarget:{dataset:{id:'attendance'}}});assert.deepEqual(urls,['/packages/work/pages/home/home']);
  const source=fs.readFileSync(require.resolve('../../miniprogram/pages/portal/portal.wxml'),'utf8');assert.match(source,/<view[^>]*class="business-row[^>]*bindtap="openFeature"/);
 });
 test('内嵌页仅允许固定的已授权HTTPS路径，不把登录令牌写入URL',()=>{
  const app=JSON.parse(fs.readFileSync(require.resolve('../../miniprogram/app.json'),'utf8'));
  assert.ok(app.pages.includes('pages/webview/webview'));
  assert.equal(app.subPackages.some(p=>p.pages.includes('pages/web/web')),false);
- let page;vm.runInNewContext(fs.readFileSync(require.resolve('../../miniprogram/pages/webview/webview.js'),'utf8'),{require:n=>n.endsWith('auth')?{requireLogin:()=>true,getUser:()=>({role:'admin'})}:n.endsWith('work-features')?work:{apiBaseUrl:'https://czsdsg.cn/api'},Page:p=>page=p,wx:{setNavigationBarTitle(){}}});page.setData=p=>page.data={...page.data,...p};page.onLoad({feature:'attendance'});assert.equal(page.data.src,'https://czsdsg.cn/attendance?mini=1');page.onLoad({feature:'https://other.invalid'});assert.match(page.data.error,/无权/);
+ let page;vm.runInNewContext(fs.readFileSync(require.resolve('../../miniprogram/pages/webview/webview.js'),'utf8'),{require:n=>n.endsWith('auth')?{requireLogin:()=>true,getUser:()=>({role:'admin'})}:n.endsWith('work-features')?work:{apiBaseUrl:'https://czsdsg.cn/api'},Page:p=>page=p,wx:{setNavigationBarTitle(){}}});page.setData=p=>page.data={...page.data,...p};page.onLoad({feature:'attendance'});assert.match(page.data.error,/无权/);page.onLoad({feature:'https://other.invalid'});assert.match(page.data.error,/无权/);
 });
 
 test('库位帮助整行进入3D网页，备件只读账号同样可查看且不增加首页业务卡',()=>{

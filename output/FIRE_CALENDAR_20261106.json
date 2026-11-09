@@ -1,0 +1,136 @@
+{
+  "at": "2026-11-06T06:30:51.669Z",
+  "id": "fire-calendar-20261106",
+  "status": "deployed-and-verified",
+  "checks": 8733,
+  "webFiles": 1055,
+  "changedWebFiles": 30,
+  "removedObsoleteWebFiles": 29,
+  "apiFiles": 2,
+  "protectedFiles": 989,
+  "protectedPreserved": true,
+  "androidUnchanged": true,
+  "webProcessesPreserved": true,
+  "restarted": [
+    "spare-parts-api"
+  ],
+  "rollback": "/opt/spare-parts/rollback/fire-calendar-20261106",
+  "version": "V1.9.10",
+  "webTests": 697,
+  "apiTests": 456,
+  "fireApiTests": 78,
+  "fireWebTests": 68,
+  "serverPhotoTests": 22,
+  "buildPassed": true,
+  "sourceHashes": {
+    "src/components/fire/FireCamera.vue": "cc39a93921578136dbafa7423532a6cc6f54a6ff74752edf05b05698ccb4cf14",
+    "src/components/fire/FirePhotoRecognition.vue": "53cfb2895dcc1dbd15f6c97566263b39d590ab771ec49bfb2834aa8fcb6784a2",
+    "src/components/fire/FireRecordEvidence.vue": "f8fa23ffda81185c6e3408e07a1b3be321bce39775532762cd3949c40450d633",
+    "src/app/AppFireRecordEvidence.vue": "23bc155690926a82b34f85412a7069360369dae7106dd8cee173fad915f024c2"
+  },
+  "apiHashes": {
+    "src/fire-recognition.js": "4562b5dd4700199b5a16fe700c99bcbf6fcfc92cac3f15d73497bdc32443de08",
+    "test/fire-photo.test.js": "002694986473b3d99fa6a241961464f13a15bb57cb7e65bb78624e4d3b968817"
+  },
+  "android": {
+    "versionCode": 24,
+    "versionName": "1.9.10-android.24",
+    "sha256": "e41eeb3e970e84f1a6f400ab29aa2cd07df7834d681f29196a7dbfa2eeceaeb2",
+    "url": "https://czsdsg.cn/app-updates/android/digital-workbench-1.9.10-android.24.apk"
+  },
+  "permissionsVerified": [
+    {
+      "role": "admin::",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "brewing::",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "raw_grain::",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "viewer:qu_making:shift_leader",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:raw_grain:group_leader",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "viewer:qu_making:group_leader",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:raw_grain:shift_leader",
+      "authorized": true,
+      "httpStatus": 200
+    },
+    {
+      "role": "viewer:qu_making:maintenance",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:qu_making:manufacturer_maintenance",
+      "authorized": false,
+      "httpStatus": 403
+    },
+    {
+      "role": "viewer:qu_making:employee",
+      "authorized": false,
+      "httpStatus": 403
+    }
+  ],
+  "automaticMonth": "2026-11",
+  "businessCountsPreserved": true,
+  "unrelatedFrontendCodePreserved": true,
+  "abbWorkerUnchanged": true,
+  "deliveryDocument": "docs/FIRE_CALENDAR_20261106.md",
+  "previousDeployment": "output/ABB_LOCAL_SPEED_20261106.json",
+  "assembly": {
+    "method": "new-compiled-fire-chunk-with-existing-production-modules",
+    "fireModule": "assets/FireInspection-yTB7nRSL.js",
+    "renames": {
+      "assets/FireInspection-CptCUNlB.js": "assets/FireInspection-CptCUNlB-fc20261106v4.js",
+      "assets/index-Sn4Rp854.js": "assets/index-Sn4Rp854-fc20261106v4.js",
+      "assets/stock-health-WUpCD__e.js": "assets/stock-health-WUpCD__e-fc20261106v4.js",
+      "assets/AbbProgramControl-BpmBwvUq.js": "assets/AbbProgramControl-BpmBwvUq-fc20261106v4.js",
+      "assets/AbbRobotGuide-BW8SkK22.js": "assets/AbbRobotGuide-BW8SkK22-fc20261106v4.js",
+      "assets/AbbRobotViewer-DEnRHG6b.js": "assets/AbbRobotViewer-DEnRHG6b-fc20261106v4.js",
+      "assets/Account-C9cKNH7B.js": "assets/Account-C9cKNH7B-fc20261106v4.js",
+      "assets/ActionMenu-DFeNBrCU.js": "assets/ActionMenu-DFeNBrCU-fc20261106v4.js",
+      "assets/AgvVehicles-CC_cSJoS.js": "assets/AgvVehicles-CC_cSJoS-fc20261106v4.js",
+      "assets/AiModelInfo-B6cTNEle.js": "assets/AiModelInfo-B6cTNEle-fc20261106v4.js",
+      "assets/Check-qLrv7DWI.js": "assets/Check-qLrv7DWI-fc20261106v4.js",
+      "assets/ControlPasswords-HnAesO0J.js": "assets/ControlPasswords-HnAesO0J-fc20261106v4.js",
+      "assets/DataQuality-BFKFFipM.js": "assets/DataQuality-BFKFFipM-fc20261106v4.js",
+      "assets/Equipment-DxvQQ5Ro.js": "assets/Equipment-DxvQQ5Ro-fc20261106v4.js",
+      "assets/FireParkModel-DKOdZyyL.js": "assets/FireParkModel-DKOdZyyL-fc20261106v4.js",
+      "assets/Inventory-D2tMpzBf.js": "assets/Inventory-D2tMpzBf-fc20261106v4.js",
+      "assets/Knowledge-CiLcwiGv.js": "assets/Knowledge-CiLcwiGv-fc20261106v4.js",
+      "assets/Login-DIh-wLdj.js": "assets/Login-DIh-wLdj-fc20261106v4.js",
+      "assets/ModelLibrary-CFGqtx5q.js": "assets/ModelLibrary-CFGqtx5q-fc20261106v4.js",
+      "assets/ModelPreview-Cm21dDWD.js": "assets/ModelPreview-Cm21dDWD-fc20261106v4.js",
+      "assets/Movements-DQIntz2D.js": "assets/Movements-DQIntz2D-fc20261106v4.js",
+      "assets/PdfReader-Apc6kUsn.js": "assets/PdfReader-Apc6kUsn-fc20261106v4.js",
+      "assets/Portal-hlSolPPD.js": "assets/Portal-hlSolPPD-fc20261106v4.js",
+      "assets/RawDuties-C6luh36s.js": "assets/RawDuties-C6luh36s-fc20261106v4.js",
+      "assets/Replenishment-CuK1S16I.js": "assets/Replenishment-CuK1S16I-fc20261106v4.js",
+      "assets/RobotProgram-DqhY521I.js": "assets/RobotProgram-DqhY521I-fc20261106v4.js",
+      "assets/Statistics-BXVVIFwn.js": "assets/Statistics-BXVVIFwn-fc20261106v4.js",
+      "assets/Warehouse3D-CVe1Z8d5.js": "assets/Warehouse3D-CVe1Z8d5-fc20261106v4.js",
+      "assets/WorkbookUploadMark-Bu49uWan.js": "assets/WorkbookUploadMark-Bu49uWan-fc20261106v4.js"
+    },
+    "unrelatedModulesVerified": true,
+    "abbWorkerUnchanged": true
+  }
+}

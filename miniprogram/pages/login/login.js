@@ -2,20 +2,33 @@ const api = require('../../services/api.js');
 const auth = require('../../services/auth.js');
 
 Page({
-  data: { username: '', password: '', showPassword: false, loading: false, formError: '' },
+  data: { username: '', password: '', showPassword: false, loading: false, formError: '', retrySession: false },
 
   onLoad() {
+    this._disposed = false;
     if (auth.getToken() && auth.getUser()) this.verifySession();
   },
 
+  onUnload() { this._disposed = true; },
+
   async verifySession() {
+    if (this.data.loading || this._disposed) return;
+    const token = auth.getToken();
+    if (!token) return;
+    this.setData({ loading: true, formError: '', retrySession: false });
     try {
       const res = await api.getMe();
-      auth.setSession(auth.getToken(), res.data.user);
+      if (this._disposed || auth.getToken() !== token) return;
+      auth.setSession(token, res.data.user);
       getApp().globalData.user = res.data.user;
       wx.reLaunch({ url: '/pages/portal/portal' });
-    } catch (_) {
-      auth.clearSession();
+    } catch (error) {
+      if (this._disposed || auth.getToken() !== token) return;
+      const expired = [401,403].includes(error.statusCode);
+      if (expired) auth.clearSession();
+      this.setData({ retrySession: !expired, formError: expired ? '登录已失效，请重新登录' : (error.message || '连接失败，请重试') });
+    } finally {
+      if (!this._disposed) this.setData({ loading: false });
     }
   },
 
@@ -33,14 +46,16 @@ Page({
     this.setData({ loading: true });
     try {
       const res = await api.login({ username: this.data.username, password: this.data.password });
+      if (this._disposed) return;
       auth.setSession(res.data.token, res.data.user);
       getApp().globalData.user = res.data.user;
       wx.reLaunch({ url: '/pages/portal/portal' });
     } catch (err) {
+      if (this._disposed) return;
       this.setData({ formError: err.message || '登录失败，请检查账号信息' });
       wx.showToast({ title: err.message || '登录失败', icon: 'none' });
     } finally {
-      this.setData({ loading: false });
+      if (!this._disposed) this.setData({ loading: false });
     }
   }
 });

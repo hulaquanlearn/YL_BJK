@@ -1,0 +1,392 @@
+{
+  "at": "2026-11-05T18:22:03.285Z",
+  "status": "deployed-and-verified",
+  "id": "abb-brake-mount-20261106",
+  "checks": 1899,
+  "webFiles": 1054,
+  "changedWebFiles": 30,
+  "apiFiles": 0,
+  "protectedFiles": 824,
+  "protectedPreserved": true,
+  "androidUnchanged": true,
+  "rollback": "/opt/spare-parts/rollback/abb-brake-mount-20261106",
+  "webTests": 677,
+  "apiTests": 451,
+  "targetedWebTests": 8,
+  "nativeRuntimeVerified": false,
+  "version": "V1.9.10",
+  "android": {
+    "versionCode": 24,
+    "versionName": "1.9.10-android.24",
+    "sha256": "e41eeb3e970e84f1a6f400ab29aa2cd07df7834d681f29196a7dbfa2eeceaeb2",
+    "url": "https://czsdsg.cn/app-updates/android/digital-workbench-1.9.10-android.24.apk"
+  },
+  "permissionsVerified": [
+    "admin",
+    "brewing",
+    "raw_grain",
+    "viewer"
+  ],
+  "temporaryTestSessionsRemoved": true,
+  "flow": [
+    {
+      "barrel": "left",
+      "height": 800,
+      "fillCount": 37,
+      "motions": 8622,
+      "requests": 22628,
+      "volume": 3.2414452116770787,
+      "coveredCells": 484,
+      "nominalSeconds": 822.0715501474965,
+      "infraredScans": 237,
+      "heightSamples": 38,
+      "temperatureHandshakeSamples": 6,
+      "temperatureValue": null,
+      "complete": true,
+      "endedAt": {
+        "fileId": "file-7",
+        "routine": "main",
+        "type": "end",
+        "reason": "exit",
+        "line": 339
+      }
+    },
+    {
+      "barrel": "right",
+      "height": 800,
+      "fillCount": 37,
+      "motions": 8622,
+      "requests": 22628,
+      "volume": 3.2414452116770835,
+      "coveredCells": 484,
+      "nominalSeconds": 836.3675675100005,
+      "infraredScans": 237,
+      "heightSamples": 38,
+      "temperatureHandshakeSamples": 6,
+      "temperatureValue": null,
+      "complete": true,
+      "endedAt": {
+        "fileId": "file-7",
+        "routine": "main",
+        "type": "end",
+        "reason": "exit",
+        "line": 339
+      }
+    }
+  ],
+  "ui": {
+    "technicalDocumentTitle": true,
+    "pdfContinuousAndSpread": true,
+    "pdf834PageJumpVerified": true,
+    "pdfLiveCanvasesAtPage81": 6,
+    "chmChapter29Verified": true,
+    "pendantWheelAndPanVerified": true,
+    "pendantZoomButtonsRemoved": true,
+    "mainStepButtonRemoved": true,
+    "footerCoherentSnapshotIntervalMs": 1000,
+    "browserFlow": {
+      "barrel": "left",
+      "height": 120,
+      "complete": true
+    },
+    "proofDirectory": "docs/validation/20261106-abb-final"
+  },
+  "testScope": {
+    "fullWeb": 677,
+    "api": 451,
+    "webGeometryAfterLastCorrection": 8,
+    "productionBuild": true,
+    "fullWebRunPrecedesLastBrakeMountCorrection": true
+  },
+  "sensors": {
+    "sharedRodAndHousing": true,
+    "models": [
+      "AT20",
+      "DS77pro"
+    ],
+    "standby": "between pots",
+    "active": "above selected pot centre",
+    "height": "delayed virtual-surface measurement",
+    "temperature": "delayed handshake only; no real temperature, no fabricated GI48"
+  },
+  "hydraulicLid": {
+    "installation": "both pot-local -X, same direction",
+    "curvedShell": true,
+    "centreHubAndLongRocker": true,
+    "hydraulicCylinderContacts": true,
+    "sweepPoses": 41,
+    "openingSeconds": 3,
+    "estimatedDimensions": true,
+    "physicalIoMapped": false
+  },
+  "serviceControls": {
+    "battery": "left of guard in ABB front view; original body face partitioned with no duplicate overlay",
+    "buttons": "six round caps ray-sampled onto original recessed robot body face; behind guard front; no fabricated mounting plate",
+    "manual": "3HAC044266-010 Rev AL pp.81,187",
+    "detailsEstimated": true
+  },
+  "sourceHashes": {
+    "spare-parts-web-release/src/utils/abb-service-panel.mjs": "8f72fe137295a755cc3d8adebb9777939651ab90d8a7f249df678a104b66c1ab",
+    "spare-parts-web-release/src/utils/abb-hydraulic-lid.mjs": "b1f306ca0bfcc5d849449b9b5d273f017604b7e38c4d264680d5358a80d8b2ab",
+    "spare-parts-web-release/src/utils/abb-infrared-camera.mjs": "640eb4a1f855d839c90bba85a8919e1a1fec869e731c3c1b3c34385b23b6bc4c",
+    "spare-parts-web-release/src/utils/abb-program-display.mjs": "56c2b617340f6ff7cb76a13ab396a47364ae137b925eaa75b245f81c84d8ee4b",
+    "spare-parts-web-release/src/components/agv/AbbRobotViewer.vue": "e829081ebbda2abe0d236a6e31f2190ce38d4396f2b23bc0505000f2df6a6e78",
+    "spare-parts-web-release/src/components/agv/AbbRobotGuide.vue": "4a936c46f51d584dc47fc6c7bb2f2951e65455c9d56e24096ddc3711768d4677",
+    "spare-parts-web-release/src/components/agv/AbbDocumentReader.vue": "5ec22e247688a3811b25b574c99a05cd3bc00e82b80922d909bddf7563ff8ab8",
+    "spare-parts-web-release/src/components/AbbPdfReader.vue": "ec33e16b68031bf1f364945db6a00b00f950f0d2e568511468820714905166d4",
+    "spare-parts-web-release/src/components/agv/FlexPendantModel.vue": "424d255aad6f9e45c62b2325b02ccda121e0a54c233d23d199316c450c5a2f93"
+  },
+  "apiHashes": {
+    "src/robot-cell-sim.js": "d6e874595b7db418eef8167cf5d924340524c1a29ce5c98226a5bb027697fe50",
+    "src/robot-sim.js": "e3c1ad09f4c859847c83e2f1e46ce721167f58ae688fb821aec9693685dff198",
+    "src/robot-library.js": "89cca28feef3755b60195d8dca64a0eebd7d6b4c8d494ca80a0e585b8ec9a859",
+    "src/robot-deposit-grid.js": "fe051154720437a0e4998284a461944fa05da67ff9d1978f38c56b2bbec5413c",
+    "src/robot-deposit-state.js": "affe26699737dde7e1918f3b2204d5aab8ac7c434772cc385399134de035fa86",
+    "src/robot-motion.js": "6aed7f2bc1ff2538b0639e10c1be1ba9b43c89d1894f1cb276ede2c28fd69e89",
+    "src/robot-infrared-sim.js": "9ab01c9731ce8ca5454465a33421e1b5e7c57242be8d69b76308465da3ed6f3e"
+  },
+  "webIndexSha256": "12047b8d55ad053f5a15fa2fe8b5ebe98e60f50d89e3c8cf3b44916cce235f7c",
+  "webRollback": "/opt/spare-parts/rollback/abb-brake-mount-20261106",
+  "apiRollback": "/opt/spare-parts/rollback/abb-model-final-20261106",
+  "baseRelease": {
+    "at": "2026-11-05T11:40:33.199Z",
+    "status": "deployed-and-verified",
+    "id": "abb-infrared-hydraulic-20261105",
+    "checks": 1845,
+    "webFiles": 1054,
+    "changedWebFiles": 36,
+    "apiFiles": 3,
+    "protectedFiles": 767,
+    "protectedPreserved": true,
+    "androidUnchanged": true,
+    "rollback": "/opt/spare-parts/rollback/abb-infrared-hydraulic-20261105",
+    "webTests": 660,
+    "apiTests": 447,
+    "nativeRuntimeVerified": false
+  },
+  "releaseHistory": [
+    {
+      "id": "abb-continuous-20261105",
+      "at": "2026-11-05T10:31:26.134Z",
+      "checks": 1847,
+      "webFiles": 1054,
+      "changedWebFiles": 36,
+      "apiFiles": 5,
+      "rollback": "/opt/spare-parts/rollback/abb-continuous-20261105"
+    },
+    {
+      "id": "abb-height-feedback-20261105",
+      "at": "2026-11-05T10:56:00.920Z",
+      "checks": 1827,
+      "rollback": "/opt/spare-parts/rollback/abb-height-feedback-20261105"
+    },
+    {
+      "at": "2026-11-05T11:40:33.199Z",
+      "status": "deployed-and-verified",
+      "id": "abb-infrared-hydraulic-20261105",
+      "checks": 1845,
+      "webFiles": 1054,
+      "changedWebFiles": 36,
+      "apiFiles": 3,
+      "protectedFiles": 767,
+      "protectedPreserved": true,
+      "androidUnchanged": true,
+      "rollback": "/opt/spare-parts/rollback/abb-infrared-hydraulic-20261105",
+      "webTests": 660,
+      "apiTests": 447,
+      "nativeRuntimeVerified": false
+    },
+    {
+      "id": "abb-infrared-dwell-20261105",
+      "at": "2026-11-05T11:48:42.227Z",
+      "rollback": "/opt/spare-parts/rollback/abb-infrared-dwell-20261105"
+    },
+    {
+      "at": "2026-11-05T17:56:20.176Z",
+      "status": "deployed-and-verified",
+      "id": "abb-model-final-20261106",
+      "checks": 1902,
+      "webFiles": 1054,
+      "changedWebFiles": 36,
+      "apiFiles": 3,
+      "protectedFiles": 824,
+      "protectedPreserved": true,
+      "androidUnchanged": true,
+      "rollback": "/opt/spare-parts/rollback/abb-model-final-20261106",
+      "webTests": 677,
+      "apiTests": 451,
+      "nativeRuntimeVerified": false
+    }
+  ],
+  "cleanup": {
+    "previous": {
+      "at": "2026-11-05T10:38:05.909Z",
+      "localBuilds": [
+        "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-final",
+        "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-normal-speed-verified",
+        "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload",
+        "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-continuous"
+      ],
+      "localFiles": [
+        "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\program-footer.png",
+        "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\full-left-800-before-surface-revision.png",
+        "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\continuous-surface-progress.png",
+        "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\deploy-continuous.tar.gz"
+      ],
+      "server": {
+        "original": "/opt/spare-parts/staging/abb-continuous-20261105",
+        "destination": "/opt/spare-parts/recycle-bin/abb-continuous-20261105-staging/staging",
+        "liveVerified": true
+      },
+      "method": "recoverable recycle; no trash emptied",
+      "kept": [
+        "latest verified web build",
+        "DSH frozen delivery",
+        "source/test logs",
+        "current and previous server rollback",
+        "all business data/uploads/private config"
+      ],
+      "infrared": {
+        "local": [
+          {
+            "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-continuous-final",
+            "at": "2026-11-05T19:52:49.9288484+08:00",
+            "method": "Windows Recycle Bin"
+          },
+          {
+            "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-infrared-verified",
+            "at": "2026-11-05T19:52:50.8088447+08:00",
+            "method": "Windows Recycle Bin"
+          },
+          {
+            "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-feedback",
+            "at": "2026-11-05T19:52:51.0043197+08:00",
+            "method": "Windows Recycle Bin"
+          },
+          {
+            "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-infrared",
+            "at": "2026-11-05T19:52:51.3460847+08:00",
+            "method": "Windows Recycle Bin"
+          },
+          {
+            "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-infrared-dwell",
+            "at": "2026-11-05T19:52:51.4282461+08:00",
+            "method": "Windows Recycle Bin"
+          },
+          {
+            "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\feedback-payload.tar.gz",
+            "at": "2026-11-05T19:52:51.4518864+08:00",
+            "method": "Windows Recycle Bin"
+          },
+          {
+            "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\infrared-payload.tar.gz",
+            "at": "2026-11-05T19:52:51.4728547+08:00",
+            "method": "Windows Recycle Bin"
+          },
+          {
+            "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\infrared-dwell-payload.tar.gz",
+            "at": "2026-11-05T19:52:51.4912957+08:00",
+            "method": "Windows Recycle Bin"
+          },
+          {
+            "path": "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\infrared-active-120.png",
+            "at": "2026-11-05T19:52:51.5124004+08:00",
+            "reason": "superseded by final 120mm proof",
+            "method": "Windows Recycle Bin"
+          },
+          {
+            "path": "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\infrared-hydraulic-40-completed.png",
+            "at": "2026-11-05T19:52:51.5320157+08:00",
+            "reason": "superseded by final 120mm proof",
+            "method": "Windows Recycle Bin"
+          }
+        ],
+        "server": [
+          {
+            "at": "2026-11-05T11:52:47.204Z",
+            "original": "/opt/spare-parts/staging/abb-height-feedback-20261105",
+            "destination": "/opt/spare-parts/recycle-bin/abb-height-feedback-20261105-staging/staging",
+            "liveVerified": true,
+            "restore": "Move staging back to original path only when unused. Deploy input and QA logs only; no live code, business data, private config or rollback moved."
+          },
+          {
+            "at": "2026-11-05T11:52:47.205Z",
+            "original": "/opt/spare-parts/staging/abb-infrared-hydraulic-20261105",
+            "destination": "/opt/spare-parts/recycle-bin/abb-infrared-hydraulic-20261105-staging/staging",
+            "liveVerified": true,
+            "restore": "Move staging back to original path only when unused. Deploy input and QA logs only; no live code, business data, private config or rollback moved."
+          },
+          {
+            "at": "2026-11-05T11:52:47.205Z",
+            "original": "/opt/spare-parts/staging/abb-infrared-dwell-20261105",
+            "destination": "/opt/spare-parts/recycle-bin/abb-infrared-dwell-20261105-staging/staging",
+            "liveVerified": true,
+            "restore": "Move staging back to original path only when unused. Deploy input and QA logs only; no live code, business data, private config or rollback moved."
+          }
+        ],
+        "liveVerified": true,
+        "method": "recoverable recycle; no trash emptied",
+        "kept": [
+          "latest verified web build",
+          "source/test logs",
+          "server rollbacks",
+          "business data/uploads/private config"
+        ]
+      }
+    },
+    "local": {
+      "entries": [
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload-camera",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload-final",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload-outer",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload-final-20261106",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload-brake-mount",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload-brake-mount-final",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload-brake-body-final",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\web-dist",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\web-dist-camera",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\web-dist-dual-final",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\web-dist-final",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\web-dist-outer",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\web-dist-model-final",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\web-dist-brake-mount",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload-camera.tar.gz",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload-final-20261106.tar.gz",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload-outer.tar.gz",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload.tar.gz",
+        "D:\\wx_xiangm\\xiangmu\\.local\\lid-correction-20261105\\payload-brake-body-final.tar.gz",
+        "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\.local-page187.png",
+        "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261106-abb-final\\battery-and-brake-controls.png"
+      ],
+      "kind": "Windows recycle bin",
+      "restore": "Restore original paths from Windows Recycle Bin; bin not emptied.",
+      "at": "2026-11-06T02:24:08.2481544+08:00"
+    },
+    "server": {
+      "at": "2026-11-05T18:23:32.424Z",
+      "kind": "recoverable project staging cleanup",
+      "entries": [
+        {
+          "original": "/opt/spare-parts/staging/abb-lid-correction-20261105",
+          "recycled": "/opt/spare-parts/recycle-bin/abb-final-20261106/abb-lid-correction-20261105"
+        },
+        {
+          "original": "/opt/spare-parts/staging/abb-camera-lid-placement-20261105",
+          "recycled": "/opt/spare-parts/recycle-bin/abb-final-20261106/abb-camera-lid-placement-20261105"
+        },
+        {
+          "original": "/opt/spare-parts/staging/abb-model-final-20261106",
+          "recycled": "/opt/spare-parts/recycle-bin/abb-final-20261106/abb-model-final-20261106"
+        },
+        {
+          "original": "/opt/spare-parts/staging/abb-brake-mount-20261106",
+          "recycled": "/opt/spare-parts/recycle-bin/abb-final-20261106/abb-brake-mount-20261106"
+        }
+      ],
+      "restore": "Rename each recycled path back to its original path only while that original is absent. Live services and rollback directories are untouched."
+    }
+  },
+  "privateBackupPublished": false,
+  "gitPush": false
+}

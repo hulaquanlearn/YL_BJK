@@ -1,0 +1,21 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>备件展台回归检查</title><div id="app"></div>
+<script type="module">
+import {createApp,ref,h} from 'vue'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
+import PartModelDetail from '../../src/components/PartModelDetail.vue'
+import PartModelBinding from '../../src/components/PartModelBinding.vue'
+import ModelPreview from '../../src/components/ModelPreview.vue'
+const options=[
+ {categoryModelId:196,categoryModelName:'SKF 22212E · 双列轴承示意',categoryModelUrl:'/models/supplement-20261009/spherical-roller-bearing-22212e.glb'},
+ {categoryModelId:197,categoryModelName:'骨架油封 90×110×12 · 示意',categoryModelUrl:'/models/supplement-20261009/oil-seal-90-110-12.glb'},
+ {categoryModelId:85,categoryModelName:'深沟球轴承',categoryModelUrl:'/models/ledger-20261008/85.glb'},
+ {categoryModelId:999,categoryModelName:'缺失文件',categoryModelUrl:'/models/missing-fixture.glb'},
+ {},{categoryModelId:999,categoryModelName:'待生成'}]
+createApp({setup(){const item=ref(0),rotation=ref(0),binding=ref(196),mounted=ref(true),mode=ref('detail');return()=>h('main',[
+ h('h1','备件展台回归检查'),h('nav',options.map((p,i)=>h('button',{onClick:()=>item.value=i},p.categoryModelName||'未绑定'))),
+ h('nav',[h('button',{onClick:()=>rotation.value+=Math.PI/2},'调整正面90°'),h('button',{onClick:()=>mounted.value=!mounted.value},'关闭/打开详情'),h('button',{onClick:()=>mode.value=mode.value==='detail'?'calibration':'detail'},'切换正面编辑')]),
+ h('section',{class:'binding'},[h('span','绑定选择（预览不保存）：'),h(PartModelBinding,{modelValue:binding.value,'onUpdate:modelValue':v=>binding.value=v,workshopCode:'raw_grain'})]),
+ mounted.value?(mode.value==='detail'?h(PartModelDetail,{part:{...options[item.value],categoryFrontRotationY:rotation.value}}):h(ModelPreview,{modelUrl:options[item.value].categoryModelUrl,frontRotationY:rotation.value,height:'430px'})):null
+])}}).use(ElementPlus).mount('#app')
+</script><style>body{margin:0;background:#f1f4f8;font:14px system-ui;color:#26364a}main{max-width:820px;margin:18px auto;padding:16px}h1{font-size:20px}nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}nav button{padding:8px;border:1px solid #bccbd6;border-radius:5px;background:white}.binding{display:flex;align-items:center;gap:10px;margin:14px 0}@media(max-width:500px){main{padding:10px;margin:8px auto}.binding{display:block}}</style></html>

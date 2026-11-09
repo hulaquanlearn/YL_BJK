@@ -1,0 +1,207 @@
+{
+  "purpose": "用户实景照片位置记录，作为2D核对与后续3D外观参考",
+  "recordedOn": "2026-10-28",
+  "userCaption": "从四车间出去的河西连廊和七车间外的横向连廊",
+  "mappingBasis": "SITE-001、SITE-002按首批上传顺序对应用户说明；后续照片逐张依据当次用户说明登记。",
+  "evidencePolicy": "地点为用户说明；visibleFeatures仅记录照片可见外观，未确定尺寸、方位和设备归属不作推断。",
+  "relatedConfirmedContext": [
+    "河西连廊与四车间相接",
+    "BB6、BB7、C3、BB8、BB9、BB10位于河西连廊内；此项来自前序用户说明，并非由本次外观照片识别",
+    "BB11位于七车间内；此项来自前序用户确认",
+    "五、六车间之间为本次SITE-003照片所示连廊；五车间比二车间窄，旁边留有部分空地，准确方位和尺寸待定。",
+    "SITE-006：用户确认原粮破曲与原粮五粮之间有连廊，原粮五粮与六车间之间也有连廊。"
+  ],
+  "photos": [
+    {
+      "id": "SITE-001",
+      "source": "D:/电脑管家迁移文件/xwechat_files/wxid_s469xrreaccl22_2b82/temp/RWTemp/2026-10/9e20f478899dc29eb19741386f9343c8/acf7be02de0f354dad85b13de96e5533.jpg",
+      "file": "site-001-workshop4-hexi-corridor.jpg",
+      "userConfirmedLocation": "从四车间出去的河西连廊",
+      "visibleFeatures": [
+        "长距离架空连廊沿道路延伸",
+        "连续落地支柱支承",
+        "侧面可见大幅文字或装饰面板",
+        "近处建筑外墙可见窗户及沿墙管线"
+      ],
+      "unknowns": [
+        "拍摄朝向及准确拍摄点",
+        "连廊尺寸、高度和支柱间距",
+        "逐段对应的皮带机编号"
+      ],
+      "sha256": "94fb30951363d929fa806a9653d5db1bf840e776af8bb5863b0cfb62b9ee375f"
+    },
+    {
+      "id": "SITE-002",
+      "source": "C:/Users/Lenovo/AppData/Local/Temp/codex-clipboard-ff8692d3-d74b-4b92-816e-c2bc59da605c.jpg",
+      "file": "site-002-workshop7-transverse-corridor.jpg",
+      "userConfirmedLocation": "七车间外的横向连廊",
+      "visibleFeatures": [
+        "架空横向连廊跨越道路",
+        "外露钢桁架及重复三角斜撑",
+        "落地钢支柱支承",
+        "上部及内部可见管线、栏杆，局部可见检修灯"
+      ],
+      "unknowns": [
+        "拍摄朝向及准确拍摄点",
+        "连廊尺寸、高度和支柱间距",
+        "照片中各管线与输送设备的具体用途"
+      ],
+      "sha256": "4ef6c63bec20395b676210adcdcd5bfa771fb1f93adb2c2b3fb43fae53e813d0"
+    },
+    {
+      "id": "SITE-003",
+      "source": "D:/电脑管家迁移文件/xwechat_files/wxid_s469xrreaccl22_2b82/temp/RWTemp/2026-10/9e20f478899dc29eb19741386f9343c8/ab40b548100ff021f8c555b2e56d140e.jpg",
+      "file": "site-003-workshops5-6-corridor.jpg",
+      "userConfirmedLocation": "五、六车间相连的连廊",
+      "userCaption": "五六车间相连的连廊 五车间没有二车间这么宽有部分空地",
+      "userConfirmedGeometry": [
+        "五车间的宽度小于二车间",
+        "五车间旁有部分空地",
+        "此前相同长度的说明不能据此扩展为所有车间宽度相同"
+      ],
+      "visibleFeatures": [
+        "架空连廊侧面为大面积实墙外观",
+        "下方可见连续混凝土梁柱及通行空间",
+        "道路旁有绿化，远处建筑前有未硬化空地"
+      ],
+      "unknowns": [
+        "五车间较窄的具体尺寸与空地所在的准确方位",
+        "拍摄朝向及准确拍摄点",
+        "连廊尺寸、高度和柱距"
+      ],
+      "sha256": "af58fe65f608bcc9da5ce2a7915b95b9a03f3dbf7a8badc9fa456480a384da3b"
+    },
+    {
+      "id": "SITE-004",
+      "source": "D:/电脑管家迁移文件/xwechat_files/wxid_s469xrreaccl22_2b82/temp/RWTemp/2026-10/9e20f478899dc29eb19741386f9343c8/5c7b45c4e9de8cd38ee7762e753fd0f3.jpg",
+      "file": "site-004-workshop1-to-workshop4-corridor.jpg",
+      "userConfirmedLocation": "一车间出来到四车间的连廊",
+      "userCaption": "一车间出来到四车间的连廊",
+      "visibleFeatures": [
+        "带窗的封闭连廊横跨道路，连接两侧建筑",
+        "白色与灰色外墙，立面有红色文字",
+        "底部梁柱架空，下面留有道路通行空间",
+        "顶部可见沿连廊走向的管线及栏杆",
+        "两侧建筑沿墙也可见管线"
+      ],
+      "relatedConfirmedContext": [
+        "一车间的连接通入四车间内部，此项来自前序用户说明"
+      ],
+      "unknowns": [
+        "照片左右两侧分别对应哪个车间及准确拍摄朝向",
+        "连廊具体尺寸、层高、窗洞和柱距",
+        "照片顶部管线的具体用途"
+      ],
+      "sha256": "96be92ccdc211b0ee060da2238dc79c3f515db35afe7549b3c7a9946c3854041"
+    },
+    {
+      "id": "SITE-005",
+      "source": "C:/Users/Lenovo/AppData/Local/Temp/codex-clipboard-71a1e4ae-267b-46d0-a956-9f9972970ce8.jpg",
+      "file": "site-005-workshops3-6-corridor.jpg",
+      "userConfirmedLocation": "三车间与六车间之间的连廊",
+      "userCaption": "三六车间的连廊",
+      "visibleFeatures": [
+        "带窗的封闭架空连廊横跨道路，连接两侧建筑",
+        "白色外墙，立面有红色文字",
+        "底部可见梁柱，道路从连廊下方穿过",
+        "顶部可见栏杆",
+        "两侧建筑及道路旁有树木和绿化"
+      ],
+      "unknowns": [
+        "照片左右两侧分别对应哪个车间及准确拍摄朝向",
+        "连廊具体尺寸、层高、窗洞和柱距",
+        "远处其他连廊的具体对应位置"
+      ],
+      "sha256": "eea7210d8daf217ab7280a73977b9781b7ab1d9481e91ee1ff2cd4d5387bde35"
+    },
+    {
+      "id": "SITE-006",
+      "source": "C:/Users/Lenovo/AppData/Local/Temp/codex-clipboard-335e0c2e-0b9c-4847-99fb-a32ecd40b7ee.jpg",
+      "file": "site-006-poqu-wuliang-workshop6-corridors.jpg",
+      "userConfirmedLocation": "破曲与五粮之间的连廊，以及五粮与六车间之间的连廊",
+      "userCaption": "破曲和五粮之间的连廊 以及五粮和六车间直接的连廊",
+      "userConfirmedConnections": [
+        {
+          "from": "原粮破曲",
+          "to": "原粮五粮"
+        },
+        {
+          "from": "原粮五粮",
+          "to": "六车间"
+        }
+      ],
+      "visibleFeatures": [
+        "照片中两段带窗封闭架空建筑在转角处相接",
+        "白灰色外墙，部分立面有红色文字",
+        "下方可见连续梁柱及道路通行空间",
+        "沿外墙可见管线，顶部可见栏杆"
+      ],
+      "unknowns": [
+        "照片中两段连廊各自对应哪一段连接及准确拍摄朝向",
+        "转角的实际角度与各端接入位置",
+        "连廊长度、宽度、高度及柱距"
+      ],
+      "sha256": "fe4a076709284ed74abea9d890935b140f5dad76710679a7bcd4da482c59cb62"
+    },
+    {
+      "id": "SITE-007",
+      "source": "D:/电脑管家迁移文件/xwechat_files/wxid_s469xrreaccl22_2b82/temp/RWTemp/2026-10/9e20f478899dc29eb19741386f9343c8/4447eafaed95d173a76123afd3fb8f32.jpg",
+      "file": "site-007-workshop3-to-poqu-corridor.jpg",
+      "userConfirmedLocation": "三车间到原粮破曲的连廊",
+      "userCaption": "这个是三车间到原粮破曲的连廊",
+      "userConfirmedConnections": [
+        {
+          "from": "三车间",
+          "to": "原粮破曲"
+        }
+      ],
+      "visibleFeatures": [
+        "右侧可见长距离外露钢桁架架空结构",
+        "可见钢立柱、三角斜撑和下方草地",
+        "道路远处可见带窗的横跨连接结构",
+        "两侧建筑之间留有道路和绿化"
+      ],
+      "unknowns": [
+        "照片中各段结构与三车间、破曲的具体端部对应关系",
+        "准确拍摄朝向和连廊转折位置",
+        "长度、宽度、高度及柱距"
+      ],
+      "sha256": "215d179794c93e1aa51641f2d10cf981afbf78535a8c24ea9c057a30da42e06a"
+    },
+    {
+      "id": "SITE-008",
+      "source": "C:/Users/Lenovo/AppData/Local/Temp/codex-clipboard-547258c3-a1ca-42be-ab12-084cededac5e.png",
+      "file": "site-008-workshop3-long-facade.png",
+      "userConfirmedLocation": "三车间长边立面",
+      "visibleFeatures": [
+        "用户确认：只有上方一排窗，下部主要为实墙",
+        "灰色下部墙面与白色竖向构件"
+      ],
+      "unknowns": [
+        "具体窗洞尺寸、数量和比例待现场测量"
+      ],
+      "sha256": "97db22ae68a4e37cf7fd3f71ad46587dc97cc3b3708e51aed0f68bfe6c1ff718"
+    },
+    {
+      "id": "SITE-009",
+      "source": "C:/Users/Lenovo/AppData/Local/Temp/codex-clipboard-be829aa7-4037-4538-8131-3edca3697afc.jpg",
+      "file": "site-009-workshop3-short-facade.jpg",
+      "userConfirmedLocation": "三车间短边立面及三六连廊",
+      "visibleFeatures": [
+        "用户确认：宽的这一面玻璃较多",
+        "可见多层窗户和连接厂房的架空连廊"
+      ],
+      "unknowns": [
+        "具体窗洞尺寸、数量和比例待现场测量"
+      ],
+      "sha256": "eea7210d8daf217ab7280a73977b9781b7ab1d9481e91ee1ff2cd4d5387bde35"
+    }
+  ],
+  "latestGeometryCorrections": [
+    "BB6在四车间内，后续皮带接出到河西连廊",
+    "河流按最新箭头方向，仅轻微弯曲，不绕回七车间",
+    "备件库在五粮一楼内部朝向六车间的角部，按红框落位；破曲五粮连廊按箭头移至边缘",
+    "三楼连廊闭环；中央三二与六五之间不添加竖向连廊",
+    "三车间长边仅上部一排窗，短边玻璃更多"
+  ]
+}

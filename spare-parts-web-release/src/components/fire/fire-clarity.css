@@ -1,0 +1,60 @@
+.fire-detail-phone-intro{display:none}
+.fire-filter-row.fire-overview-toolbar{margin:0 0 20px;gap:12px}
+.fire-overview-toolbar>.fire-month-counts{margin-left:auto;padding:0;gap:20px;flex-wrap:nowrap;flex-shrink:0;font-size:14px;white-space:nowrap}
+@media(max-width:1040px){.fire-overview-toolbar>.fire-month-counts{flex-basis:100%;justify-content:flex-end;white-space:normal;flex-wrap:wrap;gap:14px}}
+.fire-filter-row.fire-ledger-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:0}
+.fire-ledger-toolbar>.el-select{width:150px;flex:0 0 150px}
+.fire-ledger-toolbar>.el-input{width:auto;flex:1 1 200px;min-width:160px}
+.fire-ledger-toolbar>.fire-ledger-actions{margin-left:auto;gap:8px;flex-wrap:nowrap}
+.fire-ledger-actions>.el-button{margin-left:0}
+.fire-ledger-table .el-table__cell{padding:8px 0}
+.fire-ledger-row-actions{display:inline-flex;align-items:center;gap:12px;flex-wrap:nowrap;white-space:nowrap}#app .fire-ledger-table .fire-ledger-row-actions>.el-button{margin:0;min-width:0;min-height:32px;padding:0 3px;white-space:nowrap}
+@media(min-width:1100px){.fire-filter-row.fire-ledger-toolbar{flex-wrap:nowrap}.fire-ledger-toolbar>.el-select{width:130px;flex-basis:130px}.fire-ledger-toolbar>.fire-ledger-actions{flex-shrink:0}}
+@media(max-width:760px){
+ body:not(.workbench-mobile) .fire-point-dialog .el-tabs__header{display:block}
+ .fire-point-dialog .fire-detail-wide-title,.fire-point-dialog .fire-detail-summary,.fire-point-dialog .asset-order-caption,.fire-point-dialog .el-tabs__header{display:none}
+ .fire-point-dialog .fire-detail-phone-intro{display:block;margin-bottom:14px}
+ .fire-detail-phone-intro>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+ .fire-detail-phone-intro strong{font-size:18px;overflow-wrap:anywhere}
+ .fire-detail-phone-intro p{font-size:13px;line-height:1.6;margin:8px 0;color:#627083}
+ .fire-point-dialog .photo-recognition{padding:0;border:0;background:transparent}
+ .fire-ledger-toolbar>.fire-ledger-actions{width:100%;flex-wrap:wrap;margin-left:0}
+}
+
+/* The field dialog has its own compact composition; desktop tabs stay intact. */
+body.workbench-mobile .fire-app-point-dialog{width:calc(100% - 16px)!important;max-width:560px;max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px);display:flex;flex-direction:column;padding:0!important;border-radius:14px!important;margin:auto!important;overflow:hidden}
+body.workbench-mobile .fire-app-point-dialog .el-dialog__header{height:0;min-height:0!important;padding:0!important;margin:0!important;border:0;flex:none;overflow:visible}
+body.workbench-mobile .fire-app-point-dialog .el-dialog__headerbtn{width:32px;height:32px;top:9px;right:8px;z-index:2}
+body.workbench-mobile .fire-app-point-dialog .el-dialog__body{padding:16px 16px 4px;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain}
+body.workbench-mobile .fire-app-point-dialog .fire-detail-wide-title,body.workbench-mobile .fire-app-point-dialog .fire-detail-summary,body.workbench-mobile .fire-app-point-dialog .asset-order-caption,body.workbench-mobile .fire-app-point-dialog .el-tabs__header{display:none}
+body.workbench-mobile .fire-app-point-dialog .fire-detail-phone-intro{display:block;margin:0 0 10px}
+body.workbench-mobile .fire-app-point-dialog .fire-detail-phone-intro>header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-right:0}
+body.workbench-mobile .fire-app-point-dialog .fire-detail-phone-intro strong{font-size:18px;font-weight:650;color:#20384c;line-height:1.4;flex:1;min-width:0}
+body.workbench-mobile .fire-app-point-dialog .fire-detail-phone-intro .point-state{font-size:10px;padding:3px 6px;border-radius:4px;flex:none}
+body.workbench-mobile .fire-app-point-dialog .fire-detail-phone-intro .fire-detail-location{display:flex;align-items:flex-start;gap:4px;color:#81909c;font-size:11px;line-height:1.55;margin:5px 0 0}
+body.workbench-mobile .fire-app-point-dialog .fire-detail-location>.el-icon{margin-top:2px;flex:none}
+body.workbench-mobile .fire-app-point-dialog .fire-camera-launch{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px;border-radius:9px;background:#aa3147}
+body.workbench-mobile .fire-app-point-dialog .fire-camera-launch>.el-icon{font-size:20px}
+body.workbench-mobile .fire-app-point-dialog .fire-camera-launch>strong{font-size:14px;font-weight:600;line-height:1.5}
+body.workbench-mobile .fire-app-point-dialog .el-dialog__footer{padding:10px 16px 12px;margin:0;border-top:1px solid #edf0f3;background:#fff;flex:none}
+body.workbench-mobile .fire-app-point-dialog .fire-photo-save-footer{display:flex;align-items:center;gap:12px;min-height:42px}
+body.workbench-mobile .fire-app-point-dialog .fire-photo-save-footer>div{display:flex;flex:1;align-items:center;gap:8px;font-size:11px;color:#a4753f}
+body.workbench-mobile .fire-app-point-dialog .fire-photo-save-footer>div>.el-button{padding:6px 0;margin:0;font-size:11px;color:#909ca6;min-height:32px}
+body.workbench-mobile .fire-app-point-dialog .fire-photo-save-footer>.el-button{min-width:126px;min-height:42px;border-radius:8px;margin:0;font-size:14px}
+body.workbench-mobile .fire-app-point-dialog .fire-history{margin:0;padding:0;border:0}
+body.workbench-mobile .fire-app-point-dialog .fire-same-location{padding:0;min-height:36px;margin-bottom:8px;color:#748799}
+body.workbench-mobile .fire-issue-action-dialog{max-width:520px;border-radius:16px!important;padding:0!important}
+body.workbench-mobile .fire-issue-action-dialog .el-dialog__header{padding:18px 20px 14px;margin:0;border:0}
+body.workbench-mobile .fire-issue-action-dialog .el-dialog__title{font-size:17px;font-weight:600}
+body.workbench-mobile .fire-issue-action-dialog .el-dialog__headerbtn{width:44px;height:44px;top:7px;right:7px}
+body.workbench-mobile .fire-issue-action-dialog .el-dialog__body{padding:0 20px 16px}
+body.workbench-mobile .fire-issue-action-dialog .el-textarea__inner{font-size:14px;line-height:1.6;border-radius:9px;padding:10px 12px}
+body.workbench-mobile .fire-issue-action-dialog .issue-photo-form>p{font-size:12px;color:#8796a3;margin:16px 0 8px}
+body.workbench-mobile .fire-issue-action-dialog .issue-photo-form>.el-button{width:100%;min-height:44px;border-radius:9px;font-size:13px}
+body.workbench-mobile .fire-issue-action-dialog .el-dialog__footer{display:flex;gap:8px;padding:12px 20px 18px}
+body.workbench-mobile .fire-issue-action-dialog .el-dialog__footer>.el-button{flex:1;margin:0;min-height:44px;font-size:13px;border-radius:9px}
+
+body.workbench-mobile .fire-app-point-dialog .fire-point-close{width:28px;height:28px;padding:0;margin:0 -3px 0 0;display:flex;align-items:center;justify-content:center;border:0;background:transparent;color:#929ca5;font-size:19px;flex:none;border-radius:5px;cursor:pointer}
+body.workbench-mobile .fire-app-point-dialog .fire-point-close:disabled{opacity:.45;cursor:default}
+
+body.workbench-mobile .fire-app-point-dialog .fire-result-abnormal{background:#fff0f2;color:#b32a43}

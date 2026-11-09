@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-04T18:07:11.9029829Z",
+  "target": "local computer",
+  "command": "shutdown.exe /s /t 0",
+  "force": false,
+  "serverShutdown": false,
+  "status": "normal-shutdown-request-accepted",
+  "physicalPowerOffObserved": false,
+  "exitCode": 0
+}

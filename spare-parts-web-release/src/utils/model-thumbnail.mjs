@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { PUBLIC_PART_MODEL, createPublicPartModel } from './public-part-model.mjs'
 
 // Serialize card renders through one temporary context, rather than one per card.
 const cache = new Map()
@@ -22,11 +21,14 @@ async function renderThumbnail(url, rotation) {
   let root
   clearTimeout(releaseTimer)
   try {
-    root = url === PUBLIC_PART_MODEL ? createPublicPartModel() : (await new GLTFLoader().loadAsync(url)).scene
+    root = (await new GLTFLoader().loadAsync(url)).scene
     if (!renderer) {
       renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true })
       renderer.setSize(400, 320)
       renderer.setPixelRatio(1)
+      renderer.outputColorSpace = THREE.SRGBColorSpace
+      renderer.toneMapping = THREE.ACESFilmicToneMapping
+      renderer.toneMappingExposure = .95
     }
     root.rotation.y = Number(rotation) || 0
     root.updateMatrixWorld(true)
@@ -36,13 +38,17 @@ async function renderThumbnail(url, rotation) {
     if (!Number.isFinite(extent) || extent <= 0) throw new Error('模型没有有效几何尺寸')
     root.position.sub(box.getCenter(new THREE.Vector3()))
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color('#f5f7fa')
-    scene.add(root, new THREE.HemisphereLight(0xffffff, 0x8996a8, 3))
-    const light = new THREE.DirectionalLight(0xffffff, 3)
+    // Mid-tone backdrop so white/grey plastic shells do not merge into the card.
+    scene.background = new THREE.Color('#e7edf3')
+    scene.add(root, new THREE.HemisphereLight(0xffffff, 0x55616e, 1.55))
+    const light = new THREE.DirectionalLight(0xffffff, 2.35)
     light.position.set(extent, extent * 2, extent * 3)
     scene.add(light)
+    const fill = new THREE.DirectionalLight(0xdbe8f3, .7)
+    fill.position.set(-extent * 1.4, extent * .5, -extent * 1.2)
+    scene.add(fill)
     const camera = new THREE.PerspectiveCamera(34, 1.25, extent / 100, extent * 100)
-    camera.position.set(extent * .65, extent * .4, extent * 2.7)
+    camera.position.set(extent * .55, extent * .38, extent * 2.1)
     camera.lookAt(0, 0, 0)
     renderer.render(scene, camera)
     return renderer.domElement.toDataURL('image/png')

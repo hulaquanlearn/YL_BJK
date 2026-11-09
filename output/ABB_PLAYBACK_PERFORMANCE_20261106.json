@@ -1,0 +1,140 @@
+{
+  "at": "2026-11-06T02:48:28.251Z",
+  "id": "abb-playback-performance-20261106",
+  "status": "deployed-and-verified",
+  "checks": 6264,
+  "webFiles": 1054,
+  "changedWebFiles": 31,
+  "removedObsoleteWebFiles": 30,
+  "apiFiles": 0,
+  "protectedFiles": 983,
+  "protectedPreserved": true,
+  "androidUnchanged": true,
+  "rollback": "/opt/spare-parts/rollback/abb-playback-performance-20261106",
+  "servicesRestarted": false,
+  "version": "V1.9.10",
+  "webTests": 681,
+  "apiTestsRerun": false,
+  "apiUnchanged": true,
+  "buildPassed": true,
+  "permissionsVerified": [
+    "admin",
+    "brewing",
+    "raw_grain",
+    "viewer"
+  ],
+  "temporaryTestSessionsRemoved": true,
+  "android": {
+    "versionCode": 24,
+    "versionName": "1.9.10-android.24",
+    "sha256": "e41eeb3e970e84f1a6f400ab29aa2cd07df7834d681f29196a7dbfa2eeceaeb2",
+    "url": "https://czsdsg.cn/app-updates/android/digital-workbench-1.9.10-android.24.apk"
+  },
+  "profileComparison": {
+    "note": "Same first-window CPU samples; separate browser run, not an FPS or end-to-end timing benchmark. Full after capture includes idle after 120 mm completed.",
+    "before": {
+      "windowMs": 62943.03100000102,
+      "functionsMs": {
+        "vue": 7355.487999999989,
+        "labels": 7815.028999999994,
+        "setProgram": 9120.46099999999,
+        "material": 6414.69999999999
+      }
+    },
+    "after": {
+      "windowMs": 62943.03100000102,
+      "functionsMs": {
+        "vue": 4651.250000000014,
+        "material": 2658.5909999999976,
+        "labels": 333.57199999999995,
+        "setProgram": 3405.0709999999945
+      }
+    },
+    "afterFull": {
+      "windowMs": 376471.1410000008,
+      "functionsMs": {
+        "vue": 30537.04300000016,
+        "material": 15414.256000000029,
+        "labels": 840.3040000000001,
+        "setProgram": 24684.936000000158
+      }
+    }
+  },
+  "browser": {
+    "speedPercent": 100,
+    "playbackRate": 1,
+    "fullFlowHeightMm": 120,
+    "complete": true,
+    "fillCount": 6,
+    "end": {
+      "file": "ModMain.mod",
+      "line": 339,
+      "source": "EXIT;"
+    },
+    "restartReturnedHome": true,
+    "selectedRoutine": {
+      "name": "GoHome",
+      "completed": true,
+      "line": 313
+    },
+    "consoleErrors": 0,
+    "screenshot": "docs/validation/20261106-abb-performance/complete-120mm.png"
+  },
+  "baselineFlowEvidence": {
+    "reference": "output/ABB_MODEL_FINAL_VERIFY_20261106.json",
+    "rerun800mmThisPatch": false
+  },
+  "sourceHashes": {
+    "src/components/agv/AbbRobotViewer.vue": "8789c1c9e7a219704d28706594adfa8c72b7e9193c81d59af816f532d8dfa171",
+    "src/components/agv/AbbProgramControl.vue": "66bc9d3cbe465039c34c3c53d7b2c9d9fec96b2e0dadec51885e52063ae81d4b",
+    "src/utils/model-surface-anchor.mjs": "dcc80ad8e5005e5354fdedfc7c09045db3ad10118701af43c9b43fa535986844",
+    "src/utils/abb-material-simulation.mjs": "058fed432f4d778e5532b3988a090f9e2e35341e70444458dcf33a0bf83e1cad",
+    "src/utils/model-animation-clock.mjs": "90cdda4814fcea53797f195895d0b8100daf992a6512c05e21d76b14af8e5928",
+    "src/utils/model-part-materials.mjs": "1d9724eff3a2f4dd99f8e433cc542c575b2b1e0439dd3042c883851ce9788ac6"
+  },
+  "nativeRuntimeVerified": false,
+  "realControllerVerified": false,
+  "cleanup": {
+    "local": {
+      "preservedBuild": "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\dist",
+      "shutdownScheduled": false,
+      "at": "2026-11-06T02:51:12.1987325Z",
+      "previewStopped": true,
+      "recycled": [
+        {
+          "status": "recycled",
+          "path": "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\dist",
+          "bytes": 214595004
+        },
+        {
+          "status": "recycled",
+          "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-performance-20261106\\payload",
+          "bytes": 2799780
+        },
+        {
+          "status": "recycled",
+          "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-performance-20261106\\payload.tar.gz",
+          "bytes": 848390
+        },
+        {
+          "status": "recycled",
+          "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-performance-20261106\\tmp",
+          "bytes": 289620
+        },
+        {
+          "status": "recycled",
+          "path": "D:\\wx_xiangm\\xiangmu\\output\\qa-temp-performance-20261106",
+          "bytes": 2187528
+        }
+      ]
+    },
+    "server": {
+      "at": "2026-11-06T02:51:07.962Z",
+      "source": "/opt/spare-parts/staging/abb-playback-performance-20261106",
+      "target": "/opt/spare-parts/recycle-bin/abb-playback-performance-20261106/staging",
+      "restore": "Move staging back to original source path only for inspection; active web/dist and rollback remain intact."
+    }
+  },
+  "localBuildDirectory": "spare-parts-web-release/dist",
+  "localBuildFilesVerified": 1054
+}

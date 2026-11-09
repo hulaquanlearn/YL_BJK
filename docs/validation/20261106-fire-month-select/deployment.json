@@ -1,0 +1,18 @@
+{
+  "at": "2026-11-06T07:05:37.639Z",
+  "id": "fire-month-select-20261106",
+  "status": "deployed-and-verified",
+  "checks": 8737,
+  "webFiles": 1055,
+  "changedWebFiles": 30,
+  "removedObsoleteWebFiles": 29,
+  "apiFiles": 2,
+  "protectedFiles": 989,
+  "protectedPreserved": true,
+  "androidUnchanged": true,
+  "webProcessesPreserved": true,
+  "restarted": [
+    "spare-parts-api"
+  ],
+  "rollback": "/opt/spare-parts/rollback/fire-month-select-20261106"
+}

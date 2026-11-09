@@ -27,7 +27,9 @@ function powerSupply(item,detailed) {
   const front=depth/2, rear=-depth/2, wide=item.id.includes('480')
   box('metal-enclosure',(width-2)*s,(height-4.2)*s,(depth-5.5)*s,0,63*s,0)
   box('front-panel',width*s,height*s,1.4*s,0,height/2*s,(front-2.05)*s)
-  box('din-rail-latch',18*s,45*s,3.1*s,0,40*s,(rear+1.55)*s,black)
+  // The detail level reaches the declared front face with its terminal screws; the
+  // simplified level omits those screws, so its rear DIN clip supplies the same 0.1 mm.
+  box('din-rail-latch',18*s,45*s,(detailed?3.1:3.2)*s,0,40*s,(rear+(detailed?1.55:1.5))*s,black)
   for(const [count,y] of [[4,116],[3,8]]) {
     const x=wide?(count===4?-20:10):-4
     box('terminal-block',count*6.2*s,11*s,2.7*s,x*s,y*s,(front-1.45)*s,black)

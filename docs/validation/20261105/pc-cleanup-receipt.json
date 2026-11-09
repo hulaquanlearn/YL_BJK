@@ -1,0 +1,463 @@
+{
+  "At": "2026-11-05T01:41:02.1085134+08:00",
+  "Method": "Windows system recycle bin",
+  "PermanentDeletion": false,
+  "TrashEmptied": false,
+  "Rows": [
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\abb-device-20261104",
+      "Bytes": 2881793824,
+      "Files": 13258,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\abb-workcell-controls-20261104",
+      "Bytes": 936550147,
+      "Files": 4359,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\abb-program-layout-20261104",
+      "Bytes": 721959541,
+      "Files": 3262,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\abb-loading-20261104",
+      "Bytes": 718733617,
+      "Files": 3130,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\control-passwords-20261104",
+      "Bytes": 252463535,
+      "Files": 1231,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\output\\rollback",
+      "Bytes": 172204703,
+      "Files": 11,
+      "Reason": "old-release-rollback",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\spare-final-20261103",
+      "Bytes": 134314362,
+      "Files": 111,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\modeling",
+      "Bytes": 129036922,
+      "Files": 70,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\agv-old-photo-crops-20261103",
+      "Bytes": 74175375,
+      "Files": 16,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\agv-retirement-20261103",
+      "Bytes": 72840911,
+      "Files": 290,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\spare-rebuild-all-20261102",
+      "Bytes": 67995693,
+      "Files": 653,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\portal-login-20261029",
+      "Bytes": 66465373,
+      "Files": 117,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\agv-photo-correction-20261103",
+      "Bytes": 52759051,
+      "Files": 222,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\agv-third-joint-20261103",
+      "Bytes": 40854030,
+      "Files": 44,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\fire-ledger-20261103",
+      "Bytes": 38353747,
+      "Files": 209,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\agv-second-joint-20261103",
+      "Bytes": 31234934,
+      "Files": 30,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\gpt-usage-20261102",
+      "Bytes": 21239393,
+      "Files": 127,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\ai-choice-ui-20261029",
+      "Bytes": 20213396,
+      "Files": 85,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\output\\spare-parts-v1.9.10-20261019-full-robot-reader-current-attendance.tar.gz",
+      "Bytes": 17326782,
+      "Files": 1,
+      "Reason": "old-release",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\agv-model-20261102",
+      "Bytes": 13774270,
+      "Files": 97,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\spare-model-audit-20261102",
+      "Bytes": 7321604,
+      "Files": 48,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\model-repair-20261023",
+      "Bytes": 6739484,
+      "Files": 262,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\app-media-20261102",
+      "Bytes": 3240615,
+      "Files": 3843,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\retirement-20261018",
+      "Bytes": 3152983,
+      "Files": 397,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\app-ui-20261027",
+      "Bytes": 2215274,
+      "Files": 53,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-20261027",
+      "Bytes": 2204099,
+      "Files": 68,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\fire-monthly-20261102",
+      "Bytes": 2202465,
+      "Files": 121,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\account-redesign-20261103",
+      "Bytes": 2169508,
+      "Files": 16,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\tmp",
+      "Bytes": 2027360,
+      "Files": 188,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\robot-program-qa",
+      "Bytes": 1937513,
+      "Files": 33,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\app-filing-20261027",
+      "Bytes": 1871579,
+      "Files": 21,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\cross-client-20261102",
+      "Bytes": 1775766,
+      "Files": 78,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\knowledge-library-20261103",
+      "Bytes": 1660539,
+      "Files": 14,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\online-app-20261019",
+      "Bytes": 1082162,
+      "Files": 44,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\model-identity-20261103",
+      "Bytes": 982096,
+      "Files": 16,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\web-app-joint-20261102",
+      "Bytes": 648180,
+      "Files": 41,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\joint-continuation-20261103",
+      "Bytes": 644017,
+      "Files": 11,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\agv-joint-20261102",
+      "Bytes": 590282,
+      "Files": 26,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\abb-program-20261104",
+      "Bytes": 409229,
+      "Files": 28,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\personal-simplification-20261103",
+      "Bytes": 302177,
+      "Files": 22,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\robot-program-fix-20261018",
+      "Bytes": 244680,
+      "Files": 13,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\agv-collab-20261102",
+      "Bytes": 32942,
+      "Files": 2,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\exports",
+      "Bytes": 4601,
+      "Files": 1,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\Desktop\\trustfixservice-backup.reg",
+      "Bytes": 1350,
+      "Files": 1,
+      "Reason": "explicit-backup-review",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\Desktop\\TrustService-backup.reg",
+      "Bytes": 1292,
+      "Files": 1,
+      "Reason": "explicit-backup-review",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\robot-program-quota-20261018",
+      "Bytes": 1265,
+      "Files": 3,
+      "Reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright-artifacts-5NSGma",
+      "Bytes": 0,
+      "Files": 0,
+      "Reason": "old-browser-test-cache",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright-artifacts-l8QMU7",
+      "Bytes": 0,
+      "Files": 0,
+      "Reason": "old-browser-test-cache",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright-artifacts-NYXxlD",
+      "Bytes": 0,
+      "Files": 0,
+      "Reason": "old-browser-test-cache",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-6ww5rL",
+      "Bytes": 0,
+      "Files": 0,
+      "Reason": "old-browser-test-cache",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-bHEwGf",
+      "Bytes": 0,
+      "Files": 0,
+      "Reason": "old-browser-test-cache",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-eqf5nM",
+      "Bytes": 0,
+      "Files": 0,
+      "Reason": "old-browser-test-cache",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-FYqWvm",
+      "Bytes": 0,
+      "Files": 0,
+      "Reason": "old-browser-test-cache",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\DockerDesktopBackup",
+      "Bytes": 0,
+      "Files": 0,
+      "Reason": "explicit-backup-review",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\digital-workbench\\DigitalWorkbench.exe.previous",
+      "Bytes": 154112,
+      "Files": 1,
+      "Reason": "另一项目被当前正式exe替代的旧exe恢复副本",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\android-app\\releases\\1.9.10-android.22",
+      "Bytes": 2026014,
+      "Files": 3,
+      "Reason": "已被正式android.23替代的旧签名包副本",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\android-app\\app\\build",
+      "Bytes": 44527393,
+      "Files": 1210,
+      "Reason": "已验证APK在releases/android.23及服务器保留，编译中间件可重建",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\android-app\\build",
+      "Bytes": 126099,
+      "Files": 1,
+      "Reason": "可重建Android构建报告",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\dist",
+      "Bytes": 109719827,
+      "Files": 714,
+      "Reason": "已被本轮997输入稳定构建替代，之后移入最新build",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\npm-cache\\_cacache",
+      "Bytes": 839819807,
+      "Files": 2833,
+      "Reason": "npm下载内容缓存，不影响已安装依赖",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\npm-cache\\_logs",
+      "Bytes": 25549,
+      "Files": 11,
+      "Reason": "已完成npm操作日志",
+      "Status": "recycled"
+    },
+    {
+      "Source": "C:\\Users\\Lenovo\\AppData\\Local\\pip\\Cache",
+      "Bytes": 113379743,
+      "Files": 69,
+      "Reason": "pip下载缓存，不是已安装运行时",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\attendance-before-retry.json",
+      "Bytes": 7768677,
+      "Files": 1,
+      "Reason": "旧隔离履职验证前恢复副本",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\.local\\attendance-before-update.json",
+      "Bytes": 12039442,
+      "Files": 1,
+      "Reason": "旧隔离履职验证前恢复副本",
+      "Status": "recycled"
+    },
+    {
+      "Source": "D:\\wx_xiangm\\xiangmu\\output\\SHA256SUMS-V1.9.10.txt",
+      "Bytes": 140,
+      "Files": 1,
+      "Reason": "已回收历史整站包的旧校验清单",
+      "Status": "recycled"
+    }
+  ]
+}

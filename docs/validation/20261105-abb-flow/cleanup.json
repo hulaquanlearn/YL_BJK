@@ -1,0 +1,115 @@
+{
+  "at": "2026-11-05T10:38:05.909Z",
+  "localBuilds": [
+    "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-final",
+    "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-normal-speed-verified",
+    "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload",
+    "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-continuous"
+  ],
+  "localFiles": [
+    "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\program-footer.png",
+    "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\full-left-800-before-surface-revision.png",
+    "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\continuous-surface-progress.png",
+    "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\deploy-continuous.tar.gz"
+  ],
+  "server": {
+    "original": "/opt/spare-parts/staging/abb-continuous-20261105",
+    "destination": "/opt/spare-parts/recycle-bin/abb-continuous-20261105-staging/staging",
+    "liveVerified": true
+  },
+  "method": "recoverable recycle; no trash emptied",
+  "kept": [
+    "latest verified web build",
+    "DSH frozen delivery",
+    "source/test logs",
+    "current and previous server rollback",
+    "all business data/uploads/private config"
+  ],
+  "infrared": {
+    "local": [
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-continuous-final",
+        "at": "2026-11-05T19:52:49.9288484+08:00",
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-infrared-verified",
+        "at": "2026-11-05T19:52:50.8088447+08:00",
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-feedback",
+        "at": "2026-11-05T19:52:51.0043197+08:00",
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-infrared",
+        "at": "2026-11-05T19:52:51.3460847+08:00",
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-infrared-dwell",
+        "at": "2026-11-05T19:52:51.4282461+08:00",
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\feedback-payload.tar.gz",
+        "at": "2026-11-05T19:52:51.4518864+08:00",
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\infrared-payload.tar.gz",
+        "at": "2026-11-05T19:52:51.4728547+08:00",
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\infrared-dwell-payload.tar.gz",
+        "at": "2026-11-05T19:52:51.4912957+08:00",
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\infrared-active-120.png",
+        "at": "2026-11-05T19:52:51.5124004+08:00",
+        "reason": "superseded by final 120mm proof",
+        "method": "Windows Recycle Bin"
+      },
+      {
+        "path": "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\infrared-hydraulic-40-completed.png",
+        "at": "2026-11-05T19:52:51.5320157+08:00",
+        "reason": "superseded by final 120mm proof",
+        "method": "Windows Recycle Bin"
+      }
+    ],
+    "server": [
+      {
+        "at": "2026-11-05T11:52:47.204Z",
+        "original": "/opt/spare-parts/staging/abb-height-feedback-20261105",
+        "destination": "/opt/spare-parts/recycle-bin/abb-height-feedback-20261105-staging/staging",
+        "liveVerified": true,
+        "restore": "Move staging back to original path only when unused. Deploy input and QA logs only; no live code, business data, private config or rollback moved."
+      },
+      {
+        "at": "2026-11-05T11:52:47.205Z",
+        "original": "/opt/spare-parts/staging/abb-infrared-hydraulic-20261105",
+        "destination": "/opt/spare-parts/recycle-bin/abb-infrared-hydraulic-20261105-staging/staging",
+        "liveVerified": true,
+        "restore": "Move staging back to original path only when unused. Deploy input and QA logs only; no live code, business data, private config or rollback moved."
+      },
+      {
+        "at": "2026-11-05T11:52:47.205Z",
+        "original": "/opt/spare-parts/staging/abb-infrared-dwell-20261105",
+        "destination": "/opt/spare-parts/recycle-bin/abb-infrared-dwell-20261105-staging/staging",
+        "liveVerified": true,
+        "restore": "Move staging back to original path only when unused. Deploy input and QA logs only; no live code, business data, private config or rollback moved."
+      }
+    ],
+    "liveVerified": true,
+    "method": "recoverable recycle; no trash emptied",
+    "kept": [
+      "latest verified web build",
+      "source/test logs",
+      "server rollbacks",
+      "business data/uploads/private config"
+    ]
+  }
+}

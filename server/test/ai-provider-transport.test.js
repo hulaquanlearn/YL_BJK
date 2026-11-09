@@ -1,0 +1,18 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),{EventEmitter}=require('node:events');
+const T=require('../src/ai-provider-transport');
+test('provider URLs reject private, loopback, reserved, credentialed, injected and redirected destinations',async()=>{
+ for(const value of ['http://public.example.net/chat/completions','https://127.0.0.1/chat/completions','https://2130706433/chat/completions','https://10.1.2.3/chat/completions','https://169.254.169.254/chat/completions','https://[::1]/chat/completions','https://[::ffff:127.0.0.1]/chat/completions','https://localhost/chat/completions','https://user:key@public.example.net/chat/completions','https://public.example.net/chat/completions?url=http://127.0.0.1','https://public.example.net/chat/completions#x','https://public.example.net/%2e%2e/chat/completions','https://public.example.net/../chat/completions'])assert.throws(()=>T.endpoint(value),{status:400},value);
+ for(const address of ['0.0.0.0','100.64.0.1','192.168.1.1','172.31.0.1','198.18.0.1','224.0.0.1','2001:db8::1','2001:0db8::1','fc00::1'])assert.equal(T.publicAddress(address),false,address);assert.equal(T.publicAddress('8.8.8.8'),true);assert.equal(T.publicAddress('2606:4700:4700::1111'),true);
+ await assert.rejects(()=>T.resolvePublic('public.example.net',async()=>[{address:'8.8.8.8',family:4},{address:'127.0.0.1',family:4}]),{status:400});
+});
+function syntheticRequest({status=200,body='{"ok":true}',inspect=()=>{}}={}){return (url,options,callback)=>{inspect(url,options);const req=new EventEmitter();req.setTimeout=()=>req;req.write=()=>{};req.destroy=()=>{};req.end=()=>queueMicrotask(()=>{const res=new EventEmitter();res.statusCode=status;res.headers={'content-type':'application/json'};res.resume=()=>{};res.destroy=()=>{};callback(res);if(status<300||status>=400){res.emit('data',Buffer.from(body));res.emit('end')}});return req};}
+test('TLS hostname remains the URL host while its socket lookup is pinned to the prevalidated public address',async()=>{
+ let lookups=0,pinned,all;const fetch=T.createProviderFetch({lookup:async()=>{lookups++;return [{address:'8.8.8.8',family:4}]},request:syntheticRequest({inspect:(url,options)=>{assert.equal(url.hostname,'gateway.example.net');assert.equal(url.protocol,'https:');assert.notEqual(options.rejectUnauthorized,false);assert.equal(options.agent,false);options.lookup(url.hostname,{},(_error,address,family)=>{pinned={address,family}});options.lookup(url.hostname,{all:true},(_error,addresses)=>{all=addresses});}})});const response=await fetch('https://gateway.example.net/v1/chat/completions',{method:'POST',body:'{}'});assert.deepEqual(await response.json(),{ok:true});assert.equal(lookups,1);assert.deepEqual(pinned,{address:'8.8.8.8',family:4});assert.equal(all[0].address,'8.8.8.8');
+});
+test('transport refuses redirects and oversized responses without a second request',async()=>{
+ const lookup=async()=>[{address:'8.8.8.8',family:4}];for(const options of [{status:302},{body:'x'.repeat(20)}]){const fetch=T.createProviderFetch({lookup,maxBytes:10,request:syntheticRequest(options)});await assert.rejects(()=>fetch('https://gateway.example.net/chat/completions'),{status:502});}
+});
+test('an aborted DNS lookup returns promptly and never starts an HTTPS request',async()=>{
+ const controller=new AbortController();let requests=0;const fetch=T.createProviderFetch({lookup:()=>new Promise(()=>{}),request:()=>{requests++;throw Error('must not start')}}),pending=fetch('https://gateway.example.net/chat/completions',{signal:controller.signal});controller.abort();await assert.rejects(()=>pending,{name:'AbortError'});assert.equal(requests,0);
+});

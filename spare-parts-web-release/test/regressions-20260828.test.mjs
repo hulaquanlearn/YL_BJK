@@ -52,7 +52,7 @@ test('warehouse uses category models without a duplicate library button', () => 
   assert.doesNotMatch(warehouse, /@click="openModelLibrary/)
   assert.match(warehouse, /function modelUrlFor/)
   assert.doesNotMatch(warehouse, /part\.modelUrl \|\| part\.categoryModelUrl/)
-  assert.match(warehouse, /partModelMode = ref\('all'\)/)
+  assert.match(warehouse, /partModelMode = ref\(nativeAndroid \? 'hidden' : 'all'\)/)
 })
 
 test('inventory supports scoped part creation, editable xlsx import and filtered export', () => {
@@ -93,11 +93,11 @@ test('stock adjustment only asks for the recipient or handler', () => {
   assert.doesNotMatch(inventory, /label="(部门|关联设备|维修工单)"/)
 })
 
-test('statistics and replenishment keep the selected workshop scope', () => {
+test('statistics keeps its query scope and replenishment navigation follows the selected stock record workshop', () => {
   assert.match(statistics, /workshopCode: workshopCode\.value/)
   assert.match(statistics, /goScoped\('\/replenishment'\)/)
   assert.match(replenishment, /inventoryScope\(route\.query\)/)
-  assert.match(replenishment, /inventoryRouteQuery\(query/)
+  assert.match(replenishment, /inventoryRouteQuery\(\{workshopCode:row\.workshopCode\}/)
   assert.match(replenishment, /function search\(\)[\s\S]*?clearSelection\(\)/)
   assert.match(replenishment, /建议量 = 最高储备 − 当前库存/)
   assert.doesNotMatch(replenishment, /导出 CSV|exportCsv|当前 \/ 在途/)
@@ -108,7 +108,7 @@ test('3D room keeps only the entrance wall and part selection preserves shelf co
   assert.match(warehouse, /entranceWall/)
   assert.doesNotMatch(warehouse, /selectedLayers\.value = \[Number\(location\.layer\)\]/)
   assert.match(warehouse, /const aisleDistance = shelf\.size\.depth \* 0\.5 \+ 2\.15/)
-  assert.match(warehouse, /const centerwardOffset = Math\.min\(Math\.max\(-placement\.x \* 0\.58/)
+  assert.match(warehouse, /direction\.normalize\(\)/)
 })
 
 test('imports provide templates, preflight validation and actionable row errors', () => {
@@ -137,7 +137,7 @@ test('equipment uses an inline model workspace with compact counts and no market
 
 test('knowledge files always expose online reading and owner-aware deletion', () => {
   assert.match(knowledge, /function canPreview\(item\)\{return Boolean\(item\?\.hasFile\)\}/)
-  assert.match(knowledge, /detail\.canDelete/)
+  assert.match(knowledge, /detail\?\.canDelete/)
   assert.match(knowledge, /sandbox/)
   assert.match(knowledge, /设备故障知识问答/)
 })
@@ -161,7 +161,7 @@ test('compact filters and category models avoid unnecessary visual clutter', () 
   assert.doesNotMatch(warehouse, /systemCategoryModels/)
   assert.doesNotMatch(modelLibrary, /system-model-strip/)
   assert.match(modelLibrary, /物料绑定/)
-  assert.match(modelLibrary, /模型目录/)
+  assert.match(modelLibrary, /模型展示台/)
   assert.doesNotMatch(modelLibrary, /批量上传专用3D/)
   assert.match(modelLibrary, /openSingleBinding\(item\)/)
   assert.match(modelLibrary, /搜索关键词（可选）/)

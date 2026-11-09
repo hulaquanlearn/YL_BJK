@@ -1,0 +1,313 @@
+p {
+	margin-top: 0px;
+	margin-bottom: 5px;
+	padding: 0;
+}
+
+li p {
+	margin-bottom: 0px;
+}
+
+.computerscripts p {
+	margin-bottom: 0px;
+}
+
+BODY {
+	font-family: verdana;
+	font-size: 11px;
+	margin-left: 5px;
+	margin-right:15px
+}
+
+TABLE {
+	font-size: 11px;
+}
+
+.unorderedList, .orderedList, .orderedListLevel2, .orderedListLevel3 {
+	display: block;
+	margin-left: 30px;
+	margin-right: 10%;
+	margin-bottom: 10px;
+	margin-top: 5px;
+}
+
+.orderedListLevel2 {
+        list-style-type:lower-alpha
+}
+
+.orderedListLevel3 {
+        list-style-type:upper-roman
+}
+
+.ordinary-img {
+	display: block;
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+a:link {
+	text-decoration: underline;
+	color: "Blue"
+}
+
+a:visited {
+	text-decoration: underline;
+	color: "Blue"
+}
+
+.ordinary-table {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+.ordinary-col {
+	background-color: #EEEEEE;
+	vertical-align: top;
+	padding-top: 3px;
+	padding-right: 3px;
+	padding-bottom: 3px;
+	padding-left: 3px;
+}
+
+.table-header, .term {
+	font-weight: bold;
+}
+
+.bodytext {
+	display: block;
+	margin-bottom: 5px;
+}
+
+.emplight, .italic {
+	font-style: italic
+}
+
+.empstrong, .bold, .ui-reference, .titled-block-title, .terminology-title {
+	font-weight: bold;
+}
+
+.para_listintro {
+	display: block;
+	margin-bottom:;
+}
+
+.para_tableintro {
+	display: block;
+	margin-bottom:;
+}
+
+.blocklabel {
+	display: block;
+	font-size: 11px;
+	font-weight: bold;
+}
+
+.block-labelcol {
+	width: 120px;
+	font-size: 11px;
+	vertical-align: top;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	padding-top: 6px;
+	padding-right: 0px;
+	padding-bottom: 0px;
+	padding-left: 0px;
+}
+
+.block-firstbodycol {
+	border-color: #006699 black black;
+	font-size: 11px;
+	line-height: 15px;
+	margin-top: 5px;
+	border-style: none;
+	border-top-width: 1px;
+	border-right-width: 0px;
+	border-bottom-width: 0px;
+	border-left-width: 0px;
+	vertical-align: top;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	padding-top: 3px;
+	padding-right: 0px;
+	padding-bottom: 0px;
+	padding-left: 0px;
+}
+
+.block-bodycol {
+	border-color: #006699 black black;
+	font-size: 11px;
+	line-height: 15px;
+	margin-top: 5px;
+	border-style: solid;
+	border-top-width: 1px;
+	border-right-width: 0px;
+	border-bottom-width: 0px;
+	border-left-width: 0px;
+	vertical-align: top;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	padding-top: 3px;
+	padding-right: 0px;
+	padding-bottom: 0px;
+	padding-left: 0px;
+}
+
+.block-lastbodycol {
+	border-color: #006699 #006699 #006699 #006699;
+	font-size: 11px;
+	line-height: 15px;
+	margin-top: 5px;
+	border-style: solid;
+	border-top-width: 1px;
+	border-right-width: 0px;
+	border-bottom-width: 1px;
+	border-left-width: 0px;
+	vertical-align: top;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	padding-top: 3px;
+	padding-right: 0px;
+	padding-bottom: 0px;
+	padding-left: 0px;
+}
+
+.signal-symbolcol {
+	border-style: solid;
+	border-top-width: 0px;
+	border-right-width: 0px;
+	border-bottom-width: 0px;
+	border-left-width: 0px;
+	border-color: #990000 #990000 #990000 #990000;
+	width: 60px;
+	font-size: 11px;
+	vertical-align: top;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	padding-top: 6px;
+	padding-right: 0px;
+	padding-bottom: 0px;
+	padding-left: 0px;
+}
+
+.signal-bodycol {
+	line-height: 15px;
+	vertical-align: top;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	padding-top: 0px;
+	padding-right: 0px;
+	padding-bottom: 0px;
+	padding-left: 0px;
+}
+
+.map-header {
+	font-size: 12px;
+	border-color: black black #006699;
+	color: #999999;
+	border-style: solid;
+	border-top-width: 0px;
+	border-right-width: 0px;
+	border-bottom-width: 2px;
+	border-left-width: 0px;
+	margin-bottom: 0px;
+}
+
+.maplabel {
+	font-size: 12px;
+	font-weight: bold;
+	color: #000000;
+}
+
+.computerscripts {
+	font-family: courier;
+	display:block;
+	margin-top: 10px;
+	margin-left: 20px;
+	margin-bottom: 10px;
+}
+
+.computerscripts .computerscripts {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.hmi {
+	font-weight: bold;
+	display:block;
+	margin-top: 10px;
+	margin-left: 20px;
+}
+
+.script-text {
+	font-family: courier;
+}
+
+.scripts {
+	font-size: 11px;
+}
+
+.superscript {
+	font-size: 10px;
+	vertical-align: super;
+}
+
+.subscript {
+	font-size: 10px;
+	vertical-align: sub;
+}
+
+.header-nav {
+	text-align: right;
+	font-size: 11px;
+	display: block;
+}
+
+p.tip, p.note {
+	font-weight: bold;
+	color:"Black";
+	display:block;
+}
+
+p.caution, p.warning, p.danger {
+	font-weight: bold;
+	color:"Red";
+	display:block;
+}
+
+.symbol {
+	font-size: 11px;
+}
+
+.StatusSecrecy {
+	font-size: 11px;
+	text-align: right;
+	color:"Black";
+	display:block;
+	margin-bottom: 5px;
+}
+
+.noBreak {
+	word-break: keep-all;
+}
+
+.blocktitle {
+	font-size: 11px;
+        font-weight: bold;
+        margin-left: -120px;
+        margin-bottom: -16px;
+}
+
+h2 {
+	font-size: 11px;
+	margin-top: 12px;
+}
+
+pre {
+	background-color: #EEEEEE;
+}

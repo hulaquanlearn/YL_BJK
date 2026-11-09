@@ -1,0 +1,1245 @@
+{
+  "schema": 1,
+  "revision": "20261103-v1",
+  "createdAt": "2026-11-02T18:11:52.056Z",
+  "policy": "仅原始公开资料；重复按 SHA256 归并；失败下载/首页重定向/临时脚本/渲染衍生图不入库；PDF 原件保留在本地路径",
+  "statistics": {
+    "sources": 80,
+    "used": 50,
+    "referenceOnly": 25,
+    "excluded": 5
+  },
+  "sources": [
+    {
+      "publicUrl": "https://www.meanwell.com/Upload/PDF/NDR-240/NDR-240-SPEC.PDF",
+      "sha256": "383b37857443a4921952fc42b43b7dad456f150c670882d6f5e89e79f62446a1",
+      "bytes": 708114,
+      "type": "manufacturer-datasheet",
+      "category": "明纬 NDR-240",
+      "usedBy": [
+        "evidence"
+      ],
+      "status": "used",
+      "note": "机械尺寸页 p4 已目视核对",
+      "localPaths": [
+        ".local/modeling/sources/ndr-240.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.meanwell.com/Upload/PDF/NDR-480/NDR-480-SPEC.PDF",
+      "sha256": "f077c7787d0203eefe95cc6772f70353b68b8e506c8722334e3aca6c870f87c5",
+      "bytes": 754272,
+      "type": "manufacturer-datasheet",
+      "category": "明纬 NDR-480",
+      "usedBy": [
+        "evidence"
+      ],
+      "status": "used",
+      "note": "尺寸页已提取",
+      "localPaths": [
+        ".local/modeling/sources/ndr-480.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://us-en.airtac.com/upload/4V-Series-Solenoid-Valve-202212151018184956.PDF",
+      "sha256": "ae1f40f361d528a5e922b2ac57629b50f426547e61e3efabdaeac5d14a27b79f",
+      "bytes": 6022405,
+      "type": "manufacturer-catalogue",
+      "category": "亚德客 4V 电磁阀",
+      "usedBy": [
+        "reference"
+      ],
+      "status": "reference-only",
+      "note": "仅取得型号/规格页，未取得 4V200 尺寸页，暂无尺寸用于建模",
+      "localPaths": [
+        ".local/modeling/sources/airtac-4v.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.fonray.com/download/1-Filter-Regulator-Lubricator/AFC_BFC.pdf",
+      "sha256": "b1fe27b75249ece77757bbc790bad81cd6e48bd3cf19a9ec01610ae6a0a97c21",
+      "bytes": 454992,
+      "type": "manufacturer-catalogue",
+      "category": "亚德客 AFC/BFC 二联件",
+      "usedBy": [
+        "reference"
+      ],
+      "status": "reference-only",
+      "note": "仅 1 页选型/规格，未给 AFC2000 外形尺寸，未用于建模",
+      "localPaths": [
+        ".local/modeling/sources/airtac-afc-bfc.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.airtac.com/upload/SAI+SAIL+BSAI+SAIF-202409240313001916.PDF",
+      "sha256": "b77057589430eb1ca8a7f3c170b098b45e3189fc36e62f4b2e1508d88d78ef9e",
+      "bytes": 4244143,
+      "type": "manufacturer-catalogue",
+      "category": "亚德客 SAI 气缸",
+      "usedBy": [
+        "B4"
+      ],
+      "status": "used",
+      "note": "印刷页23 尺寸表已目视核对",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/airtac-sai-cn.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.airtac.com/upload/SC+SCL+SCF+SCT+BSC-202409240316027226.PDF",
+      "sha256": "f673f689b8d9322a4f8d66c64b0520a1d40fe14171d994bdbf18d40eee73f34c",
+      "bytes": 4572099,
+      "type": "manufacturer-catalogue",
+      "category": "亚德客 SC 气缸",
+      "usedBy": [
+        "B4",
+        "B6"
+      ],
+      "status": "used",
+      "note": "印刷页39 尺寸表已目视核对",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/airtac-sc-cn.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://gholizadehcranes.com/wp-content/uploads/2023/10/Demag-ZBA-motors.pdf",
+      "sha256": "7dfac109366612cc8c760e9680f24dedb6c44e167a669321e69f56c19ba4052c",
+      "bytes": 4390243,
+      "type": "manufacturer-catalogue",
+      "category": "Demag ZBA 电机",
+      "usedBy": [
+        "reference"
+      ],
+      "status": "reference-only",
+      "note": "已取得但尚未用于建模",
+      "localPaths": [
+        ".local/modeling/sources/demag-zba-motors.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.jameselectric.ca/wp-content/uploads/2013/04/IEC-Motor-Frame-Chart1.pdf",
+      "sha256": "3d493ac8cb380ff745899a33a80ab901b8d8ac83c3fdfbb7e003b715fb2fc4af",
+      "bytes": 902479,
+      "type": "public-standard",
+      "category": "IEC 60072 机座尺寸表",
+      "usedBy": [
+        "B15"
+      ],
+      "status": "used",
+      "note": "机座号 H/A/B/D/E 已用于 B15 电机几何",
+      "localPaths": [
+        ".local/modeling/sources/iec-frame-dimensions.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://files.kempstoncontrols.com/files/fd72a14004ed6243db66e801bd891843/8.5000.8558.0050.pdf",
+      "sha256": "06f0449ad5488442234574b8f1523077e1dc05a80d5a38d75da6f36a52575249",
+      "bytes": 1961084,
+      "type": "manufacturer-datasheet",
+      "category": "Kübler 8.5000 编码器",
+      "usedBy": [
+        "B12"
+      ],
+      "status": "used",
+      "note": "尺寸页已用于建模",
+      "localPaths": [
+        ".local/modeling/sources/kubler-85000.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://files.leuze.com/Volumes/Volume0/opasdata/d100001/medias/common/10/3D-CAD_br46b_ex-17-101893_1_0.zip",
+      "sha256": "a43d7f01450eef31745e4e1759db7e152be9c32d2c9a28cb39b4de7b8d1e1780",
+      "bytes": 1176916,
+      "type": "manufacturer-cad-archive",
+      "category": "Leuze 46B Ex 原厂资料 leuze-46b-ex-cad.zip",
+      "usedBy": [
+        "SR-6"
+      ],
+      "status": "reference-only",
+      "note": "原厂 46B Ex CAD/英文 PDF；未执行压缩包内程序，供 43 号后续孔位/接口核对",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/leuze-46b-ex-cad.zip"
+      ]
+    },
+    {
+      "publicUrl": "https://files.leuze.com/Volumes/Volume0/opasdata/d100001/medias/docus/546/%24v12/PAL_LSR46BSExn_en_50112942.pdf",
+      "sha256": "d652347fa166041d884c4696261fac609e4d9d71e4b0015f30621cd2ae31f777",
+      "bytes": 523765,
+      "type": "manufacturer-datasheet",
+      "category": "Leuze 46B Ex 原厂资料 leuze-46b-ex-original.pdf",
+      "usedBy": [
+        "SR-6"
+      ],
+      "status": "reference-only",
+      "note": "原厂 46B Ex CAD/英文 PDF；未执行压缩包内程序，供 43 号后续孔位/接口核对",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/leuze-46b-ex-original.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://excelautomationinc.com/wp-content/uploads/2023/05/DS_BPS-348i-SM-100-D_eng_50124982.pdf",
+      "sha256": "9e19dfd3a8cdc3ccd85fbb96a5ea0687844f97df1c52129056cbcff1663b5ba1",
+      "bytes": 464035,
+      "type": "manufacturer-datasheet",
+      "category": "Leuze BPS348i 数据表",
+      "usedBy": [
+        "B7"
+      ],
+      "status": "used",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/leuze-bps348i.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.powerswitchgears.com/datasheets/leuze/diffuse-sensor-with-background-suppression/leuze-ht46c-4p-m12-50127048.pdf",
+      "sha256": "68f3a83f3ebc12feec3ed3aa79ff82ad2ce4b9bf04f388e91aec32cc51dcd69f",
+      "bytes": 445068,
+      "type": "manufacturer-datasheet",
+      "category": "Leuze HT46C 数据表",
+      "usedBy": [
+        "B7"
+      ],
+      "status": "used",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/leuze-ht46c.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.quad-industry.com/titan_img/leuze/pdf/DS_LSR46B66S_en_50111616_P.pdf",
+      "sha256": "862962c0a5e763d8b054d7994141db7382d9c18c04a2fb7fac899863c18c5d23",
+      "bytes": 323715,
+      "type": "manufacturer-datasheet",
+      "category": "Leuze LSER46B 数据表（Ex 说明）",
+      "usedBy": [
+        "（SR-6）"
+      ],
+      "status": "excluded-no-dimensions",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/leuze-lsr46b.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://files.valinonline.com/userfiles/documents/leuze-lsr-46b-ex-n.pdf",
+      "sha256": "bfdea68e8bd1e9af426ff5b4c4b33bb2875f30dbf80f67f84d1c73e6e89ca4a7",
+      "bytes": 422011,
+      "type": "manufacturer-datasheet",
+      "category": "Leuze LSER46B Ex 说明",
+      "usedBy": [
+        "（SR-6）"
+      ],
+      "status": "excluded-no-dimensions",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/leuze-lsr46b2.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.lycbearing.com/products/UCFU206.shtml",
+      "sha256": "9446016433b022261cfdc98caeb394a5c6a52742c495b9935e2c5584a200f547",
+      "bytes": 21594,
+      "type": "manufacturer-product-page",
+      "category": "LYC UCFU",
+      "usedBy": [
+        "B5"
+      ],
+      "status": "used",
+      "note": "201 页面存在 E=402/UC206-18 冲突",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/lyc-ucfu206.html"
+      ]
+    },
+    {
+      "publicUrl": "https://www.lycbearing.com/products/UCFU207.shtml",
+      "sha256": "738e525fdb874374358ed7ce9af1c737fb307f203e6781d3584ae07c5e8060a2",
+      "bytes": 21585,
+      "type": "manufacturer-product-page",
+      "category": "LYC UCFU",
+      "usedBy": [
+        "B5"
+      ],
+      "status": "used",
+      "note": "201 页面存在 E=402/UC206-18 冲突",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/lyc-ucfu207.html"
+      ]
+    },
+    {
+      "publicUrl": "",
+      "sha256": "3460dd9c68bb351339088432c3827fd2c8acae6c532a1ad69bddde4f6ba3470a",
+      "bytes": 6513,
+      "type": "screenshot",
+      "category": "LYC UCFU 剖面图",
+      "usedBy": [
+        "B5"
+      ],
+      "status": "used",
+      "note": "Codex 截图，仅尺寸定义参考",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/lyc-ucfu-reference-0.jpg"
+      ]
+    },
+    {
+      "publicUrl": "",
+      "sha256": "9886b27b190d2a3bb6d9e613179e0edbfeb745cf14c4cbbc65b262f62e0db75c",
+      "bytes": 13124,
+      "type": "screenshot",
+      "category": "LYC UCFU 剖面图",
+      "usedBy": [
+        "B5"
+      ],
+      "status": "used",
+      "note": "Codex 截图，仅尺寸定义参考",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/lyc-ucfu-reference-1.jpg"
+      ]
+    },
+    {
+      "publicUrl": "https://www.mt.com/dam/product_organizations/industry/Load_Cells/Downloads/Transmitter/act100/datasheets/30462590_A_MAR_DS_ACT100_EN.pdf",
+      "sha256": "6938fca96d2e45eef625412f664b0807a7fdbc39fc1e5c4e9ae3bc393aef421d",
+      "bytes": 892811,
+      "type": "manufacturer-datasheet",
+      "category": "Mettler ACT100 变送器",
+      "usedBy": [
+        "reference"
+      ],
+      "status": "reference-only",
+      "note": "Codex 已看 PDF 第2页：ACT100 宽40×高110×深100 mm；但台账 ATC100DIN/30529620 与该型号精确对应未证，不得替代",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/mettler-act100.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.mouser.com/datasheet/2/586/100a-1696160.pdf",
+      "sha256": "2534f98b9f4e61494fd5a9df8cca84d3a354c4a389b55a43631a8ecb2f43d6bf",
+      "bytes": 257582,
+      "type": "manufacturer-datasheet",
+      "category": "Mettler ATC100DIN 误检资料",
+      "usedBy": [
+        "（SR-7）"
+      ],
+      "status": "excluded-wrong-product",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/mettler-atc100din.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://moxa.com/getmedia/7fb1c24f-3a1d-4152-bfad-fdbbc2872771/moxa-eds-g308-series-datasheet-v2.2.pdf",
+      "sha256": "13dc1fdca88820462af1f6159db7f02b426a605405ba7f59bd60adccf0159f1f",
+      "bytes": 1525066,
+      "type": "manufacturer-datasheet",
+      "category": "Moxa EDS-G308 工业交换机",
+      "usedBy": [
+        "B13"
+      ],
+      "status": "used",
+      "note": "尺寸页已用于建模",
+      "localPaths": [
+        ".local/modeling/sources/moxa-eds-g308.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://files.omron.eu/downloads/latest/datasheet/en/d4mc_enclosed_switch_datasheet_en.pdf",
+      "sha256": "714b8dc2b3877ff01b080036220ea747f145c17ef1744d00d85c20627a088a22",
+      "bytes": 1053278,
+      "type": "manufacturer-datasheet",
+      "category": "Omron D4MC 限位开关",
+      "usedBy": [
+        "B13"
+      ],
+      "status": "used",
+      "note": "尺寸页已用于建模",
+      "localPaths": [
+        ".local/modeling/sources/omron-d4mc.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://document.moglix.com/catalog/product/documents/ATV310HU15N4E_1674552269889.pdf",
+      "sha256": "2241bbcdedb4b2ec71725d5ef0c18687c556ee3e7ae53da1da3462287d3c3747",
+      "bytes": 275506,
+      "type": "manufacturer-datasheet",
+      "category": "Schneider ATV310 变频器",
+      "usedBy": [
+        "B19"
+      ],
+      "status": "used",
+      "note": "外形尺寸页已用于建模",
+      "localPaths": [
+        ".local/modeling/sources/schneider-atv310-moglix.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://docs.rs-online.com/d11f/0900766b81682494.pdf",
+      "sha256": "0a35fd4152a93c88c1b5b322d4a15cb927da1199ff463f5813770e12c05be82f",
+      "bytes": 103503,
+      "type": "manufacturer-datasheet",
+      "category": "Schneider EZD100 数据表",
+      "usedBy": [
+        "B8"
+      ],
+      "status": "used",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/schneider-ezd100.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://schneidersanat.com/wp-content/uploads/2021/12/TeSys-Deca-frame-2_GV2ME06.pdf",
+      "sha256": "8b37621cd7b89c59e979a87a9badf6212ee94e17f994b1355d6f72f5f67cf2a7",
+      "bytes": 202245,
+      "type": "manufacturer-datasheet",
+      "category": "Schneider GV2 数据表",
+      "usedBy": [
+        "B8"
+      ],
+      "status": "used",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/schneider-gv2me.pdf",
+        ".local/modeling/sources/schneider-gv2me.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://files.kempstoncontrols.com/files/1fc84ec22009393678bb787b243d5957/LADN20.pdf",
+      "sha256": "1a35eba87c002a3fc9bc9c898923eeb17c0c071f257fb82058bc67521e06d505",
+      "bytes": 101301,
+      "type": "manufacturer-datasheet",
+      "category": "Schneider LADN20 辅助触头",
+      "usedBy": [
+        "B19"
+      ],
+      "status": "used",
+      "note": "外形尺寸页已用于建模",
+      "localPaths": [
+        ".local/modeling/sources/schneider-ladn20.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://docs.rs-online.com/df2b/A700000009936738.pdf",
+      "sha256": "c047571705f72b96579bf283efa3025fd4b03fbdba48c5764226c84ae95242d2",
+      "bytes": 88546,
+      "type": "manufacturer-datasheet",
+      "category": "Schneider LC1N 接触器",
+      "usedBy": [
+        "B14"
+      ],
+      "status": "used",
+      "note": "外形尺寸页已用于建模",
+      "localPaths": [
+        ".local/modeling/sources/schneider-lc1n-datasheet.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://docs.rs-online.com/95e0/0900766b81685bd8.pdf",
+      "sha256": "55eacdd2789fd68d04756953f0ee34eb9f69f049358d9f0d15210796f6581280",
+      "bytes": 506636,
+      "type": "manufacturer-datasheet",
+      "category": "Schneider LC1N 数据表",
+      "usedBy": [
+        "（未用尺寸）"
+      ],
+      "status": "reference-only",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/schneider-lc1n.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.mouser.com/datasheet/3/187/26/RSL1AB4BD_document.pdf",
+      "sha256": "dc155cbfe5c2607a52e9449dcfe89dc7db9acbb2a9ebe5dd81aed7da9f414cea",
+      "bytes": 139170,
+      "type": "manufacturer-datasheet",
+      "category": "Schneider RSL1AB4BD 薄型继电器",
+      "usedBy": [
+        "B19"
+      ],
+      "status": "used",
+      "note": "外形尺寸页已用于建模",
+      "localPaths": [
+        ".local/modeling/sources/schneider-rsl1ab4bd.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/36028822547278603.pdf",
+      "sha256": "3f1a21d4c33f90f66b771d80f05b5a6a101f684d12276b69fbdc741e8cb3d8d8",
+      "bytes": 142167,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 FA57",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-fa57-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/36028822547301899.pdf",
+      "sha256": "b33d80eb1cdf757f2cc807be293768288b963457e072af8019a04fd6420af176",
+      "bytes": 141449,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 FA77",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-fa77-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025780363.pdf",
+      "sha256": "4f0b8af5a1295763fef6c8cfe9be8b91d02139578c54a2e42a75578a6bcc6f87",
+      "bytes": 204661,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 KA47",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-ka47-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025797003.pdf",
+      "sha256": "4fa34ec9eb5574b283b468c9d2714a99c895cf5c81e1ec23d27b0623b0cc848d",
+      "bytes": 204363,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 KA57",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-ka57-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025856907.pdf",
+      "sha256": "a2ecfa9071c6e8d1afa65f476571e0a40e3ad4f3ee1fce8da7dd4e382acf008f",
+      "bytes": 166102,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 KAZ107",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-kaz107-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025782027.pdf",
+      "sha256": "3897d10ada461519bbbd18a3a5136c289832ebb7eb097319fecf8b91d44d3d60",
+      "bytes": 155700,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 KAZ47",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-kaz47-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025798667.pdf",
+      "sha256": "1d7314e56ed17ba4ed63b0fc5e17234edc901001288b844f5f402af09b22a918",
+      "bytes": 156509,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 KAZ57",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-kaz57-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025810315.pdf",
+      "sha256": "bc409a7d357c4d262a4124fc3722e873b18172a24808e8db0ee15ef2462e0048",
+      "bytes": 155954,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 KAZ67",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-kaz67-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025821963.pdf",
+      "sha256": "29630ddc47b9394e251be29b320d5a3fd5324217e1353111ce2e2d429e95cb3b",
+      "bytes": 158204,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 KAZ77",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-kaz77-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025833611.pdf",
+      "sha256": "993cfcb41f158092e017fde56c9e8084d2df87fb77c5f4d692469634d96db0d1",
+      "bytes": 157397,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 KAZ87",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-kaz87-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424025845259.pdf",
+      "sha256": "1e926a511419e268b9079676e7577d24d516d0ff4a8a280ebe6a271e2e5f0eea",
+      "bytes": 161347,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 KAZ97",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-kaz97-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424024912395.pdf",
+      "sha256": "da1f21cfa4b1d131fda8adba503f4eae124f52b9241988f706c0dc9fc996d32a",
+      "bytes": 138352,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 SA37",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-sa37-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/html/33346739/Resources/pdf/18014424024910731.pdf",
+      "sha256": "da52a1283d541c267099ad0fc0fbd55e39faf100fb83967917cde6b742e23653",
+      "bytes": 143651,
+      "type": "manufacturer-drawing",
+      "category": "SEW 原厂尺寸图 SF37",
+      "usedBy": [
+        "SR-4"
+      ],
+      "status": "reference-only",
+      "note": "SEW 02/2026 单页尺寸图；KAZ47 已看，供箱体/空心轴/安装孔核对，DRN 电机总长不得冒充皖南 YFB4",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/sew-sf37-2026.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://download.sew-eurodrive.com/download/pdf/20089740.pdf",
+      "sha256": "a6467ba507f91656adb7ddb74039365c668cf1da1f676790cd0ae5a247c4eaf9",
+      "bytes": 2342668,
+      "type": "manufacturer-catalogue",
+      "category": "SEW DRU180M4 电机",
+      "usedBy": [
+        "reference"
+      ],
+      "status": "reference-only",
+      "note": "已取得但尚未用于建模",
+      "localPaths": [
+        ".local/modeling/sources/sew-dru180m4.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.sick.com/media/pdf/9/49/849/dataSheet_S30B-3011DA_1056429_en.pdf",
+      "sha256": "34ea63fe0409b6804d8a1091c769dd5f8172a4450efbebb8329fccfd718bbc32",
+      "bytes": 750857,
+      "type": "manufacturer-datasheet",
+      "category": "SICK S30B 安全激光扫描器",
+      "usedBy": [
+        "B14"
+      ],
+      "status": "used",
+      "note": "外形尺寸页已用于建模",
+      "localPaths": [
+        ".local/modeling/sources/sick-s30b.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://assets.euautomation.com/uploads/parts/pdf/6es71346gf000aa1.pdf",
+      "sha256": "ac1067e0d8236c3052e445cab85b0a5153bcf8aa6ebaad308dfba637370ce82f",
+      "bytes": 131178,
+      "type": "manufacturer-datasheet",
+      "category": "Siemens AI 8xI 模块",
+      "usedBy": [
+        "B10"
+      ],
+      "status": "used",
+      "note": "S7-1500/ET200SP 外形尺寸页",
+      "localPaths": [
+        ".local/modeling/sources/siemens-ai8xi.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://data.spangler-automation.org/ENGLISH/DATA-SHEETS/Siemens/SIE.O.6ES7135-6HD00-0BA1.pdf",
+      "sha256": "a7c42e20989c20e33ce8eefaeb63dcc847155f0cd468dae2b93dbed18604abfd",
+      "bytes": 364358,
+      "type": "manufacturer-datasheet",
+      "category": "Siemens AQ 4xU/I 模块",
+      "usedBy": [
+        "B10"
+      ],
+      "status": "used",
+      "note": "S7-1500/ET200SP 外形尺寸页",
+      "localPaths": [
+        ".local/modeling/sources/siemens-aq4x.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://docs.rs-online.com/56b4/A700000014301980.pdf",
+      "sha256": "bfef56427d803e5b9c81dc6e1e96df63a27e917e103e42a2746fff266bc72bb8",
+      "bytes": 235490,
+      "type": "manufacturer-datasheet",
+      "category": "Siemens CP 1543-1",
+      "usedBy": [
+        "B10"
+      ],
+      "status": "used",
+      "note": "S7-1500/ET200SP 外形尺寸页",
+      "localPaths": [
+        ".local/modeling/sources/siemens-cp1543.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://eriksdigitalcdn.azureedge.net/hlr-system/siemens/eclerx/documents/6es7214-1ag40-0xb0_en_ds.pdf",
+      "sha256": "01054a025403373d131248fa95aad1b814c64e468d109e3c0efe06afb95f27d6",
+      "bytes": 354923,
+      "type": "manufacturer-datasheet",
+      "category": "Siemens CPU 1214C",
+      "usedBy": [
+        "B19"
+      ],
+      "status": "used",
+      "note": "外形尺寸页已用于建模",
+      "localPaths": [
+        ".local/modeling/sources/siemens-s7-1214c-eriks.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.hmi-plc.com/wp-content/uploads/pdf/6ES7131-6BH01-0BA0.pdf",
+      "sha256": "0409aa9c967e8df0e1854aee37d51337630b4148be7ef21d5d41402c75b81edd",
+      "bytes": 160253,
+      "type": "manufacturer-datasheet",
+      "category": "Siemens DI16 数据表",
+      "usedBy": [
+        "B7"
+      ],
+      "status": "used",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/siemens-di16-datasheet.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://cache.industry.siemens.com/dl/files/540/59753540/att_882649/v1/et200sp_di_16x24vdc_st_manual_en-US_en-US.pdf",
+      "sha256": "1a92c8a1a2b4b9929bbbea668c97b7bc16732e68b0ed962917e986ce2327b009",
+      "bytes": 1022351,
+      "type": "manufacturer-datasheet",
+      "category": "Siemens DI16 manual",
+      "usedBy": [
+        "B7"
+      ],
+      "status": "used",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/siemens-di16-et200sp.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.hmi-plc.com/wp-content/uploads/pdf/6ES7522-1BL01-0AB0.pdf",
+      "sha256": "47125bfd70d962117fb7b909c9811a67962606a58f304f3536ae4aa4459bf1e5",
+      "bytes": 122672,
+      "type": "manufacturer-datasheet",
+      "category": "Siemens DQ32 数据表",
+      "usedBy": [
+        "B7"
+      ],
+      "status": "used",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/siemens-dq32-datasheet.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://cache.industry.siemens.com/dl/files/716/109480716/att_902641/v1/s71500_dq_32x24vdc_0_5a_hf_manual_en-US_en-US.pdf",
+      "sha256": "6b60c8d4abe79dee5ed70f3d1d5c8c9cf76137a94b147b51c30cd39f26fb95c5",
+      "bytes": 2226304,
+      "type": "manufacturer-manual",
+      "category": "Siemens DQ32 manual",
+      "usedBy": [
+        "B7"
+      ],
+      "status": "used",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/siemens-dq32-manual.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://turll.com/manuals/Turll-Siemens-6SL3246-0BA22-1FA0-Datasheet.pdf",
+      "sha256": "41d8862327c73a711428028b69db915f34fc5bade404635a2d013351cb4bc405",
+      "bytes": 215953,
+      "type": "manufacturer-datasheet",
+      "category": "Siemens G120 CU 数据表",
+      "usedBy": [
+        "B7"
+      ],
+      "status": "used",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/siemens-g120-cu-turll.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://cache.industry.siemens.com/dl/files/838/109761838/att_966247/v1/et200sp_im_155_6_pn_3_hf_manual_en_US_en-US.pdf",
+      "sha256": "e7e4341028662c30c1500fc673d64cb01f6024efa1d2adbf7ecde7b2963c8f2a",
+      "bytes": 1165420,
+      "type": "manufacturer-manual",
+      "category": "Siemens IM155-6 PN/3 HF 6ES7155-6AU30-0CN0",
+      "usedBy": [
+        "B12"
+      ],
+      "status": "used",
+      "note": "手册10/2018 A5E44899355-AA；Codex 已看 PDF 第53页/印刷52：表头 6ES7155-6AU30-0CN0，宽100×高117×深74 mm；BusAdapter/附件外形计入范围未证",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/siemens-im155-6au30-manual.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://assets.euautomation.com/uploads/parts/datasheet/03/6sl32101pe218ul0.pdf",
+      "sha256": "4020ba86ceb40b920a2ac018e98fa4b211fcfa6bee4e7a435f708b482ce4fa11",
+      "bytes": 239875,
+      "type": "manufacturer-datasheet",
+      "category": "Siemens PM340 数据表",
+      "usedBy": [
+        "B7"
+      ],
+      "status": "used",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/siemens-pm340.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://assets.rs-online.com/v1699978792/Datasheets/3516d0d01bec932470a979755eb710f5.pdf",
+      "sha256": "56502ca252ff6c3969279339752dfbe5332610fd6c0015a1289b80c99ab347ea",
+      "bytes": 122546,
+      "type": "manufacturer-datasheet",
+      "category": "Siemens PS 25W 电源模块",
+      "usedBy": [
+        "B10"
+      ],
+      "status": "used",
+      "note": "S7-1500/ET200SP 外形尺寸页",
+      "localPaths": [
+        ".local/modeling/sources/siemens-ps25w.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://assets.euautomation.com/uploads/parts/pdf/6gk50080ba101ab2.pdf",
+      "sha256": "2bffda2f950f711e9e09e936fe5cc915cb3d73be395f9b3e4ecf7d2f85639c4f",
+      "bytes": 138869,
+      "type": "manufacturer-datasheet",
+      "category": "Siemens SCALANCE XB008",
+      "usedBy": [
+        "B10"
+      ],
+      "status": "used",
+      "note": "S7-1500/ET200SP 外形尺寸页",
+      "localPaths": [
+        ".local/modeling/sources/siemens-xb008.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://cache.industry.siemens.com/dl/files/691/109995691/att_1344761/v1/A5E33715669Aen_WP321_M_en-US.pdf",
+      "sha256": "7c302af1b3813fc0eff8ce98e7c761a0a2804a28e12a4abcd4dfd4ae44228144",
+      "bytes": 4369724,
+      "type": "manufacturer-manual",
+      "category": "Siemens SIWAREX WP321 7MH4138-6AA00-0BA0",
+      "usedBy": [
+        "B25"
+      ],
+      "status": "reference-only",
+      "note": "Codex 已看 PDF 第123页：W15×H57×D72 mm（08/2024 A5E33715669A-AE）；与 CAD 目录 height73/depth58 冲突，未拼数",
+      "localPaths": [
+        ".local/spare-rebuild-all-20261102/codex-sources/siemens-wp321-manual.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://cdn.skfmediahub.skf.com/api/public/0901d196802809de/pdf_preview_medium/0901d196802809de_pdf_preview_medium.pdf",
+      "sha256": "65e0919bee24975b9563ca0d9adf721a9e7efcf6d0fa32c18b8d119d37b190b2",
+      "bytes": 22993460,
+      "type": "manufacturer-catalogue",
+      "category": "SKF 滚动轴承",
+      "usedBy": [
+        "evidence",
+        "B2"
+      ],
+      "status": "used",
+      "note": "1152 页滚动轴承目录",
+      "localPaths": [
+        ".local/modeling/sources/skf-bearing.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://cdn.skfmediahub.skf.com/api/public/0901d196803969af/pdf_preview_medium/0901d196803969af_pdf_preview_medium.pdf",
+      "sha256": "ae17f934492b1dce1dde8a21c841fb7a4f8152c1bc23f9c7996441f9e3de96e6",
+      "bytes": 15452292,
+      "type": "manufacturer-catalogue",
+      "category": "SKF SNL 2/3/5/6 系列",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "781 页；B2 产品表参考",
+      "localPaths": [
+        ".local/modeling/sources/skf-snl-2-5-6-b.pdf"
+      ]
+    },
+    {
+      "publicUrl": "http://www.brg-catalogues.com/Catalogue_store/SKF/6101%20EN%20Plummer-block-housings.pdf",
+      "sha256": "665c4c35b89eb7842aca55a97ff08a3e62acdaf8ea887584db87c481b53fecc9",
+      "bytes": 10044786,
+      "type": "manufacturer-catalogue",
+      "category": "SKF SNL 30/31/32 大座",
+      "usedBy": [],
+      "status": "reference-only",
+      "note": "仅覆盖 SNL 30/31/32 大规格，不用于本批 SNL 2/5 系列",
+      "localPaths": [
+        ".local/modeling/sources/skf-plummer-6101.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://docs.rs-online.com/682d/A700000007292737.pdf",
+      "sha256": "3883a1f41c7f9727d221506ac3abb2263a4639da544940fbe53c986c378de0d4",
+      "bytes": 2945270,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SN515.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://docs.rs-online.com/fe75/A700000007337741.pdf",
+      "sha256": "ff835d39366dc8da28ba21ab841c8179ed325e27f0903afb6db2e0d8831153b3",
+      "bytes": 2922457,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SN516.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://documents.klium.nl/2b7df97f-be75-4172-8c6f-c36f7a85f76b/en/technical-data-sheet-skf-snl-518-615-snl-518--615-en.pdf",
+      "sha256": "42bd6b1808e5c24834506185079dceb4fc7271ce285c83a840ebed737100b74a",
+      "bytes": 2559300,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SN518.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://docs.rs-online.com/39b4/A700000009346847.pdf",
+      "sha256": "2dccc4874586e418d062e930818686203005706e341de8d940d6c60a9b34bb7c",
+      "bytes": 1851164,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SN519.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://docs.rs-online.com/5d17/A700000007292522.pdf",
+      "sha256": "49ae03d2a1ba0f06115491d681cd1715d51652e58b3fb16156bda7675a3cbbd8",
+      "bytes": 2905315,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SNL212.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://docs.rs-online.com/05eb/A700000007337657.pdf",
+      "sha256": "a95e40d0972a189e75d57bfc6069603765288de2f88e251ffb36298727881f19",
+      "bytes": 2898950,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SNL216.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://docs.rs-online.com/0aa2/A700000008643505.pdf",
+      "sha256": "02255bb8785608b6464670d75e4cd9ae37e69105953a8db9fc13974ca714ead7",
+      "bytes": 4250191,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SNL512-610.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://documents.klium.com/b68ace5a-ed05-438b-ab0a-b9e87970ef29/en/technical-data-sheet-skf-snl-517-snl-517-en.pdf",
+      "sha256": "caac65f77d5360e80d2be9224bef2c11bb3380ced64a13d2aff63acdd3b1aee6",
+      "bytes": 2465092,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SNL517.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://docs.rs-online.com/a1c1/A700000013511830.pdf",
+      "sha256": "939cf843ce8bb7e236fdece58d81e569577c6c2b07ffd75dd79f08bfdb207111",
+      "bytes": 1460922,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "reference-only-unreadable",
+      "note": "图像页无文本，未作为尺寸依据",
+      "localPaths": [
+        ".local/modeling/sources/housing-SNL518.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://en.tradebearings.com/data/pdf/e1/1b/SNL_518_615_%28_22218_K_%29-273154.pdf",
+      "sha256": "0b6a52e4fe7bb90d60c4829b9dd0c90a8ae44908a4d5da0ff77374405d099dd8",
+      "bytes": 90681,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SNL518-615.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://documents.klium.com/a6bac693-a6aa-44c7-af8e-5b0639bbe517/en/technical-data-sheet-skf-snl-520-617-snl-520--617-en.pdf",
+      "sha256": "4482215e11dca041b0e610f00904f45bdf2ab6ca9b6f67bafc9cd45b43ade673",
+      "bytes": 2465156,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SNL520-617.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://documents.klium.com/4a2102b0-78fe-4721-a44c-da5b80f42467/en/technical-data-sheet-skf-snl-524-620-v-snl-524--620-v-en.pdf",
+      "sha256": "204d2e7c5270198b7394bf52b5ffa6dcf8ada210e4b404d9b8a7dec242ada73e",
+      "bytes": 2810857,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SNL524-620.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://documents.klium.com/15105a5c-a93a-4f86-9595-5a14c61b6046/en/technical-data-sheet-skf-snl-528-snl-528-en.pdf",
+      "sha256": "8a4ed73c18e2d3129699de9df10133c58f69d159c8ad672552144f42ac159a52",
+      "bytes": 2584679,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SNL528.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://documents.klium.nl/cdb9e722-855e-46e3-8393-d5d71416b103/en/technical-data-sheet-skf-snl-522-619-snl-522--619-en.pdf",
+      "sha256": "4d1e561173d322933aadfc414be7dc537a0ad34e95ba2dc3965c17522a397ade",
+      "bytes": 2559311,
+      "type": "manufacturer-datasheet",
+      "category": "SKF SNL/SN 剖分座",
+      "usedBy": [
+        "B2"
+      ],
+      "status": "used",
+      "note": "SKF 官网生成数据表（尺寸页已渲染核对）",
+      "localPaths": [
+        ".local/modeling/sources/housing-SNL522.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.turck.us/datasheet/_us/edb_46707_eng_us.pdf",
+      "sha256": "54155096ab6f884800ad06774edf729c3e4e394e4eba47721cec066963ce0fe3",
+      "bytes": 414481,
+      "type": "manufacturer-datasheet",
+      "category": "Turck Ni15-G30SK 接近开关",
+      "usedBy": [
+        "B12"
+      ],
+      "status": "used",
+      "note": "尺寸页已用于建模",
+      "localPaths": [
+        ".local/modeling/sources/turck-ni15-g30sk.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.vahle.com/fileadmin/cavok_upload/Energie%C3%BCbertragung/Ber%C3%BChrungslose%20Energie%C3%BCbertragung/CPS%20140kHz/Englisch/Fly-en-E400.pdf",
+      "sha256": "d59ff8da0e4228686ac23b68b169ec1ceee890941c7dacfce51846236735c55d",
+      "bytes": 323478,
+      "type": "manufacturer-datasheet",
+      "category": "VAHLE E400 flyer",
+      "usedBy": [
+        "（SR-7）"
+      ],
+      "status": "excluded-no-dimensions",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/vahle-e400.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.vahle.com/fileadmin/cavok_upload/Energie%C3%BCbertragung/Ber%C3%BChrungslose%20Energie%C3%BCbertragung/CPS%20140kHz/Englisch/Fly-en-RE400.pdf",
+      "sha256": "c7237e1923504a4770632bd0907db115de6a5eb74c6f6341e57cdadaf54df4b2",
+      "bytes": 366740,
+      "type": "manufacturer-datasheet",
+      "category": "VAHLE RE400 flyer",
+      "usedBy": [
+        "（SR-7）"
+      ],
+      "status": "excluded-no-dimensions",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/vahle-re400.pdf"
+      ]
+    },
+    {
+      "publicUrl": "https://www.vahle.com/fileadmin/cavok_upload/Energie%C3%BCbertragung/Ber%C3%BChrungslose%20Energie%C3%BCbertragung/CPS%20140kHz/Englisch/Cat_05b_en_CPS_140kHz.pdf",
+      "sha256": "de4a4e03b019f5bab8969657d89253f6707fea185700cde5333be7cbdfdcbb83",
+      "bytes": 2549403,
+      "type": "manufacturer-datasheet",
+      "category": "VAHLE vPOWER 目录",
+      "usedBy": [
+        "（SR-7）"
+      ],
+      "status": "reference-only",
+      "note": "",
+      "localPaths": [
+        ".local/modeling/sources/vahle-cat.pdf"
+      ]
+    }
+  ],
+  "externalLinks": [
+    {
+      "url": "https://cdn.skfmediahub.skf.com/api/public/0901d196808a4ad1/pdf_preview_medium/0901d196808a4ad1_pdf_preview_medium.pdf",
+      "type": "manufacturer-catalogue",
+      "category": "SKF 22212 E 尺寸表",
+      "note": "Codex 已确认 22212 E 为 60×110×28、E 圆柱孔；EK 锥孔不可混用",
+      "status": "reference-only"
+    },
+    {
+      "url": "https://www.emarketplace.in.skf.com/spherical-roller-bearing/22212-e",
+      "type": "manufacturer-product-page",
+      "category": "SKF 22212 E 官方商店",
+      "note": "同尺寸、双列、无密封",
+      "status": "reference-only"
+    },
+    {
+      "url": "https://www.mt.com/dam/product_organizations/industry/Load_Cells/Downloads/Transmitter/act100/quickguides%26manuals/20210609_30529357_MAN_UM_ACT100_EN_R03.pdf",
+      "type": "manufacturer-manual",
+      "category": "Mettler ACT100 用户手册 30529357 Rev.03",
+      "note": "Codex 已看 PDF第15页/印刷9 表1-1：30529620 为 ACT100 中文版本；本机下载循环重定向，未存本地文件或哈希",
+      "status": "reference-only"
+    },
+    {
+      "url": "https://siemens.partcommunity.com/3d-cad-models/?info=siemens_ag%2F27%2F24%2F26%2F05%2F7mh41386aa000ba0.prj",
+      "type": "manufacturer-cad-directory",
+      "category": "Siemens WP321 CAD 目录",
+      "note": "同订货号属性 height=73/depth=58，与手册 57/72 冲突；网页可读、本机 403 未下载 CAD，不拼数",
+      "status": "reference-only"
+    }
+  ]
+}

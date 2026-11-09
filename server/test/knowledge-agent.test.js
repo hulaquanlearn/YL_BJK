@@ -1,15 +1,18 @@
 const test=require('node:test'),assert=require('node:assert/strict'),express=require('express'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os');
 async function setup(t){
- const root=await fs.mkdtemp(path.join(os.tmpdir(),'knowledge-agent-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
- const config=require('../src/config'),{pool}=require('../src/db'),saved={config:{...config.knowledgeAi},query:pool.query,fetch:global.fetch};
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'knowledge-agent-'));
+ const config=require('../src/config'),{pool}=require('../src/db'),saved={config:config.knowledgeAi,query:pool.query};
  const state={calls:[],dbCalls:0,fail:false,row:{id:7,title:'设备维修手册',entryType:'document',revisionNo:2,contentText:'现场文件正文：检查传感器接插件是否松动，核对报警代码。',equipmentName:'输送设备',indexStatus:'ready',originalFilename:'维护手册.pdf'}};
- Object.assign(config.knowledgeAi,{enabled:true,token:'PRIVATE_TEST_KEY'});
+ config.knowledgeAi={...saved.config,enabled:true,token:'PRIVATE_TEST_KEY'};
  pool.query=async sql=>{state.dbCalls++;return sql.includes('FROM fermentation_knowledge_entries')?[state.row?[{...state.row}]:[]]:[[]]};
  const audit=require('../src/ai-call-audit').createStore(root),usage=require('../src/knowledge-usage').createUsage(root),app=express();app.use(express.json());
- app.use((req,_res,next)=>{const role=req.get('x-role');if(role)req.user={id:role==='admin'?1:role==='raw_grain'?2:3,role,username:'fixture'};next()});app.use((req,res,next)=>req.user?next():res.sendStatus(401));app.use('/api',require('../src/ai-call-audit').auditMiddleware(audit));app.use('/api',require('../src/routes/ai').createRouter({usage}));app.use((e,_req,res,_next)=>res.status(e.status||500).json({msg:e.message}));
+ const fetchImpl=async(url,options)=>{state.calls.push({url,options,body:JSON.parse(options.body)});return new Response(JSON.stringify({choices:[{message:{content:'检查接插件。[知识#7]'}}],usage:{total_tokens:12}}),{status:state.fail?503:200})};
+ app.use((req,_res,next)=>{const role=req.get('x-role');if(role)req.user={id:role==='admin'?1:role==='raw_grain'?2:3,role,username:'fixture'};next()});app.use((req,res,next)=>req.user?next():res.sendStatus(401));app.use('/api',require('../src/ai-call-audit').auditMiddleware(audit));app.use('/api',require('../src/routes/ai').createRouter({usage,fetchImpl}));app.use((e,_req,res,_next)=>res.status(e.status||500).json({msg:e.message}));
  const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));const base='http://127.0.0.1:'+server.address().port;
- global.fetch=async(url,options)=>{if(String(url).startsWith(base))return saved.fetch(url,options);state.calls.push({url,options,body:JSON.parse(options.body)});return new Response(JSON.stringify({choices:[{message:{content:'检查接插件。[知识#7]'}}],usage:{total_tokens:12}}),{status:state.fail?503:200})};
- t.after(async()=>{server.close();server.closeAllConnections();await audit.flush();Object.assign(config.knowledgeAi,saved.config);pool.query=saved.query;global.fetch=saved.fetch});
+ // Finish response/audit writes before removing the fixture directory. Separate
+ // hooks previously removed it first, racing late audit writes on Windows and
+ // leaving the model/config mocks unrestored for subsequent cases.
+ t.after(async()=>{server.close();server.closeAllConnections();try{await audit.flush();}finally{config.knowledgeAi=saved.config;pool.query=saved.query;}await fs.rm(root,{recursive:true,force:true,maxRetries:5,retryDelay:50});});
  const ask=async({role='admin',client='web',context,question='设备故障怎么排查？'}={})=>{const r=await fetch(base+'/api/ai/chat',{method:'POST',headers:{'x-role':role,'X-Client-Platform':client,'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:question}],...(context===undefined?{}:{context})})});return {status:r.status,...await r.json()}};
  return {state,ask,usage,audit};
 }
@@ -32,4 +35,26 @@ test('admin bypasses AI-specific count limit; model failures and unrelated quest
  const {state,ask,audit,usage}=await setup(t);for(let i=0;i<21;i++)assert.equal((await ask()).status,200);
  state.fail=true;assert.equal((await ask({role:'raw_grain'})).data.degraded,true);assert.equal((await usage.usage({id:2,role:'raw_grain'})).used,0);
  assert.equal((await ask({role:'raw_grain',question:'今天的天气如何？'})).data.restricted,true);const logs=await audit.list();assert.equal(logs.items.filter(i=>i.outcome==='fallback').length,1);assert.equal(logs.items.filter(i=>i.outcome==='restricted').length,1);assert.doesNotMatch(JSON.stringify(logs),/现场文件正文|PRIVATE_TEST_KEY/);
+});
+
+test('knowledge calls use the next compatible configuration and audit its real provider',async t=>{
+ const {state,ask,audit}=await setup(t),config=require('../src/config');
+ Object.assign(config.knowledgeAi,{provider:'openai-compatible',apiUrl:'https://api.provider.com/v1/chat/completions',model:'gpt-5-mini',token:'COMPATIBLE_TEST_KEY'});
+ assert.equal((await ask()).data.degraded,undefined);const first=state.calls.at(-1);assert.equal(first.url,config.knowledgeAi.apiUrl);assert.equal(first.options.headers.Authorization,'Bearer COMPATIBLE_TEST_KEY');assert.equal(first.body.max_completion_tokens,4000);
+ for(const key of ['thinking','temperature','tool_choice','response_format','max_tokens'])assert.equal(first.body[key],undefined,key);
+ Object.assign(config.knowledgeAi,{model:'other-text-model',token:'NEXT_TEST_KEY'});await ask();assert.equal(state.calls.at(-1).body.model,'other-text-model');assert.equal(state.calls.at(-1).body.max_tokens,4000);assert.equal(state.calls.at(-1).options.headers.Authorization,'Bearer NEXT_TEST_KEY');
+ const records=await audit.list();assert.equal(records.items.length,2);assert.ok(records.items.every(row=>row.provider==='openai-compatible'));assert.doesNotMatch(JSON.stringify(records),/COMPATIBLE_TEST_KEY|NEXT_TEST_KEY/);
+});
+
+test('current spare documents pass manufacturer, source pages and unresolved differences to AI evidence',async t=>{
+ const {state,ask}=await setup(t);
+ state.row.category='备件资料';
+ state.row.referenceMetadata=JSON.stringify({family:'气动元件',manufacturer:'AirTAC',models:['SC40'],sourceUrl:'https://www.airtac.com/manual.pdf',sourcePages:'PDF第3页 / 印刷39页',verification:'partial',verifiedScope:'外露拉杆与主尺寸',limitations:'未核实安装附件'});
+ const result=await ask({context:{entryId:7,revisionNo:2},question:'这个气缸安装要注意什么？'});
+ assert.equal(result.status,200);
+ const evidence=result.data.evidence[0];
+ assert.equal(evidence.context.referenceMetadata.manufacturer,'AirTAC');
+ assert.equal(evidence.context.referenceMetadata.sourcePages,'PDF第3页 / 印刷39页');
+ assert.match(state.calls[0].body.messages[0].content,/跨品牌同号不得默认为可替换/);
+ assert.match(state.calls[0].body.messages[0].content,/未核实安装附件/);
 });

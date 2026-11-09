@@ -3,8 +3,7 @@ const auth = require('../../services/auth.js');
 const { getPasswordError } = require('../../services/password-policy.js');
 const roleLabels={"admin":"系统管理员","raw_grain":"原粮车间管理员","qu_making":"制曲车间管理员","brewing":"酿酒车间管理员","viewer":"车间人员（按车间分配岗位）"};
 const workshops=[{value:'',name:'未分配'},{value:'raw_grain',name:'原粮车间'},{value:'qu_making',name:'制曲车间'},{value:'brewing',name:'酿酒车间'}];
-const positions=[{value:'',name:'待分配'},{value:'group_leader',name:'组长'},{value:'shift_leader',name:'班长'}];
-function positionsFor(workshop) { return workshop === 'raw_grain' ? [{value:'',name:'待分配'},{value:'employee',name:'员工'},{value:'shift_leader',name:'工段长'}] : positions; }
+function positionsFor(workshop) {return [{value:'',name:'待分配'},{value:'employee',name:'员工'},{value:'group_leader',name:'线长 / 组长'},{value:'shift_leader',name:'班长 / 工段长'},{value:'maintenance',name:'维修人员（车间）'},{value:'manufacturer_maintenance',name:'维修人员（厂家）'}];}
 function identityLabel(user) {
   if (user.role !== 'viewer') return roleLabels[user.role] || '车间人员';
   const workshop=workshops.find(item=>item.value===user.staffWorkshopCode)?.name || '未分配车间';
@@ -93,7 +92,7 @@ Page({
       showIdentity:true,identityUser:user,pendingRole:'',
       editWorkshopIndex:Math.max(0,workshops.findIndex(item=>item.value===user.staffWorkshopCode)),
       positionNames:positionsFor(user.staffWorkshopCode).map(p=>p.name),
-      editPositionIndex:Math.max(0,positionsFor(user.staffWorkshopCode).findIndex(item=>item.value===(user.staffWorkshopCode==='raw_grain'&&user.staffPosition==='group_leader'?'employee':user.staffPosition)))
+      editPositionIndex:Math.max(0,positionsFor(user.staffWorkshopCode).findIndex(item=>item.value===(user.staffPosition)))
     });
   },
   closeIdentity() { if (!this.data.submitting) this.setData({showIdentity:false,pendingRole:''}); },

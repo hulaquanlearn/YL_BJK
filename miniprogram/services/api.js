@@ -89,6 +89,7 @@ module.exports = {
   getInventoryOrder: id => request(`/inventory-orders/${encodeURIComponent(id)}`),
   createInventoryOrder: data => request('/inventory-orders', { method: 'POST', data }),
   approveInventoryOrder: (id, data) => request(`/inventory-orders/${encodeURIComponent(id)}/approve`, { method: 'POST', data }),
+  aiChannels: () => request('/ai/channels?feature=knowledge'),
   chat: messages => request('/ai/chat', {
     method: 'POST',
     data: { messages },

@@ -3,9 +3,9 @@
     "id": "meanwell-ndr-240-24",
     "level": "low",
     "file": "meanwell-ndr-240-24-low.glb",
-    "bytes": 9952,
+    "bytes": 9940,
     "triangles": 60,
-    "sha256": "db13ccb8f8383d8dacb396664255472ab3114fd887992a676092899ecc54bc60"
+    "sha256": "5b329f6a55ffd508a989bd65327b952d9edb65ab73e40004bea5c36ce6f472d4"
   },
   {
     "id": "meanwell-ndr-240-24",
@@ -19,9 +19,9 @@
     "id": "meanwell-ndr-480-24",
     "level": "low",
     "file": "meanwell-ndr-480-24-low.glb",
-    "bytes": 9908,
+    "bytes": 9912,
     "triangles": 60,
-    "sha256": "47199c580d3264cb6b18f60cd61ef5bfe3ca2b4579e88f7f7798767916fb7f2f"
+    "sha256": "fb95ba52b1468075351c0f71634be43680ae2e9028f2f91046781c1b64063207"
   },
   {
     "id": "meanwell-ndr-480-24",

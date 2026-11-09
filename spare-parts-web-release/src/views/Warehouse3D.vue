@@ -56,7 +56,7 @@
             <div class="model-title-heading"><strong>{{ layout?.room?.name || '原粮车间备件库' }}</strong>              <el-tooltip content="刷新布局" placement="top">
                 <el-button class="refresh-layout-button" :loading="loading" aria-label="刷新布局" @click="loadLayout"><el-icon v-if="!loading"><Refresh /></el-icon><span>刷新</span></el-button>
               </el-tooltip></div>
-            <template v-if="displayMode==='3d'"><span class="desktop-scene-help">左键拖动旋转 · Ctrl+滚轮缩放 · 右键拖动平移 · 双击复位</span><span class="touch-scene-help">单指旋转 · 双指缩放、平移 · 点击货架查看</span></template>
+            <template v-if="displayMode==='3d'"><span class="desktop-scene-help">{{ viewMode==='top'?'拖动平移 · Ctrl+滚轮缩放 · 双击回立体':'左键拖动旋转 · Ctrl+滚轮缩放 · 右键拖动平移 · 双击复位' }}</span><span class="touch-scene-help">{{ viewMode==='top'?'单指平移 · 双指缩放、平移 · 点击货架查看':'单指旋转 · 双指缩放、平移 · 点击货架查看' }}</span></template>
             <span v-else>平面图适合快速确认货架相对位置与入口方向</span>
           </div>
           <div v-if="isFullscreen" class="fullscreen-locator">
@@ -87,14 +87,11 @@
               <el-button><el-icon><Box /></el-icon>{{ partModelModeLabel }}<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="hidden">隐藏备件模型</el-dropdown-item>
-                  <el-dropdown-item command="all">展示全部备件</el-dropdown-item>
-                  <el-dropdown-item command="normal">仅展示正常库存</el-dropdown-item>
-                  <el-dropdown-item command="low">仅展示低库存</el-dropdown-item>
+                  <el-dropdown-item v-for="item in partModelMenuItems" :key="item.command" :command="item.command" :divided="item.divided" :disabled="item.disabled">{{ item.label }}</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <el-dropdown v-if="displayMode==='3d'" class="scene-view-menu desktop-scene-control" trigger="click" @command="setView"><el-button><el-icon><View /></el-icon>视角：{{viewMode==='perspective'?'立体':'俯视'}}<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item command="perspective">立体视角</el-dropdown-item><el-dropdown-item command="top">俯视视角</el-dropdown-item></el-dropdown-menu></template></el-dropdown>
+            <el-dropdown v-if="displayMode==='3d'" class="scene-view-menu desktop-scene-control" trigger="click" @command="setView"><el-button><el-icon><View /></el-icon>视角：{{viewMode==='perspective'?'立体':'俯视'}}<el-icon class="el-icon--right"><ArrowDown /></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item :command="viewMenuAction.command">{{ viewMenuAction.label }}</el-dropdown-item></el-dropdown-menu></template></el-dropdown>
             <el-button v-if="displayMode==='3d'" class="touch-reset-button desktop-scene-control" @click="resetPerspectiveView">复位视角</el-button>
             <el-button class="panel-toggle-button desktop-scene-control" :aria-pressed="!sidePanelCollapsed" :title="sidePanelCollapsed ? '显示货架' : '收起货架'" @click="toggleSidePanel">
               <el-icon><ArrowLeftBold v-if="sidePanelCollapsed" /><ArrowRightBold v-else /></el-icon>货架
@@ -108,19 +105,16 @@
                 <el-dropdown-item command="shelves">{{ sidePanelCollapsed ? '显示货架列表' : '收起货架列表' }}</el-dropdown-item>
                 <template v-if="displayMode==='3d'">
                   <el-dropdown-item command="reset">复位视角</el-dropdown-item>
-                  <el-dropdown-item command="perspective">立体视角</el-dropdown-item>
-                  <el-dropdown-item command="top">俯视视角</el-dropdown-item>
-                  <el-dropdown-item command="models:hidden" divided>隐藏备件模型</el-dropdown-item>
-                  <el-dropdown-item command="models:all">展示全部备件</el-dropdown-item>
-                  <el-dropdown-item command="models:normal">仅展示正常库存</el-dropdown-item>
-                  <el-dropdown-item command="models:low">仅展示低库存</el-dropdown-item>
+                  <el-dropdown-item :command="viewMenuAction.command">{{ viewMenuAction.label }}</el-dropdown-item>
+                  <el-dropdown-item v-for="(item,index) in partModelMenuItems" :key="item.command" :command="'models:'+item.command" :divided="index===0 || item.divided" :disabled="item.disabled">{{ item.label }}</el-dropdown-item>
                 </template>
               </el-dropdown-menu></template>
             </el-dropdown>
           </div>
         </div>
-        <div v-show="displayMode==='3d'" ref="stage" class="three-stage" :class="{ 'is-loading': loading || partsLoading || modelsPreparing }">
-          <div v-if="(loading || partsLoading || modelsPreparing) && !loadError" class="stage-loading" role="status" aria-live="polite"><el-icon class="is-loading"><Loading /></el-icon><span>{{sceneLoadingText}}</span><small v-if="loadProgress.phase==='models' && loadProgress.total">{{loadProgress.done}} / {{loadProgress.total}} 个库位已准备<template v-if="loadProgress.failed"> · {{loadProgress.failed}} 个模型加载失败，保留占位标记</template></small></div>
+        <div v-show="displayMode==='3d'" ref="stage" class="three-stage" :class="{ 'is-loading': !sceneReady && (loading || partsLoading || modelsPreparing) }">
+          <div v-if="!sceneReady && (loading || partsLoading || modelsPreparing) && !loadError" class="stage-loading" role="status" aria-live="polite"><el-icon class="is-loading"><Loading /></el-icon><span>{{sceneLoadingText}}</span><small v-if="loadProgress.phase==='models' && loadProgress.total">{{loadProgress.done}} / {{loadProgress.total}} 个库位已准备<template v-if="loadProgress.failed"> · {{loadProgress.failed}} 个模型加载失败，保留占位标记</template></small></div>
+          <div v-if="refreshing || refreshError" class="refresh-status" role="status">{{ refreshError || '正在核对最新库位与库存…' }}<el-button v-if="refreshError" text @click="refreshCachedWarehouse">重试</el-button></div>
           <div v-if="loadError && !webglError" class="stage-error" role="alert"><el-icon><Warning /></el-icon><strong>库位加载未完成</strong><span>{{loadError}}</span><el-button @click="loadLayout">重新加载</el-button></div>
           <div v-if="!loading && !partsLoading && !modelsPreparing && loadProgress.failed && !loadError" class="model-load-warning" role="status">{{loadProgress.failed}} 个模型加载失败，已保留库存占位标记 <el-button text @click="loadPartModels">重试模型</el-button></div>
           <div v-if="webglError" class="stage-error">
@@ -128,7 +122,7 @@
             <strong>当前浏览器未启用 3D 图形</strong>
             <span>可切换“2D平面”或使用货架列表查看库位；也可更新微信或浏览器后重试。</span>
           </div>
-          <div class="stock-model-legend" aria-label="备件模型颜色说明"><span><i class="normal"></i>库存正常</span><span><i class="low"></i>需要补充</span></div>
+          <div v-if="partsLoading||modelsPreparing" class="model-stream-status" role="status">{{ partsLoading?'正在读取库存…':'正在展示模型 '+loadProgress.done+' / '+(loadProgress.total||0) }}</div><details class="stock-model-legend" :open="!nativeAndroid" aria-label="备件模型颜色说明"><summary>图例</summary><span><i class="normal"></i>库存正常</span><span><i class="low"></i>零库存 / 需要补充</span><span><i class="unconfigured"></i>订购点未配置</span><span>◇ 未绑定 / 外形待核对</span></details>
         </div>
         <div v-show="displayMode==='2d'" class="two-stage">
           <div class="floor-label">现场平面图</div><div class="east-label">{{ eastDirectionLabel }}</div><div class="entrance-2d" :style="entrancePlanStyle"><el-icon><Right /></el-icon>入口</div>
@@ -141,7 +135,7 @@
       <aside v-show="!sidePanelCollapsed" class="shelf-panel panel" :class="{'is-stock-detail':stockDetailVisible}">
         <section v-if="stockDetailVisible" class="stock-detail-panel" v-loading="stockDetailLoading">
           <header><strong>备件详情</strong><el-button text aria-label="关闭备件详情" @click="stockDetailVisible=false"><el-icon><Close /></el-icon></el-button></header>
-          <h3>{{ selectedPart?.materialDesc }}</h3><div class="stock-identity-line"><code>{{ selectedPart?.materialCode }}</code><el-tag :type="Number(selectedPart?.totalStock)===0?'danger':selectedPart?.reorderPoint!=null && Number(selectedPart?.totalStock)<=Number(selectedPart?.reorderPoint)?'warning':'success'">{{ Number(selectedPart?.totalStock)===0?'零库存':selectedPart?.reorderPoint!=null && Number(selectedPart?.totalStock)<=Number(selectedPart?.reorderPoint)?'需补货':'库存正常' }}</el-tag></div>
+          <h3>{{ selectedPart?.materialDesc }}</h3><div class="stock-identity-line"><code>{{ selectedPart?.materialCode }}</code><el-tag :type="stockHealth(selectedPart).type">{{ stockHealth(selectedPart).label }}</el-tag></div>
           <PartModelDetail :part="selectedPart" compact />
           <dl class="stock-detail-fields"><div><dt>规格型号</dt><dd>{{ selectedPart?.spec || '未填写' }}</dd></div><div><dt>库位</dt><dd>{{ compactLocation(selectedPart) }}</dd></div><div><dt>当前库存</dt><dd>{{ selectedPart?.totalStock }} {{ selectedPart?.unit }}</dd></div><div><dt>订购点 / 最高储备</dt><dd>{{ selectedPart?.reorderPoint ?? '未配置' }} / {{ selectedPart?.maxStock ?? '未配置' }}</dd></div><div><dt>不含税单价</dt><dd>{{ selectedPart?.price == null ? '未配置' : `¥ ${Number(selectedPart.price).toFixed(2)}` }}</dd></div></dl>
           <div v-if="stockDetailError" role="alert">详情加载失败 <el-button link @click="loadStockDetail(selectedPart)">重新加载</el-button></div>
@@ -283,9 +277,14 @@
 .stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
 </style>
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+const nativeAndroid=typeof navigator!=='undefined'&&navigator.userAgent.includes('DigitalWorkbenchAndroid/')
+
+import { computed, nextTick, onActivated, onDeactivated, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { collectParts } from '../utils/collect-parts.mjs'
+import { createShelfPartsCache } from '../utils/shelf-parts-cache.mjs'
+import { streamModelJobs } from '../utils/progressive-models.mjs'
+import { stockHealth } from '../utils/stock-health.mjs'
 import { useRoute, useRouter } from 'vue-router'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -321,6 +320,8 @@ const fullscreenArea = ref(null)
 const loading = ref(true)
 const modelsPreparing = ref(false)
 const partsLoading=ref(false),loadError=ref(''),loadProgress=ref({phase:'layout',loaded:0,total:null,done:0,failed:0})
+const sceneReady=ref(false),refreshing=ref(false),refreshError=ref('')
+let sceneActive=true,firstActivation=true,resumeToken=0,handledRoutePartId=''
 const sceneLoadingText=computed(()=>loadProgress.value.phase==='layout'?'正在读取库位布局':loadProgress.value.phase==='staging'?'正在读取暂存点':loadProgress.value.phase==='parts'?`正在读取备件 ${loadProgress.value.loaded}${loadProgress.value.total===null?'': ' / '+loadProgress.value.total} 条`:loadProgress.value.phase==='models'?'正在准备备件模型':'正在呈现场景')
 const layout = ref(null)
 const shelves = ref([])
@@ -334,9 +335,9 @@ const activeGroup = ref('')
 const mobileFiltersOpen = ref(false)
 function mobileSceneCommand(command) {
   if (command === 'shelves') toggleSidePanel()
-  else if (command === 'reset') resetPerspectiveView()
-  else if (command === 'perspective' || command === 'top') setView(command)
-  else if (command.startsWith('models:')) setPartModelMode(command.slice(7))
+  else if (command === 'reset') return resetPerspectiveView()
+  else if (command === 'perspective' || command === 'top') return setView(command)
+  else if (command.startsWith('models:')) return setPartModelMode(command.slice(7))
 }
 const selectedShelf = ref(null)
 const stockDetailVisible = ref(false), stockDetailLoading = ref(false), stockDetailError = ref(false), stockDetailCandidates = ref([])
@@ -354,9 +355,11 @@ const partSearching = ref(false)
 const shelfParts = ref([])
 const shelfPartsLoading = ref(false)
 const shelfPartsError = ref('')
+const shelfPartsCache=createShelfPartsCache()
 const panelMode = ref('shelves')
 const sidePanelCollapsed = ref(true)
 const viewMode = ref('perspective')
+const viewMenuAction = computed(() => viewMode.value==='top' ? {command:'perspective',label:'立体视角'} : {command:'top',label:'俯视视角'})
 const displayMode = ref('3d')
 const selectedLayers = ref(Array.from({ length: COMMON_SHELF_LEVELS }, (_, index) => index + 1))
 const isFullscreen = ref(false)
@@ -367,9 +370,11 @@ const editorSubmitting = ref(false)
 const editForm = reactive({ displayName: '', shelfNo: '' })
 const qrVisible = ref(false)
 const qrDataUrl = ref('')
-const partModelMode = ref('all')
+// A phone enters to find a location. Load the stock models only when requested.
+const partModelMode = ref(nativeAndroid ? 'hidden' : 'all')
+const lastVisiblePartModelMode = ref('all')
 const allLocatedParts = ref([])
-const canEditCurrentWorkshop = computed(() => canEditWorkshop(workshopCode.value))
+const canEditCurrentWorkshop = computed(() => !nativeAndroid && canEditWorkshop(workshopCode.value))
 const stagingPoints = ref([])
 const VENDOR_FILTER = '__VENDOR__'
 
@@ -389,7 +394,13 @@ const shelfPartsCountText = computed(() => shelfPartsLoading.value ? '加载中�
 const layerStats = computed(() => Array.from({ length: COMMON_SHELF_LEVELS }, (_, index) => ({ layer: index + 1, count: shelfParts.value.filter(part => Number(resolvePartLocation(part).layer) === index + 1).length })))
 const editShelfNoText = computed(() => editForm.shelfNo ? `${String(editForm.shelfNo).padStart(2, '0')}号` : '')
 const editorRenumbering = computed(() => editingShelf.value && String(editForm.shelfNo || '') !== String(editingShelf.value.shelfNo || ''))
-const partModelModeLabel = computed(() => ({ hidden: '隐藏备件', all: '全部备件', normal: '正常库存', low: '低库存' }[partModelMode.value] || '全部备件'))
+const partModelModeLabel = computed(() => ({ hidden: '模型已隐藏', all: '模型：全部库存', normal: '模型：正常库存', low: '模型：低库存' }[partModelMode.value] || '模型：全部库存'))
+const partModelMenuItems = computed(() => [
+  { command: partModelMode.value==='hidden'?'show':'hidden', label: partModelMode.value==='hidden'?'展示模型':'隐藏模型', divided:false, disabled:false },
+  { command:'all', label:'全部库存', divided:true, disabled:partModelMode.value==='all' },
+  { command:'normal', label:'仅正常库存', divided:false, disabled:partModelMode.value==='normal' },
+  { command:'low', label:'仅低库存', divided:false, disabled:partModelMode.value==='low' }
+])
 const selectedLocationSegments = computed(() => {
   const location = selectedPartLocation.value
   return {
@@ -552,6 +563,8 @@ function shelfMatchesFilter(shelf, filter) {
 }
 
 async function loadLayout() {
+  shelfPartsCache.clear()
+  shelfPartsRequestToken++
   const requestToken = ++layoutRequestToken
   partModelsRequestToken++;partModelDrawToken++;partsLoading.value=false;modelsPreparing.value=false
   const requestedWorkshop = workshopCode.value
@@ -577,6 +590,9 @@ async function loadLayout() {
     if (!isCurrent()) return
     if (!scene) initScene()
     if (scene) { drawRoom(); drawShelves() }
+    // The room is usable before inventory and GLB requests have completed.
+    if(isCurrent()){sceneReady.value=true;loading.value=false}
+    await nextTick()
     if (partModelMode.value !== 'hidden') await loadPartModels()
   } catch(error){
     if(isCurrent())loadError.value=error.response?.data?.msg||error.message||'无法读取库位，请检查网络后重试'
@@ -599,6 +615,7 @@ async function searchParts(keyword) {
 }
 
 async function changeWorkshop() {
+  resumeToken++;sceneReady.value=false;refreshError.value='';refreshing.value=false
   partModelsRequestToken++
   partSearchRequestToken++
   shelfPartsRequestToken++
@@ -635,7 +652,12 @@ function clearPart() {
 }
 
 async function setPartModelMode(mode) {
+  if (mode === 'show') mode = ['all','normal','low'].includes(lastVisiblePartModelMode.value) ? lastVisiblePartModelMode.value : 'all'
   if (!['all','normal','low','hidden'].includes(mode)) return
+  if (mode === partModelMode.value) return
+  if (mode === 'hidden') {
+    if (['all','normal','low'].includes(partModelMode.value)) lastVisiblePartModelMode.value = partModelMode.value
+  } else lastVisiblePartModelMode.value = mode
   partModelsRequestToken += 1
   partModelMode.value = mode
   if (markerRoot) disposeChildren(markerRoot)
@@ -647,7 +669,10 @@ async function setPartModelMode(mode) {
     if (partModelsRoot) disposeChildren(partModelsRoot)
     return
   }
-  await loadPartModels()
+  const requestedWorkshop=workshopCode.value
+  const pending=loadPartModels(),requestedToken=partModelsRequestToken
+  await pending
+  if(nativeAndroid&&requestedToken===partModelsRequestToken&&requestedWorkshop===workshopCode.value&&mode===partModelMode.value&&!selectedShelf.value&&allLocatedParts.value.length){const location=resolvePartLocation(allLocatedParts.value[0]);const shelf=shelves.value.find(item=>Number(item.shelfNo)===Number(location.shelf));if(shelf)await selectShelf(shelf,true)}
 }
 
 async function loadPartModels() {
@@ -687,16 +712,17 @@ function modelFrontRotationFor(part) {
 
 const STOCK_MODEL_COLORS = {
   normal: { color: 0x19a974, emissive: 0x075b40 },
-  low: { color: 0xd9222f, emissive: 0x681018 }
+  low: { color: 0xd9222f, emissive: 0x681018 },
+  unconfigured: { color: 0x7f8da2, emissive: 0x283548 }
 }
 
 function stockModelColors(lowStock) {
-  return lowStock ? STOCK_MODEL_COLORS.low : STOCK_MODEL_COLORS.normal
+  return STOCK_MODEL_COLORS[typeof lowStock==='string'?lowStock:lowStock?'low':'normal']
 }
 
 function partGeometry(part, width, height, depth) {
-  // A neutral inventory marker is not a guessed spare-part model.
-  return new THREE.BoxGeometry(width * .45, height * .45, depth * .45)
+  // A diamond marks inventory location; it must not resemble a real spare part.
+  return new THREE.OctahedronGeometry(Math.min(width,height,depth)*.18)
 }
 
 function loadCustomModel(url) {
@@ -767,7 +793,7 @@ async function drawPartModels() {
     const location = resolvePartLocation(part)
     const shelf = shelves.value.find(item => Number(item.shelfNo) === Number(location.shelf))
     if (!shelf || !shelfMatchesFilter(shelf, activeGroup.value)) continue
-    // “展示全部/低库存”是全库模式，不应因用户刚刚点击过某个货架或层数而缩小范围。
+    // 库存范围作用于全库，不应因用户刚刚点击过某个货架或层数而缩小范围。
     const groupKey = `${shelf.id}:${location.position}:${location.layer}:${location.location}`
     const group = groupedParts.get(groupKey)
     if (group) {
@@ -786,10 +812,12 @@ async function drawPartModels() {
       usableWidth: placement.usableWidth, slots: placement.slots,
       depth: shelf.size.depth, layerHeight: placement.layerHeight, sideZ: placement.z
     })
-    const low = group.parts.some(item => item.safetyStock != null && Number(item.totalStock) <= Number(item.safetyStock))
+    const healthKeys=group.parts.map(item=>stockHealth(item).key)
+    const low = healthKeys.some(key=>key==='zero'||key==='low')?'low':healthKeys.includes('unconfigured')?'unconfigured':'normal'
     const status = stockModelColors(low)
     const material = new THREE.MeshStandardMaterial({
       color: status.color,
+      wireframe: true, transparent: true, opacity: .7,
       emissive: status.emissive,
       emissiveIntensity: 0.34,
       roughness: 0.58,
@@ -815,14 +843,14 @@ async function drawPartModels() {
     anchor.userData.stockParts=group.parts
     anchor.add(model)
     preparedRoot.add(anchor)
-    pendingModels.push(replaceWithCustomModel(anchor, model, part, placement, shelf, { width, height, depth }, low, drawToken).then(result=>{if(drawToken===partModelDrawToken){loadProgress.value.done++;if(result===false)loadProgress.value.failed++}}))
+    pendingModels.push(async()=>{const result=await replaceWithCustomModel(anchor, model, part, placement, shelf, { width, height, depth }, low, drawToken);if(drawToken===partModelDrawToken){loadProgress.value.done++;if(result===false)loadProgress.value.failed++}})
   }
-  await Promise.allSettled(pendingModels)
-  if(drawToken!==partModelDrawToken || partModelMode.value==='hidden')return
-  instanceStockModels(preparedRoot)
-  // Publish complete models together; never paint neutral boxes while GLBs fit.
   disposeChildren(partModelsRoot)
   while(preparedRoot.children.length)partModelsRoot.add(preparedRoot.children[0])
+  await streamModelJobs(pendingModels,{isCurrent:()=>drawToken===partModelDrawToken&&partModelMode.value!=='hidden'})
+  if(drawToken!==partModelDrawToken || partModelMode.value==='hidden')return
+  instanceStockModels(partModelsRoot)
+  // Slot markers are visible while remote models arrive.
   loadProgress.value.phase='render'
   } finally {
     disposeChildren(preparedRoot)
@@ -830,7 +858,7 @@ async function drawPartModels() {
   }
 }
 
-async function locatePart(part, requestToken = ++partLocationRequestToken) {
+async function locatePart(part, requestToken = ++partLocationRequestToken, preserveCamera = false) {
   stockDetailToken++
   stockDetailVisible.value = false
   stockDetailLoading.value = false
@@ -852,17 +880,16 @@ async function locatePart(part, requestToken = ++partLocationRequestToken) {
   }
   activeGroup.value = ''
   panelMode.value = 'parts'
-  await selectShelf(shelf, false, false, false)
-  if (!isCurrent()) return
+  const shelfSelection=selectShelf(shelf, false, false, false)
   const targetLayer = Number(location.layer)
   if (!selectedLayers.value.includes(targetLayer)) selectedLayers.value = [targetLayer]
   drawShelves()
   drawPartModels()
   drawPartMarker(shelf, part)
-  focusPart(shelf, part)
+  if(!preserveCamera)focusPart(shelf, part)
   stockDetailCandidates.value=allLocatedParts.value.filter(item=>String(item.locationCode||item.location)===String(part.locationCode||part.location) && Number(resolvePartLocation(item).shelf)===Number(location.shelf) && Number(resolvePartLocation(item).position)===Number(location.position) && Number(resolvePartLocation(item).layer)===Number(location.layer))
   stockDetailVisible.value=true;sidePanelCollapsed.value=false
-  await loadStockDetail(part)
+  await Promise.allSettled([shelfSelection,loadStockDetail(part)])
   if (!isCurrent()) return
   await nextTick();resizeScene()
 }
@@ -884,8 +911,7 @@ async function selectShelf(shelf, focus = true, clearLocatedPart = true, resetLa
   panelMode.value = 'parts'
   if (sidePanelCollapsed.value) {
     sidePanelCollapsed.value = false
-    await nextTick()
-    resizeScene()
+    nextTick(resizeScene)
   }
   if (resetLayers) selectAllLayers()
   if (clearLocatedPart && !partBelongsToShelf(selectedPart.value || {}, shelf.shelfNo)) {
@@ -894,15 +920,17 @@ async function selectShelf(shelf, focus = true, clearLocatedPart = true, resetLa
   drawShelves()
   if (selectedPart.value && partBelongsToShelf(selectedPart.value, shelf.shelfNo)) drawPartMarker(shelf, selectedPart.value)
   if (focus) focusShelf(shelf)
-  shelfParts.value = []
+  const requestedWorkshop=workshopCode.value,cacheKey=`${requestedWorkshop}:${shelf.shelfNo}`
+  const isCurrent=()=>requestToken===shelfPartsRequestToken && selectedShelf.value?.id===shelf.id && workshopCode.value===requestedWorkshop
+  shelfParts.value = shelfPartsCache.peek(cacheKey) || []
   shelfPartsError.value = ''
   if (shelf.shelfNo == null) { shelfPartsLoading.value = false; return }
   shelfPartsLoading.value = true
   try {
-    const rows = await collectParts(getParts, { shelf: shelf.shelfNo, workshopCode: workshopCode.value, sort:'codeAsc' }, () => requestToken === shelfPartsRequestToken && selectedShelf.value?.id === shelf.id)
-    if(rows)shelfParts.value=rows
+    const rows=await shelfPartsCache.get(cacheKey,()=>collectParts(getParts,{shelf:shelf.shelfNo,workshopCode:requestedWorkshop,sort:'codeAsc'},()=>requestedWorkshop===workshopCode.value))
+    if(isCurrent())shelfParts.value=rows
   } catch(error) {
-    if(requestToken===shelfPartsRequestToken)shelfPartsError.value=error?.message||'货架备件加载失败，请重试'
+    if(isCurrent()){shelfParts.value=[];shelfPartsError.value=error?.message||'货架备件加载失败，请重试'}
   } finally {
     if (requestToken === shelfPartsRequestToken) shelfPartsLoading.value = false
   }
@@ -967,12 +995,12 @@ function initScene() {
     scene.background = new THREE.Color(0xf4f5f7)
     scene.fog = new THREE.Fog(0xf4f5f7, 55, 130)
     camera = new THREE.PerspectiveCamera(43, 1, 0.1, 200)
-    camera.up.set(0, 1, 0)
-    camera.position.copy(overviewCameraPosition('perspective'))
+    camera.up.set(0, viewMode.value==='top'?0:1, viewMode.value==='top'?1:0)
+    camera.position.copy(overviewCameraPosition(viewMode.value))
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })
     const mobileGraphics = window.matchMedia('(max-width: 680px), (pointer: coarse)').matches
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, mobileGraphics ? 1.5 : 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFShadowMap
     renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -983,11 +1011,12 @@ function initScene() {
     stage.value.appendChild(labelRenderer.domElement)
 
     controls = new OrbitControls(camera, renderer.domElement)
-    controls.enableDamping = true
+    controls.enableDamping = viewMode.value !== 'top'
     controls.dampingFactor = 0.08
-    controls.enableRotate = true
+    controls.enableRotate = viewMode.value !== 'top'
     controls.enablePan = true
-    controls.touches.ONE = THREE.TOUCH.ROTATE
+    controls.touches.ONE = viewMode.value==='top'?THREE.TOUCH.PAN:THREE.TOUCH.ROTATE
+    controls.mouseButtons.LEFT = viewMode.value==='top'?THREE.MOUSE.PAN:THREE.MOUSE.ROTATE
     controls.touches.TWO = THREE.TOUCH.DOLLY_PAN
     controls.rotateSpeed = 0.72
     controls.zoomSpeed = 0.9
@@ -1354,7 +1383,7 @@ function drawPartMarker(shelf, part) {
   const label = document.createElement('div')
   label.className = 'part-location-card'
   const labelKicker = document.createElement('span')
-  labelKicker.textContent = '备件准确位置'
+  labelKicker.textContent = modelUrlFor(part)?'备件准确位置':part.categoryModelUrl?'备件位置 · 外形待核对':'备件位置 · 未绑定模型'
   const labelTitle = document.createElement('strong')
   labelTitle.textContent = shelf.displayName || shelfLabel(placement.location.shelf)
   const labelPosition = document.createElement('small')
@@ -1401,7 +1430,7 @@ function onStageClick(event) {
   raycaster.setFromCamera(pointer, camera)
   const hit = raycaster.intersectObjects([...clickableMeshes, partModelsRoot].filter(Boolean), true)[0]
   const parts=stockPartsForHit(hit)
-  if(parts.length) { locatePart(parts.find(part=>String(part._id)===String(selectedPart.value?._id)) || parts[0]); return }
+  if(parts.length) { cameraAnimation=null;locatePart(parts.find(part=>String(part._id)===String(selectedPart.value?._id)) || parts[0],undefined,true); return }
   if (hit?.object?.userData?.shelf) { stockDetailVisible.value=false;selectShelf(hit.object.userData.shelf, true) }
 }
 
@@ -1429,7 +1458,7 @@ function onStageWheel(event) {
 }
 
 function resetPerspectiveView() {
-  setView('perspective', true)
+  return setView('perspective', true)
 }
 
 function focusShelf(shelf) {
@@ -1449,22 +1478,27 @@ function focusPart(shelf, part) {
   const target = shelfLocalToWorld(shelf, new THREE.Vector3(placement.x, placement.y, placement.z))
   const isTop = viewMode.value === 'top'
   camera.up.set(0, isTop ? 0 : 1, isTop ? 1 : 0)
-  const shelfRotation = Number(shelf.position.rotationY || 0)
-  const outward = new THREE.Vector3(0, 0, placement.sideDirection).applyAxisAngle(new THREE.Vector3(0, 1, 0), shelfRotation)
-  const tangent = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), shelfRotation)
-  // 镜头放在当前排货架的通道内，并从货位朝货架中心斜看。固定向左偏会让
-  // 01等边缘货位正好被立柱挡住；距离过大又会穿过下一排货架。
+  // Search may move closer, but preserve the user's current azimuth.
+  const direction=camera.position.clone().sub(controls.target);direction.y=0
+  if(direction.lengthSq()<.001)direction.set(0,0,1)
+  direction.normalize()
   const aisleDistance = shelf.size.depth * 0.5 + 2.15
-  const centerwardOffset = Math.min(Math.max(-placement.x * 0.58, -1.35), 1.35)
   const destination = isTop
     ? new THREE.Vector3(target.x, 30, target.z + 0.01)
-    : target.clone().addScaledVector(outward, aisleDistance).addScaledVector(tangent, centerwardOffset).add(new THREE.Vector3(0, 2.15, 0))
+    : target.clone().addScaledVector(direction, aisleDistance).add(new THREE.Vector3(0, 2.15, 0))
   cameraAnimation = { start: performance.now(), duration: 760, fromPosition: camera.position.clone(), toPosition: destination, fromTarget: controls.target.clone(), toTarget: target }
 }
 
 function setView(mode, resetTarget = false) {
+  if (!['perspective','top'].includes(mode)) return
   viewMode.value = mode
   if (!camera || !controls) return
+  const isTop = mode === 'top'
+  controls.enableRotate = !isTop
+  controls.enableDamping = !isTop
+  if (controls.touches) controls.touches.ONE = isTop ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE
+  if (controls.mouseButtons) controls.mouseButtons.LEFT = isTop ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE
+  if (isTop) controls.update?.()
   const target = !resetTarget && selectedShelf.value
     ? new THREE.Vector3(selectedShelf.value.position.x, 1.2, selectedShelf.value.position.z)
     : overviewTarget()
@@ -1478,6 +1512,7 @@ function setView(mode, resetTarget = false) {
 }
 
 function animate(time = performance.now()) {
+  if(!sceneActive || document.hidden){animationFrame=0;return}
   animationFrame = requestAnimationFrame(animate)
   if (cameraAnimation) {
     const progress = Math.min((time - cameraAnimation.start) / cameraAnimation.duration, 1)
@@ -1492,7 +1527,7 @@ function animate(time = performance.now()) {
 }
 
 function resizeScene() {
-  if (!stage.value || !camera || !renderer || !labelRenderer) return
+  if (!sceneActive || !stage.value?.clientWidth || !stage.value?.clientHeight || !camera || !renderer || !labelRenderer) return
   const width = Math.max(stage.value.clientWidth, 1)
   const height = Math.max(stage.value.clientHeight, 1)
   const aspect = width / height
@@ -1613,17 +1648,76 @@ watch(displayMode, async mode => {
   }
 })
 watch(() => route.query.partId, value => {
-  if (value && shelves.value.length) locatePartById(value)
+  if (sceneActive && route.path==='/warehouse-3d' && shelves.value.length){handledRoutePartId=String(value||'');if(value)locatePartById(value)}
+})
+async function refreshCachedWarehouse(){
+  if(!sceneActive || loading.value || partsLoading.value || modelsPreparing.value || refreshing.value)return
+  const token=++resumeToken,workshop=workshopCode.value,mode=partModelMode.value,layoutToken=layoutRequestToken,modelsToken=partModelsRequestToken
+  const current=()=>sceneActive && token===resumeToken && workshop===workshopCode.value && mode===partModelMode.value && layoutToken===layoutRequestToken && modelsToken===partModelsRequestToken
+  refreshing.value=true;refreshError.value=''
+  try{
+    const [result,points,rows]=await Promise.all([
+      getWarehouseLayout({workshopCode:workshop}),getStagingPoints({workshopCode:workshop}),
+      mode==='hidden'?Promise.resolve(null):collectParts(getParts,{workshopCode:workshop,sort:'codeAsc',...(mode==='low'?{lowStock:1}:mode==='normal'?{stockStatus:'normal'}:{})},current)
+    ])
+    if(!current())return
+    const layoutChanged=JSON.stringify(layout.value)!==JSON.stringify(result.data)||JSON.stringify(stagingPoints.value)!==JSON.stringify(points.data||[])
+    const located=rows?.filter(part=>/^\d{6}$/.test(String(part.locationCode||'')))
+    const partsChanged=located && JSON.stringify(allLocatedParts.value)!==JSON.stringify(located)
+    if(layoutChanged){
+      layout.value=result.data;stagingPoints.value=points.data||[]
+      if(result.data?.workshops?.length)workshopOptions.value=result.data.workshops
+      shelves.value=(result.data?.shelves||[]).map(item=>applyPhysicalShelfLayout(item,workshop))
+      if(selectedShelf.value)selectedShelf.value=shelves.value.find(item=>item.id===selectedShelf.value.id)||null
+      drawRoom();drawShelves()
+    }
+    if(layoutChanged||partsChanged)shelfPartsCache.clear()
+    if(partsChanged){
+      allLocatedParts.value=located
+      if(selectedPart.value){const updated=located.find(part=>String(part._id)===String(selectedPart.value._id));if(updated)selectedPart.value=updated;else clearPart()}
+    }
+    if((layoutChanged||partsChanged)&&selectedPart.value){
+      const selectedLocation=resolvePartLocation(selectedPart.value)
+      const shelf=shelves.value.find(item=>Number(item.shelfNo)===Number(selectedLocation.shelf))
+      if(shelf){selectedShelf.value=shelf;drawShelves();drawPartMarker(shelf,selectedPart.value)}
+      else clearPart()
+    }
+    if((layoutChanged||partsChanged)&&mode!=='hidden')await drawPartModels()
+    if(current() && selectedShelf.value){
+      const shelf=selectedShelf.value,requestToken=++shelfPartsRequestToken
+      const detailRows=await collectParts(getParts,{shelf:shelf.shelfNo,workshopCode:workshop,sort:'codeAsc'},()=>current() && requestToken===shelfPartsRequestToken && selectedShelf.value?.id===shelf.id)
+      if(detailRows && current()){shelfParts.value=detailRows;shelfPartsCache.set(`${workshop}:${shelf.shelfNo}`,detailRows)}
+    }
+  }catch{if(current())refreshError.value='最新数据核对失败，当前仍显示上次视图'}
+  finally{if(token===resumeToken)refreshing.value=false}
+}
+function resumeAnimation(){if(sceneActive && scene && !animationFrame && !document.hidden)animate()}
+onActivated(async()=>{
+  sceneActive=true
+  if(firstActivation){firstActivation=false;return}
+  await nextTick();controls && (controls.enabled=true);resizeObserver?.observe(stage.value);resizeScene();resumeAnimation()
+  if(route.query.workshopCode && route.query.workshopCode!==workshopCode.value){workshopCode.value=String(route.query.workshopCode);await changeWorkshop()}
+  else if(!sceneReady.value && !loading.value && !partsLoading.value && !modelsPreparing.value)await loadLayout()
+  else await refreshCachedWarehouse()
+  if(sceneActive && route.query.partId && String(route.query.partId)!==handledRoutePartId){handledRoutePartId=String(route.query.partId);await locatePartById(route.query.partId)}
+})
+onDeactivated(()=>{
+  sceneActive=false;resumeToken++;refreshing.value=false;cancelAnimationFrame(animationFrame);animationFrame=0;resizeObserver?.disconnect();controls && (controls.enabled=false)
+  stagePointers.clear();pointerStart=null;multiPointerGesture=false;cameraAnimation=null
+  stockDetailToken++;stockDetailVisible.value=false;editorVisible.value=false;qrVisible.value=false
 })
 onMounted(async () => {
+  document.addEventListener('visibilitychange',resumeAnimation)
   document.addEventListener('fullscreenchange', handleFullscreenChange)
   document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
   const requestToken = layoutRequestToken + 1
   await loadLayout()
   if (requestToken !== layoutRequestToken) return
-  if (route.query.partId) await locatePartById(route.query.partId)
+  if (sceneActive && route.path==='/warehouse-3d' && route.query.partId){handledRoutePartId=String(route.query.partId);await locatePartById(route.query.partId)}
 })
 onBeforeUnmount(() => {
+  shelfPartsCache.clear()
+  sceneActive=false;resumeToken++;document.removeEventListener('visibilitychange',resumeAnimation)
   partLocationRequestToken++
   layoutRequestToken++
   stockDetailToken++
@@ -1656,6 +1750,12 @@ onBeforeUnmount(() => {
   labelRenderer?.domElement?.remove()
 })
 </script>
+<style>
+.model-stream-status{position:absolute;left:12px;top:12px;z-index:4;padding:8px 12px;border-radius:8px;background:#fffef2;color:#795a22;font-size:12px;box-shadow:0 2px 10px #152b4112}
+.stock-model-legend summary{cursor:pointer;pointer-events:auto;list-style:none}
+@media(min-width:761px){.stock-model-legend summary{display:none}}
+@media(max-width:760px){.stock-model-legend{pointer-events:auto;max-width:calc(100% - 24px);right:8px;bottom:8px;padding:6px 10px}.stock-model-legend:not([open]){display:block}.stock-model-legend[open]{display:flex;flex-wrap:wrap}.stock-model-legend[open] summary{width:100%}.stock-model-legend:not([open]) span{display:none}}
+</style>
 
 <style scoped>
 .warehouse-page { --wine:#8f1720; --crimson:#c91f2c; --amber:#e3a321; --purple:#7254a6; --teal:#15936b; }
@@ -1815,10 +1915,10 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .model-title-heading{display:flex;align-items:center;gap:8px}
-:global(#app) .model-title-heading .refresh-layout-button{width:auto;min-width:60px;height:32px;min-height:32px;padding:0 8px;margin-left:0;font-size:12px;border-radius:6px}
+:global(#app .model-title-heading .refresh-layout-button){width:auto;min-width:60px;height:32px;min-height:32px;padding:0 8px;margin-left:0;font-size:12px;border-radius:6px}
 @media(max-width:760px){
   .model-title-heading{justify-content:space-between;width:100%}
-  :global(#app) .model-title-heading .refresh-layout-button{height:36px;min-height:36px}
+  :global(#app .model-title-heading .refresh-layout-button){height:36px;min-height:36px}
   .model-actions .view-mode-tools{display:block}
   .model-actions .view-mode-tools .el-button-group::before,.model-actions .view-mode-tools .el-button-group::after{display:none;content:none}
   .model-actions .view-mode-tools .el-button-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
@@ -1883,4 +1983,9 @@ onBeforeUnmount(() => {
   .warehouse-page .model-actions .view-mode-tools .el-button{padding:6px 4px}
 }
 .stage-loading small{font-size:12px;color:#667085}.model-load-warning{position:absolute;top:12px;left:12px;right:12px;z-index:4;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 12px;border:1px solid #f1d298;background:#fff8e8;border-radius:8px;font-size:12px;color:#795919}
+</style>
+
+<style scoped>
+.stock-model-legend{flex-wrap:wrap;max-width:calc(100% - 48px)}.stock-model-legend i.unconfigured{background:#7f8da2}
+.refresh-status{position:absolute;top:12px;left:12px;z-index:6;max-width:calc(100% - 48px);padding:8px 12px;border:1px solid #bfd4dc;border-radius:8px;background:#fffffff0;color:#526779;font-size:12px}
 </style>

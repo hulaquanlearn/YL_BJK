@@ -1,0 +1,44 @@
+p {
+	margin-top: 0px;
+	margin-bottom: 5px;
+}
+
+BODY {
+	font-family: verdana;
+	font-size: 11px;
+	margin-left: 5px;
+	margin-right:30px
+}
+
+.emplight {
+	font-style: italic
+}
+
+.empstrong {
+	font-weight: bold;
+}
+
+.scripts {
+	font-size: 11px;
+}
+
+.symbol {
+	font-family: symbol;
+	font-size: 11px;
+}
+
+.limit-liability {
+	display:block;
+	margin-top: 50px;
+	margin-bottom: 50px;
+}
+
+.cprght {
+	display:block;
+	text-align: center;
+}
+
+.adrs {
+	display:block;
+	text-align: center;
+}

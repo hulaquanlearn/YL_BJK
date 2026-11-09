@@ -1,0 +1,44 @@
+{
+  "at": "2026-11-05T18:36:36.061Z",
+  "version": "V1.9.10",
+  "deployment": "abb-brake-mount-20261106",
+  "server": {
+    "webHashes": 1054,
+    "apiHashes": 7,
+    "protectedHashes": 824,
+    "android24Unchanged": true,
+    "servicesOnline": true,
+    "publicRoutes": 4,
+    "database": "connected",
+    "stagingAlreadyEmpty": true
+  },
+  "local": {
+    "recycledPaths": 42,
+    "files": 4465,
+    "bytes": 710697867,
+    "allRecoverable": true,
+    "retainedBuild": "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\dist",
+    "previewPort8534": "stopped and released",
+    "preserved": [
+      "source",
+      "tests and QA evidence",
+      "models and reference manuals",
+      "current signed Android24 APK",
+      "dependencies",
+      "local MySQL data",
+      "private preview robot library",
+      "server business database/uploads/private configuration",
+      "verified server rollback directories"
+    ],
+    "manifest": ".local/cleanup-before-shutdown-20261106.json"
+  },
+  "shutdown": {
+    "helperPid": 41916,
+    "forceApplications": false,
+    "command": "shutdown.exe /s /t 0",
+    "requestedByUser": true,
+    "state": "normal shutdown helper queued",
+    "delaySeconds": 15,
+    "at": "2026-11-06T02:37:16.1565630+08:00"
+  }
+}

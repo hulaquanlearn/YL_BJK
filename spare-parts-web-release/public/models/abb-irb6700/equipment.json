@@ -1,0 +1,678 @@
+{
+  "units": "metres",
+  "upAxis": "Y",
+  "assets": [
+    {
+      "id": "tool-640",
+      "source": "640布料头古井七车间.rslib",
+      "sourceSha256": "489d0dc7423728cc14b413d8a9a48ccea7a6467fe3caf4c0957ba4796c04832f",
+      "glbSha256": "69e0fa384a5286faa64619c2c2e47b2fc6d64d3183abf0eaaa376b441a75b1c3",
+      "bytes": 5709948,
+      "sourceRootTransform": [
+        -0.999893104476075,
+        3.72899232311596e-8,
+        0.0146212045055999,
+        0,
+        -2.79388796150831e-8,
+        -0.999999999999795,
+        6.3975783620704e-7,
+        0,
+        0.0146212045056207,
+        6.39280948885444e-7,
+        0.999893104475872,
+        0,
+        -1.40293402228764e-7,
+        1.33365306157063,
+        -3.08170514079617,
+        1
+      ],
+      "keepRootPlacement": false,
+      "instances": 208,
+      "definitions": [
+        {
+          "definition": "214",
+          "triangles": 600
+        },
+        {
+          "definition": "215",
+          "triangles": 732
+        },
+        {
+          "definition": "216",
+          "triangles": 840
+        },
+        {
+          "definition": "217",
+          "triangles": 2792
+        },
+        {
+          "definition": "218",
+          "triangles": 3528
+        },
+        {
+          "definition": "219",
+          "triangles": 952
+        },
+        {
+          "definition": "220",
+          "triangles": 974
+        },
+        {
+          "definition": "221",
+          "triangles": 192
+        },
+        {
+          "definition": "222",
+          "triangles": 29294
+        },
+        {
+          "definition": "223",
+          "triangles": 392
+        },
+        {
+          "definition": "224",
+          "triangles": 432
+        },
+        {
+          "definition": "225",
+          "triangles": 23775
+        },
+        {
+          "definition": "226",
+          "triangles": 18258
+        },
+        {
+          "definition": "227",
+          "triangles": 216
+        },
+        {
+          "definition": "228",
+          "triangles": 916
+        },
+        {
+          "definition": "229",
+          "triangles": 208
+        },
+        {
+          "definition": "230",
+          "triangles": 216
+        },
+        {
+          "definition": "231",
+          "triangles": 856
+        },
+        {
+          "definition": "233",
+          "triangles": 128
+        },
+        {
+          "definition": "235",
+          "triangles": 16856
+        },
+        {
+          "definition": "236",
+          "triangles": 18258
+        },
+        {
+          "definition": "239",
+          "triangles": 392
+        },
+        {
+          "definition": "240",
+          "triangles": 376
+        },
+        {
+          "definition": "241",
+          "triangles": 252
+        },
+        {
+          "definition": "242",
+          "triangles": 1848
+        },
+        {
+          "definition": "243",
+          "triangles": 2460
+        },
+        {
+          "definition": "244",
+          "triangles": 492
+        },
+        {
+          "definition": "247",
+          "triangles": 14040
+        },
+        {
+          "definition": "248",
+          "triangles": 316
+        },
+        {
+          "definition": "249",
+          "triangles": 180
+        },
+        {
+          "definition": "250",
+          "triangles": 136
+        },
+        {
+          "definition": "251",
+          "triangles": 192
+        },
+        {
+          "definition": "252",
+          "triangles": 228
+        },
+        {
+          "definition": "253",
+          "triangles": 216
+        },
+        {
+          "definition": "254",
+          "triangles": 104
+        },
+        {
+          "definition": "255",
+          "triangles": 244
+        },
+        {
+          "definition": "256",
+          "triangles": 240
+        },
+        {
+          "definition": "257",
+          "triangles": 664
+        },
+        {
+          "definition": "258",
+          "triangles": 536
+        },
+        {
+          "definition": "259",
+          "triangles": 928
+        },
+        {
+          "definition": "260",
+          "triangles": 1504
+        },
+        {
+          "definition": "261",
+          "triangles": 2100
+        },
+        {
+          "definition": "262",
+          "triangles": 1200
+        },
+        {
+          "definition": "263",
+          "triangles": 1008
+        },
+        {
+          "definition": "264",
+          "triangles": 1016
+        },
+        {
+          "definition": "265",
+          "triangles": 196
+        },
+        {
+          "definition": "266",
+          "triangles": 948
+        },
+        {
+          "definition": "267",
+          "triangles": 820
+        },
+        {
+          "definition": "268",
+          "triangles": 2168
+        },
+        {
+          "definition": "269",
+          "triangles": 12
+        },
+        {
+          "definition": "270",
+          "triangles": 88
+        },
+        {
+          "definition": "271",
+          "triangles": 280
+        },
+        {
+          "definition": "272",
+          "triangles": 584
+        },
+        {
+          "definition": "273",
+          "triangles": 664
+        },
+        {
+          "definition": "275",
+          "triangles": 220
+        },
+        {
+          "definition": "276",
+          "triangles": 416
+        },
+        {
+          "definition": "277",
+          "triangles": 1108
+        },
+        {
+          "definition": "278",
+          "triangles": 228
+        },
+        {
+          "definition": "279",
+          "triangles": 884
+        },
+        {
+          "definition": "280",
+          "triangles": 208
+        }
+      ],
+      "omittedReferenceSolids": [
+        {
+          "instance": "184",
+          "name": "体积模拟_默认<按加工>",
+          "reason": "CAD material/load reference solid; not a physical hopper cover"
+        }
+      ],
+      "displayCorrections": [
+        {
+          "instance": "146",
+          "name": "皮带U17-1A-W  22",
+          "change": "Centre belt on hopper width axis",
+          "originalOffsetM": 0.0499004110784302
+        }
+      ],
+      "drawCalls": 200
+    },
+    {
+      "id": "tool-700",
+      "source": "FJRB000910 古井七车间暂存皮带布料头（700宽度).rslib",
+      "sourceSha256": "e88982875f62164fc3f6605586eadb9c8bc250cf92beeee6d1fc14c2faf15efd",
+      "glbSha256": "c636b873ab91a37188148e0328b5ed5b6e3a1100da928b5f067d5fa0e3afc5cc",
+      "bytes": 7695452,
+      "sourceRootTransform": [
+        -1,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0.1185,
+        5.486668,
+        1
+      ],
+      "keepRootPlacement": false,
+      "instances": 279,
+      "definitions": [
+        {
+          "definition": "285",
+          "triangles": 576
+        },
+        {
+          "definition": "286",
+          "triangles": 840
+        },
+        {
+          "definition": "287",
+          "triangles": 2792
+        },
+        {
+          "definition": "288",
+          "triangles": 3528
+        },
+        {
+          "definition": "289",
+          "triangles": 732
+        },
+        {
+          "definition": "290",
+          "triangles": 952
+        },
+        {
+          "definition": "291",
+          "triangles": 974
+        },
+        {
+          "definition": "292",
+          "triangles": 192
+        },
+        {
+          "definition": "293",
+          "triangles": 29294
+        },
+        {
+          "definition": "294",
+          "triangles": 392
+        },
+        {
+          "definition": "295",
+          "triangles": 432
+        },
+        {
+          "definition": "296",
+          "triangles": 23761
+        },
+        {
+          "definition": "297",
+          "triangles": 18258
+        },
+        {
+          "definition": "298",
+          "triangles": 216
+        },
+        {
+          "definition": "299",
+          "triangles": 916
+        },
+        {
+          "definition": "300",
+          "triangles": 208
+        },
+        {
+          "definition": "301",
+          "triangles": 216
+        },
+        {
+          "definition": "302",
+          "triangles": 856
+        },
+        {
+          "definition": "304",
+          "triangles": 112
+        },
+        {
+          "definition": "306",
+          "triangles": 19880
+        },
+        {
+          "definition": "307",
+          "triangles": 18258
+        },
+        {
+          "definition": "310",
+          "triangles": 392
+        },
+        {
+          "definition": "311",
+          "triangles": 376
+        },
+        {
+          "definition": "312",
+          "triangles": 252
+        },
+        {
+          "definition": "313",
+          "triangles": 1848
+        },
+        {
+          "definition": "316",
+          "triangles": 1794
+        },
+        {
+          "definition": "317",
+          "triangles": 33108
+        },
+        {
+          "definition": "318",
+          "triangles": 248
+        },
+        {
+          "definition": "319",
+          "triangles": 228
+        },
+        {
+          "definition": "320",
+          "triangles": 492
+        },
+        {
+          "definition": "321",
+          "triangles": 536
+        },
+        {
+          "definition": "322",
+          "triangles": 404
+        },
+        {
+          "definition": "323",
+          "triangles": 2460
+        },
+        {
+          "definition": "324",
+          "triangles": 4500
+        },
+        {
+          "definition": "325",
+          "triangles": 1308
+        },
+        {
+          "definition": "326",
+          "triangles": 2188
+        },
+        {
+          "definition": "327",
+          "triangles": 2656
+        },
+        {
+          "definition": "328",
+          "triangles": 2168
+        },
+        {
+          "definition": "329",
+          "triangles": 12494
+        },
+        {
+          "definition": "330",
+          "triangles": 136
+        },
+        {
+          "definition": "331",
+          "triangles": 2452
+        },
+        {
+          "definition": "332",
+          "triangles": 228
+        },
+        {
+          "definition": "333",
+          "triangles": 280
+        },
+        {
+          "definition": "334",
+          "triangles": 1300
+        },
+        {
+          "definition": "335",
+          "triangles": 524
+        },
+        {
+          "definition": "336",
+          "triangles": 196
+        },
+        {
+          "definition": "337",
+          "triangles": 344
+        },
+        {
+          "definition": "338",
+          "triangles": 216
+        },
+        {
+          "definition": "339",
+          "triangles": 200
+        },
+        {
+          "definition": "340",
+          "triangles": 104
+        },
+        {
+          "definition": "341",
+          "triangles": 156
+        },
+        {
+          "definition": "342",
+          "triangles": 172
+        },
+        {
+          "definition": "343",
+          "triangles": 316
+        },
+        {
+          "definition": "344",
+          "triangles": 1368
+        },
+        {
+          "definition": "345",
+          "triangles": 1380
+        },
+        {
+          "definition": "346",
+          "triangles": 244
+        },
+        {
+          "definition": "347",
+          "triangles": 690
+        },
+        {
+          "definition": "348",
+          "triangles": 688
+        },
+        {
+          "definition": "349",
+          "triangles": 416
+        },
+        {
+          "definition": "350",
+          "triangles": 584
+        },
+        {
+          "definition": "351",
+          "triangles": 820
+        },
+        {
+          "definition": "352",
+          "triangles": 296
+        },
+        {
+          "definition": "353",
+          "triangles": 280
+        },
+        {
+          "definition": "354",
+          "triangles": 216
+        },
+        {
+          "definition": "355",
+          "triangles": 960
+        },
+        {
+          "definition": "356",
+          "triangles": 216
+        },
+        {
+          "definition": "357",
+          "triangles": 222
+        },
+        {
+          "definition": "358",
+          "triangles": 884
+        },
+        {
+          "definition": "359",
+          "triangles": 216
+        },
+        {
+          "definition": "360",
+          "triangles": 208
+        },
+        {
+          "definition": "361",
+          "triangles": 220
+        },
+        {
+          "definition": "362",
+          "triangles": 1108
+        },
+        {
+          "definition": "363",
+          "triangles": 208
+        },
+        {
+          "definition": "364",
+          "triangles": 216
+        },
+        {
+          "definition": "365",
+          "triangles": 948
+        },
+        {
+          "definition": "366",
+          "triangles": 1008
+        }
+      ],
+      "omittedReferenceSolids": [
+        {
+          "instance": "282",
+          "name": "模拟物料重量_默认<按加工>",
+          "reason": "CAD material/load reference solid; not a physical hopper cover"
+        }
+      ],
+      "displayCorrections": [],
+      "drawCalls": 271
+    },
+    {
+      "id": "gujing-pot",
+      "source": "古井甑锅.rslib",
+      "sourceSha256": "f79dd8f3c01a330674adef204b21816700f203c0f9e6cb4eaab721bfdc906448",
+      "glbSha256": "ef0bfd27e2e9c9217add2af9dc5abb0aaf0a27d949ba718f2239194f269c0d76",
+      "bytes": 9776,
+      "sourceRootTransform": [
+        0,
+        0,
+        1,
+        0,
+        -1,
+        0,
+        0,
+        0,
+        0,
+        -1,
+        0,
+        0,
+        0,
+        0.103019,
+        -2.95189,
+        1
+      ],
+      "keepRootPlacement": true,
+      "instances": 1,
+      "definitions": [
+        {
+          "definition": "4",
+          "triangles": 228
+        }
+      ],
+      "omittedReferenceSolids": [],
+      "displayCorrections": [],
+      "drawCalls": 1
+    }
+  ],
+  "currentFeedStation": {
+    "id": "feed-station",
+    "module": "src/utils/abb-feed-station.mjs",
+    "source": "现场照片与用户接料位置示意",
+    "dimensionsEstimated": true,
+    "layoutSource": "酿酒机器人.zip · pFeedWork / tGripOutlet / WobjBarrelL / WobjBarrelR",
+    "layoutSourceSha256": "01b7a45ee4996486ec6c300d249b1f1628ad152d23c1530c5fe31e42362406ad",
+    "supportLegs": false
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-06T08:08:09.869Z",
+  "status": "recycled",
+  "original": "/opt/spare-parts/staging/fire-app-layout-20261106",
+  "recycled": "/opt/spare-parts/recycle-bin/fire-app-layout-staging-20261106",
+  "rollback": "/opt/spare-parts/rollback/fire-app-layout-20261106",
+  "restore": "Move recycled staging directory back to its original location only if needed; rollback instructions are in rollback/RESTORE.json. Active database, uploads, configuration and web/dist were not recycled."
+}

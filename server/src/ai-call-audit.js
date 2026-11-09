@@ -1,13 +1,15 @@
 const {AsyncLocalStorage}=require('node:async_hooks'),fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto');
 const {ApiError,asyncHandler}=require('./utils');
+const {providerFetch}=require('./ai-provider-transport');
 const context=new AsyncLocalStorage(),stores=new WeakMap();
 const day=value=>new Date(new Date(value).getTime()+8*3600000).toISOString().slice(0,10);
 const clients=['web','miniprogram','android','unknown'];
-const features=['knowledge_chat','raw_summary','robot_annotation_start','robot_annotations','robot_question','robot_modify','robot_connection'];
+const features=['knowledge_chat','gpt_connection','raw_summary','fire_photo_recognition','robot_annotation_start','robot_annotations','robot_question','robot_modify','robot_connection'];
 const outcomes=['pending','success','failed','blocked','fallback','restricted','interrupted'];
 function featureFor(req){
  if(req.method!=='POST')return null;
  if(req.path==='/ai/chat')return 'knowledge_chat';
+ if(req.path==='/fire-inspection/photo-recognitions')return 'fire_photo_recognition';
  if(/^\/raw-duties\/reports\/\d+\/summary$/.test(req.path))return 'raw_summary';
  if(req.path==='/robot-program/connection-check')return 'robot_connection';
  if(/^\/robot-program\/library\/[^/]+\/annotation-run$/.test(req.path))return 'robot_annotation_start';
@@ -15,16 +17,17 @@ function featureFor(req){
  return null;
 }
 const count=value=>Number.isSafeInteger(value)&&value>=0?value:null;
-function noteUsage(envelope){const current=context.getStore();if(!current)return;const u=envelope?.usage;if(!u||typeof u!=='object')return;current.promptTokens=count(u.prompt_tokens);current.completionTokens=count(u.completion_tokens);current.totalTokens=count(u.total_tokens)??(current.promptTokens!==null&&current.completionTokens!==null?current.promptTokens+current.completionTokens:null);current.cachedTokens=count(u.prompt_cache_hit_tokens)}
+function noteUsage(envelope){require('./ai-channels').recordModel(envelope?.model);const current=context.getStore();if(current&&typeof envelope?.model==='string'&&/^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/.test(envelope.model)&&!envelope.model.startsWith('sk-'))current.model=envelope.model;if(!current)return;const u=envelope?.usage;if(!u||typeof u!=='object')return;current.promptTokens=count(u.prompt_tokens);current.completionTokens=count(u.completion_tokens);current.totalTokens=count(u.total_tokens)??(current.promptTokens!==null&&current.completionTokens!==null?current.promptTokens+current.completionTokens:null);current.cachedTokens=count(u.prompt_cache_hit_tokens)}
 function noteOutcome(value){if(context.getStore()&&outcomes.includes(value))context.getStore().outcome=value}
+function noteOutcomeReason(value){const row=context.getStore();if(row&&row.feature==='fire_photo_recognition'&&typeof value==='string')row.reason=value.replace(/https?:\/\/\S+/gi,'[链接]').replace(/[\r\n]/g,' ').slice(0,400)}
 function noteRobotMode(mode){const row=context.getStore();if(row&&['robot_question','robot_modify'].includes(row.feature)&&['analyze','modify'].includes(mode))row.feature=mode==='modify'?'robot_modify':'robot_question'}
 function noteOperation(value){if(context.getStore()&&typeof value==='string'&&/^[a-f0-9-]{36}$/.test(value))context.getStore().operationId=value}
-async function modelFetch(url,options,fetchImpl=fetch){
+async function modelFetch(url,options,fetchImpl=providerFetch){
  const current=context.getStore();
- if(current){current.modelCalls++;current.provider=String(url).startsWith('https://api.deepseek.com/')?'deepseek':/^https:\/\/(?:open\.bigmodel\.cn|api\.z\.ai)\//.test(String(url))?'glm':'unknown';try{current.model=String(JSON.parse(options.body).model||'').slice(0,120)}catch{};
+ if(current){current.modelCalls++;let hostname='';try{hostname=new URL(url).hostname}catch{}current.provider=hostname==='api.deepseek.com'?'deepseek':hostname==='api.openai.com'?'openai':['open.bigmodel.cn','api.z.ai'].includes(hostname)?'glm':'openai-compatible';try{current.model=String(JSON.parse(options.body).model||'').slice(0,120)}catch{};
   try{await stores.get(current).write({...current})}catch{current.modelCalls--;throw new ApiError(503,'AI 调用记录暂不可写，本次尚未调用模型，请联系管理员')}
  }
- try{const response=await fetchImpl(url,options);if(current)current.upstreamStatus=Number.isInteger(response.status)?response.status:null;return response}
+ try{const response=await (fetchImpl===globalThis.fetch?providerFetch:fetchImpl)(url,options);if(current)current.upstreamStatus=Number.isInteger(response.status)?response.status:null;return response}
  catch(error){if(current)current.failureType=error.name==='AbortError'?'timeout':'network';throw error}
 }
 function createStore(root=process.env.AI_AUDIT_DIR||path.resolve(__dirname,'../uploads/ai-call-logs')){
@@ -33,7 +36,7 @@ function createStore(root=process.env.AI_AUDIT_DIR||path.resolve(__dirname,'../u
  function finish(row){const promise=write(row);pending.add(promise);promise.finally(()=>pending.delete(promise)).catch(()=>{});return promise}
  async function flush(){await Promise.all([...pending])}
  function date(value,fallback){const text=String(value||fallback);if(!/^\d{4}-\d{2}-\d{2}$/.test(text)||!Number.isFinite(Date.parse(text+'T00:00:00Z'))||new Date(text+'T00:00:00Z').toISOString().slice(0,10)!==text)throw new ApiError(400,'日期无效');return text}
- async function list(query={}){
+ async function list(query={}, {includeAll=false}={}){
   await flush();const today=day(new Date()),from=date(query.from,today),to=date(query.to,from),span=(Date.parse(to)-Date.parse(from))/86400000;
   if(span<0||span>30)throw new ApiError(400,'每次可查询连续31天，请调整日期范围');
   for(const [key,allowed]of [['client',clients],['feature',features],['outcome',outcomes]])if(query[key]&&!allowed.includes(query[key]))throw new ApiError(400,'筛选条件无效');
@@ -48,7 +51,7 @@ function createStore(root=process.env.AI_AUDIT_DIR||path.resolve(__dirname,'../u
   for(const row of rows){if(!row.provider)continue;const p=providers[row.provider]??={modelCalls:0,totalTokens:0,unknownTokenCalls:0};p.modelCalls+=row.modelCalls;if(row.totalTokens!==null)p.totalTokens+=row.totalTokens;else p.unknownTokenCalls+=row.modelCalls}
   const summary={requests:rows.length,modelCalls:0,success:0,failed:0,blocked:0,totalTokens:0,unknownTokenCalls:0};
   for(const row of rows){summary.modelCalls+=row.modelCalls;if(row.outcome==='success')summary.success++;if(['failed','interrupted'].includes(row.outcome))summary.failed++;if(['blocked','restricted'].includes(row.outcome))summary.blocked++;if(row.totalTokens!==null)summary.totalTokens+=row.totalTokens;else summary.unknownTokenCalls+=row.modelCalls}
-  return {from,to,page,pageSize,total:rows.length,summary,providers,items:rows.slice((page-1)*pageSize,page*pageSize)};
+  return {from,to,page,pageSize,total:rows.length,summary,providers,items:includeAll?rows:rows.slice((page-1)*pageSize,page*pageSize)};
  }
  return {root,write,finish,flush,list};
 }
@@ -64,4 +67,4 @@ function auditMiddleware(store=defaultStore){return asyncHandler(async(req,res,n
  res.once('finish',()=>finish());res.once('close',()=>{if(!res.writableFinished)finish(true)});
  context.run(row,next);
 })}
-module.exports={createStore,defaultStore,auditMiddleware,modelFetch,noteUsage,noteOutcome,noteOperation,noteRobotMode,features,clients,outcomes};
+module.exports={createStore,defaultStore,auditMiddleware,modelFetch,noteUsage,noteOutcome,noteOperation,noteRobotMode,noteOutcomeReason,features,clients,outcomes};

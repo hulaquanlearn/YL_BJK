@@ -23,6 +23,7 @@ test('inventory list is scoped to workshop while system administrator sees all',
     }
     if (sql.includes('AS pending')) return [[{ total: 1, pending: 1, approved: 0, rejected: 0 }]];
     if (sql.startsWith('SELECT COUNT')) return [[{ total: 1 }]];
+    if (sql.startsWith('SELECT order_id,inventory_id')) return [[]];
     return [[{ id: 12, workshop_code: params[0] || 'raw_grain', approveStatus: '待审批' }]];
   };
   const app = express();
@@ -35,16 +36,16 @@ test('inventory list is scoped to workshop while system administrator sees all',
   try {
     const staff = await fetch(`${base}/inventory-orders?status=待审批`, { headers: { 'x-role': 'raw-staff' } });
     assert.equal(staff.status, 200);
-    assert.deepEqual(calls.at(-1).params.slice(0, 2), ['raw_grain', '待审批']);
+    assert.deepEqual(calls.findLast(call => call.sql.startsWith('SELECT * FROM inventory_orders')).params.slice(0, 2), ['raw_grain', '待审批']);
     const manager = await fetch(`${base}/inventory-orders?status=待审批`, { headers: { 'x-role': 'qu-manager' } });
     assert.equal(manager.status, 200);
-    assert.deepEqual(calls.at(-1).params.slice(0, 2), ['qu_making', '待审批']);
+    assert.deepEqual(calls.findLast(call => call.sql.startsWith('SELECT * FROM inventory_orders')).params.slice(0, 2), ['qu_making', '待审批']);
     const cross = await fetch(`${base}/inventory-orders?workshopCode=qu_making`, { headers: { 'x-role': 'raw-manager' } });
     assert.equal(cross.status, 403);
     assert.equal((await fetch(`${base}/inventory-orders/12`, { headers: { 'x-role': 'raw-manager' } })).status, 403);
     const system = await fetch(`${base}/inventory-orders?status=待审批`, { headers: { 'x-role': 'system' } });
     assert.equal(system.status, 200);
-    assert.equal(calls.at(-1).params[0], '待审批');
+    assert.equal(calls.findLast(call => call.sql.startsWith('SELECT * FROM inventory_orders')).params[0], '待审批');
     assert.equal((await fetch(`${base}/inventory-orders/12`, { headers: { 'x-role': 'system' } })).status, 200);
   } finally {
     pool.query = oldQuery;

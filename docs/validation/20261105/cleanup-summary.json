@@ -1,0 +1,32 @@
+{
+  "at": "2026-11-04T18:06:41.6183300Z",
+  "status": "cleanup-completed",
+  "pc": {
+    "targets": 74,
+    "bytes": 8010425049,
+    "GiB": 7.460289680399001,
+    "method": "Windows recycle bin"
+  },
+  "server": {
+    "targets": 24,
+    "bytes": 8779836537,
+    "GiB": 8.176859968341887,
+    "method": "private recoverable recycle"
+  },
+  "permanentDeletion": false,
+  "recycleBinsEmptied": false,
+  "preserved": [
+    "active source and model resources",
+    "current local dist and android.23",
+    "business DB/uploads/private config/robot ZIP library",
+    "in-use server browser",
+    "review isolation data and unconfirmed MySQL data",
+    "CAD/PLC/personal files and installed tools"
+  ],
+  "preview8534Stopped": true,
+  "nativeAuditPidsStopped": [
+    43736,
+    15760
+  ],
+  "oldOtherEmulatorPid9228Untouched": true
+}

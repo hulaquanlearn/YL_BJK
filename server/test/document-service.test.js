@@ -6,6 +6,8 @@ const path = require('path');
 const { previewDocument, extractDocumentText, informationPreview } = require('../src/document-service');
 const { stripActiveHtml } = require('../src/office-preview');
 const { sandboxCommand } = require('../src/document-sandbox');
+const { EventEmitter } = require('events');
+const childProcess = require('child_process');
 
 test('Linux external converters are isolated from network and business filesystem', () => {
   const command = sandboxCommand('/usr/bin/soffice', ['--headless'], '/tmp/document-job', 'linux');
@@ -50,9 +52,45 @@ test('text files support bounded safe preview and extraction while PDF remains n
   assert.equal((await previewDocument(file, 'document.pdf')).contentType, 'application/pdf');
   assert.equal((await previewDocument(file, 'document.dwg')).mode, 'metadata');
 });
-test('corrupt Office file reports an explicit compatibility failure from the worker', async t => {
+test('Office worker PDF result is cached and returned without changing the source', async t => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'document-conversion-success-'));
+  t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const file = path.join(directory, 'source.rtf'), source = '{\\rtf1\\ansi Isolated conversion fixture}';
+  await fs.writeFile(file, source);
+  let receivedJob, disconnected = false;
+  // Isolate the IPC boundary so this success-path check needs no host Office installation.
+  const fork = t.mock.method(childProcess, 'fork', () => {
+    const worker = new EventEmitter();
+    worker.send = job => {
+      receivedJob = job;
+      const output = path.join(job.directory, 'document.pdf');
+      fs.writeFile(output, '%PDF-1.4\nIsolated worker result\n%%EOF\n').then(() => worker.emit('message', {
+        filePath: output, contentType: 'application/pdf', mode: 'converted-pdf', notice: 'Isolated worker result'
+      }), error => worker.emit('error', error));
+    };
+    worker.disconnect = () => { disconnected = true; };
+    return worker;
+  });
+  const modulePath = require.resolve('../src/document-service'), originalModule = require.cache[modulePath];
+  let isolated;
+  try { delete require.cache[modulePath]; isolated = require(modulePath); }
+  finally { fork.mock.restore(); require.cache[modulePath] = originalModule; }
+  const preview = await isolated.previewDocument(file, 'source.rtf');
+  if (preview.filePath) t.after(() => fs.rm(preview.filePath, { force: true }));
+  assert.equal(preview.mode, 'converted-pdf');
+  assert.equal(preview.contentType, 'application/pdf');
+  assert.notEqual(preview.filePath, file);
+  assert.match(await fs.readFile(preview.filePath, 'utf8'), /^%PDF-/);
+  assert.equal(await fs.readFile(file, 'utf8'), source);
+  assert.equal(receivedJob.action, 'preview'); assert.equal(receivedJob.extension, '.rtf');
+  assert.equal(disconnected, true);
+});
+test('missing Office converter and invalid legacy content report an explicit compatibility failure', async t => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'document-test-'));
   t.after(() => fs.rm(directory, { recursive: true, force: true }));
+  const previous = process.env.LIBREOFFICE_BIN;
+  process.env.LIBREOFFICE_BIN = path.join(directory, 'deliberately-missing-office-converter');
+  t.after(() => { if (previous === undefined) delete process.env.LIBREOFFICE_BIN; else process.env.LIBREOFFICE_BIN = previous; });
   const file = path.join(directory, 'broken.doc'); await fs.writeFile(file, 'not an office file');
   const preview = await previewDocument(file, 'broken.doc');
   assert.equal(preview.mode, 'metadata'); assert.match(preview.notice, /未能完整预览/);

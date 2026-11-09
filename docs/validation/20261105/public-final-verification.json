@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-04T18:01:03.401Z",
+  "status": "public-after-cleanup-passed",
+  "checks": [
+    {
+      "path": "/api/health",
+      "status": 200,
+      "bytes": 67
+    },
+    {
+      "path": "/agv-vehicles?family=abb",
+      "status": 200,
+      "bytes": 819082
+    },
+    {
+      "path": "/app-updates/android/latest.json",
+      "status": 200,
+      "bytes": 591
+    }
+  ]
+}

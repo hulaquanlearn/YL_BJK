@@ -2,7 +2,9 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const config = require('../config');
 const {modelFetch,noteUsage,noteOutcome}=require('../ai-call-audit');
+const {modelOptions}=require('../ai-provider-payload');
 const { pool } = require('../db');
+const {referenceMetadata,referenceSearchText}=require('../knowledge-reference');
 const { ApiError, asyncHandler } = require('../utils');
 const { RESTRICTED_ANSWER, isAllowedConversation } = require('../ai-topic-guard');
 const {requireAsker,createUsage}=require('../knowledge-usage');
@@ -46,9 +48,9 @@ async function retrieveEvidence(question) {
               LEFT(k.fault_symptom,1200) AS faultSymptom,LEFT(k.fault_cause,1200) AS faultCause,
               LEFT(k.solution,2000) AS solution,LEFT(k.preventive_action,800) AS preventiveAction,
               LEFT(k.content_text,16000) AS contentText,k.original_filename AS originalFilename,
-              k.tags,k.revision_no AS revisionNo,k.index_status AS indexStatus,k.updated_at AS updatedAt
+              k.tags,k.revision_no AS revisionNo,k.index_status AS indexStatus,k.updated_at AS updatedAt,k.reference_metadata AS referenceMetadata
        FROM fermentation_knowledge_entries k
-       WHERE k.status='active' AND (${tokens.map(() => "CONCAT_WS(' ',k.title,k.category,k.equipment_name,k.summary,k.fault_symptom,k.fault_cause,k.solution,k.content_text,k.tags,k.original_filename) LIKE ?").join(' OR ')})
+       WHERE k.status='active' AND (${tokens.map(() => "CONCAT_WS(' ',k.title,k.category,k.equipment_name,k.summary,k.fault_symptom,k.fault_cause,k.solution,k.content_text,k.tags,k.original_filename,CAST(k.reference_metadata AS CHAR)) LIKE ?").join(' OR ')})
        ORDER BY (${tokens.map(() => "(CASE WHEN CONCAT_WS(' ',k.title,k.equipment_name,k.tags,k.original_filename) LIKE ? THEN 8 ELSE 0 END + CASE WHEN k.content_text LIKE ? THEN 2 ELSE 0 END)").join(' + ')}) DESC,k.updated_at DESC LIMIT 24`,
       [...knowledgeParams,...knowledgeRankParams]
     ),
@@ -73,13 +75,15 @@ async function retrieveEvidence(question) {
       equipmentParams
     )
   ]);
+  for(const item of knowledgeResult[0])for(const field of ['title','equipmentName','summary','faultSymptom','faultCause','solution','preventiveAction','contentText','tags','originalFilename'])item[field]=require('../agv-terms').normalizeAgvTerms(item[field]);
   const candidates = [
     ...knowledgeResult[0].map(item => ({
       sourceType: 'knowledge', sourceId: String(item.id), title: item.title,
-      excerpt: makeExcerpt([item.summary, item.faultSymptom, item.faultCause, item.solution, item.preventiveAction, item.contentText], tokens),
+      excerpt: makeExcerpt([referenceSearchText(referenceMetadata(item.referenceMetadata)),item.summary, item.faultSymptom, item.faultCause, item.solution, item.preventiveAction, item.contentText], tokens),
       context: {
         category: item.category, equipmentName: item.equipmentName, originalFilename: item.originalFilename,
-        revisionNo: Number(item.revisionNo) || 1, indexStatus: item.indexStatus || 'pending', updatedAt: item.updatedAt
+        revisionNo: Number(item.revisionNo) || 1, indexStatus: item.indexStatus || 'pending', updatedAt: item.updatedAt,
+        referenceMetadata:referenceMetadata(item.referenceMetadata)
       },
       searchable: [item.title, item.category, item.equipmentName, item.tags, item.originalFilename, item.summary, item.faultSymptom, item.faultCause, item.solution, item.contentText].join(' ')
     })),
@@ -129,14 +133,15 @@ function degradedAnswer(reason, evidence) {
 async function currentEntry(input){
  if(input===undefined||input===null)return null;
  if(typeof input!=='object'||Array.isArray(input)||!Number.isSafeInteger(input.entryId)||input.entryId<1||!Number.isSafeInteger(input.revisionNo)||input.revisionNo<1)throw new ApiError(400,'当前资料编号或版本无效，请重新打开资料');
- const [rows]=await pool.query(`SELECT id,title,entry_type AS entryType,category,equipment_name AS equipmentName,summary,fault_symptom AS faultSymptom,fault_cause AS faultCause,solution,preventive_action AS preventiveAction,content_text AS contentText,original_filename AS originalFilename,revision_no AS revisionNo,index_status AS indexStatus FROM fermentation_knowledge_entries WHERE id=? AND status='active' LIMIT 1`,[input.entryId]);
+ const [rows]=await pool.query(`SELECT id,title,entry_type AS entryType,category,equipment_name AS equipmentName,summary,fault_symptom AS faultSymptom,fault_cause AS faultCause,solution,preventive_action AS preventiveAction,content_text AS contentText,original_filename AS originalFilename,revision_no AS revisionNo,index_status AS indexStatus,reference_metadata AS referenceMetadata FROM fermentation_knowledge_entries WHERE id=? AND status='active' LIMIT 1`,[input.entryId]);
  const row=rows[0];if(!row)throw new ApiError(404,'当前资料已删除或不可用');if(Number(row.revisionNo)!==input.revisionNo)throw new ApiError(409,'当前资料已更新，请重新打开后提问');return row;
 }
 function entryEvidence(row,question){
- const text=[row.summary,row.faultSymptom,row.faultCause,row.solution,row.preventiveAction,row.contentText].filter(Boolean).join('\n');
- return {sourceType:'knowledge',sourceId:String(row.id),title:row.title,citation:citationLabel('knowledge',row.id),url:evidenceLink('knowledge',row.id),excerpt:makeExcerpt([text],searchTokens(question),16000),context:{currentFile:true,originalFilename:row.originalFilename||null,revisionNo:Number(row.revisionNo),indexStatus:row.indexStatus,entryType:row.entryType,category:row.category,equipmentName:row.equipmentName,partial:text.length>16000||row.entryType==='document'&&row.indexStatus!=='ready'}};
+ const meta=referenceMetadata(row.referenceMetadata);
+ const text=[referenceSearchText(meta),row.summary,row.faultSymptom,row.faultCause,row.solution,row.preventiveAction,row.contentText].filter(Boolean).join('\n');
+ return {sourceType:'knowledge',sourceId:String(row.id),title:row.title,citation:citationLabel('knowledge',row.id),url:evidenceLink('knowledge',row.id),excerpt:makeExcerpt([text],searchTokens(question),16000),context:{currentFile:true,referenceMetadata:meta,originalFilename:row.originalFilename||null,revisionNo:Number(row.revisionNo),indexStatus:row.indexStatus,entryType:row.entryType,category:row.category,equipmentName:row.equipmentName,partial:text.length>16000||row.entryType==='document'&&row.indexStatus!=='ready'}};
 }
-function createRouter({usage=createUsage(require('../ai-call-audit').defaultStore.root)}={}){
+function createRouter({usage=createUsage(require('../ai-call-audit').defaultStore.root),fetchImpl}={}){
  const router=express.Router();
  router.post('/ai/chat',(req,_res,next)=>{try{requireAsker(req.user);next()}catch(e){next(e)}},aiLimiter,asyncHandler(async(req,res)=>{
   const messages = Array.isArray(req.body?.messages) ? req.body.messages : [];
@@ -154,35 +159,36 @@ function createRouter({usage=createUsage(require('../ai-call-audit').defaultStor
     return;
   }
   const output=await usage.execute(req.user,async()=>{
+  // Capture one coherent hot configuration for this call; a later save applies
+  // to the next call rather than mixing endpoint and credentials mid-request.
+  const ai={...config.knowledgeAi};
   const queryContext = conversationQuery(safeMessages),related=await retrieveEvidence([selected?.title,selected?.equipmentName,queryContext].filter(Boolean).join(' '));
   const evidence=selected?[entryEvidence(selected,queryContext),...related.filter(e=>e.sourceType!=='knowledge'||e.sourceId!==String(selected.id))]:related;
   if(selected&&selected.entryType==='document'&&!String(selected.contentText||'').trim()){noteOutcome('fallback');return {answer:'当前文件尚未提取到可检索正文，请先完成文件解析或重建全文索引后再分析。',evidence:[evidence[0]],degraded:true}}
-  if (!config.knowledgeAi.enabled) {noteOutcome('fallback');return {answer:degradedAnswer('管理员关闭了 AI，仅返回站内检索结果',evidence),evidence,degraded:true}}
-  if (!config.knowledgeAi.token) {noteOutcome('fallback');return {answer:degradedAnswer('尚未配置 DeepSeek Key',evidence),evidence,degraded:true}}
+  if (!ai.enabled) {noteOutcome('fallback');return {answer:degradedAnswer('管理员关闭了 AI，仅返回站内检索结果',evidence),evidence,degraded:true}}
+  if (!ai.token) {noteOutcome('fallback');return {answer:degradedAnswer('尚未配置模型服务 API Key',evidence),evidence,degraded:true}}
   const promptEvidence=[];let evidenceSize=0;for(const item of evidence){const bytes=JSON.stringify(item).length;if(evidenceSize+bytes>30000)break;promptEvidence.push(item);evidenceSize+=bytes}
   const evidenceText=JSON.stringify(promptEvidence);
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), config.knowledgeAi.timeoutMs);
+  const timeout = setTimeout(() => controller.abort(), ai.timeoutMs);
   let response, result;
   try {
-    response = await modelFetch(config.knowledgeAi.apiUrl, {
+    response = await modelFetch(ai.apiUrl, {
       redirect: 'error',
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${config.knowledgeAi.token}`,
+        Authorization: `Bearer ${ai.token}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: config.knowledgeAi.model,
+        model: ai.model,
         stream: false,
-        thinking: {type:'disabled'},
-        max_tokens: 4000,
-        tool_choice: 'none',
+        ...modelOptions(ai,{maxTokens:4000}),
         messages: [
           {
             role: 'system',
-            content: `你是设备故障知识库智能体，使用 DeepSeek 结合当前文件、库内故障案例及设备备件关系进行分析，必须遵守以下边界：
+            content: `你是设备故障知识库智能体，结合当前文件、库内故障案例及设备备件关系进行分析，必须遵守以下边界：
 1. 只允许进行简单问候，以及各车间设备维修、故障诊断、保养、点检、备件、物料、仓储、库存、盘点和工程资料相关沟通。
 2. 问候时只简短问候并说明可协助上述工作，不主动提供日期、天气、财经或其他闲聊信息。
 3. 对任何无关话题，只回复：${RESTRICTED_ANSWER}
@@ -194,13 +200,15 @@ function createRouter({usage=createUsage(require('../ai-call-audit').defaultStor
 9. 引用证据时使用证据提供的 citation 值，在句末严格标注[知识#编号]、[备件#编号]或[设备型号#编号]。
 10. context.currentFile=true 是当前打开文件，优先回答这份文件中的问题；未提供当前文件时使用知识库检索。context.partial=true 表示只读取了相关片段，不能声称已分析完整文件；文件无明确依据时说明缺失信息。分析依次给出现象核对、可能原因、排查步骤、处置建议和对应依据，不把推测当作已经确认的故障。
 
+11. 备件资料的 referenceMetadata 记录厂家、完整型号、版本、来源页与核实范围。source_checked 只表示已核查标注的范围，不是实物或安装验收；partial/conflicting/unverified 不得作为已证实参数，跨品牌同号不得默认为可替换。引用具体尺寸时同时说明原始资料页，扫描原图未提取的内容不能补写。
+
 检索证据：${evidenceText}`
           },
           ...safeMessages
         ]
       }),
       signal: controller.signal
-    });
+    },fetchImpl);
     result = await response.json();noteUsage(result);
   } catch (error) {
     noteOutcome('fallback');

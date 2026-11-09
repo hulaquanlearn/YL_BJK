@@ -1,0 +1,2 @@
+.model-fullscreen,.model-fullscreen:fullscreen{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:0!important;max-height:none!important;margin:0!important;padding:12px!important;box-sizing:border-box;z-index:4000;background:#f1f6f9;overflow:hidden}
+.model-fullscreen .robot-toolbar,.model-fullscreen .agv-topbar{flex-shrink:0}

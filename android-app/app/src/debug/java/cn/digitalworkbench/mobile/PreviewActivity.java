@@ -17,16 +17,19 @@ public class PreviewActivity extends Activity {
         setContentView(root);
         TextView banner = new TextView(this); banner.setText("本地界面演示 · 不连接业务服务器"); banner.setTextSize(10); banner.setTextColor(0xff758291); banner.setGravity(Gravity.CENTER); root.addView(banner);
         try {
-            JSONObject snapshot = new JSONObject(); snapshot.put("name", "演示账号"); snapshot.put("initial", "演"); snapshot.put("role", "仅用于界面验证");
+            JSONObject snapshot = new JSONObject(); snapshot.put("version",1);snapshot.put("accountId","preview-only");snapshot.put("name", "演示账号"); snapshot.put("initial", "演"); snapshot.put("role", "仅用于界面验证");
             JSONArray modules = new JSONArray();
             modules.put(module("备件管理中心", "查询库存、库位与现场备件", "/inventory", new String[][]{{"3D 库位","/warehouse-3d"},{"补货清单","/replenishment"},{"盘点管理","/check"}}));
             modules.put(module("智能工程中心", "工程资料与故障经验，随时查阅", "/knowledge", new String[][]{{"工程知识库","/knowledge"},{"机器人程序助手","/robot-program"}}));
-            modules.put(module("工作管理中心", "履职填报、考评与考勤核查", "/raw-duties", new String[][]{{"履职考评","/raw-duties"},{"考勤核查","/attendance"}}));
+            modules.put(module("工作管理中心", "消防点检", "/fire-inspection", new String[][]{{"消防点检","/fire-inspection"}}));
             snapshot.put("modules", modules);
-            root.addView(new NativeHome(this,snapshot,new NativeHome.Actions(){
+            final NativeHome[] workspace = new NativeHome[1]; final LinearLayout nav = new LinearLayout(this); nav.setOrientation(LinearLayout.VERTICAL);
+            workspace[0]=new NativeHome(this,snapshot,new NativeHome.Actions(){
                 public void navigate(String p,String t){new AlertDialog.Builder(PreviewActivity.this).setTitle(t).setMessage("演示入口："+p).setPositiveButton("确定",null).show();}
-                public void server(){navigate("连接设置","设置");}public void reload(){navigate("刷新","刷新");}public void logout(){navigate("退出登录","账号");}
-            }),new LinearLayout.LayoutParams(-1,0,1));
+                public void logout(){navigate("退出登录","账号");}
+                public void tab(int index){nav.removeAllViews();nav.addView(NativeHome.navigation(PreviewActivity.this,snapshot,index,target->workspace[0].select(target)));}
+            });
+            root.addView(workspace[0],new LinearLayout.LayoutParams(-1,0,1));root.addView(nav,new LinearLayout.LayoutParams(-1,-2));
         } catch (JSONException e) { throw new IllegalStateException(e); }
     }
     private JSONObject module(String title,String description,String path,String[][] links) throws JSONException {

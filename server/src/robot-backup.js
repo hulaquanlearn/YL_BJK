@@ -35,21 +35,22 @@ async function readZip(buffer){
     if(entry.generalPurposeBitFlag&1)throw new ApiError(400,'暂不支持带密码的ZIP，请上传未加密备份');
     if(name.endsWith('/'))return zip.readEntry();
     const program=/(?:^|\/)RAPID\/[^/]+\/(?:PROGMOD|SYSMOD)\/[^/]+\.(?:modx?|sysx?|rapid)$/i.test(name);
-    const config=/(?:^|\/)SYSPAR\/(?:EIO|SYS)\.cfg$/i.test(name);
+    const motionConfig=/(?:^|\/)SYSPAR\/MOC\.cfg$/i.test(name);
+    const config=/(?:^|\/)SYSPAR\/(?:EIO|SYS)\.cfg$/i.test(name)||motionConfig;
     const info=/(?:^|\/)BACKINFO\/backinfo\.txt$/i.test(name);
     if(!program&&!config&&!info)return zip.readEntry();
     if(entry.uncompressedSize>MAX_FILE)throw new ApiError(413,'单个程序或配置文件不能超过2MB');
     zip.openReadStream(entry,(err,stream)=>{
      if(err)return fail(err);let size=0;const chunks=[];
      stream.on('error',fail);stream.on('data',chunk=>{size+=chunk.length;if(size>MAX_FILE){stream.destroy();fail(new ApiError(413,'文件解压大小超限'))}else chunks.push(chunk)});
-     stream.on('end',()=>{if(settled)return;const bytes=Buffer.concat(chunks);if(bytes.length!==entry.uncompressedSize||crc32(bytes)!==entry.crc32)return fail(new ApiError(400,'备份文件校验失败'));selected.push({path:name,kind:program?'program':config?'config':'info',bytes});zip.readEntry()});
+     stream.on('end',()=>{if(settled)return;const bytes=Buffer.concat(chunks);if(bytes.length!==entry.uncompressedSize||crc32(bytes)!==entry.crc32)return fail(new ApiError(400,'备份文件校验失败'));selected.push({path:name,kind:program?'program':motionConfig?'motion-config':config?'config':'info',bytes});zip.readEntry()});
     });
    }catch(e){fail(e)}
   });zip.readEntry();
  }));
 }
 // Remove comments without interpreting quoted strings as program instructions.
-function codePart(line){let quoted=false;for(let i=0;i<line.length;i++){if(line[i]==='"'){if(quoted&&line[i+1]==='"'){i++;continue}quoted=!quoted}else if(line[i]==='!'&&!quoted)return line.slice(0,i)}return line}
+const {codePart}=require('./robot-code');
 function parseRoutines(lines){
  const routines=[];let current=null;
  for(let i=0;i<lines.length;i++){
@@ -78,7 +79,7 @@ async function parseBackup(buffer,filename='ABB-backup.zip'){
  const archive=await readZip(buffer),files=[];let lineCount=0;
  const info=archive.selected.find(f=>f.kind==='info'),infoText=info&&decode(info.bytes)?.text||'';
  const aliases=Object.fromEntries([...infoText.matchAll(/>>(TASK\d+):\s*\(([^,\n]+)/gi)].map(m=>[m[1].toUpperCase(),m[2].trim()]));
- for(const entry of archive.selected.filter(f=>f.kind!=='info')){
+ for(const entry of archive.selected.filter(f=>f.kind!=='info'&&f.kind!=='motion-config')){
   const decoded=decode(entry.bytes),text=decoded?.text||'',lines=text.split(/\r\n|\n|\r/);lineCount+=lines.length;
   if(lineCount>40000)throw new ApiError(413,'程序超过40000行，请按任务拆分备份');
   const folder=entry.path.match(/\/RAPID\/([^/]+)\//i)?.[1]||entry.path.match(/^RAPID\/([^/]+)\//i)?.[1]||'';
@@ -92,6 +93,19 @@ async function parseBackup(buffer,filename='ABB-backup.zip'){
  const hooks=files.filter(f=>f.kind==='config'&&/SYS\.cfg$/i.test(f.path)&&f.readable).flatMap(f=>configRecords(f.text,'CAB_EXEC_HOOKS').map(r=>({fileId:f.id,line:r.line,...r.fields})));
  const definitions=modules.flatMap(f=>f.routines.map(r=>({fileId:f.id,task:f.task,...r})));
  for(const f of modules)for(const r of f.routines){r.calls=r.calls.map(c=>({...c,targets:definitions.filter(d=>d.task===f.task&&d.name.toLowerCase()===c.name.toLowerCase()).map(d=>({fileId:d.fileId,line:d.startLine}))}));const tokens=new Set(f.text.split(/\r\n|\n|\r/).slice(r.startLine-1,r.endLine).map(codePart).join('\n').match(/\b[A-Za-z_]\w*\b/g)||[]);r.ioNames=signals.filter(s=>tokens.has(s.name)).map(s=>s.name)}
- return {filename:path.basename(filename).slice(0,200),sha256:sha256(buffer),robotWare:infoText.match(/RobotWare Version:\s*([^\r\n]+)/i)?.[1]||'',robotModel:infoText.match(/^\s*(IRB\s+\d+[^\r\n]*)/m)?.[1]?.trim()||'',files,signals,hooks,statistics:{archiveEntries:archive.entryCount,totalBytes:archive.totalBytes,tasks:[...new Set(modules.map(f=>f.task))].length,modules:modules.length,readableModules:modules.filter(f=>f.readable).length,unreadableModules:modules.filter(f=>!f.readable).length,routines:definitions.length,signals:signals.length},warnings:modules.filter(f=>!f.readable).map(f=>`${f.path}：${f.reason}`)};
+ const moc=archive.selected.filter(f=>f.kind==='motion-config'),motionConfig=moc.length===1?parseMotionConfig(moc[0]):null;
+ return {filename:path.basename(filename).slice(0,200),sha256:sha256(buffer),robotWare:infoText.match(/RobotWare Version:\s*([^\r\n]+)/i)?.[1]||'',robotModel:infoText.match(/^\s*(IRB\s+\d+[^\r\n]*)/m)?.[1]?.trim()||'',...(motionConfig?{motionConfig}:{}),files,signals,hooks,statistics:{archiveEntries:archive.entryCount,totalBytes:archive.totalBytes,tasks:[...new Set(modules.map(f=>f.task))].length,modules:modules.length,readableModules:modules.filter(f=>f.readable).length,unreadableModules:modules.filter(f=>!f.readable).length,routines:definitions.length,signals:signals.length},warnings:modules.filter(f=>!f.readable).map(f=>`${f.path}：${f.reason}`)};
+}
+function parseMotionConfig(entry){
+ const text=decode(entry.bytes)?.text;if(!text)return null;
+ const robots=configRecords(text,'ROBOT'),arms=configRecords(text,'ARM');if(robots.length!==1)return null;
+ const robot=robots[0].fields,joints=[];
+ for(let axis=0;axis<6;axis++){
+  const name=robot['use_joint_'+axis],arm=arms.find(a=>a.fields.name===name);if(!arm)return null;
+  const lower=Number(arm.fields.lower_joint_bound),upper=Number(arm.fields.upper_joint_bound);
+  if(!Number.isFinite(lower)||!Number.isFinite(upper)||lower>=upper||Math.max(Math.abs(lower),Math.abs(upper))>1000)return null;
+  joints.push({name,line:arm.line,lowerDegrees:Math.round(lower*180/Math.PI*1000)/1000,upperDegrees:Math.round(upper*180/Math.PI*1000)/1000});
+ }
+ return {source:entry.path,sha256:sha256(entry.bytes),robot:robot.name,robotType:robot.use_robot_type,joints};
 }
 module.exports={MAX_ZIP,sha256,decode,codePart,parseRoutines,configRecords,parseBackup,readZip};

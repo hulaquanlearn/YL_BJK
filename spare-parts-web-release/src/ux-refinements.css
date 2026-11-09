@@ -6,7 +6,7 @@
 :root .metric-icon{width:28px;height:28px;font-size:16px}
 :root .metric-note{font-size:12px;line-height:1.5}
 :root .inventory-summary{margin:12px 0 16px;padding:12px 16px;background:#fff;border:1px solid #e6e9ef;border-radius:12px}
-.inventory-summary>summary{cursor:pointer;font-weight:600;line-height:28px}.inventory-summary>summary span{margin-left:18px;font-weight:400;color:#536275}
+.inventory-summary>summary{cursor:pointer;font-weight:600;line-height:28px}.inventory-summary>summary>span{margin-left:18px;font-weight:400;color:#536275}
 :root .inventory-summary .page-head{margin:12px 0}.inventory-summary .metric-grid{margin-bottom:0}
 .mobile-parts{display:none}
 :root .warehouse-hero{min-height:0;padding:8px 0;margin-bottom:12px;background:none;box-shadow:none;color:inherit;justify-content:flex-end}

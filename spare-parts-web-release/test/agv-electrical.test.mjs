@@ -1,0 +1,6 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {electricalGroups,electricalSource} from '../src/utils/agv-electrical.mjs'
+import {buildAgvModel} from '../src/utils/agv-model.mjs'
+test('electrical navigation covers all 22 drawing pages with original PDF page numbers',()=>{assert.equal(electricalSource.knowledgeId,20);assert.equal(electricalSource.pages,25);const pages=electricalGroups.flatMap(g=>g.pages.map(p=>p.n));assert.equal(pages.length,22);assert.deepEqual([...new Set(pages)].sort((a,b)=>a-b),Array.from({length:22},(_,i)=>i+4));})
+test('wireless pickup, TPM, EKK and EKV are independent car assemblies without off-vehicle supply equipment',()=>{const model=buildAgvModel();for(const name of ['pickup','tpm','ekk','supercapacitor']){const part=model.parts.find(p=>p.name===name);assert.ok(part,name);assert.equal(part.userData.sourceKnowledgeId,19);assert.ok(part.children.length>0);assert.equal(part.userData.external,undefined);}assert.equal(model.root.getObjectByName('wireless-station'),undefined);assert.ok(model.parts.every(p=>!p.userData.external));assert.equal(new Set(model.parts.map(p=>p.name)).size,model.parts.length);model.root.traverse(p=>{p.geometry?.dispose();if(p.material)(Array.isArray(p.material)?p.material:[p.material]).forEach(m=>m.dispose())});})

@@ -29,7 +29,8 @@ test('shared formerly pending assets identify their original model names and IDs
     assert.equal(model.modelUrl,update.modelUrl)
     const bytes=fs.readFileSync(new URL('../public'+model.modelUrl,import.meta.url))
     const gltf=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'')
-    assert.equal(gltf.scene.children[0].userData.modelName,model.name)
+    if(model.id===88){assert.equal(gltf.scene.children[0].userData.originalModelName,model.name);assert.equal(gltf.scene.children[0].userData.modelName,'SKF 22216 EK')}
+    else assert.equal(gltf.scene.children[0].userData.modelName,model.name)
     assert.equal(gltf.scene.children[0].userData.catalogId,model.id)
     assert.equal(gltf.scene.children[0].userData.manufacturerCAD,false)
     gltf.scene.traverse(n=>{n.geometry?.dispose();n.material?.dispose()})

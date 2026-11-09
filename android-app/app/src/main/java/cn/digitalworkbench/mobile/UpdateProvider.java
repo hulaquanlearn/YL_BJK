@@ -30,7 +30,7 @@ public final class UpdateProvider extends ContentProvider {
             File file = apk(uri);
             String[] columns = projection == null ? new String[]{OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE} : projection;
             MatrixCursor cursor = new MatrixCursor(columns); Object[] row = new Object[columns.length];
-            for (int i = 0; i < columns.length; i++) row[i] = OpenableColumns.DISPLAY_NAME.equals(columns[i]) ? "数字工作台.apk" : OpenableColumns.SIZE.equals(columns[i]) ? file.length() : null;
+            for (int i = 0; i < columns.length; i++) row[i] = OpenableColumns.DISPLAY_NAME.equals(columns[i]) ? "数字记录工具.apk" : OpenableColumns.SIZE.equals(columns[i]) ? file.length() : null;
             cursor.addRow(row); return cursor;
         } catch (FileNotFoundException e) { return null; }
     }

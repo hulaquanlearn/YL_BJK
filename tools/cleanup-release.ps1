@@ -41,7 +41,8 @@ $targets = @(Get-ChildItem -LiteralPath $output -Force | Where-Object {
   ($_.PSIsContainer -and $_.Name -match '^spare-parts-v[\d.]+-\d{8}(?:-[a-z0-9-]+)?$') -or
   (-not $_.PSIsContainer -and $_.Name -match '^spare-parts-v[\d.]+-\d{8}(?:-[a-z0-9-]+)?\.tar\.gz$' -and $_.Name -ne $CurrentArchive)
 })
-$deleted = @()
+$recycled = @()
+Add-Type -AssemblyName Microsoft.VisualBasic
 foreach ($item in $targets) {
   $target = OutputPath $item.Name
   if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "不清理重解析点：$target" }
@@ -50,11 +51,15 @@ foreach ($item in $targets) {
     if ($children | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint }) { throw "目录含重解析点：$target" }
     $bytes = ($children | Where-Object { -not $_.PSIsContainer } | Measure-Object Length -Sum).Sum
   } else { $bytes = $item.Length }
-  Remove-Item -LiteralPath $target -Force -Recurse
-  $deleted += [pscustomobject]@{ path=$item.Name; bytes=[long]$bytes }
+  if ($item.PSIsContainer) {
+    [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteDirectory($target,[Microsoft.VisualBasic.FileIO.UIOption]::OnlyErrorDialogs,[Microsoft.VisualBasic.FileIO.RecycleOption]::SendToRecycleBin)
+  } else {
+    [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile($target,[Microsoft.VisualBasic.FileIO.UIOption]::OnlyErrorDialogs,[Microsoft.VisualBasic.FileIO.RecycleOption]::SendToRecycleBin)
+  }
+  $recycled += [pscustomobject]@{ path=$item.Name; bytes=[long]$bytes }
 }
-$report = [pscustomobject]@{ version=$version; current=$CurrentArchive; deleted=$deleted; removedBytes=($deleted | Measure-Object bytes -Sum).Sum; rollback=$rollbackDir }
+$report = [pscustomobject]@{ version=$version; current=$CurrentArchive; recycled=$recycled; recycledBytes=($recycled | Measure-Object bytes -Sum).Sum; rollback=$rollbackDir }
 $localDir = Join-Path $root '.local'
 New-Item -ItemType Directory -Force -Path $localDir | Out-Null
 $report | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $localDir 'release-cleanup.json') -Encoding utf8
-$report | Select-Object version,current,removedBytes,rollback | Format-List
+$report | Select-Object version,current,recycledBytes,rollback | Format-List

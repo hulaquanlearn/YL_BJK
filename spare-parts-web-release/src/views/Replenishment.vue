@@ -1,33 +1,51 @@
 <template>
   <div class="replenishment-page">
 
-    <section class="panel replenish-controls">
+    <section class="phone-inventory-filters" aria-label="补货筛选">
+      <div class="phone-inventory-search"><el-input v-model="query.searchKeyword" clearable placeholder="编码、名称、规格或库位" aria-label="搜索补货备件" @keyup.enter="search" @clear="search"/><el-button type="primary" :loading="loading" @click="search">查询</el-button></div>
+      <details><summary><el-icon><Filter /></el-icon><span class="inventory-scope-label">查询范围：{{query.workshopCode ? workshopName(query.workshopCode) : '全部车间'}}</span><small>筛选补货</small><el-icon><ArrowDown /></el-icon></summary><div class="phone-inventory-filter-grid"><el-select v-model="query.workshopCode" clearable placeholder="全部车间" aria-label="补货所属车间" @change="workshopChanged"><el-option label="全部车间" value=""/><el-option v-for="item in workshops" :key="item.code" :label="item.name" :value="item.code"/></el-select><el-select v-model="query.warehouseAreaName" clearable filterable placeholder="全部货区" aria-label="补货货区" @change="search"><el-option v-for="area in areas" :key="area" :label="area" :value="area"/></el-select><el-button v-if="query.workshopCode||query.searchKeyword||query.warehouseAreaName" @click="reset">重置筛选</el-button></div></details>
+      <p v-if="query.partType||query.stockStatus||query.lowStock" class="inherited-scope">沿用库存筛选<el-button text size="small" @click="clearInheritedScope">清除范围</el-button></p>
+    </section>
+    <section class="panel replenish-controls inventory-desktop-filter">
       <div class="replenish-filter">
-        <div class="filter-field"><label>所属车间</label><el-select v-model="query.workshopCode" clearable placeholder="全部车间" style="width:100%" @change="workshopChanged"><el-option v-for="item in workshops" :key="item.code" :label="item.name" :value="item.code" /></el-select></div>
+        <div class="filter-field"><label>所属车间</label><el-select v-model="query.workshopCode" clearable placeholder="全部车间" style="width:100%" @change="workshopChanged"><el-option label="全部车间" value="" /><el-option v-for="item in workshops" :key="item.code" :label="item.name" :value="item.code" /></el-select></div>
         <div class="filter-field replenish-search"><label>关键词</label><el-input v-model="query.searchKeyword" clearable placeholder="物料编码、名称、规格或库位" @keyup.enter="search" @clear="search"><template #prefix><el-icon><Search /></el-icon></template></el-input></div>
         <div class="filter-field"><label>货区</label><el-select v-model="query.warehouseAreaName" clearable filterable placeholder="全部货区" style="width:100%" @change="search"><el-option v-for="area in areas" :key="area" :label="area" :value="area" /></el-select></div>
         <div class="filter-actions"><el-button v-if="query.workshopCode || query.searchKeyword || query.warehouseAreaName || query.partType || query.stockStatus || query.lowStock" text @click="reset">重置</el-button><el-button :loading="loading" @click="search">查询</el-button></div>
       </div>
       <p v-if="query.partType||query.stockStatus||query.lowStock" class="inherited-scope">沿用库存范围：{{[query.partType,query.stockStatus,query.lowStock?'低库存':''].filter(Boolean).join(' · ')}}<el-button text size="small" @click="clearInheritedScope">清除范围</el-button></p>
     </section>
+    <el-alert v-if="loadError" :title="loadError" type="error" :closable="false" show-icon><el-button size="small" @click="load">重试</el-button></el-alert>
+    <el-alert v-if="filterError" title="货区读取失败，可重试或使用其他条件查询" type="warning" :closable="false"><el-button size="small" @click="loadFilters">重试货区</el-button></el-alert>
 
-    <section class="replenishment-metrics">
-      <article><div class="metric-top"><span>低库存记录</span><span class="metric-icon"><el-icon><Warning /></el-icon></span></div><strong class="metric-value">{{ formatNumber(summary.total) }}</strong><small class="metric-note">已达到或低于订购点</small></article>
-      <article class="is-critical"><div class="metric-top"><span>零库存</span><span class="metric-icon"><el-icon><CircleClose /></el-icon></span></div><strong class="metric-value">{{ formatNumber(summary.zeroStock) }}</strong></article>
-      <article class="is-config"><div class="metric-top"><span>未设最高储备</span><span class="metric-icon"><el-icon><Setting /></el-icon></span></div><strong class="metric-value">{{ formatNumber(summary.missingTarget) }}</strong></article>
-      <article class="is-money"><div class="metric-top"><span>预计补货金额</span><span class="metric-icon"><el-icon><Money /></el-icon></span></div><strong class="metric-value">¥ {{ formatMoney(summary.estimatedAmount) }}</strong><small class="metric-note">当前筛选范围，已配置单价与目标的记录</small></article>
+    <section v-if="!nativeAndroid" class="replenishment-metrics">
+      <article><div class="metric-top"><span>低库存记录</span><span class="metric-icon"><el-icon><Warning /></el-icon></span></div><strong class="metric-value">{{ loadError ? '—' : formatNumber(summary.total) }}</strong><small class="metric-note">已达到或低于订购点</small></article>
+      <article class="is-critical"><div class="metric-top"><span>零库存</span><span class="metric-icon"><el-icon><CircleClose /></el-icon></span></div><strong class="metric-value">{{ loadError ? '—' : formatNumber(summary.zeroStock) }}</strong></article>
+      <article class="is-config"><div class="metric-top"><span>未设最高储备</span><span class="metric-icon"><el-icon><Setting /></el-icon></span></div><strong class="metric-value">{{ loadError ? '—' : formatNumber(summary.missingTarget) }}</strong></article>
+      <article class="is-money"><div class="metric-top"><span>预计补货金额</span><span class="metric-icon"><el-icon><Money /></el-icon></span></div><strong class="metric-value">{{ loadError ? '—' : `¥ ${formatMoney(summary.estimatedAmount)}` }}</strong><small class="metric-note">当前筛选范围，已配置单价与目标的记录</small></article>
     </section>
 
 
     <section class="panel replenish-table">
-      <div class="table-toolbar"><div><strong>待补货备件</strong><span class="result-count">共 {{ total }} 条</span></div><div class="replenishment-table-tools"><span class="formula-tip">建议量 = 最高储备 − 当前库存</span></div></div>
-      <div class="selection-summary">
+      <div class="table-toolbar replenish-record-heading"><div><strong>待补货备件</strong><span class="result-count">共 {{ total }} 条</span></div><div v-if="!nativeAndroid" class="replenishment-table-tools"><span class="formula-tip">建议量 = 最高储备 − 当前库存</span></div></div>
+      <div v-if="!nativeAndroid" class="selection-summary">
         <div class="selection-details"><template v-if="selectedRows.length"><span>已选 {{ selectedRows.length }} 条</span><strong>{{ selectedUnitSummary }}</strong><span class="selection-amount-label">已选补货金额</span><strong>¥ {{ formatMoney(selectedReplenishmentAmount) }}</strong></template><small v-else>未选择备件</small></div>
-        <div class="selection-actions"><el-button :disabled="loading||!selectedRows.length" @click="exportList"><el-icon><Download /></el-icon>导出表格清单</el-button></div>
+        <div v-if="!nativeAndroid" class="selection-actions"><el-button v-if="!nativeAndroid" :disabled="loading||!!loadError||!selectedRows.length" @click="exportList"><el-icon><Download /></el-icon>导出表格清单</el-button></div>
       </div>
 
-      <el-table ref="tableRef" :data="list" v-loading="loading" row-key="_id" empty-text="当前没有低库存备件" @selection-change="selectedRows = $event">
-        <el-table-column type="selection" width="48" reserve-selection />
+      <div class="phone-records replenish-records" v-loading="loading" aria-label="补货备件列表">
+        <el-checkbox v-if="!nativeAndroid" :disabled="loading||!!loadError||!list.length" :model-value="list.length>0&&list.every(row=>selectedRows.some(item=>item._id===row._id))" :indeterminate="list.some(row=>selectedRows.some(item=>item._id===row._id))&&!list.every(row=>selectedRows.some(item=>item._id===row._id))" @change="value=>list.forEach(row=>tableRef?.toggleRowSelection(row,value))">选择当前页</el-checkbox>
+        <article v-for="row in list" :key="row._id" class="phone-record phone-replenish-record">
+          <header><el-checkbox v-if="!nativeAndroid" :disabled="!canSelectRow(row)" :aria-label="`选择${row.materialDesc}`" :model-value="selectedRows.some(item=>item._id===row._id)" @change="value=>tableRef?.toggleRowSelection(row,value)"/><strong>{{ row.materialDesc || '未命名备件' }}</strong><el-tag size="small" :type="riskTag(row.riskLevel)">{{riskLabel(row.riskLevel)}}</el-tag></header>
+          <p>{{ row.materialCode }}</p><p v-if="row.spec && row.spec!==row.materialDesc">规格：{{ row.spec }}</p>
+          <p class="replenish-location">{{workshopName(row.workshopCode)}} · {{[row.warehouseAreaName,row.locationCode || row.locationNote].filter(Boolean).join(' · ') || '位置待补充'}}</p>
+          <dl class="replenish-quantities"><div><dt>当前库存</dt><dd class="stock-risk">{{ formatNumber(row.currentStock) }} <small>{{ row.unit || '' }}</small></dd></div><div><dt>建议补货</dt><dd>{{ row.suggestedQuantity == null ? '待配置' : formatNumber(row.suggestedQuantity) }} <small v-if="row.suggestedQuantity!=null">{{row.unit || ''}}</small></dd></div></dl>
+          <div class="replenish-basis"><span>订购点 {{row.reorderPoint ?? '未配置'}} · 最高储备 {{row.maxStock ?? '未配置'}}</span><span>预计金额 {{row.estimatedAmount == null ? '未配置' : `¥ ${formatMoney(row.estimatedAmount)}`}}</span></div>
+          <footer><el-button link type="primary" @click="openInventory(row)">库存详情</el-button><el-button link type="primary" @click="locate(row)"><el-icon><Location /></el-icon>3D定位</el-button></footer>
+        </article><el-empty v-if="!loading&&!loadError&&!list.length" description="当前没有低库存备件" />
+      </div>
+      <el-table v-if="!nativeAndroid" class="phone-replaced-table" ref="tableRef" :data="list" v-loading="loading" row-key="_id" :empty-text="loadError ? '补货清单读取失败，请重试' : '当前没有低库存备件'" @selection-change="selectionChanged">
+        <el-table-column v-if="!nativeAndroid" type="selection" width="48" reserve-selection :selectable="canSelectRow" />
         <el-table-column label="风险" width="90" align="center"><template #default="{ row }"><el-tag :type="riskTag(row.riskLevel)" effect="dark" round>{{ riskLabel(row.riskLevel) }}</el-tag></template></el-table-column>
         <el-table-column label="物料" min-width="260"><template #default="{ row }"><div class="material-cell"><strong>{{ row.materialDesc || '未命名备件' }}</strong><span>{{ row.materialCode }} · {{ row.spec || '未填写规格' }}</span></div></template></el-table-column>
         <el-table-column label="库位" min-width="150"><template #default="{ row }"><button class="location-link" type="button" @click="locate(row)"><el-icon><Location /></el-icon>{{ row.locationCode || '3D定位' }}</button><small class="area-copy">{{ row.warehouseAreaName || '未分区' }}</small></template></el-table-column>
@@ -36,22 +54,29 @@
         <el-table-column label="建议补货" width="130" align="center"><template #default="{ row }"><strong v-if="row.suggestedQuantity !== null" class="suggested-quantity">{{ row.suggestedQuantity }} {{ row.unit || '' }}</strong><el-tag v-else type="info" effect="plain">待配置</el-tag></template></el-table-column>
         <el-table-column label="预计金额" width="120" align="right"><template #default="{ row }">{{ row.estimatedAmount == null ? '-' : `¥ ${formatMoney(row.estimatedAmount)}` }}</template></el-table-column>
       </el-table>
-      <div class="pagination-bar"><el-pagination v-model:current-page="query.page" v-model:page-size="query.pageSize" :total="total" :page-sizes="[50,100,200]" layout="sizes, prev, pager, next" @current-change="load" @size-change="search" /></div>
+      <div class="pagination-bar" :class="{'is-single-page':total<=query.pageSize}"><el-pagination v-model:current-page="query.page" v-model:page-size="query.pageSize" :total="total" :page-sizes="[20,50,100,200]" layout="sizes, prev, pager, next" @current-change="load" @size-change="search" /></div>
     </section>
 
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import {isAppSurface} from '../app/surface.mjs'
+const nativeAndroid=isAppSurface()
+
+import { computed, onMounted, onBeforeUnmount, nextTick, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useRoute, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import { getFilters, getReplenishment } from '../api'
 import { inventoryRouteQuery, inventoryScope } from '../utils/inventory-scope.mjs'
+import { getUser } from '../auth'
+import { collectParts } from '../utils/collect-parts.mjs'
+import { boundedPage, createListViewState, selectedRowsFromIds } from '../utils/list-view-state.mjs'
 
 const router = useRouter()
 const route = useRoute()
 const loading = ref(false)
+const loadError = ref(''), filterError = ref(false)
 const list = ref([])
 const total = ref(0)
 const areas = ref([])
@@ -59,7 +84,13 @@ const selectedRows = ref([])
 const tableRef = ref(null)
 const summary = ref({ total: 0, zeroStock: 0, missingTarget: 0, estimatedAmount: 0, suggestedUnitTotals: [] })
 const workshops = [{ code: 'raw_grain', name: '原粮车间' }, { code: 'qu_making', name: '制曲车间' }, { code: 'brewing', name: '酿酒车间' }]
-const query = reactive({ page: 1, pageSize: 100, ...inventoryScope(route.query) })
+const query = reactive({ page: 1, pageSize: nativeAndroid?20:100, ...inventoryScope(route.query) })
+const viewState = createListViewState({ view: 'replenishment', user: getUser(), scope: { ...route.query }, queryKeys: Object.keys(query) })
+const restoredState = viewState.read()
+if (restoredState) Object.assign(query, restoredState.query, { page: boundedPage(restoredState.query.page), pageSize: [20, 50, 100, 200].includes(Number(restoredState.query.pageSize)) ? Number(restoredState.query.pageSize) : nativeAndroid ? 20 : 100 })
+let selectedIds = restoredState?.selectedIds || []
+let restoreScroll = restoredState?.scrollTop ?? null
+let restoringSelection = false
 let requestToken=0,filterToken=0
 const selectedUnitSummary = computed(() => {
   const totals = new Map()
@@ -77,28 +108,61 @@ function formatNumber(value) { return Number(value || 0).toLocaleString('zh-CN',
 function formatMoney(value) { return Number(value || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
 function riskLabel(level) { return level === 'critical' ? '断货' : level === 'high' ? '紧急' : '预警' }
 function riskTag(level) { return level === 'critical' ? 'danger' : level === 'high' ? 'warning' : 'info' }
-function locate(row) { router.push({ path: '/warehouse-3d', query: inventoryRouteQuery(query, { partId: row._id }) }) }
+function workshopName(code) { return workshops.find(item=>item.code===code)?.name || '未分车间' }
+function openInventory(row) { router.push({path:'/inventory',query:inventoryRouteQuery({workshopCode:row.workshopCode},{inventoryId:row._id,searchKeyword:row.materialCode})}) }
+function locate(row) { router.push({ path: '/warehouse-3d', query: inventoryRouteQuery({workshopCode:row.workshopCode}, { partId: row._id }) }) }
 
 async function load() {
   const token=++requestToken
   loading.value = true
   try {
-    const result = await getReplenishment({ ...query })
+    const params = { ...query }
+    const wantedIds = [...selectedIds]
+    const result = await getReplenishment(params)
     if(token!==requestToken)return
+    // Rehydrate selected IDs from current server rows, including selections on other pages.
+    // Saved stock, suggested quantities and export amounts are never reused.
+    let freshSelection = []
+    if (wantedIds.length) {
+      const visibleIds = new Set((result.data || []).map(row => String(row._id)))
+      const rows = wantedIds.every(id => visibleIds.has(id)) ? result.data || [] : await collectParts(getReplenishment, params, () => token === requestToken)
+      if (token !== requestToken || !rows) return
+      freshSelection = selectedRowsFromIds(wantedIds, rows)
+    }
+    restoringSelection = true
+    tableRef.value?.clearSelection()
     list.value = result.data || []
     total.value = Number(result.total) || 0
     summary.value = result.summary || summary.value
-  } finally { if(token===requestToken)loading.value = false }
+    selectedRows.value = freshSelection
+    selectedIds = freshSelection.map(row => String(row._id))
+    loadError.value = ''
+    await nextTick()
+    if (token !== requestToken) return
+    freshSelection.forEach(row => tableRef.value?.toggleRowSelection(row, true))
+    restoringSelection = false
+    if (wantedIds.length > selectedIds.length) ElMessage.info('部分已选备件已不在当前补货范围，已按最新数据取消勾选。')
+    const lastPage = Math.max(1, Math.ceil(total.value / query.pageSize))
+    if (query.page > lastPage) { query.page = lastPage; return load() }
+    if (!list.value.length && total.value > 0) loadError.value = '补货数量与明细暂未同步，请重试后核对清单。'
+    if (restoreScroll !== null) { window.scrollTo(0, restoreScroll); restoreScroll = null }
+  } catch { if (token === requestToken) { restoringSelection = true; tableRef.value?.clearSelection(); list.value = []; selectedRows.value = []; total.value = 0; loadError.value = '补货清单读取失败，当前结果和勾选尚未核实，重试成功后才能导出。' } }
+  finally { if(token===requestToken) { restoringSelection = false; loading.value = false } }
 }
-async function loadFilters() { const token=++filterToken;const result = await getFilters({ workshopCode: query.workshopCode });if(token===filterToken)areas.value = result.data?.areas || [] }
+async function loadFilters() { const token=++filterToken; try { const result = await getFilters({ workshopCode: query.workshopCode });if(token===filterToken) { areas.value = result.data?.areas || []; filterError.value = false } } catch { if(token===filterToken) { areas.value = []; filterError.value = true } } }
 function workshopChanged() { query.warehouseAreaName = ''; search();loadFilters() }
 function clearInheritedScope(){Object.assign(query,{partType:'',stockStatus:'',lowStock:''});search()}
-function search() { query.page = 1; tableRef.value?.clearSelection(); selectedRows.value=[]; load() }
-function reset() { Object.assign(query, { page: 1, ...inventoryScope() }); tableRef.value?.clearSelection(); selectedRows.value=[]; loadFilters(); load() }
+function search() { query.page = 1; tableRef.value?.clearSelection(); selectedRows.value=[]; selectedIds=[]; restoreScroll=null; return load() }
+function reset() { Object.assign(query, { page: 1, ...inventoryScope() }); tableRef.value?.clearSelection(); selectedRows.value=[]; selectedIds=[]; restoreScroll=null; loadFilters(); return load() }
+function canSelectRow() { return !loading.value && !loadError.value }
+function selectionChanged(rows) { if (restoringSelection || loading.value) return; selectedRows.value = rows; selectedIds = rows.map(row => String(row._id)) }
 function buildRows() { return selectedRows.value.map(row => [row.materialCode,row.materialDesc,row.spec,row.warehouseAreaName,row.locationCode,row.currentStock,row.reorderPoint,row.maxStock,row.suggestedQuantity ?? '待配置',row.unit,row.estimatedAmount ?? '',riskLabel(row.riskLevel)]) }
 function csvCell(value){return `"${String(value??'').replaceAll('"','""')}"`}
-function exportList(){if(!selectedRows.value.length)return;const header=['物料编码','物料名称','规格型号','货区','库位','当前库存','订购点','最高储备','建议补货','单位','预计金额','风险'];const csv='\uFEFF'+[header,...buildRows()].map(row=>row.map(csvCell).join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download=`补货清单-${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);ElMessage.success(`已导出 ${selectedRows.value.length} 条补货清单`)}
+function exportList(){if(loading.value||loadError.value||!selectedRows.value.length)return;const header=['物料编码','物料名称','规格型号','货区','库位','当前库存','订购点','最高储备','建议补货','单位','预计金额','风险'];const csv='\uFEFF'+[header,...buildRows()].map(row=>row.map(csvCell).join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download=`补货清单-${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);ElMessage.success(`已导出 ${selectedRows.value.length} 条补货清单`)}
+function rememberView() { viewState.save({ query: { ...query }, selectedIds, scrollTop: window.scrollY }) }
+onBeforeRouteLeave(rememberView)
 onMounted(() => Promise.allSettled([load(), loadFilters()]))
+onBeforeUnmount(() => { rememberView(); requestToken++; filterToken++ })
 </script>
 
 <style scoped>

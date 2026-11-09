@@ -1,0 +1,388 @@
+{
+  "at": "2026-11-05T11:48:42.227Z",
+  "status": "deployed-and-verified",
+  "id": "abb-infrared-dwell-20261105",
+  "checks": 1826,
+  "webFiles": 1054,
+  "changedWebFiles": 0,
+  "apiFiles": 2,
+  "protectedFiles": 767,
+  "protectedPreserved": true,
+  "androidUnchanged": true,
+  "rollback": "/opt/spare-parts/rollback/abb-infrared-dwell-20261105",
+  "webTests": 660,
+  "apiTests": 448,
+  "nativeRuntimeVerified": false,
+  "version": "V1.9.10",
+  "android": {
+    "versionCode": 24,
+    "versionName": "1.9.10-android.24",
+    "sha256": "e41eeb3e970e84f1a6f400ab29aa2cd07df7834d681f29196a7dbfa2eeceaeb2",
+    "url": "https://czsdsg.cn/app-updates/android/digital-workbench-1.9.10-android.24.apk"
+  },
+  "permissionsVerified": [
+    "admin",
+    "brewing",
+    "raw_grain",
+    "viewer"
+  ],
+  "flow": [
+    {
+      "barrel": "left",
+      "height": 800,
+      "fillCount": 37,
+      "motions": 8622,
+      "requests": 22621,
+      "volume": 3.2414452116770787,
+      "coveredCells": 484,
+      "nominalSeconds": 822.5345138519015,
+      "infraredScans": 237,
+      "infraredRegionCalls": 236,
+      "complete": true,
+      "endedAt": {
+        "fileId": "file-7",
+        "routine": "main",
+        "type": "end",
+        "reason": "exit",
+        "line": 339
+      }
+    },
+    {
+      "barrel": "right",
+      "height": 800,
+      "fillCount": 37,
+      "motions": 8622,
+      "requests": 22621,
+      "volume": 3.2414452116770835,
+      "coveredCells": 484,
+      "nominalSeconds": 834.0319371389289,
+      "infraredScans": 237,
+      "infraredRegionCalls": 236,
+      "complete": true,
+      "endedAt": {
+        "fileId": "file-7",
+        "routine": "main",
+        "type": "end",
+        "reason": "exit",
+        "line": 339
+      }
+    }
+  ],
+  "ui": {
+    "targetHeight": 120,
+    "complete": true,
+    "fillCount": 6,
+    "infraredScans": 16,
+    "position": 3,
+    "robotExited": true,
+    "selectedLidClosed": true,
+    "otherLidOpen": true,
+    "restartVerified": true,
+    "errorsSinceFinalReload": 0,
+    "viewport": [
+      1265,
+      712
+    ],
+    "panelClientHeight": 413,
+    "panelScrollHeight": 413,
+    "screenshot": "docs/validation/20261105-abb-flow/infrared-hydraulic-120-completed.png",
+    "defaultsRestored": {
+      "height": 800,
+      "speedPercent": 100,
+      "multiplier": 1
+    },
+    "proofPixels": [
+      1265,
+      712
+    ]
+  },
+  "apiHashes": {
+    "src/robot-cell-sim.js": "c17c5c5a20f03892791a4b4ddec71b4b7394244631c052ad32c400e95db08c3a",
+    "src/robot-sim.js": "f436f3788a702bb53af77cffe02e707f31b51a6d96a4c122d82ea705a8ca18d4",
+    "src/robot-library.js": "89cca28feef3755b60195d8dca64a0eebd7d6b4c8d494ca80a0e585b8ec9a859",
+    "src/robot-deposit-grid.js": "fe051154720437a0e4998284a461944fa05da67ff9d1978f38c56b2bbec5413c",
+    "src/robot-deposit-state.js": "affe26699737dde7e1918f3b2204d5aab8ac7c434772cc385399134de035fa86",
+    "src/robot-infrared-sim.js": "3fb9d3d53863d4e07614f1efb7c3f473a082306d90636f4e3efe35f6366295fb"
+  },
+  "payloadSha256": "8849accccf3d6cc928b8fd55414c2ed55d43e902d7ae79395a4dddf348d46244",
+  "privateBackupPublished": false,
+  "gitPush": false,
+  "cleanup": {
+    "at": "2026-11-05T10:38:05.909Z",
+    "localBuilds": [
+      "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-final",
+      "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-normal-speed-verified",
+      "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload",
+      "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-continuous"
+    ],
+    "localFiles": [
+      "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\program-footer.png",
+      "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\full-left-800-before-surface-revision.png",
+      "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\continuous-surface-progress.png",
+      "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\deploy-continuous.tar.gz"
+    ],
+    "server": {
+      "original": "/opt/spare-parts/staging/abb-continuous-20261105",
+      "destination": "/opt/spare-parts/recycle-bin/abb-continuous-20261105-staging/staging",
+      "liveVerified": true
+    },
+    "method": "recoverable recycle; no trash emptied",
+    "kept": [
+      "latest verified web build",
+      "DSH frozen delivery",
+      "source/test logs",
+      "current and previous server rollback",
+      "all business data/uploads/private config"
+    ],
+    "infrared": {
+      "local": [
+        {
+          "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-continuous-final",
+          "at": "2026-11-05T19:52:49.9288484+08:00",
+          "method": "Windows Recycle Bin"
+        },
+        {
+          "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\web-dist-infrared-verified",
+          "at": "2026-11-05T19:52:50.8088447+08:00",
+          "method": "Windows Recycle Bin"
+        },
+        {
+          "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-feedback",
+          "at": "2026-11-05T19:52:51.0043197+08:00",
+          "method": "Windows Recycle Bin"
+        },
+        {
+          "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-infrared",
+          "at": "2026-11-05T19:52:51.3460847+08:00",
+          "method": "Windows Recycle Bin"
+        },
+        {
+          "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\payload-infrared-dwell",
+          "at": "2026-11-05T19:52:51.4282461+08:00",
+          "method": "Windows Recycle Bin"
+        },
+        {
+          "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\feedback-payload.tar.gz",
+          "at": "2026-11-05T19:52:51.4518864+08:00",
+          "method": "Windows Recycle Bin"
+        },
+        {
+          "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\infrared-payload.tar.gz",
+          "at": "2026-11-05T19:52:51.4728547+08:00",
+          "method": "Windows Recycle Bin"
+        },
+        {
+          "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-flow-20261105\\infrared-dwell-payload.tar.gz",
+          "at": "2026-11-05T19:52:51.4912957+08:00",
+          "method": "Windows Recycle Bin"
+        },
+        {
+          "path": "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\infrared-active-120.png",
+          "at": "2026-11-05T19:52:51.5124004+08:00",
+          "reason": "superseded by final 120mm proof",
+          "method": "Windows Recycle Bin"
+        },
+        {
+          "path": "D:\\wx_xiangm\\xiangmu\\docs\\validation\\20261105-abb-flow\\infrared-hydraulic-40-completed.png",
+          "at": "2026-11-05T19:52:51.5320157+08:00",
+          "reason": "superseded by final 120mm proof",
+          "method": "Windows Recycle Bin"
+        }
+      ],
+      "server": [
+        {
+          "at": "2026-11-05T11:52:47.204Z",
+          "original": "/opt/spare-parts/staging/abb-height-feedback-20261105",
+          "destination": "/opt/spare-parts/recycle-bin/abb-height-feedback-20261105-staging/staging",
+          "liveVerified": true,
+          "restore": "Move staging back to original path only when unused. Deploy input and QA logs only; no live code, business data, private config or rollback moved."
+        },
+        {
+          "at": "2026-11-05T11:52:47.205Z",
+          "original": "/opt/spare-parts/staging/abb-infrared-hydraulic-20261105",
+          "destination": "/opt/spare-parts/recycle-bin/abb-infrared-hydraulic-20261105-staging/staging",
+          "liveVerified": true,
+          "restore": "Move staging back to original path only when unused. Deploy input and QA logs only; no live code, business data, private config or rollback moved."
+        },
+        {
+          "at": "2026-11-05T11:52:47.205Z",
+          "original": "/opt/spare-parts/staging/abb-infrared-dwell-20261105",
+          "destination": "/opt/spare-parts/recycle-bin/abb-infrared-dwell-20261105-staging/staging",
+          "liveVerified": true,
+          "restore": "Move staging back to original path only when unused. Deploy input and QA logs only; no live code, business data, private config or rollback moved."
+        }
+      ],
+      "liveVerified": true,
+      "method": "recoverable recycle; no trash emptied",
+      "kept": [
+        "latest verified web build",
+        "source/test logs",
+        "server rollbacks",
+        "business data/uploads/private config"
+      ]
+    }
+  },
+  "webRollback": "/opt/spare-parts/rollback/abb-infrared-hydraulic-20261105",
+  "baseRelease": {
+    "at": "2026-11-05T11:40:33.199Z",
+    "status": "deployed-and-verified",
+    "id": "abb-infrared-hydraulic-20261105",
+    "checks": 1845,
+    "webFiles": 1054,
+    "changedWebFiles": 36,
+    "apiFiles": 3,
+    "protectedFiles": 767,
+    "protectedPreserved": true,
+    "androidUnchanged": true,
+    "rollback": "/opt/spare-parts/rollback/abb-infrared-hydraulic-20261105",
+    "webTests": 660,
+    "apiTests": 447,
+    "nativeRuntimeVerified": false
+  },
+  "heightFeedback": {
+    "simulated": true,
+    "source": "readable historical yuanxin comment; protected BaseMod substitute",
+    "updates": [
+      "nDisZOffs",
+      "zaomian_gaodu",
+      "gaodu1",
+      "zaomiangaodu_guding",
+      "zaomiangaodu"
+    ],
+    "probe": "last spread outlet in static selected pot frame",
+    "approach": "whole-pot maximum + 250 mm"
+  },
+  "dsh": {
+    "review": "docs/ABB_INFRARED_REVIEW_DSH_20261105.md",
+    "sha256": "a80d8c6a06701b3b040d92983207a204be7085f303db8b9bdc40b597c9b639dd",
+    "independentReadOnly": true,
+    "sourceCorrections": "docs/ABB_FLOW_COLLABORATION_20261105.md",
+    "finalCodeTestsBy": "Codex"
+  },
+  "shortFlow": [
+    {
+      "barrel": "left",
+      "height": 119.99999999999957,
+      "fillCount": 6,
+      "motions": 1391,
+      "requests": 3713,
+      "volume": 0.4535183241385475,
+      "coveredCells": 484,
+      "nominalSeconds": 148.2402386439989,
+      "infraredScans": 16,
+      "infraredRegionCalls": 15,
+      "complete": true,
+      "endedAt": {
+        "fileId": "file-7",
+        "routine": "main",
+        "type": "end",
+        "reason": "exit",
+        "line": 339
+      }
+    },
+    {
+      "barrel": "right",
+      "height": 119.99999999999957,
+      "fillCount": 6,
+      "motions": 1391,
+      "requests": 3713,
+      "volume": 0.45351832413854787,
+      "coveredCells": 484,
+      "nominalSeconds": 150.64830201342764,
+      "infraredScans": 16,
+      "infraredRegionCalls": 15,
+      "complete": true,
+      "endedAt": {
+        "fileId": "file-7",
+        "routine": "main",
+        "type": "end",
+        "reason": "exit",
+        "line": 339
+      }
+    }
+  ],
+  "releaseHistory": [
+    {
+      "id": "abb-continuous-20261105",
+      "at": "2026-11-05T10:31:26.134Z",
+      "checks": 1847,
+      "webFiles": 1054,
+      "changedWebFiles": 36,
+      "apiFiles": 5,
+      "rollback": "/opt/spare-parts/rollback/abb-continuous-20261105"
+    },
+    {
+      "id": "abb-height-feedback-20261105",
+      "at": "2026-11-05T10:56:00.920Z",
+      "checks": 1827,
+      "rollback": "/opt/spare-parts/rollback/abb-height-feedback-20261105"
+    },
+    {
+      "at": "2026-11-05T11:40:33.199Z",
+      "status": "deployed-and-verified",
+      "id": "abb-infrared-hydraulic-20261105",
+      "checks": 1845,
+      "webFiles": 1054,
+      "changedWebFiles": 36,
+      "apiFiles": 3,
+      "protectedFiles": 767,
+      "protectedPreserved": true,
+      "androidUnchanged": true,
+      "rollback": "/opt/spare-parts/rollback/abb-infrared-hydraulic-20261105",
+      "webTests": 660,
+      "apiTests": 447,
+      "nativeRuntimeVerified": false
+    }
+  ],
+  "webPayloadSha256": "05b838465aa957d8c0c49244b2838393f52c70793b1c62bd7733e14616f0c598",
+  "infrared": {
+    "simulated": true,
+    "temperature": null,
+    "goZero": "ModMain:188 releases command after arrival; preserve physical GI position",
+    "oneRequestOneResult": true,
+    "coverIndependent": true,
+    "regionBranches": [
+      {
+        "area": 11,
+        "cycle": 11,
+        "start": 57,
+        "end": 78,
+        "sign": 1
+      },
+      {
+        "area": 21,
+        "cycle": 21,
+        "start": 55,
+        "end": 78,
+        "sign": 1
+      },
+      {
+        "area": 31,
+        "cycle": 31,
+        "start": 0,
+        "end": 76,
+        "sign": -1
+      },
+      {
+        "area": 41,
+        "cycle": 41,
+        "start": 0,
+        "end": 0,
+        "sign": -1
+      }
+    ],
+    "pointPour": "IR41 completed WaitTime dwell only; estimated capacity/8 seconds, never vertical transport"
+  },
+  "hydraulicLid": {
+    "drive": "hydraulic oil cylinder",
+    "estimated": true,
+    "physicalIoMapped": false,
+    "sourceCoverHandshakeIsNotLidValve": true,
+    "closingRequires": [
+      "main completed",
+      "camera at park 3",
+      "robot/tool outside conservative swept bounding box"
+    ],
+    "openingSeconds": 3
+  }
+}

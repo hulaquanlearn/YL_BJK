@@ -1,0 +1,5 @@
+const test=require('node:test'),assert=require('node:assert/strict'),{summarizeExpenses}=require('../src/application-expenses');
+test('feature expenses estimate only complete single-call token observations with official price bounds',()=>{
+ const r=summarizeExpenses([{feature:'knowledge_chat',provider:'deepseek',model:'deepseek-flash',modelCalls:1,promptTokens:1000000,completionTokens:1000000,cachedTokens:500000},{feature:'raw_summary',provider:'deepseek',model:'deepseek-flash',modelCalls:2,promptTokens:100,completionTokens:50,cachedTokens:0},{feature:'fire_photo_recognition',provider:'deepseek',model:'unknown',modelCalls:1,promptTokens:100,completionTokens:50}]);
+ assert.equal(r.byFeature.knowledge.estimatedCalls,1);assert.ok(Math.abs(r.byFeature.knowledge.min-.6765)<1e-10);assert.ok(Math.abs(r.byFeature.knowledge.max-1.353)<1e-10);assert.equal(r.byFeature.rawSummary.unknownCalls,2);assert.equal(r.byFeature.rawSummary.max,0);assert.equal(r.byFeature.firePhoto.unknownCalls,1);assert.equal(r.byFeature.robot.estimatedCalls,0);assert.equal(r.byFeature.knowledge.currency,'USD');
+});

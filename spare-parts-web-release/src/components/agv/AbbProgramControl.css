@@ -1,0 +1,1148 @@
+/*
+ * ABB 程序运行面板 · 紧凑浅钢蓝主题
+ * 作用域：仅 .abb-program-control 内部；不定义布局容器、不碰示教器/画布。
+ * 集成：建议在 AbbProgramControl.vue 用
+ *   <style scoped src="./AbbProgramControl.css"></style>
+ * 替换原内联 <style scoped>。若速度控件仍留在 AbbRobotViewer.vue，
+ * 可把 .main-program-speed 移入本组件，或以非 scoped 方式额外引入本文件。
+ * 本文件只负责外观；模板分组 class 见 docs/ABB_PROGRAM_PANEL_DSH_20261104.md。
+ */
+
+.abb-program-control {
+  --apc-ink: #2e566d;
+  --apc-ink-strong: #173f56;
+  --apc-muted: #6d8798;
+  --apc-faint: #91a7b5;
+  --apc-line: #d2e2ec;
+  --apc-line-strong: #b7d2e1;
+  --apc-surface: #fbfdff;
+  --apc-surface-soft: #f2f8fb;
+  --apc-surface-blue: #e8f3f8;
+  --apc-accent: #2b7b98;
+  --apc-accent-strong: #1e617b;
+  --apc-accent-soft: #e1f1f6;
+  --apc-warn: #9a6b24;
+  --apc-warn-soft: #fffaf0;
+  --apc-danger: #a64049;
+  --apc-danger-soft: #fff4f5;
+  position: relative;
+  max-width: 100%;
+  padding: 11px 12px 12px;
+  border: 1px solid var(--apc-line);
+  border-radius: 13px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, var(--apc-surface) 45%, #f5fafd 100%);
+  box-shadow:
+    0 1px 0 #ffffff inset,
+    0 8px 22px #2c526b0f;
+  color: var(--apc-ink);
+  font-size: 12px;
+  line-height: 1.55;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  accent-color: var(--apc-accent);
+}
+
+.abb-program-control *,
+.abb-program-control *::before,
+.abb-program-control *::after {
+  box-sizing: border-box;
+}
+
+/* ---------- 标题 ---------- */
+
+.abb-program-control > header,
+.abb-program-control .program-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 1px 1px 9px;
+  margin: 0 0 10px;
+  border-bottom: 1px solid var(--apc-line);
+}
+
+.abb-program-control > header strong,
+.abb-program-control .program-title {
+  display: block;
+  color: var(--apc-ink-strong);
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: .01em;
+  line-height: 1.3;
+}
+
+.abb-program-control .program-eyebrow {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--apc-muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .08em;
+}
+
+.abb-program-control > header a,
+.abb-program-control .program-link {
+  flex: none;
+  padding: 3px 0;
+  color: var(--apc-accent-strong);
+  font-size: 11px;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.abb-program-control > header a:hover,
+.abb-program-control .program-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- 分组卡片 ---------- */
+
+.abb-program-control .program-section {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--apc-line);
+  border-radius: 10px;
+  background: #ffffffc9;
+}
+
+.abb-program-control .program-section:first-of-type {
+  margin-top: 0;
+}
+
+.abb-program-control .program-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  grid-column: 1 / -1;
+  margin: 0 0 7px;
+}
+
+.abb-program-control .program-section > .program-section-title {
+  display: block;
+  margin: 0 0 7px;
+}
+
+.abb-program-control .program-section.program-fill > .program-metrics,
+.abb-program-control .program-section.program-fill > .program-volume-note,
+.abb-program-control .program-section.program-speed-section > .program-speed {
+  grid-column: 1 / -1;
+}
+
+.abb-program-control .program-section-title,
+.abb-program-control .program-section-head h3 {
+  margin: 0;
+  color: var(--apc-ink-strong);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .04em;
+}
+
+.abb-program-control .program-section-note {
+  margin: 0;
+  color: var(--apc-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.abb-program-control .program-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 0 6px;
+  border: 1px solid var(--apc-line-strong);
+  border-radius: 999px;
+  background: var(--apc-surface-soft);
+  color: var(--apc-accent-strong);
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.abb-program-control .program-badge.is-muted {
+  color: var(--apc-muted);
+  border-color: var(--apc-line);
+}
+
+/* ---------- 备份 / 例程 ---------- */
+
+.abb-program-control .program-pickers {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 8px;
+  align-items: end;
+}
+
+.abb-program-control .program-pickers label,
+.abb-program-control .program-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  margin: 0;
+  color: var(--apc-muted);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.abb-program-control .program-field-label {
+  color: var(--apc-muted);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.abb-program-control select,
+.abb-program-control input:not([type="range"]):not([type="checkbox"]) {
+  width: 100%;
+  min-width: 0;
+  min-height: 32px;
+  padding: 4px 7px;
+  border: 1px solid var(--apc-line-strong);
+  border-radius: 7px;
+  background: var(--apc-surface);
+  color: #315a72;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.abb-program-control select:hover,
+.abb-program-control input:not([type="range"]):not([type="checkbox"]):hover {
+  border-color: #9fc2d4;
+}
+
+.abb-program-control select:focus-visible,
+.abb-program-control input:focus-visible,
+.abb-program-control button:focus-visible,
+.abb-program-control summary:focus-visible,
+.abb-program-control a:focus-visible {
+  outline: 2px solid #3d93b0;
+  outline-offset: 2px;
+}
+
+/* ---------- 装填高度 / 斗容 / 累计体积 ---------- */
+
+.abb-program-control .program-cell-settings,
+.abb-program-control .program-fill {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px 8px;
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid #d5e6ee;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #f6fbfd, #edf6fa);
+}
+
+.abb-program-control .program-cell-settings > p,
+.abb-program-control .program-fill > .program-section-note {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  padding-top: 6px;
+  border-top: 1px dashed #c9dde8;
+  color: var(--apc-muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.abb-program-control .program-cell-settings label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  margin: 0;
+  color: var(--apc-muted);
+  font-size: 10px;
+}
+
+.abb-program-control .program-cell-settings label input[type="number"] {
+  width: 72px;
+  min-height: 30px;
+  padding: 3px 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.abb-program-control .program-cell-settings label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  justify-self: start;
+}
+
+.abb-program-control .program-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  grid-column: 1 / -1;
+  margin: 5px 0;
+  color: var(--apc-muted);
+  font-size: 10px;
+}
+
+.abb-program-control .program-check input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  flex: none;
+}
+
+.abb-program-control .program-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  grid-column: 1 / -1;
+}
+
+.abb-program-control .program-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 6px 7px;
+  border: 1px solid #d6e6ef;
+  border-radius: 8px;
+  background: #ffffffc9;
+}
+
+.abb-program-control .program-metric-label {
+  color: var(--apc-muted);
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.abb-program-control .program-metric-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  gap: 4px;
+  text-align: center;
+  color: var(--apc-ink-strong);
+  font-size: 14px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+
+.abb-program-control .program-metric-unit {
+  margin-left: 2px;
+  color: var(--apc-faint);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.abb-program-control .program-metric.is-accent {
+  border-color: #b9d8e5;
+  background: linear-gradient(150deg, #e7f4f9, #f8fcfe);
+}
+
+.abb-program-control .program-volume-bar,
+.abb-program-control .program-cell-bar {
+  grid-column: 1 / -1;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dfeaf1;
+}
+
+.abb-program-control .program-volume-bar > span,
+.abb-program-control .program-cell-bar-fill {
+  display: block;
+  width: var(--volume, var(--progress, 0%));
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4b9ab2, #2b7893);
+}
+
+.abb-program-control .program-volume-note {
+  grid-column: 1 / -1;
+  color: var(--apc-faint);
+  font-size: 10px;
+}
+
+/* ---------- 速度 / 演示倍速 ---------- */
+
+.abb-program-control .program-speed,
+.abb-program-control .program-speed-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+}
+
+.abb-program-control .program-speed label,
+.abb-program-control .program-speed-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--apc-muted);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.abb-program-control .program-speed input[type="range"] {
+  width: 100%;
+  min-width: 56px;
+  margin: 0;
+  accent-color: var(--apc-accent);
+  cursor: pointer;
+}
+
+.abb-program-control .program-speed-value {
+  min-width: 40px;
+  color: var(--apc-ink-strong);
+  font-size: 11px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.abb-program-control .program-rate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.abb-program-control .program-rate-label {
+  color: var(--apc-muted);
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.abb-program-control .program-rate-options {
+  display: inline-grid;
+  grid-template-columns: repeat(3, minmax(30px, 1fr));
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--apc-line);
+  border-radius: 8px;
+  background: #eaf3f8;
+}
+
+.abb-program-control .program-rate-option {
+  min-height: 24px;
+  padding: 0 7px;
+  border: 0 !important;
+  border-radius: 6px;
+  background: transparent !important;
+  color: var(--apc-muted);
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  box-shadow: none !important;
+}
+
+.abb-program-control .program-rate-option[aria-pressed="true"],
+.abb-program-control .program-rate-option.is-active,
+.abb-program-control .program-rate-option.active {
+  background: #ffffff !important;
+  color: var(--apc-accent-strong);
+  box-shadow: 0 1px 3px #31526724 !important;
+}
+
+/* ---------- 运行 / 停止 ---------- */
+
+.abb-program-control .program-run-actions {
+  position: sticky;
+  top: -1px;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 9px 0 0;
+  padding: 8px 0 2px;
+  border-top: 1px solid var(--apc-line);
+  background: linear-gradient(180deg, #ffffff, #f7fbfd);
+}
+
+.abb-program-control button {
+  min-height: 31px;
+  padding: 0 9px;
+  border: 1px solid var(--apc-line-strong);
+  border-radius: 7px;
+  background: #ffffff;
+  color: #2a657e;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.abb-program-control button:hover:not(:disabled) {
+  border-color: #94bbcf;
+  background: #f0f8fb;
+}
+
+.abb-program-control button:active:not(:disabled) {
+  background: #e4f1f6;
+}
+
+.abb-program-control button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.abb-program-control .program-primary,
+.abb-program-control button.is-primary,
+.abb-program-control button[data-variant="primary"] {
+  border-color: var(--apc-accent-strong);
+  background: linear-gradient(180deg, #3386a2, var(--apc-accent-strong));
+  color: #ffffff;
+  font-weight: 750;
+  box-shadow: 0 2px 6px #1e617b2e;
+}
+
+.abb-program-control .program-primary:hover:not(:disabled),
+.abb-program-control button.is-primary:hover:not(:disabled) {
+  border-color: #174e64;
+  background: linear-gradient(180deg, #2d7d98, #1a5570);
+}
+
+.abb-program-control .program-danger,
+.abb-program-control .program-stop,
+.abb-program-control button.is-danger,
+.abb-program-control button[data-variant="danger"] {
+  border-color: #d9aeb3;
+  background: #fff7f7;
+  color: var(--apc-danger);
+}
+
+.abb-program-control .program-danger:hover:not(:disabled),
+.abb-program-control button.is-danger:hover:not(:disabled) {
+  border-color: #c4878e;
+  background: #fff0f1;
+}
+
+.abb-program-control .program-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--apc-muted);
+}
+
+.abb-program-control .program-ghost:hover:not(:disabled) {
+  border-color: var(--apc-line);
+  background: var(--apc-surface-soft);
+}
+
+/* 没有显式 ghost class 时，把运行组最后一个按钮（重新开始）降级，避免与主运行/停止争层级。 */
+.abb-program-control .program-run-actions > button:last-child {border:1px solid var(--apc-line-strong);background:var(--apc-surface);border-radius:7px;}
+
+.abb-program-control .program-run-actions > button:last-child:hover:not(:disabled) {
+  border-color: var(--apc-line);
+  background: var(--apc-surface-soft);
+}
+
+/* ---------- 状态 / 进度 ---------- */
+
+.abb-program-control .program-status-block {
+  margin-top: 8px;
+  padding: 8px 9px;
+  border: 1px solid var(--apc-line);
+  border-radius: 9px;
+  background: #f6fbfd;
+}
+
+.abb-program-control .program-status,
+.abb-program-control > p[role="status"] {
+  margin: 0;
+  padding: 7px 9px;
+  border: 1px solid #cfe3ec;
+  border-radius: 7px;
+  background: #f3f9fc;
+  color: var(--apc-ink);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.abb-program-control .program-status-block .program-status {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.abb-program-control .program-status::before {
+  content: "●";
+  display: inline-block;
+  margin-right: 5px;
+  color: #6da7bc;
+  font-size: 8px;
+  vertical-align: 1px;
+}
+
+.abb-program-control .program-status.is-running::before {
+  color: #2f8f72;
+}
+
+.abb-program-control .program-status.is-error::before {
+  color: var(--apc-danger);
+}
+
+.abb-program-control .program-error {
+  color: var(--apc-danger) !important;
+  border-color: #eccfd3 !important;
+  background: var(--apc-danger-soft) !important;
+}
+
+.abb-program-control .program-error::before {
+  color: var(--apc-danger) !important;
+}
+
+.abb-program-control .program-progress {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 7px 9px;
+  border: 1px solid var(--apc-line);
+  border-radius: 8px;
+  background: #f7fbfd;
+}
+
+.abb-program-control .program-progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--apc-muted);
+  font-size: 10px;
+}
+
+.abb-program-control .program-progress-head strong {
+  color: var(--apc-accent-strong);
+  font-size: 11px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.abb-program-control .program-progress > small {
+  color: var(--apc-faint);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.abb-program-control .program-progress-value {
+  color: var(--apc-accent-strong);
+  font-size: 11px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.abb-program-control .program-progress-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dce9f0;
+}
+
+.abb-program-control .program-progress-fill {
+  display: block;
+  width: var(--progress, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5aa7bd, #2b7893);
+  transition: width .2s linear;
+}
+
+.abb-program-control .program-progress.is-indeterminate .program-progress-fill {
+  width: 38%;
+  animation: apc-indeterminate 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes apc-indeterminate {
+  from { transform: translateX(-20%); }
+  to { transform: translateX(220%); }
+}
+
+/* ---------- 当前行 ---------- */
+
+.abb-program-control .program-current {
+  display: grid;
+  gap: 3px;
+  margin: 8px 0 0;
+  padding: 8px 9px;
+  border: 1px solid #d4e6ee;
+  border-left: 3px solid var(--apc-accent);
+  border-radius: 7px;
+  background: #eef7fa;
+}
+
+.abb-program-control .program-current strong {
+  color: var(--apc-ink-strong);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.abb-program-control .program-current code {
+  display: block;
+  max-height: 88px;
+  margin: 0;
+  overflow: auto;
+  color: #3b6177;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 10px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.abb-program-control .program-source {
+  max-height: 190px;
+  margin: 6px 0 0;
+  padding: 7px 8px;
+  overflow: auto;
+  border: 1px solid #dbe8f0;
+  border-radius: 7px;
+  background: #f7fbfd;
+  color: #3b6177;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 10px;
+  line-height: 1.55;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.abb-program-control .program-source-line {
+  display: block;
+  min-width: max-content;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.abb-program-control .program-source-line.is-current {
+  background: #fff4cf;
+  color: #6f5220;
+}
+
+/* ---------- 缺失输入 ---------- */
+
+.abb-program-control .program-inputs {
+  margin-top: 8px;
+  padding: 8px 9px;
+  border: 1px solid #e6d2a2;
+  border-radius: 9px;
+  background: var(--apc-warn-soft);
+}
+
+.abb-program-control .program-inputs > strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #7d5a1f;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.abb-program-control .program-inputs label {
+  display: grid;
+  grid-template-columns: minmax(88px, 135px) minmax(0, 1fr);
+  align-items: center;
+  gap: 4px 8px;
+  margin: 5px 0;
+  color: #72552a;
+  font-size: 10px;
+}
+
+.abb-program-control .program-inputs label > small {
+  grid-column: 1 / -1;
+  color: #957b4d;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.abb-program-control .program-inputs button {
+  margin-top: 4px;
+  border-color: #d6bd88;
+  background: #fffdf7;
+  color: #7a5923;
+}
+
+/* ---------- 高级详情：源码 / 信号 / 运动指令 ---------- */
+
+.abb-program-control .program-advanced {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.abb-program-control details,
+.abb-program-control .program-signals {
+  margin: 0;
+  border: 1px solid var(--apc-line);
+  border-radius: 9px;
+  background: #ffffffc9;
+}
+
+.abb-program-control details[open],
+.abb-program-control .program-signals[open] {
+  background: #ffffff;
+}
+
+.abb-program-control summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+  padding: 5px 9px;
+  color: #3b647a;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.abb-program-control summary::-webkit-details-marker {
+  display: none;
+}
+
+.abb-program-control summary::after {
+  content: "▾";
+  flex: none;
+  color: var(--apc-faint);
+  font-size: 10px;
+  transition: transform .15s ease;
+}
+
+.abb-program-control details[open] > summary::after {
+  transform: rotate(180deg);
+}
+
+.abb-program-control summary:hover {
+  background: #f3f9fc;
+}
+
+.abb-program-control .program-details-body,
+.abb-program-control details > .program-details-body {
+  padding: 2px 9px 9px;
+  border-top: 1px solid #e4eef4;
+}
+
+.abb-program-control .program-signals > input,
+.abb-program-control .program-signals-search {
+  width: calc(100% - 18px);
+  margin: 7px 9px 3px;
+  min-height: 29px;
+}
+
+.abb-program-control .program-signals label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 120px);
+  align-items: center;
+  gap: 5px 8px;
+  margin: 4px 9px;
+  color: var(--apc-ink);
+  font-size: 10px;
+}
+
+.abb-program-control .program-signals label small {
+  grid-column: 1 / -1;
+  color: var(--apc-faint);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.abb-program-control .program-signals button {
+  margin: 4px 9px 9px;
+}
+
+.abb-program-control details > p {
+  margin: 6px 9px;
+  color: var(--apc-muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.abb-program-control .program-note {
+  margin: 6px 0 0;
+  color: var(--apc-faint);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+/* ---------- 事件 / 运动指令列表 ---------- */
+
+.abb-program-control .program-events {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 104px;
+  margin: 8px 0 0;
+  padding: 6px 8px;
+  overflow: auto;
+  border: 1px solid var(--apc-line);
+  border-radius: 8px;
+  background: #f8fbfd;
+  color: var(--apc-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.abb-program-control .program-events > span {
+  padding-left: 8px;
+  border-left: 2px solid #cfe2ec;
+}
+
+.abb-program-control .program-events > span:first-child {
+  border-left-color: var(--apc-accent);
+}
+
+.abb-program-control .program-actions {
+  max-height: 168px;
+  margin: 6px 0 0;
+  padding: 0 0 0 4px;
+  overflow: auto;
+  list-style: none;
+  counter-reset: apc-action;
+}
+
+.abb-program-control .program-actions li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border-bottom: 1px solid #edf4f8;
+  color: var(--apc-ink);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.abb-program-control .program-actions li::before {
+  counter-increment: apc-action;
+  content: counter(apc-action);
+  display: none;
+}
+
+.abb-program-control .program-actions li.current {
+  border-radius: 6px;
+  background: var(--apc-accent-soft);
+  color: var(--apc-accent-strong);
+}
+
+.abb-program-control .program-actions li span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.abb-program-control .program-actions li button {
+  min-height: 25px;
+  padding: 0 6px;
+  font-size: 10px;
+}
+
+/* ---------- 工位状态 ---------- */
+
+.abb-program-control .program-cell-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 8px 0 0;
+  padding: 6px 8px;
+  border: 1px solid #cce5dc;
+  border-radius: 8px;
+  background: #f1faf6;
+  color: #246d57;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.abb-program-control .program-empty {
+  margin: 0;
+  padding: 8px;
+  border: 1px dashed var(--apc-line-strong);
+  border-radius: 8px;
+  color: var(--apc-muted);
+  font-size: 10px;
+  text-align: center;
+}
+
+/* ---------- 兼容旧 class（未包 section 时也有层次） ---------- */
+
+.abb-program-control > .program-note,
+.abb-program-control > .program-cell-status,
+.abb-program-control > .program-events {
+  margin-bottom: 0;
+}
+
+.abb-program-control > .program-run-actions + .program-note {
+  margin-top: 6px;
+}
+
+/* ---------- 手机适配 ---------- */
+
+@media (max-width: 760px) {
+  .abb-program-control {
+    padding: 10px;
+    border-radius: 12px;
+    font-size: 12px;
+  }
+
+  .abb-program-control > header,
+  .abb-program-control .program-panel-head {
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+
+  .abb-program-control .program-section {
+    padding: 8px;
+  }
+
+  .abb-program-control .program-pickers,
+  .abb-program-control .program-cell-settings,
+  .abb-program-control .program-fill,
+  .abb-program-control .program-metrics,
+  .abb-program-control .program-speed,
+  .abb-program-control .program-inputs label {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .abb-program-control .program-check {
+    grid-column: 1 / -1;
+  }
+
+  .abb-program-control .program-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .abb-program-control .program-run-actions {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-top: 8px;
+  }
+
+  .abb-program-control button {
+    min-height: 40px;
+    font-size: 12px;
+  }
+
+  .abb-program-control .program-rate-option {
+    min-height: 32px;
+    font-size: 11px;
+  }
+
+  .abb-program-control .program-actions li button {
+    min-height: 32px;
+  }
+
+  .abb-program-control summary {
+    min-height: 40px;
+  }
+
+  .abb-program-control .program-events {
+    max-height: 120px;
+  }
+}
+
+@media (max-width: 430px) {
+  .abb-program-control .program-run-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .abb-program-control .program-primary,
+  .abb-program-control .program-danger {
+    grid-column: 1 / -1;
+  }
+
+  .abb-program-control .program-rate {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .abb-program-control .program-rate-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .abb-program-control *,
+  .abb-program-control *::before,
+  .abb-program-control *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+
+.abb-program-control .program-parameter-value{display:flex;align-items:center;gap:6px;min-width:0}.abb-program-control .program-parameter-value input{flex:1;min-width:0;text-align:center}.abb-program-control .program-parameter-value .program-metric-unit{flex:none;margin:0;min-width:20px;text-align:right}
+.abb-program-control .program-metrics{align-items:stretch;grid-auto-rows:1fr}
+.abb-program-control .program-metric{gap:4px;padding:8px}
+.abb-program-control .program-metric-label{line-height:16px}
+.abb-program-control .program-metric .program-parameter-value{display:grid;grid-template-columns:minmax(0,1fr) 24px;align-items:center;gap:6px;min-height:34px}
+.abb-program-control .program-metric .program-parameter-value input,.abb-program-control .program-metric>select,.abb-program-control .program-metric-value{height:34px;min-height:34px;font-size:14px;line-height:1.4}
+.abb-program-control .program-metric .program-metric-unit{font-size:11px;line-height:1;margin:0;align-self:center}
+.abb-program-control .program-parameter-value .program-metric-unit{text-align:center}
+.abb-program-control .program-event-details .program-events{max-height:none;overflow:visible}
+.abb-program-control .program-panel-head>.program-title{margin:0;padding:5px 7px;border-radius:6px;background:#e5f5ed;color:#14764d;font-size:14px;font-weight:750;text-decoration:none}
+.abb-program-control .program-mode-exit{padding:4px 6px;min-height:30px;white-space:nowrap;border:0;background:transparent;box-shadow:none;font-size:12px}
+.abb-program-control .program-panel-close{border:0;background:transparent;box-shadow:none;width:32px;min-width:32px;height:32px;min-height:32px;padding:0;font-size:22px;font-weight:400;line-height:1;color:#8194a1;margin-left:auto}
+.abb-program-control.program-docked-actions,.abb-program-control.program-docked-speed{display:contents}
+.abb-program-control.program-docked-actions .program-run-actions{position:static;display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0;padding:0;border:0;background:none;box-shadow:none}
+.abb-program-control.program-docked-actions .program-run-actions>button{min-height:36px;padding:6px 10px;white-space:nowrap;font-size:12px;border-radius:7px;flex:none}
+.abb-program-control.program-docked-speed .program-speed-section{display:flex;align-items:center;gap:10px;margin:0;padding:0;border:0;background:none}
+.abb-program-control.program-docked-speed .program-section-head{margin:0;gap:6px;white-space:nowrap}
+.abb-program-control.program-docked-speed .program-section-title{font-size:12px;letter-spacing:0}
+.abb-program-control.program-docked-speed .program-speed{display:flex;align-items:center;gap:10px}
+.abb-program-control.program-docked-speed .program-speed label{display:block;width:clamp(70px,9vw,190px);margin:0}
+.abb-program-control.program-docked-speed .program-speed label>span,.abb-program-control.program-docked-speed .program-rate-label{display:none}
+.abb-program-control.program-docked-speed .program-rate-option{min-height:28px;padding:0 7px;font-size:11px}
+@media(max-width:600px){.abb-program-control.program-docked-speed .program-speed-section{flex-wrap:wrap;gap:7px}.abb-program-control.program-docked-speed .program-speed label{width:clamp(60px,25vw,150px)}}
+
+.abb-program-control .program-panel-head{align-items:center;justify-content:flex-start;gap:8px;margin-bottom:8px;padding-bottom:7px}
+.abb-program-control .program-pickers label{font-size:11px;font-weight:750;color:#426578}
+.abb-program-control .program-selection{padding:7px 9px}
+.abb-program-control .program-diagnostics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:7px}
+.abb-program-control .program-source-details,.abb-program-control .program-diagnostics>details[open],.abb-program-control .program-diagnostics>.program-inputs{grid-column:1/-1}
+.abb-program-control .program-diagnostics summary{min-height:30px;padding:5px 8px}
+.abb-program-control .program-diagnostics>details{min-width:0}
+@media(max-width:380px){.abb-program-control .program-diagnostics{grid-template-columns:1fr}}
+
+@media(min-width:901px) and (max-height:850px){
+ .abb-program-control{padding:7px 8px;font-size:11px}
+ .abb-program-control .program-panel-head{gap:6px;padding-bottom:4px;margin-bottom:5px}
+ .abb-program-control .program-panel-head>.program-title{font-size:12px;padding:4px 6px}
+ .abb-program-control .program-mode-exit{font-size:11px}
+ .abb-program-control .program-section{padding:6px 7px;margin-top:5px}
+ .abb-program-control .program-pickers label{gap:2px;font-size:10px;line-height:14px}
+ .abb-program-control .program-pickers select{min-height:28px;height:28px;font-size:11px}
+ .abb-program-control .program-section-head{margin-bottom:4px}
+ .abb-program-control .program-metrics{gap:5px}
+ .abb-program-control .program-metric{padding:5px 6px;gap:2px}
+ .abb-program-control .program-metric-label{font-size:10px;line-height:14px}
+ .abb-program-control .program-metric .program-parameter-value{min-height:28px}
+ .abb-program-control .program-metric .program-parameter-value input,.abb-program-control .program-metric>select,.abb-program-control .program-metric-value{height:28px;min-height:28px;font-size:13px}
+ .abb-program-control .program-progress{margin-top:5px;padding:5px 7px;gap:3px}
+ .abb-program-control .program-diagnostics{margin-top:5px;gap:4px}
+ .abb-program-control .program-diagnostics summary{min-height:25px;padding:3px 7px;font-size:10px}
+}
+@media(min-width:901px) and (max-height:750px){
+ .abb-program-control{padding:5px 8px}
+ .abb-program-control .program-panel-head{padding-bottom:2px;margin-bottom:3px}
+ .abb-program-control .program-section{padding-top:4px;padding-bottom:4px}
+ .abb-program-control .program-diagnostics{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .abb-program-control .program-diagnostics>.program-source-details:not([open]){grid-column:auto}
+ .abb-program-control .program-diagnostics summary{padding-left:5px;padding-right:5px;gap:3px}
+ .abb-program-control .program-metric-unit{white-space:nowrap}
+}
+
+.program-parameter-value input[type=number]{appearance:textfield;-moz-appearance:textfield}
+.program-parameter-value input[type=number]::-webkit-inner-spin-button,.program-parameter-value input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.abb-program-control .program-compatibility-note{margin:0;padding:8px 10px;color:#856018;background:#fff8e9;border:1px solid #efddb6;border-radius:8px;font-size:12px;line-height:1.5}

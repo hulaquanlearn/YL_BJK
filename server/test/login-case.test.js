@@ -3,6 +3,7 @@ const {pool}=require('../src/db'),{hashPassword}=require('../src/password');
 test('login preserves case and rejects differently cased account names before creating a session',async t=>{
  const original=pool.query,passwordHash=await hashPassword('Test123');let sessions=0;const seen=[];
  pool.query=async(sql,args=[])=>{
+  if(sql.includes('FROM fire_members'))return [[]];
   if(sql.includes('FROM app_users WHERE username')){
    seen.push(args[0]);assert.match(sql,/CAST\(username AS BINARY\)\s*=\s*CAST\(\? AS BINARY\)/);
    assert.deepEqual(args,[args[0],args[0]]);
@@ -17,6 +18,6 @@ test('login preserves case and rejects differently cased account names before cr
  t.after(async()=>{pool.query=original;await new Promise(r=>server.close(r))});
  const login=username=>fetch(`http://127.0.0.1:${server.address().port}/auth/login`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username,password:'Test123'})});
  assert.equal((await login('zhang_01')).status,401);assert.equal((await login('ZHANG_01')).status,401);assert.equal(sessions,0);
- const ok=await login(' Zhang_01 ');assert.equal(ok.status,200);assert.equal((await ok.json()).data.user.username,'Zhang_01');assert.equal(sessions,1);
+ const ok=await login(' Zhang_01 ');assert.equal(ok.status,200);const account=(await ok.json()).data.user;assert.equal(account.username,'Zhang_01');assert.deepEqual(account.fireAccess,{canRead:false,canManage:false,areaIds:[]});assert.equal(sessions,1);
  assert.deepEqual(seen,['zhang_01','ZHANG_01','Zhang_01']);
 });

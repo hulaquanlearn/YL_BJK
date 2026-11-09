@@ -28,7 +28,7 @@ test('inventory filter choices follow the latest workshop even if the previous r
 })
 test('inventory count scope options cannot switch back to an earlier workshop', async () => {
   const old = deferred(), current = deferred()
-  const state = { scopeRequest: 0, form: { workshopCode: 'raw_grain' }, areas: ref([]), shelfMap: ref({}),
+  const state = { scopeRequest: 0, scopeError: ref(false), form: { workshopCode: 'raw_grain' }, areas: ref([]), shelfMap: ref({}),
     getFilters: ({ workshopCode }) => workshopCode === 'raw_grain' ? old.promise : current.promise }
   loadFunction('Check', 'loadScopeOptions', 'function isSelected', state)
   const first = state.loadScopeOptions()
@@ -44,7 +44,7 @@ test('inventory count scope options cannot switch back to an earlier workshop', 
 })
 test('rapid count-order clicks retain the last requested detail', async () => {
   const old = deferred(), current = deferred()
-  const state = { detailRequest: 0, detail: ref(null), detailVisible: ref(false),
+  const state = { detailRequest: 0, detail: ref(null), detailVisible: ref(false), detailTarget: ref(null), detailError: ref(''), detailLoading: ref(false), detailItemLimit: ref(30),
     getInventoryOrder: id => id === 'old' ? old.promise : current.promise }
   loadFunction('Check', 'viewDetail', 'function abnormalFor', state)
   const first = state.viewDetail({ _id: 'old' }), second = state.viewDetail({ _id: 'current' })
@@ -54,4 +54,6 @@ test('rapid count-order clicks retain the last requested detail', async () => {
   await first
   assert.equal(state.detail.value._id, 'current')
   assert.equal(state.detailVisible.value, true)
+  assert.equal(state.detailTarget.value._id, 'current')
+  assert.equal(state.detailLoading.value, false)
 })

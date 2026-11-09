@@ -1,7 +1,7 @@
 <view class="login-page">
   <view class="brand-block">
     <view class="brand-icon">仓</view>
-    <text class="brand-title">原粮车间备件管理</text>
+    <text class="brand-title">数字工作台</text>
     <text class="brand-subtitle">使用分配的账号登录系统</text>
   </view>
 
@@ -19,6 +19,7 @@
     </view>
     <button class="login-button" loading="{{loading}}" disabled="{{loading}}" bindtap="submitLogin">登录</button>
     <text class="form-error" wx:if="{{formError}}">{{formError}}</text>
+    <button wx:if="{{retrySession}}" loading="{{loading}}" disabled="{{loading}}" bindtap="verifySession">重试连接</button>
     <text class="security-tip">账号由管理员创建。如忘记密码，请联系管理员重置。</text>
   </view>
 </view>

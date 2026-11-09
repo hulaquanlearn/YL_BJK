@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-05T03:33:07.562Z",
+  "status": "deployed-and-verified",
+  "checks": 1615,
+  "webFiles": 1054,
+  "changedWebFiles": 1,
+  "apiFiles": 0,
+  "protectedFiles": 550,
+  "protectedPreserved": true,
+  "android": {
+    "versionCode": 24,
+    "versionName": "1.9.10-android.24",
+    "sha256": "e41eeb3e970e84f1a6f400ab29aa2cd07df7834d681f29196a7dbfa2eeceaeb2",
+    "url": "https://czsdsg.cn/app-updates/android/digital-workbench-1.9.10-android.24.apk"
+  },
+  "rollback": "/opt/spare-parts/rollback/fire-dialog-update-20261105-r2",
+  "webTests": 640,
+  "nativeRuntimeVerified": false
+}

@@ -141,12 +141,12 @@ test('maps layer numbers from the bottom shelf upwards', () => {
   assert.ok(firstLayer < fourthLayer)
 })
 
-test('uses a precise location card and side-aware camera instead of a sphere ring marker', () => {
+test('uses a precise location card and preserves camera direction instead of a sphere ring marker', () => {
   assert.doesNotMatch(warehouseViewSource, /TorusGeometry|SphereGeometry|part-3d-label/)
   assert.match(warehouseViewSource, /part-location-card/)
-  assert.match(warehouseViewSource, /addScaledVector\(outward/)
+  assert.match(warehouseViewSource, /addScaledVector\(direction/)
   assert.match(warehouseViewSource, /const aisleDistance = shelf\.size\.depth \* 0\.5 \+ 2\.15/)
-  assert.match(warehouseViewSource, /const centerwardOffset = Math\.min\(Math\.max\(-placement\.x \* 0\.58/)
+  assert.match(warehouseViewSource, /direction\.normalize\(\)/)
   assert.doesNotMatch(warehouseViewSource, /EdgesGeometry|locationOutline/)
 })
 

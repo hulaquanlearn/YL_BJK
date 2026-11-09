@@ -1,3 +1,4 @@
+import { partModelNeedsReview } from './bound-part-model.mjs'
 // Public product descriptors only. Never embed a customer's material ledger here.
 export const evidenceModels = [{
   id:'meanwell-ndr-240-24', brands:['明纬','mean well','meanwell'], model:'NDR-240-24',
@@ -57,5 +58,6 @@ export function unsafeCategory(part) {
 
 // Explicit ledger binding is authoritative; no descriptor-based fallback.
 export function warehouseModelUrl(part) {
-  return String(part?.categoryModelUrl || '').trim()
+  const url=String(part?.categoryModelUrl || '').trim()
+  return partModelNeedsReview(part)?'':url
 }

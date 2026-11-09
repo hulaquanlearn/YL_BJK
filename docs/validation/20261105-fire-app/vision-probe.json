@@ -1,0 +1,131 @@
+{
+  "synthetic": true,
+  "results": [
+    {
+      "case": "full",
+      "durationMs": 2242,
+      "contentReady": true,
+      "deviceCode": "005",
+      "year": 2026,
+      "month": 11,
+      "checks": [
+        {
+          "key": "appearance",
+          "name": "外观",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        },
+        {
+          "key": "box",
+          "name": "箱身",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        },
+        {
+          "key": "pressure",
+          "name": "压力表",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        },
+        {
+          "key": "seal",
+          "name": "保险销",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        },
+        {
+          "key": "cylinder",
+          "name": "筒体",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        },
+        {
+          "key": "handle",
+          "name": "提把压把",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        }
+      ],
+      "reasons": [],
+      "evidence": {
+        "cardCount": 1,
+        "cardYearText": "2026",
+        "typeConfidence": 0.98,
+        "codeConfidence": 0.98,
+        "yearConfidence": 0.98,
+        "rowConfidence": 0.98,
+        "cardComplete": true,
+        "concerns": []
+      }
+    },
+    {
+      "case": "two_views",
+      "durationMs": 1613,
+      "contentReady": true,
+      "deviceCode": "005",
+      "year": 2026,
+      "month": 11,
+      "checks": [
+        {
+          "key": "appearance",
+          "name": "外观",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        },
+        {
+          "key": "box",
+          "name": "箱身",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        },
+        {
+          "key": "pressure",
+          "name": "压力表",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        },
+        {
+          "key": "seal",
+          "name": "保险销",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        },
+        {
+          "key": "cylinder",
+          "name": "筒体",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        },
+        {
+          "key": "handle",
+          "name": "提把压把",
+          "mark": "√",
+          "confidence": 0.97,
+          "result": "normal"
+        }
+      ],
+      "reasons": [],
+      "evidence": {
+        "cardCount": 1,
+        "cardYearText": "2026",
+        "typeConfidence": 0.98,
+        "codeConfidence": 0.98,
+        "yearConfidence": 0.98,
+        "rowConfidence": 0.98,
+        "cardComplete": true,
+        "concerns": []
+      }
+    }
+  ]
+}

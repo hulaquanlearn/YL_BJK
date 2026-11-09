@@ -1,15 +1,16 @@
 <template>
  <section class="weekly-summary panel">
-  <header><h3>本周总结</h3><div class="summary-tools"><el-button v-if="editable && modelValue.trim()" :disabled="busy" @click="editing=!editing">{{editing?'完成修改':'修改'}}</el-button><el-button v-if="editable" type="primary" :disabled="busy || quota && !quota.unlimited && quota.remaining<=0" :loading="generating" @click="$emit('generate')">{{modelValue.trim()?'AI 重新生成':'AI 生成周总结'}}</el-button></div></header>
-  <p v-if="editable && quota" class="summary-quota">{{quota.unlimited?'系统管理员不限次数':'今日剩余 '+quota.remaining+' / '+quota.limit+' 次 · 每日最多3次，北京时间零点重置'}}</p>
+  <header><h3>本周总结</h3><div class="summary-tools"><el-button v-if="editable && modelValue.trim()" @click="editing=!editing">{{editing?'完成修改':'修改'}}</el-button><el-button v-if="editable" type="primary" :disabled="busy || quota && !quota.unlimited && quota.remaining<=0" :loading="generating" @click="$emit('generate')">{{modelValue.trim()?'AI 重新生成':'AI 生成周总结'}}</el-button></div></header>
+  <AiModelInfo v-if="editable" feature="rawSummary"/><p v-if="editable && quota" class="summary-quota">{{quota.unlimited?'系统管理员不限次数':'今日剩余 '+quota.remaining+' / '+quota.limit+' 次 · 每日最多3次，北京时间零点重置'}}</p>
   <p class="summary-help">根据已保存的实际填报生成，核对后随周材料保存、提交。</p>
   <el-alert v-if="error" :title="error" type="warning" :closable="false" />
-  <el-input v-if="editable && editing" :model-value="modelValue" type="textarea" :autosize="{minRows:8,maxRows:20}" maxlength="4000" :disabled="busy" placeholder="核对并修改周总结" @update:model-value="$emit('update:modelValue',$event)" />
+  <el-input v-if="editable && editing" :model-value="modelValue" type="textarea" :autosize="{minRows:8,maxRows:20}" maxlength="4000" placeholder="核对并修改周总结" @update:model-value="$emit('update:modelValue',$event)" />
   <div v-else-if="modelValue.trim()" class="summary-content">{{modelValue}}</div>
   <div v-else class="summary-empty">{{editable?'点击“AI 生成周总结”，根据本周实际填报整理工作结果和待跟进事项。':'尚未生成周总结'}}</div>
  </section>
 </template>
 <script setup>
+import AiModelInfo from './AiModelInfo.vue'
 import {ref,watch} from 'vue'
 const props=defineProps({modelValue:{type:String,default:''},editable:Boolean,busy:Boolean,generating:Boolean,error:String,quota:Object})
 defineEmits(['generate','update:modelValue'])

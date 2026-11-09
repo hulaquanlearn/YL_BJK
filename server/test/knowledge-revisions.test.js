@@ -37,6 +37,8 @@ function loadKnowledgeRoute({ pool, uploadDir, extractDocumentText = async () =>
     },
     '../utils': { ...utils, asyncHandler: fn => fn },
     '../knowledge-utils': require('../src/knowledge-utils'),
+    '../knowledge-reference': require('../src/knowledge-reference'),
+    '../agv-terms': require('../src/agv-terms'),
     '../document-service': {
       extractDocumentText,
       getDocumentCapabilities: async () => ({}),
@@ -174,7 +176,8 @@ test('restore requires owner permission and archives the current version before 
     process_stage: null, equipment_name: null, summary: '旧摘要', fault_symptom: null, fault_cause: null,
     solution: null, preventive_action: null, content_text: 'V2 正文', tags: '历史',
     original_filename: 'v2.docx', stored_filename: 'stored-v2.docx', mime_type: 'application/docx',
-    file_size: 222, index_status: 'ready', index_message: null, indexed_at: '2026-09-01 08:00:00'
+    file_size: 222, index_status: 'ready', index_message: null, indexed_at: '2026-09-01 08:00:00',
+    reference_metadata: {family:'气动元件',manufacturer:'AirTAC',models:['SC40'],verification:'partial',fileSha256:'a'.repeat(64)}
   };
   const connection = {
     async beginTransaction() {}, async commit() { calls.push('commit'); }, async rollback() { calls.push('rollback'); }, release() {},
@@ -198,7 +201,58 @@ test('restore requires owner permission and archives the current version before 
   assert.ok(snapshotIndex >= 0 && updateIndex > snapshotIndex);
   assert.equal(calls[updateIndex].params[11], 'V2 正文');
   assert.equal(calls[updateIndex].params[17], 6);
+  assert.equal(JSON.parse(calls[updateIndex].params[21]).fileSha256,'a'.repeat(64));
   assert.equal(res.body.data.revisionNo, 6);
   assert.ok(calls.includes('commit'));
+});
+
+test('spare document upload stores actual attachment hash and normalized provenance',async t=>{
+ const uploadDir=fs.mkdtempSync(path.join(os.tmpdir(),'knowledge-reference-upload-'));
+ t.after(()=>fs.rmSync(uploadDir,{recursive:true,force:true}));
+ const attachment=path.join(uploadDir,'vendor.pdf'),bytes=Buffer.from('%PDF-1.7\nfixture');fs.writeFileSync(attachment,bytes);
+ let inserted;
+ const pool={query:async(sql,params)=>{assert.match(sql,/INSERT INTO fermentation_knowledge_entries/);inserted=params;return [{insertId:16}]}};
+ const app=loadKnowledgeRoute({pool,uploadDir,extractDocumentText:async()=>'SC40 dimension table'});
+ const req=request({body:{entryType:'document',title:'SC样本',category:'备件资料',referenceMetadata:JSON.stringify({family:'气动元件',manufacturer:'AirTAC',models:['SC40'],sourceUrl:'https://www.airtac.com/manual.pdf',fileSha256:'0'.repeat(64)})}});
+ req.file={path:attachment,filename:'vendor.pdf',originalname:'SC样本.pdf',mimetype:'application/pdf',size:bytes.length};
+ const res=responseCapture();await app.handlers.get('post /knowledge').at(-1)(req,res);
+ assert.equal(res.statusCode,201);
+ const metadata=JSON.parse(inserted[23]);
+ assert.equal(metadata.fileSha256,require('node:crypto').createHash('sha256').update(bytes).digest('hex'));
+ assert.equal(metadata.applicability,'shared');assert.deepEqual(metadata.models,['SC40']);
+});
+
+test('spare library filters remain parameterized and include shared documents across workshops',async t=>{
+ const uploadDir=fs.mkdtempSync(path.join(os.tmpdir(),'knowledge-reference-query-'));
+ t.after(()=>fs.rmSync(uploadDir,{recursive:true,force:true}));
+ const calls=[],pool={query:async(sql,params)=>{calls.push({sql,params});return /COUNT\(\*\)/.test(sql)?[[{total:0}]]:[[]]}};
+ const app=loadKnowledgeRoute({pool,uploadDir}),req=request();
+ req.query={workshopCode:'qu_making',category:'备件资料',referenceFamily:'气动元件',referenceManufacturer:"AirTAC' OR 1=1 --",search:'SC40'};
+ const res=responseCapture();await app.handlers.get('get /knowledge').at(-1)(req,res);
+ assert.equal(res.body.total,0);assert.equal(calls.length,2);
+ for(const call of calls){
+  assert.match(call.sql,/applicability'\)\)='shared'/);
+  assert.equal(call.sql.includes(req.query.referenceManufacturer),false);
+  assert.ok(call.params.includes(req.query.referenceManufacturer));
+  assert.equal((call.sql.match(/\?/g)||[]).length,call.params.length);
+ }
+});
+
+test('metadata-only revision preserves the prior attachment hash and snapshot',async t=>{
+ const uploadDir=fs.mkdtempSync(path.join(os.tmpdir(),'knowledge-reference-edit-'));
+ t.after(()=>fs.rmSync(uploadDir,{recursive:true,force:true}));
+ const meta={family:'气动元件',manufacturer:'AirTAC',models:['SC40'],fileSha256:'b'.repeat(64)};
+ const current={id:9,workshopCode:'raw_grain',category:'备件资料',storedFilename:'vendor.pdf',originalFilename:'SC.pdf',uploadedBy:7,revisionNo:2,referenceMetadata:JSON.stringify(meta)};
+ let saved,snapshot;
+ const connection={beginTransaction:async()=>{},commit:async()=>{},rollback:async()=>{},release(){},query:async(sql,params)=>{
+  if(/FOR UPDATE/.test(sql))return [[current]];
+  if(/INSERT INTO knowledge_entry_revisions/.test(sql)){snapshot=sql;return [{affectedRows:1}]}
+  if(/UPDATE fermentation_knowledge_entries/.test(sql)){saved=params;return [{affectedRows:1}]}
+  throw Error(sql);
+ }};
+ const app=loadKnowledgeRoute({pool:{getConnection:async()=>connection},uploadDir});
+ await app.handlers.get('put /knowledge/:id').at(-1)(request({body:{entryType:'document',title:'更正摘要',category:'备件资料'}}),responseCapture());
+ assert.match(snapshot,/reference_metadata/);assert.equal(JSON.parse(saved[21]).fileSha256,'b'.repeat(64));
+ assert.equal(JSON.parse(saved[21]).manufacturer,'AirTAC');
 });
 

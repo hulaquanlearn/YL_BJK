@@ -5,6 +5,7 @@ Page({
   data: {
     // 基础数据
     workshops: ['全部'],
+    isAdmin: false, businessWorkshops: [], businessWorkshopNames: [], businessWorkshopIndex: 0, selectedWorkshopCode: '',
     shelfMap: {},       // {工段: [货架列表]}
     layerMap: {},       // {工段: {货架: [层数列表]}}
     
@@ -34,42 +35,36 @@ Page({
 
   onLoad() {
     if (!auth.requireLogin()) return;
-    this.loadFilterOptions();
+    this.setData({ isAdmin: auth.isAdmin(), selectedWorkshopCode: auth.isAdmin() ? '' : auth.userWorkshopCode() });
+    return this.loadFilterOptions();
   },
 
-  // 从服务器 API 加载筛选数据
-  loadFilterOptions() {
-    this.setData({ isLoading: true });
-    api.getFilters(auth.isAdmin() ? {} : { workshopCode: auth.userWorkshopCode() }).then(res => {
-      if (res.success) {
-        let { areas, shelfMap, layerMap } = res.data;
-        
-        // 处理层数映射
-        const adaptedLayerMap = {};
-        for (const [area, shelfLayerObj] of Object.entries(layerMap)) {
-          adaptedLayerMap[area] = {};
-          for (const [shelf, layerList] of Object.entries(shelfLayerObj)) {
-            const adaptedLayerList = layerList.filter(item => item != null && item !== '');
-            adaptedLayerMap[area][shelf] = adaptedLayerList;
-          }
-        }
-
-        this.setData({
-          workshops: ['全部', ...(areas || []).filter(item => item != null && item !== '')],
-          shelfMap: shelfMap || {},
-          layerMap: adaptedLayerMap, // 适配后的层数映射
-          isLoading: false
-        });
-      } else {
-        wx.showToast({ title: res.msg || '加载失败', icon: 'none' });
-        this.setData({ isLoading: false });
+  async loadFilterOptions() {
+    const read=this.filterRequest=(this.filterRequest||0)+1,code=this.data.selectedWorkshopCode;
+    this.setData({ isLoading:true });
+    try {
+      const res=await api.getFilters(code?{workshopCode:code}:{});
+      if(read!==this.filterRequest)return;
+      const data=res.data||{},businessWorkshops=[{code:'',name:'请选择所属车间'},...(data.workshops||[])],layerMap={};
+      for(const [area,shelves] of Object.entries(data.layerMap||{})) {
+        layerMap[area]={};
+        for(const [shelf,layers] of Object.entries(shelves||{}))layerMap[area][shelf]=(layers||[]).filter(v=>v!=null&&v!=='');
       }
-    }).catch(err => {
-      console.error('加载失败：', err);
-      wx.showToast({ title: '网络异常', icon: 'none' });
-      this.setData({ isLoading: false });
-    });
+      const selected=Boolean(code);
+      this.setData({businessWorkshops,businessWorkshopNames:businessWorkshops.map(w=>w.name),businessWorkshopIndex:Math.max(0,businessWorkshops.findIndex(w=>w.code===code)),workshops:selected?['全部',...(data.areas||[]).filter(Boolean)]:['全部'],shelfMap:selected?(data.shelfMap||{}):{},layerMap:selected?layerMap:{}});
+    } catch(error) {
+      if(read===this.filterRequest)wx.showToast({title:error.message||'筛选数据加载失败',icon:'none'});
+    } finally { if(read===this.filterRequest)this.setData({isLoading:false}); }
   },
+
+  onBusinessWorkshop(e) {
+    if(!this.data.isAdmin||this.data.isLoading)return;
+    const item=this.data.businessWorkshops[Number(e.detail.value)];if(!item)return;
+    this.setData({selectedWorkshopCode:item.code,selectedWorkshop:'全部',selectedShelfNo:'全部',selectedLayer:'全部',shelfNoList:['全部'],layerList:['全部'],workshops:['全部'],shelfMap:{},layerMap:{}});
+    return this.loadFilterOptions();
+  },
+
+  onUnload(){this.filterRequest=(this.filterRequest||0)+1},
 
   // ========== 自定义筛选弹窗通用逻辑 ==========
   selectModalItem(e) {
@@ -212,8 +207,10 @@ Page({
 
   // 确认最终筛选（跳转页面：优化URL拼接，确保参数传递准确，兼容旧字段）
   confirmFinalFilter() {
-    const { selectedWorkshop, selectedShelfNo, selectedLayer, selectedStatus } = this.data;
+    const { selectedWorkshop, selectedShelfNo, selectedLayer, selectedStatus, selectedWorkshopCode } = this.data;
+    if (!selectedWorkshopCode || this.data.isLoading) return wx.showToast({title:this.data.isLoading?'请等待筛选加载完成':'请先选择所属车间',icon:'none'});
     const params = {
+      workshopCode: encodeURIComponent(selectedWorkshopCode),
       workshop: encodeURIComponent(selectedWorkshop || '全部'),
       shelf: encodeURIComponent(selectedShelfNo || '全部'),
       layer: encodeURIComponent(selectedLayer || '全部'),

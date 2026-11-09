@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-06T08:48:09.622Z",
+  "publicAssetsVerified": 30,
+  "health": 200,
+  "modelUnauthenticated": 401,
+  "tests": 10,
+  "buildPassed": true,
+  "id": "showroom-title-20261106",
+  "version": "V1.9.10",
+  "rollback": "/opt/spare-parts/rollback/showroom-title-20261106",
+  "sourceSha256": "66984a66301ff29e0f951bc436e1185213eceed8ad69cc9432433e2c0afc7a14"
+}

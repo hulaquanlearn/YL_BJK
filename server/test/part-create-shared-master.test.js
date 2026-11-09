@@ -8,12 +8,13 @@ const { normalizeWorkshopCode, assertWorkshopWrite } = require('../src/workshop-
 const { parseNonNegativeQuantity } = require('../src/inventory-guards');
 const { changedSharedDescriptors } = require('../src/part-import-identity');
 const { warehouseJoin } = require('../src/warehouse-join');
+const { decoratePartRows } = require('../src/model-reviews');
 
 function fixture({ shared = true, existing = true, duplicate = false } = {}) {
   const source = fs.readFileSync(path.join(__dirname, '../src/routes/parts.js'), 'utf8');
   const start = source.indexOf("router.post('/parts',");
   const end = source.indexOf("router.post('/parts/import-preview',", start);
-  const state = { writes: [], queries: [], connections: 0, committed: false, rolledBack: false, released: false };
+  const state = { writes: [], queries: [], connections: 0, committed: false, rolledBack: false, released: false, response: null };
   const master = { id: 10, name: '电机', spec: 'M1', part_type: '质保件', usage_description: '输送', remark: null };
   const connection = {
     async beginTransaction() {}, async commit() { state.committed = true; },
@@ -36,12 +37,15 @@ function fixture({ shared = true, existing = true, duplicate = false } = {}) {
     pool: { getConnection: async () => { state.connections++; return connection; } }, ApiError,
     optionalValue: value => value == null || value === '' ? null : value,
     resolveWarehouse: async (_connection, data) => ({ code: 'AREA_A', name: '本车间库', workshopCode: data.workshopCode }),
-    PART_SELECT: 'READ_PART', toPart: value => value
+    PART_SELECT: 'READ_PART', toPart: value => value,
+    // The read-back row has no review history. Exercise the real lightweight
+    // decorator without adding model queries or changing this fixture's writes.
+    modelReviews: { decoratePartRows }
   });
   return { state, run: (body = {}, role = 'raw_grain') => handler({
     body: { materialCode: 'P1', materialDesc: '电机', spec: 'M1', partType: '质保件', usageDescription: '输送', workshopCode: 'raw_grain', totalStock: 2, locationCode: '011102', ...body },
     user: { id: 1, role, displayName: '测试' }
-  }, { status() { return this; }, json() {} }) };
+  }, { status() { return this; }, json(value) { state.response = value; } }) };
 }
 
 test('workshop cannot change shared descriptors by adding an existing code at a new location', async () => {
@@ -57,6 +61,10 @@ test('same shared master may get a local workshop location with independent unit
   const f = fixture();
   await f.run({ unit: '套', reorderPoint: 3, maxStock: 9, price: 12.5 });
   assert.equal(f.state.committed, true);
+  assert.equal(f.state.response.data.id, 22);
+  assert.equal(f.state.response.data.materialDesc, '电机');
+  assert.equal(f.state.response.data.categoryModelReviewDecision, null);
+  assert.ok(f.state.queries.every(row => !row.sql.includes('part_model_reviews')));
   assert.equal(f.state.writes.filter(row => /UPDATE parts|INSERT INTO parts/.test(row.sql)).length, 0);
   const usage = f.state.queries.find(row => row.sql.startsWith('SELECT COUNT(*)'));
   assert.deepEqual(usage.args, [10, 'raw_grain']);
@@ -73,6 +81,9 @@ test('administrator can update shared master while owner can update an unshared 
   for (const [role, shared] of [['admin', true], ['raw_grain', false]]) {
     const f = fixture({ shared }); await f.run({ materialDesc: '更新型号' }, role);
     assert.equal(f.state.committed, true);
+    assert.equal(f.state.response.data.id, 22);
+    assert.equal(f.state.response.data.categoryModelReviewDecision, null);
+    assert.ok(f.state.queries.every(row => !row.sql.includes('part_model_reviews')));
     assert.equal(f.state.writes.find(row => row.sql.startsWith('UPDATE parts')).args[0], '更新型号');
   }
 });

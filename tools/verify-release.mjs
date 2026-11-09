@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import zlib from 'node:zlib'
 import crypto from 'node:crypto'
+import {verifyReleaseDocuments,verifyReleaseDesignQa} from './release-documents.mjs'
 const archive=path.resolve(process.argv[2] || '')
 const data=zlib.gunzipSync(fs.readFileSync(archive)),files=new Map()
 let offset=0,paxPath=null,longName=null
@@ -40,7 +41,7 @@ for(const line of checks){
   const match=line.match(/^([A-Fa-f0-9]{64})\s+(.+)$/);if(!match)throw new Error('Bad checksum line')
   const [_,hash,relative]=match,bytes=files.get(folder+'/'+relative)
   if(!bytes||sum(bytes)!==hash.toUpperCase())throw new Error('Hash mismatch '+relative)
-  if(relative!=='server/data/ledger-model-catalog.json'&&/(^|\/)(node_modules|uploads|data|\.local|\.env|\.git)(\/|$)|\.log$/i.test(relative))throw new Error('Private/runtime data packaged '+relative)
+  if(relative!=='server/data/ledger-model-catalog.json'&&/(^|\/)(node_modules|uploads|data|\.local|\.private|\.env|\.git)(\/|$)|(?:^|\/)\.env\.ai-settings(?:\.[^/]*)?$|\.log$/i.test(relative))throw new Error('Private/runtime data packaged '+relative)
   const root=path.resolve(path.dirname(archive),'..')
   let local=relative.startsWith('web-dist/')?path.join(root,'spare-parts-web-release/dist',relative.slice(9)):path.join(root,relative)
   if(relative.startsWith('web-runtime/'))local=path.join(root,'spare-parts-web-release',relative.slice(12))
@@ -69,7 +70,7 @@ for(const asset of evidenceManifest){
   if(!bytes||sum(bytes)!==asset.sha256.toUpperCase()||sum(bytes)!==sum(fs.readFileSync(path.join(evidenceRoot,asset.file))))throw new Error('Missing/stale evidence model '+asset.file)
   if(bytes.toString('ascii',0,4)!=='glTF'||bytes.readUInt32LE(8)!==bytes.length)throw new Error('Invalid evidence GLB '+asset.file)
 }
-if(!files.has(folder+'/docs/OPENCLAW_MODEL_MATCHING.md'))throw new Error('Missing model handoff')
+verifyReleaseDocuments(files,folder)
 for(const [name,bytes] of files){
   if(!name.includes('/server/sql/')||!name.endsWith('.sql'))continue
   for(const match of bytes.toString('utf8').matchAll(/['"](\/models\/[A-Za-z0-9_./-]+\.(?:glb|jpg|png))['"]/g)){
@@ -108,8 +109,8 @@ if(retiredWork){
  if(/routes\/(?:work|plc(?:-agent)?)['"]|work-score-scheduler/.test(app)||/migration_work_|work-score-scheduler|plc_projects/.test(db))throw new Error('Retired feature startup remains');
  for(const required of ['server/src/calendar-date.js','docs/RETIRED_FEATURES_20261018.md'])if(!files.has(folder+'/'+required))throw new Error('Missing cleanup release file '+required);
 }
-if(files.has(folder+'/docs/RELEASE_AUDIT_20261018.md')){
- for(const required of ['server/src/knowledge-usage.js','server/src/robot-usage.js','server/src/ai-call-audit.js','server/src/personal-usage.js','server/src/codex-usage.js','server/src/hunyuan-usage.js','server/src/routes/personal-usage.js','server/src/routes/ai-call-logs.js','docs/KNOWLEDGE_AGENT_REVIEW_20261018.md','docs/ACCOUNT_STORAGE_REVIEW_20261018.md','docs/TOOLBAR_CLEANUP_REVIEW_20261018.md','docs/UI_SIMPLIFICATION_20261018.md'])if(!files.has(folder+'/'+required))throw new Error('Missing current AI/admin release file '+required);
+if(files.has(folder+'/server/src/ai-call-audit.js')){
+ for(const required of ['server/src/knowledge-usage.js','server/src/robot-usage.js','server/src/ai-call-audit.js','server/src/personal-usage.js','server/src/codex-usage.js','server/src/hunyuan-usage.js','server/src/routes/personal-usage.js','server/src/routes/ai-call-logs.js'])if(!files.has(folder+'/'+required))throw new Error('Missing current AI/admin release file '+required);
  for(const name of files.keys())if(/(?:^|\/)(?:project\.private\.config\.json|\.env(?:\..+)?|[^/]*dify[^/]*|[^/]*credentials?[^/]*\.(?:csv|json)|[^/]+\.pem)$/i.test(name)&&!name.endsWith('/server/.env.example'))throw new Error('Private/retired file packaged '+name);
  for(const page of ['Account','Knowledge','RobotProgram'])if(![...files.keys()].some(n=>n.includes('/web-dist/assets/'+page+'-')&&n.endsWith('.js')))throw new Error('Missing compiled current page '+page);
  const deps=JSON.parse(files.get(folder+'/server/package.json'));
@@ -162,7 +163,8 @@ if(['V1.9.0','V1.9.1','V1.9.2','V1.9.3','V1.9.4','V1.9.5','V1.9.6','V1.9.7','V1.
     if([...files.keys()].some(n=>/\/web-dist\/assets\/InspectionNotice/.test(n)))throw new Error('Retired compiled inspection page remains');
   }
   if(['V1.9.5','V1.9.6','V1.9.7','V1.9.8','V1.9.9','V1.9.10'].includes(releaseVersion)){
-    for(const required of ['server/src/staff-identity.js','server/sql/migration_staff_identity_20260924.sql','miniprogram/pages/home/home.wxml','miniprogram/pages/home/home.wxss','miniprogram/pages/detail/detail.wxss','project.config.json','design-qa.md',`USER_GUIDE_${releaseVersion}.md`])if(!files.has(folder+'/'+required))throw new Error('Missing '+releaseVersion+' file '+required)
+    for(const required of ['server/src/staff-identity.js','server/sql/migration_staff_identity_20260924.sql','miniprogram/pages/home/home.wxml','miniprogram/pages/home/home.wxss','miniprogram/pages/detail/detail.wxss','project.config.json',`USER_GUIDE_${releaseVersion}.md`])if(!files.has(folder+'/'+required))throw new Error('Missing '+releaseVersion+' file '+required)
+    verifyReleaseDesignQa(files, folder, releaseVersion)
     const home=files.get(folder+'/miniprogram/pages/home/home.wxml').toString('utf8')
     const homeStyle=files.get(folder+'/miniprogram/pages/home/home.wxss').toString('utf8')
     if(!home.includes('dashboard-caption')||!homeStyle.includes('flex: 0 0 112rpx'))throw new Error('Missing right-aligned mini refresh layout')
@@ -186,7 +188,7 @@ if(files.has(folder+'/server/src/raw-staff-access.js')){
  // The early authenticated JSON size parser is not the business router mount.
  const work=app.indexOf(retiredWork?"app.use('/api/raw-duties', require('./routes/raw-duties')":"app.use('/api/work',")
  if(guard<0||work<0||guard>work)throw new Error('Raw employee guard must precede business routes')
- for(const required of ['server/src/staff-identity.js','server/src/attendance-access.js','miniprogram/services/auth.js','miniprogram/services/work-features.js','miniprogram/pages/users/users.js']){
+ for(const required of ['server/src/staff-identity.js','miniprogram/services/auth.js','miniprogram/services/work-features.js','miniprogram/pages/users/users.js']){
   if(!files.has(folder+'/'+required))throw new Error('Missing raw staff permission file '+required)
  }
  if(!files.get(folder+'/miniprogram/pages/users/users.js').toString('utf8').includes("name:'工段长'"))throw new Error('Missing raw-grain foreman position selector')
@@ -225,15 +227,15 @@ if(files.has(folder+'/server/src/raw-duties.js')){
 }
 
 if(releaseVersion==='V1.9.10'){
- for(const required of ['server/src/attendance-analysis.js','server/src/attendance-workbook.js','server/src/routes/attendance.js','server/src/routes/work-storage.js','server/src/work-storage.js','server/src/warehouse-areas.js','server/sql/migration_attendance_storage_20261009.sql','docs/ATTENDANCE_REVIEW_20261009.md'])if(!files.has(folder+'/'+required))throw new Error('Missing combined release file '+required)
- for(const page of ['AttendanceReview','WorkStorage']){
+ for(const required of ['server/src/routes/work-storage.js','server/src/work-storage.js','server/src/warehouse-areas.js','server/sql/migration_storage_audit_20261028.sql'])if(!files.has(folder+'/'+required))throw new Error('Missing combined release file '+required)
+ for(const page of ['WorkStorage']){
   const standalone=[...files.keys()].some(n=>n.includes('/web-dist/assets/'+page+'-')&&n.endsWith('.js'));
   // Storage now lives in Account and is statically bundled with that page.
-  const embedded=page==='WorkStorage'&&files.has(folder+'/docs/RELEASE_AUDIT_20261018.md')&&[...files].some(([name,bytes])=>/\/web-dist\/assets\/Account-[^/]+\.js$/.test(name)&&['资料管理','一键清理'].every(label=>bytes.toString('utf8').includes(label)));
+  const embedded=page==='WorkStorage'&&[...files].some(([name,bytes])=>/\/web-dist\/assets\/Account-[^/]+\.js$/.test(name)&&['资料管理','数据管理'].some(label=>bytes.toString('utf8').includes(label))&&bytes.toString('utf8').includes('一键清理'));
   if(!standalone&&!embedded)throw new Error('Missing compiled '+page);
  }
  const app=files.get(folder+'/server/src/app.js').toString('utf8'),db=files.get(folder+'/server/src/db.js').toString('utf8')
- if(!app.includes("'/api/attendance'")||!app.includes("'/api/work-storage'")||!db.includes('migration_attendance_storage_20261009.sql'))throw new Error('Work center routes/schema not mounted')
+ if(!app.includes("'/api/work-storage'")||!db.includes('migration_storage_audit_20261028.sql'))throw new Error('Work center routes/schema not mounted')
  if((ledgerCatalog.supplements||[]).find(batch=>batch.version==='missing-five-20261009-v1')?.models.length!==5)throw new Error('Missing five supplemental models')
  if((ledgerCatalog.supplements||[]).find(batch=>batch.version==='pending-ledger-20261009-v1')?.models.length!==131)throw new Error('Missing pending ledger models')
  if(ledgerCatalog.supplements.find(batch=>batch.version==='pending-ledger-20261009-v1').bindByCode!==false)throw new Error('Per-code batch must preserve named bindings')

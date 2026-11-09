@@ -1,0 +1,41 @@
+{
+  "at": "2026-11-04T18:05:58.123Z",
+  "status": "final-server-verification-passed",
+  "checkedFiles": 1057,
+  "hashMismatches": [],
+  "services": [
+    {
+      "name": "couple-space-api",
+      "pid": 1783421,
+      "status": "online"
+    },
+    {
+      "name": "spare-parts-api",
+      "pid": 2493885,
+      "status": "online"
+    },
+    {
+      "name": "spare-parts-web",
+      "pid": 2521086,
+      "status": "online"
+    },
+    {
+      "name": "spare-parts-web",
+      "pid": 2521099,
+      "status": "online"
+    }
+  ],
+  "health": {
+    "success": true,
+    "service": "spare-parts-api",
+    "database": "connected"
+  },
+  "apkHash": "40eb0ad6a5b820138c199b02bd91962b42176525d768d676780e8fb78ecf5cb3",
+  "tempRequest": {
+    "source": "/tmp/codex-server-audit-20261104.md",
+    "destination": "/opt/spare-parts/recycle-bin/final-cleanup-20261105-extra/codex-server-audit-request.md",
+    "bytes": 1201,
+    "status": "recycled"
+  },
+  "permanentDeletion": false
+}

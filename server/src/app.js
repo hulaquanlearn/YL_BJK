@@ -39,6 +39,7 @@ app.use('/uploads/part-models', express.static(config.parts.modelDir, privateSta
 const modelRoots = process.env.MODEL_ASSETS_DIR ? [path.resolve(process.env.MODEL_ASSETS_DIR)]
   : [path.resolve(__dirname, '../../web/dist'), path.resolve(__dirname, '../../spare-parts-web-release/public')];
 app.use('/models', requireAssetAuth, accessLimits.asset,
+  require('./model-transfer').compressedModelTransfer(modelRoots),
   ...modelRoots.map(root => express.static(path.join(root, 'models'), privateStatic)));
 
 app.get('/api/health', async (_req, res) => {
@@ -52,19 +53,25 @@ app.get('/api/health', async (_req, res) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api', requireAuth);
+app.use('/api', require('./ai-channels').router());
+app.use('/api', require('./ai-channels').middleware());
 app.use('/api', require('./ai-call-audit').auditMiddleware());
+// Fire inspection has its own area grants. Keep it outside inventory-only
+// employee/read-only gates; the router rechecks every request's fire grants.
+app.use('/api/fire-inspection', accessLimits.account, accessLimits.hourly,
+  (req, res, next) => /\/export$/.test(req.path) ? accessLimits.download(req, res, next) : next(),
+  require('./routes/fire-inspection').createRouter(require('./db').pool));
 app.use('/api', require('./raw-staff-access').enforceRawEmployeeAccess);
 app.use('/api', accessLimits.account, accessLimits.hourly);
 app.use('/api', (req, res, next) => /\/(download|preview|import-template|export)$/.test(req.path)
   ? accessLimits.download(req, res, next) : next());
-// Raw-grain duty and attendance permissions remain separate from inventory access.
+// Raw-grain duty permissions remain separate from inventory access.
 app.use('/api/raw-duties', require('./routes/raw-duties').createRouter(require('./raw-duty-store').createStore(require('./db').pool)));
-app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/work-storage', require('./routes/work-storage'));
 app.use('/api/data-management', require('./routes/data-management').createRouter());
 app.use('/api/robot-program', require('./routes/robot-program').createRouter());
-app.use('/api', require('./routes/ai-call-logs').createRouter());
 app.use('/api/personal-usage', require('./routes/personal-usage').createRouter());
+app.use('/api/control-passwords', require('./routes/control-passwords').createRouter());
 app.use('/api', enforceReadOnly);
 app.use('/api/users', usersRouter);
 app.use('/api', partsRouter);

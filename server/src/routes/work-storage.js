@@ -24,7 +24,7 @@ router.get('/',asyncHandler(async(req,res)=>{
 }));
 router.get('/cleanup-preview',asyncHandler(async(req,res)=>{
   const {where,args}=scope(req.query,true),cutoff=S.cutoffDate(req.query.cutoff);
-  const [rows]=await pool.query(`SELECT * FROM (${S.STORAGE_SELECT}) storage${where} AND (referenceCount=0 OR kind='raw_duty_photo') AND processingCount=0 AND DATE(updatedAt)<? AND (retentionUntil IS NULL OR DATE(retentionUntil)<?) ORDER BY updatedAt ASC,kind,id LIMIT 1001`,[...args,cutoff,S.today()]);
+  const [rows]=await pool.query(`SELECT * FROM (${S.STORAGE_SELECT}) storage${where} AND (referenceCount=0 OR kind='raw_duty_photo') AND processingCount=0 AND DATE(updatedAt)<? ORDER BY updatedAt ASC,kind,id LIMIT 1001`,[...args,cutoff]);
   if(rows.length>MAX_CLEANUP_ITEMS)throw new ApiError(400,'待清理资料超过1000项，请按资料类型或截止日期缩小范围');
   const items=rows.map(r=>({kind:r.kind,id:Number(r.id),revision:Number(r.revision),title:r.title,bytes:Number(r.bytes),fileCount:Number(r.fileCount),historyCount:Number(r.historyCount||0),referenceCount:Number(r.referenceCount||0)}));
   ok(res,{items,itemCount:items.length,totalBytes:items.reduce((sum,r)=>sum+r.bytes,0)});
@@ -41,11 +41,6 @@ router.post('/cleanup',asyncHandler(async(req,res)=>{
     let cleared;try{cleared=await S.deleteStorageItems(db,req.user,items.map(item=>({...item,cutoff})))}catch(error){if(error.status===404)throw new ApiError(409,'资料已变化，请重新预览后核对清理');throw error}
     return {itemCount:cleared.length,releasedBytes:cleared.reduce((n,item)=>n+item.releasedBytes,0)};
   });ok(res,result);
-}));
-router.get('/audit',asyncHandler(async(_req,res)=>{const [rows]=await pool.query('SELECT id,actor_id,source_kind,source_id,title,released_bytes,created_at FROM work_storage_audit ORDER BY id DESC LIMIT 50');ok(res,rows);}));
-router.patch('/:kind/:id/retention',asyncHandler(async(req,res)=>{
-  const {kind}=req.params;if(kind!=='attendance')throw new ApiError(400,'此类资料按最后更新时间清理');const date=req.body.retentionUntil===null?null:String(req.body.retentionUntil||'');if(date!==null&&!Number.isFinite(require('../attendance-analysis').dayNumber(date)))throw new ApiError(400,'保留截止日期无效');
-  await tx(async db=>{const table='attendance_reports';const [r]=await db.query(`SELECT revision FROM ${table} WHERE id=? AND workshop_code='raw_grain' FOR UPDATE`,[S.storageId(req.params.id)]);if(!r.length)throw new ApiError(404,'资料不存在');if(r[0].revision!==Number(req.body.revision))throw new ApiError(409,'资料已更新，请刷新列表');await db.query(`UPDATE ${table} SET retention_until=?,revision=revision+1,updated_at=updated_at WHERE id=?`,[date,S.storageId(req.params.id)]);});ok(res,true);
 }));
 router.delete('/:kind/:id',asyncHandler(async(req,res)=>{if(!S.TYPES.includes(req.params.kind))throw new ApiError(400,'资料类型无效');ok(res,await tx(db=>S.deleteStorageItem(db,req.user,{kind:req.params.kind,id:req.params.id,cutoff:req.body.cutoff,revision:req.body.revision,manual:req.body.manual??false})));}));
 module.exports=router;

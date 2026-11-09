@@ -1,6 +1,6 @@
 const api = require('../../services/api.js');
 const auth = require('../../services/auth.js');
-const { formatDigitInput, isEmptyValue } = require('../../services/utils.js');
+const { formatDigitInput, isEmptyValue, decodeQueryValue } = require('../../services/utils.js');
 
 const STATUS = {
   COMPLETED: '已盘点',
@@ -31,16 +31,24 @@ Page({
     inventoryUser: ''
   },
 
-  onLoad(options) {
+  onLoad(options = {}) {
     if (!auth.requireLogin()) return;
     const currentUser = auth.getUser();
     this.setData({ inventoryUser: currentUser?.displayName || currentUser?.username || '',
       isViewer: auth.isViewer(), canSubmitInventory: auth.canSubmitInventory() });
+    const code = auth.isAdmin() ? decodeQueryValue(options.workshopCode) : auth.userWorkshopCode();
+    if (!['raw_grain','qu_making','brewing'].includes(code)) {
+      this.setData({isLoading:false,isReadOnly:true});
+      wx.showToast({title:'请先选择所属车间再盘点',icon:'none'});
+      wx.navigateBack({fail:()=>wx.redirectTo({url:'/pages/filter/filter'})});
+      return;
+    }
     const filterParams = {
-      workshop: decodeURIComponent(options.workshop || '全部'),
-      shelf: decodeURIComponent(options.shelf || '全部'),
-      layer: decodeURIComponent(options.layer || '全部'),
-      status: decodeURIComponent(options.status || '未盘点')
+      workshopCode: code,
+      workshop: decodeQueryValue(options.workshop || '全部'),
+      shelf: decodeQueryValue(options.shelf || '全部'),
+      layer: decodeQueryValue(options.layer || '全部'),
+      status: decodeQueryValue(options.status || '未盘点')
     };
     this.setData({
       filterParams,
@@ -61,7 +69,7 @@ Page({
   async getTodayInventoryData() {
     const today = this.formatDateToYMD(new Date());
     try {
-      const res = await api.getInventoryOrders({ date: today, limit: 200 });
+      const res = await api.getInventoryOrders({ date: today, limit: 200, workshopCode: this.data.filterParams.workshopCode });
       const pendingIds = new Set();
       const completedIds = new Set();
       (res.data || []).forEach(order => {
@@ -87,7 +95,7 @@ Page({
   buildQueryParams(page) {
     const { workshop, shelf, layer, status } = this.data.filterParams;
     const params = { page, pageSize: 200, sort: 'codeAsc' };
-    if (!auth.isAdmin() && auth.userWorkshopCode()) params.workshopCode = auth.userWorkshopCode();
+    params.workshopCode = this.data.filterParams.workshopCode || auth.userWorkshopCode();
     if (workshop !== '全部') params.warehouseAreaName = workshop;
     if (shelf !== '全部') params.shelf = shelf === '未指定' ? '__EMPTY__' : shelf.replace('号', '');
     if (layer !== '全部') params.layer = layer === '未指定' ? '__EMPTY__' : layer.replace('层', '');
@@ -277,6 +285,10 @@ Page({
       return;
     }
 
+    if (scopeList.some(item => item.workshopCode && item.workshopCode !== this.data.filterParams.workshopCode)) {
+      wx.showToast({title:'盘点范围包含其他车间，请重新筛选',icon:'none'});
+      return;
+    }
     const inventoryAllList = scopeList.map(item => ({
       partId: item._id,
       partName: item.materialDesc,

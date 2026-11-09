@@ -1,6 +1,7 @@
 const express = require('express');
 const { pool } = require('../db');
-const { ApiError, asyncHandler, parseJson, positiveInt, toInventoryOrder } = require('../utils');
+const { ApiError, asyncHandler, parseJson, positiveInt } = require('../utils');
+const { inventoryOrderViews } = require('../inventory-order-view');
 const {
   parseInventoryId,
   normalizeInventoryOrderLists,
@@ -74,7 +75,7 @@ router.get('/inventory-orders', asyncHandler(async (req, res) => {
     pool.query(`SELECT * FROM inventory_orders ${whereSql} ORDER BY createTime DESC,id DESC LIMIT ? OFFSET ?`, [...params, pageSize, (page - 1) * pageSize])
   ]);
   const summary = Object.fromEntries(Object.entries(counts).map(([key, value]) => [key, Number(value) || 0]));
-  res.json({ success: true, data: rows.map(toInventoryOrder), total: Number(totalRows[0].total), page, pageSize, summary });
+  res.json({ success: true, data: await inventoryOrderViews(pool, rows), total: Number(totalRows[0].total), page, pageSize, summary });
 }));
 
 router.get('/inventory-orders/:id', asyncHandler(async (req, res) => {
@@ -82,7 +83,7 @@ router.get('/inventory-orders/:id', asyncHandler(async (req, res) => {
   const [rows] = await pool.query('SELECT * FROM inventory_orders WHERE id = ? LIMIT 1', [orderId]);
   if (!rows.length) throw new ApiError(404, '盘点单不存在');
   inventoryOrderScope(req.user, rows[0].workshop_code || 'raw_grain');
-  res.json({ success: true, data: toInventoryOrder(rows[0]) });
+  res.json({ success: true, data: (await inventoryOrderViews(pool, rows))[0] });
 }));
 
 router.post('/inventory-orders', asyncHandler(async (req, res) => {
@@ -146,7 +147,7 @@ router.post('/inventory-orders', asyncHandler(async (req, res) => {
         result.insertId,
         inventoryId,
         Number(inventoryRowById.get(inventoryId).quantity),
-        isAbnormal ? normalized.actualQuantityById.get(inventoryId) : null,
+        normalized.actualQuantityById.get(inventoryId),
         isAbnormal ? 1 : 0
       );
     }

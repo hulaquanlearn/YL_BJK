@@ -1,16 +1,20 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { clearSession, getToken, isViewer, userWorkshopCode } from '../auth'
-import { canSubmitInventoryRequest, isBusinessWrite, PERMISSION_MESSAGE } from '../utils/write-permission.mjs'
+import { canSubmitInventoryRequest,  isBusinessWrite, PERMISSION_MESSAGE } from '../utils/write-permission.mjs'
 import { clientPlatform } from '../utils/client-platform.mjs'
+import {simulationTransfer} from '../utils/robot-simulation-transfer.mjs'
 
 const http = axios.create({
   baseURL: '/api',
   headers: {'X-Client-Platform':clientPlatform()},
   timeout: 30000
 })
+const currentRequestSession=config=>!config||!Object.prototype.hasOwnProperty.call(config,'_sessionToken')||config._sessionToken===getToken()
+const staleSessionError=config=>new axios.CanceledError('请求所属登录会话已结束',config)
 
 http.interceptors.request.use(config => {
+  config._sessionToken=getToken()
   config.headers['X-Client-Platform'] = clientPlatform()
   if (isViewer() && isBusinessWrite(config.method, config.url)
     && !canSubmitInventoryRequest(config.method, config.url, userWorkshopCode())) {
@@ -18,7 +22,7 @@ http.interceptors.request.use(config => {
     error.response = { status:403, data:{ msg:PERMISSION_MESSAGE } }
     return Promise.reject(error)
   }
-  const token = getToken()
+  const token = config._sessionToken
   if (token) config.headers.Authorization = `Bearer ${token}`
   // 浏览器必须自行生成 multipart boundary。手动保留 application/json 或
   // multipart/form-data 都可能让 Multer 收不到文件，最终 req.files 为空。
@@ -32,32 +36,47 @@ http.interceptors.request.use(config => {
 })
 
 http.interceptors.response.use(
-  response => response.config.returnResponse ? { blob: response.data, headers: response.headers } : response.data,
+  response => {
+    if(!currentRequestSession(response.config))throw staleSessionError(response.config)
+    return response.config.returnResponse ? { blob: response.data, headers: response.headers } : response.data
+  },
   async error => {
+    if(axios.isCancel(error))return Promise.reject(error)
+    if(!currentRequestSession(error.config))return Promise.reject(staleSessionError(error.config))
     if (typeof Blob !== 'undefined' && error.response?.data instanceof Blob) {
       try { error.response.data = JSON.parse(await error.response.data.text()) } catch { /* not a JSON error */ }
     }
+    if(!currentRequestSession(error.config))return Promise.reject(staleSessionError(error.config))
     const message = error.response?.data?.msg || error.message || '请求失败，请稍后重试'
-    ElMessage.error(message)
+    if(!error.config?.silentError)ElMessage.error(error.response?.data?.msg||(error.code==='ERR_NETWORK'?'网络连接中断，请稍后重试':message))
     if (error.response?.status === 401 && !String(error.config?.url || '').includes('/auth/login')) {
       clearSession()
-      if (window.location.pathname !== '/login') window.location.assign('/login')
+      if (window.location.pathname !== '/login') window.location.assign('/login?redirect='+encodeURIComponent(window.location.pathname+window.location.search+window.location.hash))
     }
     return Promise.reject(error)
   }
 )
 
 export const getHealth = () => http.get('/health')
+export const getControlPasswords = () => http.get('/control-passwords')
+export const getControlPassword = id => http.get(`/control-passwords/${id}/secret`)
+export const updateControlPassword = (id, data) => http.put(`/control-passwords/${id}`, data)
+export const getAiChannels = feature => http.get('/ai/channels',{params:{feature},silentError:true})
 export const updateMyProfile = data => http.patch('/auth/profile',data)
+export const getOpenaiPlatformUsage = () => http.get('/personal-usage/openai-platform',{silentError:true})
 export const getPersonalUsage = () => http.get('/personal-usage/providers')
-export const getPersonalUsageSummary = params => http.get('/personal-usage/records-summary',{params})
-export const getAiCallLogs = params => http.get('/ai-call-logs',{params})
 export const getRobotAgentStatus = () => http.get('/robot-program/status')
 export const startRobotAnnotationRun = (id,data) => http.post('/robot-program/library/'+id+'/annotation-run',data)
 export const checkRobotAgentConnection = () => http.post('/robot-program/connection-check')
 export const deleteRobotBackup = (id, revision) => http.delete('/robot-program/library/'+id,{data:{revision}})
 export const listRobotBackups = () => http.get('/robot-program/library')
 export const getRobotBackup = id => http.get('/robot-program/library/'+id)
+export const getRobotMotion = (id,routine='') => http.get('/robot-program/library/'+id+'/motion',{params:{routine},silentError:true})
+export const simulateRobotProgram = async (id,data,{signal}={}) => {
+  const sessionToken=getToken(),wire=await simulationTransfer(data,{signal})
+  if(sessionToken!==getToken())throw new axios.CanceledError('请求所属登录会话已结束')
+  return http.post('/robot-program/library/'+id+'/simulate',wire.data,{silentError:true,signal,headers:wire.headers})
+}
 export const renameRobotBackup = (id,data) => http.patch('/robot-program/library/'+id,data)
 export const saveRobotBackup = data => http.post('/robot-program/library',data,{timeout:60000})
 export const askRobotBackup = (id,data) => http.post('/robot-program/library/'+id+'/analyze',data,{timeout:195000})
@@ -107,6 +126,7 @@ export const unlinkEquipmentPart = (id, relationId) => http.delete(`/equipment/$
 export const getWarehouseLayout = params => http.get('/warehouse-layout', { params })
 export const updateWarehouseShelf = (id, data) => http.put(`/warehouse-layout/shelves/${id}`, data)
 export const getKnowledgeStats = params => http.get('/knowledge/stats', { params })
+export const getKnowledgeReferenceFacets = () => http.get('/knowledge/reference-facets')
 export const getKnowledgeEntries = params => http.get('/knowledge', { params })
 export const getKnowledgeEntry = id => http.get(`/knowledge/${id}`)
 export const createKnowledgeEntry = (data, onUploadProgress) => http.post('/knowledge', data, { timeout: 1800000, onUploadProgress })
@@ -145,3 +165,5 @@ export const importModelBindings = data => http.post('/parts/model-bindings/impo
 export const getStagingPoints = params => http.get('/staging-points', { params })
 
 export const downloadModelBindingsTemplate = () => http.get('/parts/model-bindings/template', { responseType: 'blob' })
+export const getPartModelReview = id => http.get(`/part-models/${encodeURIComponent(id)}/review`)
+export const savePartModelReview = (id, data) => http.post(`/part-models/${encodeURIComponent(id)}/reviews`, data, { timeout: 120000 })

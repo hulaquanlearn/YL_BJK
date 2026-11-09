@@ -1,0 +1,470 @@
+{
+  "schema": 1,
+  "revision": "20261103-v1",
+  "createdAt": "2026-11-02T16:38:46.827Z",
+  "policy": "仅登记已生成并测试的自包含GLB；品牌与完整型号唯一匹配才自动选中；previewOnly=true 表示部分结构为示意，不得复用人工核对通过",
+  "variants": [
+    {
+      "id": "SPV-169-02",
+      "catalogId": 169,
+      "model": "托辊 φ89×200",
+      "brands": [
+        "丢糟皮带机托辊",
+        "碳钢托辊"
+      ],
+      "materialCode": "505023270",
+      "family": "roller",
+      "spec": {
+        "family": "roller",
+        "diameter": 89,
+        "length": 200,
+        "shaftDiameter": 20,
+        "shaftLength": 200
+      },
+      "confirmedDimensionsMm": "φ89×200 mm（轴径20；轴长未给出，按总长=辊长示意）",
+      "unknown": [
+        "管壁厚",
+        "轴承型号",
+        "轴长（除 950/978 外未给出）",
+        "包胶/螺旋形式"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-169-02.glb",
+      "sha256": "62b3e11b1b5ae8309687eb6c6e707fdb2a35381351fea2534835fc0e86bb77ae",
+      "meshCount": 4,
+      "bboxMm": [
+        220,
+        89,
+        89
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    },
+    {
+      "id": "SPV-169-03",
+      "catalogId": 169,
+      "model": "托辊 φ89×220",
+      "brands": [
+        "丢糟皮带机托辊",
+        "碳钢托辊"
+      ],
+      "materialCode": "505023270",
+      "family": "roller",
+      "spec": {
+        "family": "roller",
+        "diameter": 89,
+        "length": 220,
+        "shaftDiameter": 20,
+        "shaftLength": 220
+      },
+      "confirmedDimensionsMm": "φ89×220 mm（轴径20；轴长未给出，按总长=辊长示意）",
+      "unknown": [
+        "管壁厚",
+        "轴承型号",
+        "轴长（除 950/978 外未给出）",
+        "包胶/螺旋形式"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-169-03.glb",
+      "sha256": "797e3ac0b4b26ae90064f9fa850d7b4cf5f13597be6843df81b2637744d8e0c0",
+      "meshCount": 4,
+      "bboxMm": [
+        240,
+        89,
+        89
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    },
+    {
+      "id": "SPV-169-04",
+      "catalogId": 169,
+      "model": "托辊 φ89×750",
+      "brands": [
+        "丢糟皮带机托辊",
+        "碳钢托辊"
+      ],
+      "materialCode": "505023270",
+      "family": "roller",
+      "spec": {
+        "family": "roller",
+        "diameter": 89,
+        "length": 750,
+        "shaftDiameter": 20,
+        "shaftLength": 750
+      },
+      "confirmedDimensionsMm": "φ89×750 mm（轴径20；轴长未给出，按总长=辊长示意）",
+      "unknown": [
+        "管壁厚",
+        "轴承型号",
+        "轴长（除 950/978 外未给出）",
+        "包胶/螺旋形式"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-169-04.glb",
+      "sha256": "de5d5cf268f385be2ae73f88696a5fd3d6027fc28f9e9a19c394c0fef3aee40c",
+      "meshCount": 4,
+      "bboxMm": [
+        770,
+        89,
+        89
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    },
+    {
+      "id": "SPV-169-05",
+      "catalogId": 169,
+      "model": "托辊 φ89×420",
+      "brands": [
+        "丢糟皮带机托辊",
+        "碳钢托辊"
+      ],
+      "materialCode": "505023270",
+      "family": "roller",
+      "spec": {
+        "family": "roller",
+        "diameter": 89,
+        "length": 420,
+        "shaftDiameter": 20,
+        "shaftLength": 420
+      },
+      "confirmedDimensionsMm": "φ89×420 mm（轴径20；轴长未给出，按总长=辊长示意）",
+      "unknown": [
+        "管壁厚",
+        "轴承型号",
+        "轴长（除 950/978 外未给出）",
+        "包胶/螺旋形式"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-169-05.glb",
+      "sha256": "2842e5b389276aa35d66095fb49015d30d006f389a5a16a3707d6e95836d12e5",
+      "meshCount": 4,
+      "bboxMm": [
+        440,
+        89,
+        89
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    },
+    {
+      "id": "SPV-128-02",
+      "catalogId": 128,
+      "model": "托辊 φ89×200",
+      "brands": [
+        "丢糟皮带机托辊",
+        "碳钢托辊"
+      ],
+      "materialCode": "505023265",
+      "family": "roller",
+      "spec": {
+        "family": "roller",
+        "diameter": 89,
+        "length": 200,
+        "shaftDiameter": 20,
+        "shaftLength": 200
+      },
+      "confirmedDimensionsMm": "φ89×200 mm（轴径20；轴长未给出，按总长=辊长示意）",
+      "unknown": [
+        "管壁厚",
+        "轴承型号",
+        "轴长（除 950/978 外未给出）",
+        "包胶/螺旋形式"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-128-02.glb",
+      "sha256": "323bab245501ce6bc443d5aa11134de328648a3322708a7d01385763877a2827",
+      "meshCount": 4,
+      "bboxMm": [
+        220,
+        89,
+        89
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    },
+    {
+      "id": "SPV-128-03",
+      "catalogId": 128,
+      "model": "托辊 φ89×220",
+      "brands": [
+        "丢糟皮带机托辊",
+        "碳钢托辊"
+      ],
+      "materialCode": "505023265",
+      "family": "roller",
+      "spec": {
+        "family": "roller",
+        "diameter": 89,
+        "length": 220,
+        "shaftDiameter": 20,
+        "shaftLength": 220
+      },
+      "confirmedDimensionsMm": "φ89×220 mm（轴径20；轴长未给出，按总长=辊长示意）",
+      "unknown": [
+        "管壁厚",
+        "轴承型号",
+        "轴长（除 950/978 外未给出）",
+        "包胶/螺旋形式"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-128-03.glb",
+      "sha256": "b315115f8f4859e049f7e59979050f0f55c4f215d634ccb760f37b9a7bac69df",
+      "meshCount": 4,
+      "bboxMm": [
+        240,
+        89,
+        89
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    },
+    {
+      "id": "SPV-128-04",
+      "catalogId": 128,
+      "model": "托辊 φ89×750",
+      "brands": [
+        "丢糟皮带机托辊",
+        "碳钢托辊"
+      ],
+      "materialCode": "505023265",
+      "family": "roller",
+      "spec": {
+        "family": "roller",
+        "diameter": 89,
+        "length": 750,
+        "shaftDiameter": 20,
+        "shaftLength": 750
+      },
+      "confirmedDimensionsMm": "φ89×750 mm（轴径20；轴长未给出，按总长=辊长示意）",
+      "unknown": [
+        "管壁厚",
+        "轴承型号",
+        "轴长（除 950/978 外未给出）",
+        "包胶/螺旋形式"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-128-04.glb",
+      "sha256": "cf395bf444968dffcf846aba749e9cb379af05303f684ab78f485a77a4ec19cd",
+      "meshCount": 4,
+      "bboxMm": [
+        770,
+        89,
+        89
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    },
+    {
+      "id": "SPV-128-05",
+      "catalogId": 128,
+      "model": "托辊 φ89×420",
+      "brands": [
+        "丢糟皮带机托辊",
+        "碳钢托辊"
+      ],
+      "materialCode": "505023265",
+      "family": "roller",
+      "spec": {
+        "family": "roller",
+        "diameter": 89,
+        "length": 420,
+        "shaftDiameter": 20,
+        "shaftLength": 420
+      },
+      "confirmedDimensionsMm": "φ89×420 mm（轴径20；轴长未给出，按总长=辊长示意）",
+      "unknown": [
+        "管壁厚",
+        "轴承型号",
+        "轴长（除 950/978 外未给出）",
+        "包胶/螺旋形式"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-128-05.glb",
+      "sha256": "5c3191498ac2d1189b9ecbff01c57ebd39dec8fb668cbc55cc7000d120c39d2e",
+      "meshCount": 4,
+      "bboxMm": [
+        440,
+        89,
+        89
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    },
+    {
+      "id": "SPV-082-02",
+      "catalogId": 82,
+      "model": "气动快插接头 PC8-02",
+      "brands": [
+        "亚德客"
+      ],
+      "materialCode": "来自 82 物料列表 PC8-02",
+      "family": "pneumatic-fitting",
+      "spec": {
+        "family": "pneumatic-fitting",
+        "tubeOd": 8,
+        "threadMm": 13
+      },
+      "confirmedDimensionsMm": "接管外径 8 mm、螺纹 R1/4",
+      "unknown": [
+        "六角本体尺寸",
+        "卡套与释放环结构"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-082-02.glb",
+      "sha256": "fab2b2d0b44a32272619fef3ae3fbfb055fc452a715a1bac3dd078f847e7c05d",
+      "meshCount": 4,
+      "bboxMm": [
+        32,
+        14,
+        16.2
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    },
+    {
+      "id": "SPV-082-03",
+      "catalogId": 82,
+      "model": "气动快插接头 PC12-02",
+      "brands": [
+        "亚德客"
+      ],
+      "materialCode": "来自 82 物料列表 PC12-02",
+      "family": "pneumatic-fitting",
+      "spec": {
+        "family": "pneumatic-fitting",
+        "tubeOd": 12,
+        "threadMm": 13
+      },
+      "confirmedDimensionsMm": "接管外径 12 mm、螺纹 R1/4",
+      "unknown": [
+        "六角本体尺寸",
+        "卡套与释放环结构"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-082-03.glb",
+      "sha256": "ca5a48231f71a0334ad233ce3266cfe2d5e16dff3df2bb6e404ebe75a1f49b0b",
+      "meshCount": 4,
+      "bboxMm": [
+        48,
+        21,
+        24.2
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    },
+    {
+      "id": "SPV-126-02",
+      "catalogId": 126,
+      "model": "橡胶弹簧 ∅86×∅96",
+      "brands": [
+        "橡胶弹簧"
+      ],
+      "materialCode": "505024...",
+      "family": "rubber-spring",
+      "spec": {
+        "family": "rubber-spring",
+        "outerDiameter": 86,
+        "height": 96
+      },
+      "confirmedDimensionsMm": "∅86×∅96（按外径86×高96理解，解释待现场确认）",
+      "unknown": [
+        "尺寸解释（外径×高）",
+        "橡胶硬度与隔板结构"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-126-02.glb",
+      "sha256": "59557932fd9490b18799d72399201e33cfbc1bedea7fcc98a77c976943686abe",
+      "meshCount": 7,
+      "bboxMm": [
+        86,
+        96,
+        86
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    },
+    {
+      "id": "SPV-131-03",
+      "catalogId": 131,
+      "model": "输送带 800×2(5+2.5) EP200 耐热",
+      "brands": [
+        "双箭"
+      ],
+      "materialCode": "来自 131 物料列表 800 宽规格",
+      "family": "profile-strip",
+      "spec": {
+        "family": "profile-strip",
+        "width": 800,
+        "height": 12.5,
+        "length": 1000
+      },
+      "confirmedDimensionsMm": "带宽 800 mm、总厚约 12.5 mm（2 层、上胶5/下胶2.5）；带长未给出按1 m示意",
+      "unknown": [
+        "带长",
+        "接头方式",
+        "层间结构"
+      ],
+      "quality": "结构示意",
+      "previewOnly": true,
+      "sourceType": "ledger-material-spec",
+      "url": "/models/variants-20261103/SPV-131-03.glb",
+      "sha256": "f4cb23a12682186adaf99c5468f26115740afe2f7a343c746ece0860a811b754",
+      "meshCount": 1,
+      "bboxMm": [
+        1000,
+        12.5,
+        800
+      ],
+      "sourceUrl": "",
+      "sourcePage": "",
+      "retrieved": "2026-11-03",
+      "evidenceNote": "尺寸取自台账物料规格；未核对厂家图纸或实物；结构细节为示意"
+    }
+  ]
+}

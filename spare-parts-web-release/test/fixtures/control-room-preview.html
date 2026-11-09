@@ -1,0 +1,9 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>中控密码管理 · 本地预览</title></head><body><div id="app"></div><script type="module">
+import {createApp,h} from 'vue';import ElementPlus from 'element-plus';import zhCn from 'element-plus/es/locale/lang/zh-cn';import * as Icons from '@element-plus/icons-vue';import 'element-plus/dist/index.css';import '/src/styles.css';import '/src/ux-refinements.css';import '/src/sites-refinement.css';import '/src/ledger-entry.css';import '/src/summary-cards.css';import App from '/src/App.vue';import router from '/src/router/index.js';import Page from '/src/views/ControlPasswords.vue';import {setSession} from '/src/auth.js';
+if(location.hostname!=='127.0.0.1')throw Error('Loopback fixture only');
+const response=await fetch('/api/auth/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:'admin',password:'preview'})});const result=await response.json();if(!response.ok)throw Error('Synthetic preview login unavailable');setSession(result.data.token,result.data.user);
+router.removeRoute('ControlPasswords');
+const app=createApp(App);for(const [name,component] of Object.entries(Icons))app.component(name,component);app.use(ElementPlus,{locale:zhCn}).use(router);app.mount('#app');await router.isReady();
+const entry=document.createElement('script');entry.type='module';entry.dataset.controlEntry='true';entry.src='/tools/control-passwords-entry.js';entry.dataset.controlWidget='/test/fixtures/control-passwords-widget-preview.mjs';document.head.append(entry);
+await new Promise((resolve,reject)=>{let tries=0;const check=()=>{if(router.hasRoute('ControlPasswords'))return resolve();if(++tries>200)return reject(Error('Route registration timed out'));setTimeout(check,10)};check()});await router.push('/control-passwords');
+</script></body></html>

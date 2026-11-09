@@ -1,0 +1,32 @@
+{
+  "at": "2026-11-08T05:11:17.355Z",
+  "id": "fire-issue-detail-20261108",
+  "status": "deployed-and-verified",
+  "checks": 11219,
+  "webFiles": 1065,
+  "changedWebFiles": 32,
+  "removedObsoleteWebFiles": 31,
+  "apiFiles": 0,
+  "protectedFiles": 1608,
+  "protectedPreserved": true,
+  "androidUnchanged": true,
+  "webProcessesPreserved": true,
+  "restarted": [],
+  "rollback": "/opt/spare-parts/rollback/fire-issue-detail-20261108",
+  "version": "V1.9.10",
+  "previousDeployment": {
+    "id": "fire-issue-card-20261108",
+    "at": "2026-11-08T05:05:38.163Z",
+    "rollback": "/opt/spare-parts/rollback/fire-issue-card-20261108"
+  },
+  "buildPassed": true,
+  "focusedTests": 65,
+  "scope": "App 消防点检异常详情与列表共用异常项提取，详情分开显示异常项与整改状态。",
+  "android": {
+    "at": "2026-11-07T10:03:34.603Z",
+    "versionCode": 25,
+    "url": "https://czsdsg.cn/app-updates/android/digital-workbench-1.9.10-android.25.apk",
+    "sha256": "7cb306f8f712ca444225ee331561207e1eccd95b508cee909649d6878235d13b",
+    "rollback": "/opt/spare-parts/rollback/favorites-android25-20261107"
+  }
+}

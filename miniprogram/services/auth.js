@@ -30,7 +30,7 @@ function canEditWorkshop(workshopCode) {
   return isAdmin() || (Boolean(WORKSHOP_ROLES[getUser()?.role]) && WORKSHOP_ROLES[getUser().role] === String(workshopCode || ''));
 }
 function isRawEmployee(user = getUser()) { return user?.role === 'viewer' && user.staffWorkshopCode === 'raw_grain' && user.staffPosition !== 'shift_leader'; }
-function staffPositionLabel(user) { return user?.staffWorkshopCode === 'raw_grain' ? (user.staffPosition === 'shift_leader' ? '工段长' : '员工') : ({group_leader:'组长',shift_leader:'班长'})[user?.staffPosition] || '人员'; }
+function staffPositionLabel(user) { return ({employee:'员工',maintenance:'维修人员（车间）',manufacturer_maintenance:'维修人员（厂家）',group_leader:'线长 / 组长',shift_leader:'班长 / 工段长'})[user?.staffPosition] || '人员'; }
 function canSubmitInventory() {
   if (isRawEmployee()) return false;
   return canEditAnyWorkshop() || (isViewer() && Boolean(userWorkshopCode()));

@@ -36,6 +36,7 @@ const { readModelLedger, planModelLedger } = require('../model-ledger-import');
 const { assertAssetScope, withPartAssetWrite } = require('../part-asset-permissions');
 const { summarizeInventory, summarizeInventoryScopes } = require('../inventory-metrics');
 const { warehouseJoin } = require('../warehouse-join');
+const modelReviews = require('../model-reviews');
 const WAREHOUSE_JOIN = warehouseJoin();
 
 async function inventoryMetrics(query) {
@@ -52,6 +53,7 @@ async function inventoryMetrics(query) {
 }
 
 const router = express.Router();
+router.use(require('./part-model-reviews').createRouter(pool));
 
 const PENDING_INVENTORY_SQL = `EXISTS (
   SELECT 1
@@ -80,6 +82,7 @@ const PART_SELECT = `
          CASE WHEN NULLIF(p.image_url,'') IS NOT NULL THEN 'part' WHEN cm.image_url IS NOT NULL THEN 'category' ELSE 'none' END AS imageSource,
          NULL AS modelUrl, 1 AS modelScale,
          p.bound_model_id AS categoryModelId, cm.name AS categoryModelName, cm.quality AS modelQuality,
+         (SELECT MAX(mr.id) FROM part_model_reviews mr WHERE mr.model_id=cm.id) AS categoryModelReviewId,
          cm.model_url AS categoryModelUrl, cm.image_url AS categoryImageUrl, COALESCE(cm.model_scale,1) AS categoryModelScale,
          COALESCE(cm.front_rotation_y,0) AS categoryFrontRotationY,
          i.quantity AS totalStock,
@@ -491,7 +494,7 @@ router.get('/parts', asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    data: rows.map(toPart),
+    data: (await modelReviews.decoratePartRows(pool, req.user, rows)).map(toPart),
     total: Number(countRow.total) || 0,
     page,
     pageSize
@@ -658,7 +661,7 @@ router.get('/stats', asyncHandler(async (req, res) => {
         partTypes: Number(row.partTypes) || 0,
         lowStock: Number(row.lowStock) || 0
       })),
-      lowStockParts: lowRows.map(toPart),
+      lowStockParts: (await modelReviews.decoratePartRows(pool, req.user, lowRows)).map(toPart),
       movementPeriodDays: days,
       movementSummary: {
         total: Number(movementSummary.total) || 0,
@@ -771,7 +774,7 @@ router.get('/replenishment', asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
-    data: rows.map(row => buildReplenishmentItem(toPart(row))),
+    data: (await modelReviews.decoratePartRows(pool, req.user, rows)).map(row => buildReplenishmentItem(toPart(row))),
     total: Number(summary.total) || 0,
     page,
     pageSize,
@@ -818,7 +821,7 @@ router.get('/parts/:id', asyncHandler(async (req, res) => {
     [req.params.id]
   );
   if (!rows.length) throw new ApiError(404, '备件库存记录不存在');
-  res.json({ success: true, data: toPart(rows[0]) });
+  res.json({ success: true, data: toPart((await modelReviews.decoratePartRows(pool, req.user, rows))[0]) });
 }));
 
 router.post('/parts', requireAnyWorkshopEditor, asyncHandler(async (req, res) => {
@@ -935,7 +938,7 @@ router.post('/parts', requireAnyWorkshopEditor, asyncHandler(async (req, res) =>
     res.status(201).json({
       success: true,
       msg: existingPart ? '新增备件库位成功' : '新增备件成功',
-      data: toPart(rows[0])
+      data: toPart((await modelReviews.decoratePartRows(connection, req.user, rows))[0])
     });
   } catch (error) {
     await connection.rollback();
@@ -1208,7 +1211,7 @@ router.patch('/parts/:id', requireAnyWorkshopEditor, asyncHandler(async (req, re
     if (Object.hasOwn(data, 'modelId')) await bindPartModel(connection, req.user, current.partId, data.modelId, current.workshopCode);
     const [updatedRows] = await connection.query(`${PART_SELECT} WHERE i.id=? LIMIT 1`, [inventoryId]);
     await connection.commit();
-    res.json({ success: true, msg: '备件信息已保存', data: toPart(updatedRows[0]) });
+    res.json({ success: true, msg: '备件信息已保存', data: toPart((await modelReviews.decoratePartRows(connection, req.user, updatedRows))[0]) });
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -1274,7 +1277,7 @@ router.post('/parts/:id/stock', requireAnyWorkshopEditor, asyncHandler(async (re
     const [updatedRows] = await connection.query(`${PART_SELECT} WHERE i.id = ?`, [inventoryId]);
     if (!updatedRows.length) throw new Error('库存更新后未能读回数据');
     await connection.commit();
-    res.json({ success: true, msg: '操作成功', data: toPart(updatedRows[0]) });
+    res.json({ success: true, msg: '操作成功', data: toPart((await modelReviews.decoratePartRows(connection, req.user, updatedRows))[0]) });
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -1348,7 +1351,7 @@ router.get('/dashboard', asyncHandler(async (req, res) => {
         pendingWorkshop ? [pendingWorkshop] : [])
       : Promise.resolve([[{ pendingApproval: 0 }]])
   ]);
-  res.json({ success:true, data:{ dashboard:{ ...metrics, totalStock: metrics.unitTotals.length === 1 ? metrics.unitTotals[0].total : null, pendingApproval:Number(pendingRow.pendingApproval)||0 }, lowStockParts:lowRows.map(toPart) } });
+  res.json({ success:true, data:{ dashboard:{ ...metrics, totalStock: metrics.unitTotals.length === 1 ? metrics.unitTotals[0].total : null, pendingApproval:Number(pendingRow.pendingApproval)||0 }, lowStockParts:(await modelReviews.decoratePartRows(pool, req.user, lowRows)).map(toPart) } });
 }));
 
 const partImageDir = config.parts.uploadDir;
@@ -1527,6 +1530,7 @@ router.get('/part-model-library', asyncHandler(async (req, res) => {
             CASE WHEN NULLIF(p.image_url,'') IS NOT NULL THEN 'part' WHEN cm.image_url IS NOT NULL THEN 'category' ELSE 'none' END AS imageSource,
             NULL AS modelUrl, 1 AS modelScale,
             p.bound_model_id AS categoryModelId, cm.name AS categoryModelName, cm.quality AS modelQuality,
+            (SELECT MAX(mr.id) FROM part_model_reviews mr WHERE mr.model_id=cm.id) AS categoryModelReviewId,
             cm.model_url AS categoryModelUrl, cm.model_scale AS categoryModelScale,
             cm.image_url AS categoryImageUrl, COALESCE(cm.front_rotation_y,0) AS categoryFrontRotationY,
             p.category_id AS categoryId, c.name AS categoryName,
@@ -1551,7 +1555,7 @@ router.get('/part-model-library', asyncHandler(async (req, res) => {
     }
     if (row.workshopCode && !existing.workshopCodes.includes(row.workshopCode)) existing.workshopCodes.push(row.workshopCode);
   }
-  res.json({ success: true, data: [...byPart.values()] });
+  res.json({ success: true, data: await modelReviews.decoratePartRows(pool, req.user, [...byPart.values()]) });
 }));
 
 function parsePartIds(value) {
@@ -1642,7 +1646,7 @@ router.get('/part-models', asyncHandler(async (req, res) => {
      ORDER BY pcm.id ASC`,
     params
   );
-  res.json({ success: true, data: rows });
+  res.json({ success: true, data: await modelReviews.decorateModels(pool, req.user, rows) });
 }));
 
 router.post('/part-models', requireAnyWorkshopEditor, (req, res, next) => {

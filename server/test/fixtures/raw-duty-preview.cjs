@@ -61,7 +61,6 @@ async function createFixture({seed=true,newReportVersion=2,legacyExample=false,s
  // the production endpoint has transaction/session-revocation coverage.
  app.post('/api/auth/change-password',(_req,res)=>res.status(400).json({success:false,msg:'本地演示账号密码固定为 preview，正式账号可正常修改密码'}));
  if(extendApp)await extendApp(app,{store,accounts,users});
- app.get('/api/attendance/reports',(req,res)=>require('../../src/attendance-access').canReadAttendance(req.user)?res.json({success:true,data:[]}):res.status(403).json({success:false,msg:'当前账号没有考勤查看权限'}));
  app.use('/api/raw-duties',(req,res,next)=>{const json=res.json.bind(res);res.json=body=>{if(req.path==='/context'&&body.data)body.data.preview=true;return json(body)};next()},require('../../src/routes/raw-duties').createRouter(store,summaryGenerator?{generateSummary:summaryGenerator}:{}));
  app.use('/api',(_req,res)=>res.status(404).json({success:false,msg:'此预览仅提供原粮周履职功能'}));
  app.use((e,_req,res,_next)=>res.status(e.status||(e.code==='LIMIT_FILE_SIZE'?400:500)).json({success:false,msg:e.code==='LIMIT_FILE_SIZE'?'每张图片不能超过8MB':e.status?e.message:'本地预览内部错误'}));

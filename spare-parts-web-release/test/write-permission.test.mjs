@@ -24,3 +24,4 @@ test('assigned staff may submit a count order but cannot approve or change parts
   assert.equal(canSubmitInventoryRequest('post','/inventory-orders/1/approve','raw_grain'),false)
   assert.equal(canSubmitInventoryRequest('patch','/parts/1','raw_grain'),false)
 })
+

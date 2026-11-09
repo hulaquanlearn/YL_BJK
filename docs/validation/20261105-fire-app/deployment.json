@@ -1,0 +1,81 @@
+{
+  "at": "2026-11-05T01:28:13.943Z",
+  "status": "deployed-and-verified",
+  "checks": 1100,
+  "webFiles": 1054,
+  "apiFiles": 4,
+  "protectedFiles": 19,
+  "protectedPreserved": true,
+  "tablesBefore": {
+    "fire_points": 1003,
+    "fire_assets": 1003,
+    "fire_records": 117,
+    "fire_photos": 121,
+    "fire_record_assets": 117,
+    "fire_issues": 4,
+    "inventory_orders": 1,
+    "inventory": 580
+  },
+  "tablesAfter": {
+    "fire_points": 1003,
+    "fire_assets": 1003,
+    "fire_records": 117,
+    "fire_photos": 121,
+    "fire_record_assets": 117,
+    "fire_issues": 4,
+    "inventory_orders": 1,
+    "inventory": 580
+  },
+  "roles": [
+    {
+      "role": "admin::",
+      "authorized": true,
+      "points": 995,
+      "searches": 8
+    },
+    {
+      "role": "brewing::",
+      "authorized": false
+    },
+    {
+      "role": "raw_grain::",
+      "authorized": true,
+      "points": 995,
+      "searches": 8
+    },
+    {
+      "role": "viewer:qu_making:shift_leader",
+      "authorized": false
+    },
+    {
+      "role": "viewer:raw_grain:group_leader",
+      "authorized": true,
+      "points": 995,
+      "searches": 8
+    },
+    {
+      "role": "viewer:qu_making:group_leader",
+      "authorized": false
+    },
+    {
+      "role": "viewer:raw_grain:shift_leader",
+      "authorized": true,
+      "points": 995,
+      "searches": 8
+    },
+    {
+      "role": "viewer:qu_making:maintenance",
+      "authorized": false
+    },
+    {
+      "role": "viewer:qu_making:manufacturer_maintenance",
+      "authorized": false
+    },
+    {
+      "role": "viewer:qu_making:employee",
+      "authorized": false
+    }
+  ],
+  "noNewApk": true,
+  "rollback": "/opt/spare-parts/rollback/fire-app-20261105"
+}

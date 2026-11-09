@@ -1,17 +1,23 @@
 const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto');
 const {ApiError}=require('./utils');
 const {parseBackup,sha256}=require('./robot-backup');
+const {withLegacySource}=require('./robot-basemod-legacy');
 const {validateResult,validateTarget}=require('./robot-agent');
 // Per-response validation remains in robot-agent; accumulated notes span the whole backup.
 const MAX_RECORD_BYTES=32*1024*1024;
 function createLibrary(root=process.env.ROBOT_LIBRARY_DIR||path.resolve(__dirname,'../uploads/robot-program-library')){
- root=path.resolve(root);const locks=new Set();
+ root=path.resolve(root);const locks=new Set(),reports=new Map();
  function directory(id){if(!/^[a-f0-9]{64}$/.test(id))throw new ApiError(400,'备份编号无效');return path.join(root,id)}
  async function exclusive(id,fn){if(locks.has(id))throw new ApiError(409,'该备份正在保存或分析，请稍后刷新');locks.add(id);try{return await fn()}finally{locks.delete(id)}}
  async function atomic(filename,value){const text=JSON.stringify(value);if(Buffer.byteLength(text)>MAX_RECORD_BYTES)throw new ApiError(413,'分析记录超过32MB保存上限，现有结果保留，请联系管理员归档');const tmp=filename+'.'+crypto.randomUUID()+'.tmp';try{await fs.writeFile(tmp,text,{flag:'wx',mode:0o600});await fs.rename(tmp,filename)}finally{await fs.unlink(tmp).catch(()=>{})}}
  async function record(id){try{const filename=path.join(directory(id),'record.json');if((await fs.stat(filename)).size>MAX_RECORD_BYTES)throw new ApiError(413,'分析记录超过32MB读取上限，请联系管理员');const text=await fs.readFile(filename,'utf8');if(Buffer.byteLength(text)>MAX_RECORD_BYTES)throw new ApiError(413,'分析记录超过32MB读取上限，请联系管理员');const r=JSON.parse(text);if(r.id!==id||r.schema!==1)throw new Error('invalid record');return r}catch(e){if(e.code==='ENOENT')throw new ApiError(404,'备份不存在');throw e}}
  async function list(){let names;try{names=await fs.readdir(root,{withFileTypes:true})}catch(e){if(e.code==='ENOENT')return [];throw e}const rows=[];for(const entry of names.filter(e=>e.isDirectory()&&/^[a-f0-9]{64}$/.test(e.name))){let r;try{r=await record(entry.name)}catch(e){if(e.status===404)continue;throw e}rows.push({id:r.id,filename:r.filename,displayName:r.displayName||r.filename,uploadedAt:r.uploadedAt,updatedAt:r.updatedAt,revision:r.revision,robotModel:r.robotModel,robotWare:r.robotWare,statistics:r.statistics,annotationCount:r.analysis?.annotations.length||0})}return rows.sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))}
- async function get(id){const r=await record(id),bytes=await fs.readFile(path.join(directory(id),'backup.zip'));if(sha256(bytes)!==id)throw new ApiError(409,'保存的备份校验失败，请联系管理员');const report=await parseBackup(bytes,r.filename);return {...r,report}}
+ async function get(id){
+  const r=await record(id),file=path.join(directory(id),'backup.zip'),stat=await fs.stat(file,{bigint:true}),stamp=[stat.size,stat.mtimeNs,stat.ctimeNs].join(':');let cached=reports.get(id);
+  if(!cached||cached.stamp!==stamp){const bytes=await fs.readFile(file);if(sha256(bytes)!==id){reports.delete(id);throw new ApiError(409,'保存的备份校验失败，请联系管理员')}cached={stamp,report:await parseBackup(bytes,r.filename)};}
+  reports.delete(id);reports.set(id,cached);if(reports.size>6)reports.delete(reports.keys().next().value);
+  return {...r,report:withLegacySource(cached.report)};
+ }
  function cleanAnalysis(input,report){if(!input)return null;if(input.sourceHash!==report.sha256)throw new ApiError(409,'注释与备份不一致');return {...validateResult(input,report,{allowChanges:input.mode==='modify'}),sourceHash:report.sha256,model:typeof input.model==='string'?input.model.slice(0,120):'',mode:input.mode==='modify'?'modify':'analyze',generatedAt:input.generatedAt}}
  async function upload(bytes,filename,initial=null,progress={}, {origin='upload'}={}){const report=await parseBackup(bytes,filename),id=report.sha256;return exclusive('upload',()=>exclusive(id,async()=>{
   try{return await get(id)}catch(e){if(e.status!==404)throw e}

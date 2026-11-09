@@ -1,6 +1,6 @@
 param(
     [string]$ApkPath = (Join-Path $PSScriptRoot '../app/build/outputs/apk/release/app-release.apk'),
-    [string]$Destination = (Join-Path $PSScriptRoot '../releases/1.9.10-android.5'),
+    [string]$Destination = (Join-Path $PSScriptRoot '../releases/1.9.10-android.20'),
     [string]$BaseUrl = 'https://czsdsg.cn',
     [string]$SdkPath = 'D:\Android\android-sdk',
     [string]$JdkPath = '',

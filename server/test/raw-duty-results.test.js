@@ -14,17 +14,21 @@ test('仅提供已完成和异常；异常原因必填，处理进展与历史�
  }
  assert.equal(D.checks([{dutyId:'x',result:'进行中',note:'旧记录'}],tmpl,[])[0].result,'进行中');
 });
-test('每日、每周、每月和持续事项采用相同异常校验；各端统计和日历口径一致',async()=>{
+test('每日、每周、每月和持续事项采用相同异常校验；各端统计和日历口径一致',async t=>{
+ // Use a past cross-month week: both monthly slots can have genuine, non-future execution dates.
+ t.mock.method(D,'today',()=> '2026-10-01');
  const today=D.today(),start=D.period(today).start;
+ const {weekDays,weekMonths}=require('../src/raw-duty-cadence-summary'),days=weekDays(start),months=weekMonths(start);
+ assert.deepEqual(months,['2026-09','2026-10']);
  const entries=['每班','每周','每月','持续开展'].map((frequency,i)=>({id:String(i),frequency,title:'工作'+i}));
  const calendar=Object.fromEntries(Array.from({length:7},(_,i)=>[new Date(Date.parse(start+'T00:00:00Z')+i*86400000).toISOString().slice(0,10),'rest']));calendar[today]='work';
- const payload=result=>entries.map(e=>{const c={result,note:result==='异常'?'发现异常':'',action:result==='异常'?'正在排查':'',recordDate:today};return e.frequency==='每班'?{dutyId:e.id,dailyRecords:[{...c,date:today}]}:e.frequency==='每月'?{dutyId:e.id,monthlyRecords:[{...c,month:today.slice(0,7)}]}:{dutyId:e.id,...c}});
+ const payload=result=>entries.map(e=>{const c={result,note:result==='异常'?'发现异常':'',action:result==='异常'?'正在排查':'',recordDate:today};return e.frequency==='每班'?{dutyId:e.id,dailyRecords:[{...c,date:today}]}:e.frequency==='每月'?{dutyId:e.id,monthlyRecords:months.map(month=>{const recordDate=days.filter(date=>date.startsWith(month)&&date<=today).at(-1);assert.ok(recordDate,'each covered month needs a non-future execution date');return {...c,month,recordDate}})}:{dutyId:e.id,...c}});
  const progress=[require('../src/raw-duty-progress'),await import('../../spare-parts-web-release/src/utils/raw-duty-progress.mjs'),require('../../miniprogram/packages/work/services/raw-duty-progress')];
  const helpers=[require('../src/raw-duty-cadence-summary'),await import('../../spare-parts-web-release/src/utils/raw-duty-cadence-summary.mjs'),require('../../miniprogram/packages/work/services/raw-duty-cadence-summary')];
  const tables=[require('../src/raw-duty-week-table'),await import('../../spare-parts-web-release/src/utils/raw-duty-week-table.mjs'),require('../../miniprogram/packages/work/services/raw-duty-week-table')];
  for(const result of ['已完成','异常']){
   const valid=C.validate(payload(result),{entries},[],calendar,start,true);
-  for(const h of helpers){const stats=h.cadenceSummary(entries,valid.checks,valid.cadence,start,today);assert.equal(stats.itemOverview[result==='异常'?'abnormal':'done'],4);assert.equal(stats.itemOverview.incomplete,0);assert.equal(stats.progress.ready,4)}
+  for(const h of helpers){const stats=h.cadenceSummary(entries,valid.checks,valid.cadence,start,today);assert.equal(stats.itemOverview[result==='异常'?'abnormal':'done'],4);assert.equal(stats.itemOverview.incomplete,0);assert.equal(stats.progress.ready,entries.length+months.length-1)}
   if(result==='异常'&&start<today){
    const mixed={...valid.cadence,calendar:{...calendar,[start]:'work'}};
    for(const h of helpers){const stats=h.cadenceSummary(entries,valid.checks,mixed,start,today);assert.equal(stats.itemOverview.abnormal,4);assert.equal(stats.itemOverview.incomplete,1);assert.equal(stats.itemOverview.done,0)}

@@ -1,0 +1,57 @@
+[
+  {
+    "bytes": 214539478.0,
+    "original": "D:\\wx_xiangm\\xiangmu\\.local\\fire-dialog-update-20261105\\web-dist-delivery",
+    "restore": "Windows Recycle Bin",
+    "status": "recycled"
+  },
+  {
+    "bytes": 214539324.0,
+    "original": "D:\\wx_xiangm\\xiangmu\\.local\\fire-dialog-update-20261105\\web-dist-final",
+    "restore": "Windows Recycle Bin",
+    "status": "recycled"
+  },
+  {
+    "bytes": 4691049.0,
+    "original": "D:\\wx_xiangm\\xiangmu\\.local\\fire-dialog-update-20261105\\payload",
+    "restore": "Windows Recycle Bin",
+    "status": "recycled"
+  },
+  {
+    "bytes": 2750937,
+    "original": "D:\\wx_xiangm\\xiangmu\\.local\\fire-dialog-update-20261105\\payload.tar.gz",
+    "restore": "Windows Recycle Bin",
+    "status": "recycled"
+  },
+  {
+    "bytes": 75200673,
+    "original": "D:\\wx_xiangm\\xiangmu\\.local\\fire-dialog-update-20261105\\emulator-r2.log",
+    "restore": "Windows Recycle Bin",
+    "status": "recycled"
+  },
+  {
+    "restore": "Windows Recycle Bin",
+    "original": "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\dist",
+    "status": "previous canonical build recycled; current canonical verified"
+  },
+  {
+    "status": "recycled",
+    "original": "D:\\wx_xiangm\\xiangmu\\.local\\fire-dialog-update-20261105\\web-dist-r2",
+    "restore": "Windows Recycle Bin"
+  },
+  {
+    "status": "recycled",
+    "original": "D:\\wx_xiangm\\xiangmu\\.local\\fire-dialog-update-20261105\\payload-r2",
+    "restore": "Windows Recycle Bin"
+  },
+  {
+    "status": "recycled",
+    "original": "D:\\wx_xiangm\\xiangmu\\.local\\fire-dialog-update-20261105\\payload-r2.tar.gz",
+    "restore": "Windows Recycle Bin"
+  },
+  {
+    "status": "11:26 build file recycled before 11:33 canonical update",
+    "original": "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\dist\\index.html",
+    "restore": "Windows Recycle Bin"
+  }
+]

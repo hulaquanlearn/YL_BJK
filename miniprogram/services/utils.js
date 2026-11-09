@@ -10,4 +10,9 @@ function isEmptyValue(value) {
   return value === undefined || value === null || String(value).trim() === '';
 }
 
-module.exports = { formatDigitInput, isEmptyValue };
+function decodeQueryValue(value) {
+  try { return decodeURIComponent(String(value || '')); }
+  catch (_) { return String(value || ''); }
+}
+
+module.exports = { formatDigitInput, isEmptyValue, decodeQueryValue };

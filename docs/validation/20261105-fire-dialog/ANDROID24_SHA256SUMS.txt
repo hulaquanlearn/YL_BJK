@@ -1,0 +1,2 @@
+e41eeb3e970e84f1a6f400ab29aa2cd07df7834d681f29196a7dbfa2eeceaeb2  digital-workbench-1.9.10-android.24.apk
+cd3126b2739bab69d2c7cbb9ae28dd5a12cb9606b6fdc51063681f629622062b  latest.json

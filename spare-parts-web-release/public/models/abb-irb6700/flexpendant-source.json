@@ -1,0 +1,17 @@
+{
+  "model": "ABB FlexPendant",
+  "partNumber": "3HAC031711-002",
+  "author": "ABB",
+  "source": "FlexPendant.rslib",
+  "sourceSha256": "dc4ca5c3239c004c315bc92797c74ab4fb082687b3c0b2317bc3cfec3d89e714",
+  "glbSha256": "bf57157be634e14c71c58d188510e7985276b6ffdd1e71d80e7a04a89e0de9cd",
+  "bytes": 17014116,
+  "triangles": 470816,
+  "sourceFaces": 6371,
+  "meshDraws": 8,
+  "originalEmbeddedTextures": 2,
+  "units": "metres",
+  "upAxis": "Y",
+  "screenMaterial": "CAD-material-7",
+  "note": "Original ABB CAD geometry and hardware texture retained; the application replaces the LCD texture only while teaching."
+}

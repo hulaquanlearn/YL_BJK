@@ -10,6 +10,7 @@
   </view>
 
   <view class="input-card">
+    <view wx:if="{{canUseKnowledgeAI && aiModelLabel}}" class="ai-model-info">{{aiModelLabel}}</view>
     <textarea
       class="input-box"
       maxlength="500"

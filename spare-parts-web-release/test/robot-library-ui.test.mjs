@@ -8,7 +8,7 @@ function project(id){return {id,filename:id+'.zip',revision:1,updatedAt:'2026-10
 function preview({projects=[project('a'),project('b')],confirm=async()=>{},enabled=true,cache=null,migrateDeleted=false,failBatch=false,canManage=true,remaining=3}={}){
  let mounted;const rows=new Map(projects.map(p=>[p.id,clone(p)])),calls=[],status={accountId:'1',canInteract:true,canManage,quota:canManage?{unlimited:true,remaining:null}:{unlimited:false,remaining,limit:3,used:3-remaining},enabled,transport:'deepseek',model:'deepseek-flash',message:enabled?'已配置':'机器人分析尚未开启',issues:[]};
  const source=fs.readFileSync(new URL('../src/views/RobotProgram.vue',import.meta.url),'utf8').match(/<script setup>([\s\S]*?)<\/script>/)[1].replace(/^import .+$/gm,'')
- const context=vm.createContext({ref:value=>({value}),computed:fn=>({get value(){return fn()}}),onMounted:fn=>mounted=fn,onBeforeUnmount(){},nextTick:async()=>{},annotationBatches,annotationCoverage,explanationReview,missingRoutineBatches,
+ const context=vm.createContext({useRoute:()=>({query:{}}),isAppSurface:()=>false,ref:value=>({value}),computed:fn=>({get value(){return fn()}}),onMounted:fn=>mounted=fn,onBeforeUnmount(){},nextTick:async()=>{},annotationBatches,annotationCoverage,explanationReview,missingRoutineBatches,
   localStorage:{setItem(){},getItem(){return ''},removeItem(){}},FormData,Blob,URL,setTimeout,
   ElMessageBox:{confirm,alert:async()=>{}},robotSession:async(_account,action)=>{calls.push({type:'cache',action});return action==='get'?cache:undefined},
   getRobotAgentStatus:async()=>({data:status}),listRobotBackups:async()=>({data:[...rows.values()].map(clone)}),getRobotBackup:async id=>({data:clone(rows.get(id))}),
@@ -18,7 +18,7 @@ function preview({projects=[project('a'),project('b')],confirm=async()=>{},enabl
   saveRobotBackup:async body=>{calls.push({type:'upload',origin:body.get('origin')});if(migrateDeleted)throw {response:{status:410,data:{msg:'已删除'}}};const p=project('new');rows.set(p.id,p);return {data:clone(p)}},
   askRobotBackup:async(id,body)=>{calls.push({type:'analysis',id,body:clone(body)});const failure=typeof failBatch==='function'?await failBatch(body):failBatch;if(failure)throw typeof failure==='object'?failure:{response:{data:{msg:'测试额度不足'}}};const p=rows.get(id);p.revision++;p.analysis={sourceHash:id,annotations:[{fileId:p.report.files[0].id,line:1,text:'说明'}]};if(body.target)p.batchState[body.target.fileId+':'+body.target.startLine+'-'+body.target.endLine]={status:'done'};return {data:clone(p)}}
  });
- vm.runInContext(source+'\nthis.subject={agentStatus,library,projectId,report,analysis,error,reading,busy,pendingFile,batchState,autoAnalyze,localNotice,stopBatch,orderedFiles,fileGroups,question,canManage,canInteract,ask,acceptProject,readBackup,generateBatches};',context)
+ vm.runInContext(source+'\nthis.subject={agentStatus,library,projectId,report,analysis,error,reading,busy,pendingFile,batchState,autoAnalyze,localNotice,stopBatch,orderedFiles,fileGroups,question,canManage,canInteract,ask,acceptProject,readBackup,generateBatches,startNewConversation,dialogueResult,dialogueAnalysis,newConversation,history,confirmedChanges};',context)
  context.subject.agentStatus.value=status
  return {state:context.subject,calls,mount:()=>mounted(),rows}
 }
@@ -61,3 +61,16 @@ test('manual pause finishes the active batch and authentication failure stops th
 test('unreadable files follow every readable task and configuration without changing source order',()=>{
  const p=project('a'),file=p.report.files[0];p.report.files=[{...file,id:'binary',name:'Base.mod',readable:false,task:'T_ROB1'},file,{...file,id:'cfg',kind:'config',task:''}];const app=preview({projects:[p]});app.state.acceptProject(p);assert.deepEqual(Array.from(app.state.orderedFiles.value,f=>f.id),['file-a','cfg','binary']);assert.deepEqual(Array.from(app.state.fileGroups.value,g=>g.name),['系统配置','不可读文件']);assert.equal(p.report.files[0].id,'binary');
 });
+
+test('a new conversation hides old answers and resets modification confirmation without an AI request',async()=>{
+ const app=preview(),saved=project('a');saved.dialogueAnalysis={summary:'旧回答',changes:[{replacement:'旧修改'}]};saved.history=[{role:'user',content:'旧问题'},{role:'assistant',content:'旧回答'}]
+ app.state.acceptProject(saved);app.state.confirmedChanges.value=true;assert.equal(app.state.dialogueResult.value.summary,'旧回答')
+ app.state.startNewConversation();assert.equal(app.state.dialogueResult.value,null);assert.equal(app.state.dialogueAnalysis.value,null);assert.equal(app.state.confirmedChanges.value,false);assert.equal(app.state.history.value.length,2)
+ assert.equal(app.calls.filter(c=>c.type==='analysis').length,0)
+ app.state.question.value='新的问题';await app.state.ask();assert.equal(app.calls.find(c=>c.type==='analysis').body.newConversation,true)
+})
+
+test('new conversation cannot erase the active answer while a request is busy',()=>{
+ const app=preview(),saved=project('a');saved.dialogueAnalysis={summary:'保留回答'};app.state.acceptProject(saved);app.state.reading.value=true
+ app.state.startNewConversation();assert.equal(app.state.dialogueResult.value.summary,'保留回答');assert.equal(app.state.newConversation.value,false)
+})

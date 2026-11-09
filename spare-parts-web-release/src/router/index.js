@@ -2,12 +2,17 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { getToken, getUser, setSession } from '../auth'
 import { getMe } from '../api'
 import { canReadFeature } from '../utils/feature-access.mjs'
+import {isMobileNavigationAllowed} from '../utils/mobile-workspace.mjs'
+import {isAppSurface,appPathAllowed} from '../app/surface.mjs'
 
 const routes = [
-  { path: '/ai-call-logs', redirect: '/account?tab=records' },
+  { path:'/control-passwords',name:'ControlPasswords',component:()=>import('../views/ControlPasswords.vue'),meta:{module:'work',title:'中控密码管理',description:'按中控室电脑编号查看登录资料'} },
+  {path:'/app-download',name:'AppDownload',component:()=>import('../views/AppDownload.vue'),meta:{public:true,title:'下载App'}},
+  { path:'/agv-vehicles',name:'AgvVehicles',component:()=>import('../views/AgvVehicles.vue'),meta:{module:'work',title:'设备模型展示',description:'查看AGV车辆与ABB机器人的三维结构'} },
+  { path: '/ai-call-logs', redirect: '/account?tab=usage' },
   { path: '/robot-program', name: 'RobotProgram', component: () => import('../views/RobotProgram.vue'), meta: { module:'knowledge', title:'机器人程序智能分析', description:'ABB备份分析、中文注释与修改审阅' } },
   { path: '/raw-duties', name: 'RawDuties', component: () => import('../views/RawDuties.vue'), meta: { module: 'work', title: '工段长履职考评', description: '填写每周履职情况、查看验证材料与导出周材料' } },
-  { path: '/attendance', name: 'AttendanceReview', component: () => import('../views/AttendanceReview.vue'), meta: { module: 'work', title: '考勤核查', description: '按排班核对闸机进出与手机打卡记录' } },
+  { path: '/fire-inspection', name: 'FireInspection', component: () => import('../views/FireInspection.vue'), meta: { module: 'work', title: '消防点检', description: '按周期检查消防点位，留存现场照片与整改记录' } },
   { path: '/work-storage', redirect: '/account?tab=storage' },
   { path: '/login', name: 'Login', component: () => import('../views/Login.vue'), meta: { public: true, title: '账号登录' } },
   { path: '/', redirect: '/portal' },
@@ -31,18 +36,22 @@ const router = createRouter({ history: createWebHistory(), routes, scrollBehavio
 
 let verifiedToken = ''
 router.beforeEach(async to => {
+  if (to.name === 'AppDownload') return true
   const token = getToken()
   if (token && token !== verifiedToken) {
     try {
       const response = await getMe()
+      if(getToken()!==token)return false
       setSession(token, response.data.user || response.data)
       verifiedToken = token
-    } catch { return to.path === '/login' ? true : '/login' }
+    } catch { if(getToken()!==token)return false;return to.path === '/login' ? true : '/login' }
   }
   if (to.meta.public) return getToken() && getUser() ? '/portal' : true
   if (!getToken() || !getUser()) return { path: '/login', query: { redirect: to.fullPath } }
   if (to.meta.admin && getUser()?.role !== 'admin') return '/portal'
   if (!canReadFeature(getUser(), to.path)) return '/portal'
+  if(isAppSurface()&&!appPathAllowed(to.fullPath))return '/portal'
+  if(/DigitalWorkbenchAndroid\//.test(navigator.userAgent)&&!isMobileNavigationAllowed(getUser(),to.fullPath,{nativeAndroid:true}))return '/portal'
   return true
 })
 

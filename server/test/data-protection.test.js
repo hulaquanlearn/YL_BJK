@@ -7,7 +7,7 @@ const stop=server=>new Promise(resolve=>{server.close(resolve);server.closeAllCo
 test('production route chain protects business APIs and uploaded assets, revokes disabled sessions and accepts cookies only on read assets',async()=>{
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'spare-private-assets-'));await fs.writeFile(path.join(dir,'private.jpg'),'private-fixture');
  const savedQuery=pool.query,savedDir=config.parts.uploadDir;config.parts.uploadDir=dir;let queries=0,enabled=true;
- pool.query=async sql=>{queries++;if(sql.includes('FROM app_sessions'))return [[{id:91,username:'synthetic',display_name:'Test',role:'viewer',enabled:enabled?1:0,session_id:2}]];throw new Error('Unexpected business access')};
+ pool.query=async sql=>{queries++;if(sql.includes('FROM app_sessions'))return [[{id:91,username:'synthetic',display_name:'Test',role:'viewer',enabled:enabled?1:0,session_id:2}]];if(sql.includes('FROM fire_members'))return [[]];throw new Error('Unexpected business access')};
  const {server,base}=await listen(require('../src/app'));
  try{
   for(const url of ['/models/reference-20260904/manifest.json','/models/categories/motor.glb','/api/parts','/api/users','/api/part-model-library','/api/knowledge/1/download','/api/knowledge/1/preview','/uploads/part-images/private.jpg','/uploads/part-models/private.glb']){const res=await fetch(base+url);assert.equal(res.status,401,url);assert.match(res.headers.get('cache-control'),/no-store/)}

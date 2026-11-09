@@ -75,5 +75,6 @@ async function ensureModelCatalog(db) {
     await ensureModelAssets(db);
     await db.commit();
   } catch (error) { await db.rollback(); throw error; }
+  await require('./model-reviews').ensureModelReviewSchema(db);
 }
 module.exports = { ensureModelCatalog, ensureSupplementalModels, ensureModelAssets };

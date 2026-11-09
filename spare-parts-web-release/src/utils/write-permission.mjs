@@ -7,6 +7,7 @@ export function canSubmitInventoryRequest(method, url, workshopCode) {
 export function isBusinessWrite(method, url) {
   if (['GET','HEAD','OPTIONS'].includes(String(method || 'GET').toUpperCase())) return false
   const pathname=String(url || '').split('?')[0]
+  if(String(method).toUpperCase()==='POST' && /^\/robot-program\/library\/[a-f0-9]{64}\/simulate$/.test(pathname))return false
   return !['/auth/login','/auth/logout','/auth/change-password','/auth/profile','/ai/chat'].includes(pathname)
 }
 

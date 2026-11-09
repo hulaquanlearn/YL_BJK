@@ -1,0 +1,523 @@
+{
+  "at": "2026-11-04T17:38:23.852Z",
+  "rows": [
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-device-20261104",
+      "kind": "project-temporary-review",
+      "bytes": 2881793824,
+      "files": 13258,
+      "links": 1,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-workcell-controls-20261104",
+      "kind": "project-temporary-review",
+      "bytes": 936550147,
+      "files": 4359,
+      "links": 1,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-program-layout-20261104",
+      "kind": "project-temporary-review",
+      "bytes": 721959541,
+      "files": 3262,
+      "links": 1,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-loading-20261104",
+      "kind": "project-temporary-review",
+      "bytes": 718733617,
+      "files": 3130,
+      "links": 1,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\control-passwords-20261104",
+      "kind": "project-temporary-review",
+      "bytes": 252463535,
+      "files": 1231,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\output\\rollback",
+      "kind": "old-release-rollback",
+      "bytes": 172204703,
+      "files": 11,
+      "links": 0,
+      "reason": "old-release-rollback"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\spare-final-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 134314362,
+      "files": 111,
+      "links": 2,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\modeling",
+      "kind": "project-temporary-review",
+      "bytes": 129036922,
+      "files": 70,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-old-photo-crops-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 74175375,
+      "files": 16,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-retirement-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 72840911,
+      "files": 290,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\spare-rebuild-all-20261102",
+      "kind": "project-temporary-review",
+      "bytes": 67995693,
+      "files": 653,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\portal-login-20261029",
+      "kind": "project-temporary-review",
+      "bytes": 66465373,
+      "files": 117,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-photo-correction-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 52759051,
+      "files": 222,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-third-joint-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 40854030,
+      "files": 44,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-ledger-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 38353747,
+      "files": 209,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-second-joint-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 31234934,
+      "files": 30,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\gpt-usage-20261102",
+      "kind": "project-temporary-review",
+      "bytes": 21239393,
+      "files": 127,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\ai-choice-ui-20261029",
+      "kind": "project-temporary-review",
+      "bytes": 20213396,
+      "files": 85,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\output\\spare-parts-v1.9.10-20261019-full-robot-reader-current-attendance.tar.gz",
+      "kind": "old-release",
+      "bytes": 17326782,
+      "files": 1,
+      "links": 0,
+      "reason": "old-release"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-model-20261102",
+      "kind": "project-temporary-review",
+      "bytes": 13774270,
+      "files": 97,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\spare-model-audit-20261102",
+      "kind": "project-temporary-review",
+      "bytes": 7321604,
+      "files": 48,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\model-repair-20261023",
+      "kind": "project-temporary-review",
+      "bytes": 6739484,
+      "files": 262,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\app-media-20261102",
+      "kind": "project-temporary-review",
+      "bytes": 3240615,
+      "files": 3843,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\retirement-20261018",
+      "kind": "project-temporary-review",
+      "bytes": 3152983,
+      "files": 397,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\app-ui-20261027",
+      "kind": "project-temporary-review",
+      "bytes": 2215274,
+      "files": 53,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-20261027",
+      "kind": "project-temporary-review",
+      "bytes": 2204099,
+      "files": 68,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-monthly-20261102",
+      "kind": "project-temporary-review",
+      "bytes": 2202465,
+      "files": 121,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\account-redesign-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 2169508,
+      "files": 16,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\tmp",
+      "kind": "project-temporary-review",
+      "bytes": 2027360,
+      "files": 188,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\robot-program-qa",
+      "kind": "project-temporary-review",
+      "bytes": 1937513,
+      "files": 33,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\app-filing-20261027",
+      "kind": "project-temporary-review",
+      "bytes": 1871579,
+      "files": 21,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\cross-client-20261102",
+      "kind": "project-temporary-review",
+      "bytes": 1775766,
+      "files": 78,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\knowledge-library-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 1660539,
+      "files": 14,
+      "links": 1,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\online-app-20261019",
+      "kind": "project-temporary-review",
+      "bytes": 1082162,
+      "files": 44,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\model-identity-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 982096,
+      "files": 16,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\web-app-joint-20261102",
+      "kind": "project-temporary-review",
+      "bytes": 648180,
+      "files": 41,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\joint-continuation-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 644017,
+      "files": 11,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-joint-20261102",
+      "kind": "project-temporary-review",
+      "bytes": 590282,
+      "files": 26,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-program-20261104",
+      "kind": "project-temporary-review",
+      "bytes": 409229,
+      "files": 28,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\personal-simplification-20261103",
+      "kind": "project-temporary-review",
+      "bytes": 302177,
+      "files": 22,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\robot-program-fix-20261018",
+      "kind": "project-temporary-review",
+      "bytes": 244680,
+      "files": 13,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-collab-20261102",
+      "kind": "project-temporary-review",
+      "bytes": 32942,
+      "files": 2,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\exports",
+      "kind": "project-temporary-review",
+      "bytes": 4601,
+      "files": 1,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\Desktop\\trustfixservice-backup.reg",
+      "kind": "explicit-backup-review",
+      "bytes": 1350,
+      "files": 1,
+      "links": 0,
+      "reason": "explicit-backup-review"
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\Desktop\\TrustService-backup.reg",
+      "kind": "explicit-backup-review",
+      "bytes": 1292,
+      "files": 1,
+      "links": 0,
+      "reason": "explicit-backup-review"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\robot-program-quota-20261018",
+      "kind": "project-temporary-review",
+      "bytes": 1265,
+      "files": 3,
+      "links": 0,
+      "reason": "已被当前源码和本轮已核验部署替代的历史QA/构建/部署暂存；不含正在使用的隔离预览数据和数据库"
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright-artifacts-5NSGma",
+      "kind": "old-browser-test-cache",
+      "bytes": 0,
+      "files": 0,
+      "links": 0,
+      "reason": "old-browser-test-cache"
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright-artifacts-l8QMU7",
+      "kind": "old-browser-test-cache",
+      "bytes": 0,
+      "files": 0,
+      "links": 0,
+      "reason": "old-browser-test-cache"
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright-artifacts-NYXxlD",
+      "kind": "old-browser-test-cache",
+      "bytes": 0,
+      "files": 0,
+      "links": 0,
+      "reason": "old-browser-test-cache"
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-6ww5rL",
+      "kind": "old-browser-test-cache",
+      "bytes": 0,
+      "files": 0,
+      "links": 0,
+      "reason": "old-browser-test-cache"
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-bHEwGf",
+      "kind": "old-browser-test-cache",
+      "bytes": 0,
+      "files": 0,
+      "links": 0,
+      "reason": "old-browser-test-cache"
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-eqf5nM",
+      "kind": "old-browser-test-cache",
+      "bytes": 0,
+      "files": 0,
+      "links": 0,
+      "reason": "old-browser-test-cache"
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\AppData\\Local\\Temp\\playwright_chromiumdev_profile-FYqWvm",
+      "kind": "old-browser-test-cache",
+      "bytes": 0,
+      "files": 0,
+      "links": 0,
+      "reason": "old-browser-test-cache"
+    },
+    {
+      "path": "D:\\DockerDesktopBackup",
+      "kind": "explicit-backup-review",
+      "bytes": 0,
+      "files": 0,
+      "links": 0,
+      "reason": "explicit-backup-review"
+    },
+    {
+      "path": "D:\\wx_xiangm\\digital-workbench\\DigitalWorkbench.exe.previous",
+      "kind": "explicit-generated-or-backup",
+      "reason": "另一项目被当前正式exe替代的旧exe恢复副本",
+      "bytes": 154112,
+      "files": 1
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\android-app\\releases\\1.9.10-android.22",
+      "kind": "explicit-generated-or-backup",
+      "reason": "已被正式android.23替代的旧签名包副本",
+      "bytes": 2026014,
+      "files": 3
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\android-app\\app\\build",
+      "kind": "explicit-generated-or-backup",
+      "reason": "已验证APK在releases/android.23及服务器保留，编译中间件可重建",
+      "bytes": 44527393,
+      "files": 1210
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\android-app\\build",
+      "kind": "explicit-generated-or-backup",
+      "reason": "可重建Android构建报告",
+      "bytes": 126099,
+      "files": 1
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\dist",
+      "kind": "explicit-generated-or-backup",
+      "reason": "已被本轮997输入稳定构建替代，之后移入最新build",
+      "bytes": 109719827,
+      "files": 714
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\AppData\\Local\\npm-cache\\_cacache",
+      "kind": "explicit-generated-or-backup",
+      "reason": "npm下载内容缓存，不影响已安装依赖",
+      "bytes": 839819807,
+      "files": 2833
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\AppData\\Local\\npm-cache\\_logs",
+      "kind": "explicit-generated-or-backup",
+      "reason": "已完成npm操作日志",
+      "bytes": 25549,
+      "files": 11
+    },
+    {
+      "path": "C:\\Users\\Lenovo\\AppData\\Local\\pip\\Cache",
+      "kind": "explicit-generated-or-backup",
+      "reason": "pip下载缓存，不是已安装运行时",
+      "bytes": 113379743,
+      "files": 69
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\attendance-before-retry.json",
+      "kind": "explicit-generated-or-backup",
+      "reason": "旧隔离履职验证前恢复副本",
+      "bytes": 7768677,
+      "files": 1
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\attendance-before-update.json",
+      "kind": "explicit-generated-or-backup",
+      "reason": "旧隔离履职验证前恢复副本",
+      "bytes": 12039442,
+      "files": 1
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\output\\SHA256SUMS-V1.9.10.txt",
+      "kind": "explicit-generated-or-backup",
+      "reason": "已回收历史整站包的旧校验清单",
+      "bytes": 140,
+      "files": 1
+    }
+  ],
+  "keep": [
+    "current source and node_modules",
+    "current android.23 release and SDK/JDK tools",
+    "review isolation data",
+    "unknown MySQL data",
+    "usage synchronization state",
+    "personal/CAD/PLC/business data and installations"
+  ],
+  "latestBuild": "D:\\wx_xiangm\\xiangmu\\.local\\final-usage-20261105/web-dist-verified"
+}

@@ -1,0 +1,208 @@
+{
+  "at": "2026-11-06T07:37:02.785Z",
+  "method": "new-compiled-fire-chunk-with-existing-production-modules",
+  "fireModule": "assets/FireInspection-BKd4cH84.js",
+  "renames": {
+    "assets/FireInspection-CptCUNlB-fc20261106v5.js": "assets/FireInspection-CptCUNlB-fc20261106v6.js",
+    "assets/index-Sn4Rp854-fc20261106v5.js": "assets/index-Sn4Rp854-fc20261106v6.js",
+    "assets/stock-health-WUpCD__e-fc20261106v5.js": "assets/stock-health-WUpCD__e-fc20261106v6.js",
+    "assets/AbbProgramControl-BpmBwvUq-fc20261106v5.js": "assets/AbbProgramControl-BpmBwvUq-fc20261106v6.js",
+    "assets/AbbRobotGuide-BW8SkK22-fc20261106v5.js": "assets/AbbRobotGuide-BW8SkK22-fc20261106v6.js",
+    "assets/AbbRobotViewer-DEnRHG6b-fc20261106v5.js": "assets/AbbRobotViewer-DEnRHG6b-fc20261106v6.js",
+    "assets/Account-C9cKNH7B-fc20261106v5.js": "assets/Account-C9cKNH7B-fc20261106v6.js",
+    "assets/ActionMenu-DFeNBrCU-fc20261106v5.js": "assets/ActionMenu-DFeNBrCU-fc20261106v6.js",
+    "assets/AgvVehicles-CC_cSJoS-fc20261106v5.js": "assets/AgvVehicles-CC_cSJoS-fc20261106v6.js",
+    "assets/AiModelInfo-B6cTNEle-fc20261106v5.js": "assets/AiModelInfo-B6cTNEle-fc20261106v6.js",
+    "assets/Check-qLrv7DWI-fc20261106v5.js": "assets/Check-qLrv7DWI-fc20261106v6.js",
+    "assets/ControlPasswords-HnAesO0J-fc20261106v5.js": "assets/ControlPasswords-HnAesO0J-fc20261106v6.js",
+    "assets/DataQuality-BFKFFipM-fc20261106v5.js": "assets/DataQuality-BFKFFipM-fc20261106v6.js",
+    "assets/Equipment-DxvQQ5Ro-fc20261106v5.js": "assets/Equipment-DxvQQ5Ro-fc20261106v6.js",
+    "assets/FireParkModel-DKOdZyyL-fc20261106v5.js": "assets/FireParkModel-DKOdZyyL-fc20261106v6.js",
+    "assets/Inventory-D2tMpzBf-fc20261106v5.js": "assets/Inventory-D2tMpzBf-fc20261106v6.js",
+    "assets/Knowledge-CiLcwiGv-fc20261106v5.js": "assets/Knowledge-CiLcwiGv-fc20261106v6.js",
+    "assets/Login-DIh-wLdj-fc20261106v5.js": "assets/Login-DIh-wLdj-fc20261106v6.js",
+    "assets/ModelLibrary-CFGqtx5q-fc20261106v5.js": "assets/ModelLibrary-CFGqtx5q-fc20261106v6.js",
+    "assets/ModelPreview-Cm21dDWD-fc20261106v5.js": "assets/ModelPreview-Cm21dDWD-fc20261106v6.js",
+    "assets/Movements-DQIntz2D-fc20261106v5.js": "assets/Movements-DQIntz2D-fc20261106v6.js",
+    "assets/PdfReader-Apc6kUsn-fc20261106v5.js": "assets/PdfReader-Apc6kUsn-fc20261106v6.js",
+    "assets/Portal-hlSolPPD-fc20261106v5.js": "assets/Portal-hlSolPPD-fc20261106v6.js",
+    "assets/RawDuties-C6luh36s-fc20261106v5.js": "assets/RawDuties-C6luh36s-fc20261106v6.js",
+    "assets/Replenishment-CuK1S16I-fc20261106v5.js": "assets/Replenishment-CuK1S16I-fc20261106v6.js",
+    "assets/RobotProgram-DqhY521I-fc20261106v5.js": "assets/RobotProgram-DqhY521I-fc20261106v6.js",
+    "assets/Statistics-BXVVIFwn-fc20261106v5.js": "assets/Statistics-BXVVIFwn-fc20261106v6.js",
+    "assets/Warehouse3D-CVe1Z8d5-fc20261106v5.js": "assets/Warehouse3D-CVe1Z8d5-fc20261106v6.js",
+    "assets/WorkbookUploadMark-Bu49uWan-fc20261106v5.js": "assets/WorkbookUploadMark-Bu49uWan-fc20261106v6.js"
+  },
+  "unrelatedModulesVerified": true,
+  "abbWorkerUnchanged": true,
+  "css": {
+    "oldScopesRemoved": [
+      "data-v-5907b30d",
+      "data-v-5fb8a97b"
+    ],
+    "newScopesAdded": [
+      "data-v-8c39bd07",
+      "data-v-3a47dccd"
+    ],
+    "removedCssRules": 13,
+    "addedCssRules": 41,
+    "unrelatedCssPreserved": true
+  },
+  "coreExportRemap": [
+    {
+      "newAlias": "b",
+      "productionAlias": "b",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "n",
+      "productionAlias": "n",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "o",
+      "productionAlias": "o",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "d",
+      "productionAlias": "d",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "q",
+      "productionAlias": "q",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "t",
+      "productionAlias": "v",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "v",
+      "productionAlias": "w",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "w",
+      "productionAlias": "x",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "x",
+      "productionAlias": "y",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "y",
+      "productionAlias": "B",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "z",
+      "productionAlias": "C",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "A",
+      "productionAlias": "E",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "_",
+      "productionAlias": "_",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "B",
+      "productionAlias": "G",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "C",
+      "productionAlias": "H",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "D",
+      "productionAlias": "I",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "e",
+      "productionAlias": "e",
+      "equivalentMatches": 1
+    },
+    {
+      "newAlias": "E",
+      "productionAlias": "J",
+      "equivalentMatches": 1
+    }
+  ],
+  "changedModuleReferencesVerified": 318,
+  "webFiles": 1055,
+  "changed": [
+    "assets/AbbProgramControl-BpmBwvUq-fc20261106v6.js",
+    "assets/AbbRobotGuide-BW8SkK22-fc20261106v6.js",
+    "assets/AbbRobotViewer-DEnRHG6b-fc20261106v6.js",
+    "assets/Account-C9cKNH7B-fc20261106v6.js",
+    "assets/ActionMenu-DFeNBrCU-fc20261106v6.js",
+    "assets/AgvVehicles-CC_cSJoS-fc20261106v6.js",
+    "assets/AiModelInfo-B6cTNEle-fc20261106v6.js",
+    "assets/Check-qLrv7DWI-fc20261106v6.js",
+    "assets/ControlPasswords-HnAesO0J-fc20261106v6.js",
+    "assets/DataQuality-BFKFFipM-fc20261106v6.js",
+    "assets/Equipment-DxvQQ5Ro-fc20261106v6.js",
+    "assets/FireInspection-CptCUNlB-fc20261106v6.js",
+    "assets/FireParkModel-DKOdZyyL-fc20261106v6.js",
+    "assets/index-Sn4Rp854-fc20261106v6.js",
+    "assets/Inventory-D2tMpzBf-fc20261106v6.js",
+    "assets/Knowledge-CiLcwiGv-fc20261106v6.js",
+    "assets/Login-DIh-wLdj-fc20261106v6.js",
+    "assets/ModelLibrary-CFGqtx5q-fc20261106v6.js",
+    "assets/ModelPreview-Cm21dDWD-fc20261106v6.js",
+    "assets/Movements-DQIntz2D-fc20261106v6.js",
+    "assets/PdfReader-Apc6kUsn-fc20261106v6.js",
+    "assets/Portal-hlSolPPD-fc20261106v6.js",
+    "assets/RawDuties-C6luh36s-fc20261106v6.js",
+    "assets/Replenishment-CuK1S16I-fc20261106v6.js",
+    "assets/RobotProgram-DqhY521I-fc20261106v6.js",
+    "assets/Statistics-BXVVIFwn-fc20261106v6.js",
+    "assets/stock-health-WUpCD__e-fc20261106v6.js",
+    "assets/Warehouse3D-CVe1Z8d5-fc20261106v6.js",
+    "assets/WorkbookUploadMark-Bu49uWan-fc20261106v6.js",
+    "index.html"
+  ],
+  "removed": [
+    "assets/AbbProgramControl-BpmBwvUq-fc20261106v5.js",
+    "assets/AbbRobotGuide-BW8SkK22-fc20261106v5.js",
+    "assets/AbbRobotViewer-DEnRHG6b-fc20261106v5.js",
+    "assets/Account-C9cKNH7B-fc20261106v5.js",
+    "assets/ActionMenu-DFeNBrCU-fc20261106v5.js",
+    "assets/AgvVehicles-CC_cSJoS-fc20261106v5.js",
+    "assets/AiModelInfo-B6cTNEle-fc20261106v5.js",
+    "assets/Check-qLrv7DWI-fc20261106v5.js",
+    "assets/ControlPasswords-HnAesO0J-fc20261106v5.js",
+    "assets/DataQuality-BFKFFipM-fc20261106v5.js",
+    "assets/Equipment-DxvQQ5Ro-fc20261106v5.js",
+    "assets/FireInspection-CptCUNlB-fc20261106v5.js",
+    "assets/FireParkModel-DKOdZyyL-fc20261106v5.js",
+    "assets/Inventory-D2tMpzBf-fc20261106v5.js",
+    "assets/Knowledge-CiLcwiGv-fc20261106v5.js",
+    "assets/Login-DIh-wLdj-fc20261106v5.js",
+    "assets/ModelLibrary-CFGqtx5q-fc20261106v5.js",
+    "assets/ModelPreview-Cm21dDWD-fc20261106v5.js",
+    "assets/Movements-DQIntz2D-fc20261106v5.js",
+    "assets/PdfReader-Apc6kUsn-fc20261106v5.js",
+    "assets/Portal-hlSolPPD-fc20261106v5.js",
+    "assets/RawDuties-C6luh36s-fc20261106v5.js",
+    "assets/Replenishment-CuK1S16I-fc20261106v5.js",
+    "assets/RobotProgram-DqhY521I-fc20261106v5.js",
+    "assets/Statistics-BXVVIFwn-fc20261106v5.js",
+    "assets/Warehouse3D-CVe1Z8d5-fc20261106v5.js",
+    "assets/WorkbookUploadMark-Bu49uWan-fc20261106v5.js",
+    "assets/index-Sn4Rp854-fc20261106v5.js",
+    "assets/stock-health-WUpCD__e-fc20261106v5.js"
+  ]
+}
