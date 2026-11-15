@@ -42,7 +42,8 @@ function requireInventorySubmit() {
   return false;
 }
 
-function goLogin() {
+function goLogin(expectedToken) {
+  if (expectedToken !== undefined && expectedToken !== getToken()) return;
   if (redirecting) return;
   redirecting = true;
   clearSession();

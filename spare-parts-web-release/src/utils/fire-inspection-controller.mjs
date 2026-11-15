@@ -84,7 +84,7 @@ async function sectionChanged(){pointPage.value=1;recordQuery.page=1;issueQuery.
 function cycleChanged(){if(recognitionBusy.value)return;detailVisible.value=false;clearRecognition();query.status=executionMode.value?'pending':'';recordQuery.page=1;issueQuery.page=1;refreshCurrent()}
 function setStatus(value){query.status=value;if(value==='abnormal'&&!issuesLoading.value)return loadIssues(true)}
 const photoLoading=new Set()
-async function loadPhoto(photo){if(!photo?.id || photoUrls.value[photo.id]||!photo.url||photoLoading.has(photo.id))return;photoLoading.add(photo.id);try{const blob=await fireApi.photoBlob(photo.url);if(disposed)return;photoUrls.value[photo.id]=URL.createObjectURL(blob)}catch(e){if(detailVisible.value)detailError.value='部分照片读取失败：'+e.message}finally{photoLoading.delete(photo.id)}}
+async function loadPhoto(photo,quiet=false){if(!photo?.id || photoUrls.value[photo.id]||!photo.url||photoLoading.has(photo.id))return;photoLoading.add(photo.id);try{const blob=await fireApi.photoBlob(photo.url);if(disposed)return;photoUrls.value[photo.id]=URL.createObjectURL(blob)}catch(e){if(!quiet&&detailVisible.value)detailError.value='部分照片读取失败：'+e.message}finally{photoLoading.delete(photo.id)}}
 async function loadVisiblePhotos(){const photos=detailTab.value==='history'?visibleRecords.value.flatMap(r=>r.photos||[]):detailTab.value==='issues'?(detail.value?.issues||[]).flatMap(i=>[...(i.photos||[]),...(i.events||[]).flatMap(e=>e.photos||[])]):[];let index=0;await Promise.allSettled(Array.from({length:Math.min(4,photos.length)},async()=>{while(index<photos.length)await loadPhoto(photos[index++])}))}
 watch([detailTab,historyLimit],loadVisiblePhotos)
 async function openPoint(id,tab,assetId='',autoDispatch=false,recognitionRefresh=false){

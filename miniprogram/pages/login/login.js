@@ -22,7 +22,7 @@ Page({
       auth.setSession(token, res.data.user);
       getApp().globalData.user = res.data.user;
       wx.reLaunch({ url: '/pages/portal/portal' });
-    } catch (error) {
+    } catch (error) {if (error?.staleSession) return;
       if (this._disposed || auth.getToken() !== token) return;
       const expired = [401,403].includes(error.statusCode);
       if (expired) auth.clearSession();
@@ -50,7 +50,7 @@ Page({
       auth.setSession(res.data.token, res.data.user);
       getApp().globalData.user = res.data.user;
       wx.reLaunch({ url: '/pages/portal/portal' });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       if (this._disposed) return;
       this.setData({ formError: err.message || '登录失败，请检查账号信息' });
       wx.showToast({ title: err.message || '登录失败', icon: 'none' });

@@ -1,0 +1,80 @@
+{
+  "at": "2026-11-15T22:07:45.7378944+08:00",
+  "deployment": "fire-evidence-compact-final-20261115",
+  "method": "Windows system Recycle Bin; no permanent deletion",
+  "preview": {
+    "command": "\"D:\\nodejs\\node.exe\" tools/preview-review.cjs",
+    "action": "stopped-verified-project-preview",
+    "port": 8534,
+    "released": true,
+    "pid": 42240
+  },
+  "preserved": [
+    "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-final-20261115\\web-dist-isolated",
+    "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-20261115\\production-assets.tar.gz",
+    "source, tests, docs, screenshots, manifests and baseline records",
+    "server complete previous website rollback; all business/private/upload data"
+  ],
+  "recycled": [
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-20261115\\build-temp",
+      "bytes": 2190488,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-20261115\\production-assets",
+      "bytes": 8604335,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-20261115\\web-dist-built",
+      "bytes": 215947508,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-20261115\\web-dist-final",
+      "bytes": 215947499,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-20261115\\web-dist-isolated",
+      "bytes": 8607922,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-final-20261115\\web-dist-built",
+      "bytes": 215947496,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-20261115\\assembly-interim.js",
+      "bytes": 110572,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-20261115\\payload",
+      "bytes": 3218759,
+      "action": "moved-to-system-recycle-bin",
+      "note": "Journal resumed after transient output-file lock; bytes verified from exact transfer archive"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-20261115\\deployment-payload.tar.gz",
+      "bytes": 996135,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-final-20261115\\payload",
+      "bytes": 3222720,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-final-20261115\\deployment-payload.tar.gz",
+      "bytes": 996583,
+      "action": "moved-to-system-recycle-bin"
+    }
+  ],
+  "notPresent": [],
+  "failed": [],
+  "bytes": 675790017,
+  "status": "passed"
+}

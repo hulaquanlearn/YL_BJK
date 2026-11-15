@@ -39,7 +39,7 @@ Page({
         isLoading: false,
         hasLoaded: true
       });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error('统计数据加载失败：', err);
       this.setData({ isLoading: false, hasLoaded: false });
       wx.showToast({ title: err.message || '统计加载失败，请重试', icon: 'none' });
@@ -79,7 +79,7 @@ Page({
     try {
       await wx.setClipboardData({ data: reportContent });
       wx.showModal({ title: '报表已复制', content: '统计数量已按单位分开，可直接粘贴使用。', showCancel: false });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       wx.showToast({ title: '导出失败，请重试', icon: 'none' });
     }
   },

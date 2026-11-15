@@ -1,0 +1,209 @@
+{
+  "at": "2026-11-15T21:45:34.0999767+08:00",
+  "deployment": "agv-rear-trapezoid-20261115",
+  "method": "Windows system Recycle Bin; no permanent deletion",
+  "preview": {
+    "pid": 4248,
+    "port": 8534,
+    "action": "stopped-verified-project-preview",
+    "released": true,
+    "command": "\"D:\\nodejs\\node.exe\" tools/preview-review.cjs"
+  },
+  "preserved": [
+    "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261115\\web-dist-isolated",
+    "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261115\\production-assets.tar.gz",
+    "source, tests, docs, screenshots, manifests and baseline records",
+    "server complete previous website rollback; all business/private/upload data"
+  ],
+  "recycled": [
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-opening-20261113\\build-temp",
+      "bytes": 1904020,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-opening-20261113\\production-assets",
+      "bytes": 8589193,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-opening-20261113\\web-dist-final",
+      "bytes": 215938460,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-opening-20261113\\web-dist-isolated",
+      "bytes": 8590580,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-opening-20261113\\web-dist-isolated-final",
+      "bytes": 8590579,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-opening-20261113\\web-dist-ready",
+      "bytes": 215938461,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-opening-20261113\\web-dist-review-inner",
+      "bytes": 215940004,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-opening-20261113\\web-dist-review-only",
+      "bytes": 215939326,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-rim-20261113\\build-temp",
+      "bytes": 2190488,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-rim-20261113\\production-assets",
+      "bytes": 8589193,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-rim-20261113\\web-dist-final",
+      "bytes": 215940866,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-rim-20261113\\web-dist-isolated",
+      "bytes": 8592032,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-rim-20261113\\web-dist-isolated-v2",
+      "bytes": 8592864,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\build-temp",
+      "bytes": 2190662,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\production-assets",
+      "bytes": 8592864,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\web-dist-built",
+      "bytes": 215944403,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\web-dist-built-final",
+      "bytes": 215944430,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\web-dist-built-ready",
+      "bytes": 215944510,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\web-dist-isolated",
+      "bytes": 8598228,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\web-dist-isolated-v2",
+      "bytes": 8598255,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\web-dist-isolated-v3",
+      "bytes": 8598335,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-program-note-20261114\\build-temp",
+      "bytes": 2190432,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-program-note-20261114\\production-assets",
+      "bytes": 8598335,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-program-note-20261114\\web-dist-built",
+      "bytes": 215944048,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-program-note-20261114\\web-dist-isolated",
+      "bytes": 8599446,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-2d-20261114\\production-assets",
+      "bytes": 7711844,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261114\\build-temp",
+      "bytes": 2190424,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261114\\web-dist-final",
+      "bytes": 215945001,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261115\\build-temp",
+      "bytes": 2190448,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261115\\production-assets",
+      "bytes": 8599446,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261115\\web-dist-built",
+      "bytes": 215945665,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261114\\shell-restoration\\web-dist",
+      "bytes": 215945209,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261114\\shell-restoration\\web-dist-closed",
+      "bytes": 215945665,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261114\\shell-restoration\\web-dist-final",
+      "bytes": 215945472,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\spare-parts-web-release\\.local\\agv-rear-trapezoid-20261114",
+      "bytes": 7002,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261115\\payload",
+      "bytes": 3213241,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261115\\deployment-payload.tar.gz",
+      "bytes": 994773,
+      "action": "moved-to-system-recycle-bin"
+    }
+  ],
+  "notPresent": [],
+  "failed": [],
+  "bytes": 3159714204,
+  "status": "passed"
+}

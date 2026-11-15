@@ -1,3 +1,51 @@
+## 2026-11-15 DSH 排查修复同步（当前）
+
+2026-11-15T14:39:41.057Z完成：3份API源码、32份网页文件，31份旧JS随上一版回滚退出活动目录。仅重启API id1，网页进程保持；117份API基线中114份未改变，2264份上传/私有文件校验保持。无新增迁移/手动历史SQL、APK或微信发布。完整上版网页/API源码位于`/opt/spare-parts/rollback/dsh-audit-fixes-20261115`，按RESTORE.json核对无后续发布、先回收当前目录再恢复并仅重启API。暂存已移至项目私有回收目录；小程序仅源码。[操作与验证](../docs/PROJECT_AUDIT_FIXES_20261115.md)。
+
+## 2026-11-15 消防凭证去重（已上线）
+
+只替换两份凭证组件及对应限定CSS，保留其他生产逻辑和照片手势；1066份活动网页，最终同步32份、31份旧JS退出活动目录。API/私有配置/上传/Android/PM2及PID保持，无重启。本任务前完整网页回滚在`/opt/spare-parts/rollback/fire-evidence-compact-20261115/web-dist-before`；最终文案校正前一版在`/opt/spare-parts/rollback/fire-evidence-compact-final-20261115/web-dist-before`。优先按任务说明选择目标，核对无后续发布后，先将当前web/dist移到项目私有回收目录，再恢复所选完整上一版，验证公网、健康和权限。两次暂存均移入项目私有回收区，RECYCLE.json可恢复；无SQL、新APK/正式包、Git提交或推送。[明细](../docs/FIRE_EVIDENCE_COMPACT_20261115.md)。
+
+## 2026-11-15 后壳梯形槽与中部开关（已上线）
+
+仅替换buildAgvModel编译函数及资源引用，32份更新、31份旧JS退出活动，1066份活动网页；API/上传/私有配置/Android/PM2与PID保持，无重启。完整上一版在`/opt/spare-parts/rollback/agv-rear-trapezoid-20261115/web-dist-before`，同目录manifest.json与RESTORE.json可恢复。先核对无后续发布，将当前web/dist移至本项目私有回收目录，再恢复完整上一版并验证公网、健康和权限。暂存移入`/opt/spare-parts/recycle-bin/agv-rear-trapezoid-20261115-staging-final`，RECYCLE.json可恢复暂存。无SQL、新APK/正式包、Git提交/推送或微信发布。[验收](../docs/AGV_REAR_TRAPEZOID_DEPLOY_20261115.md)。
+
+## 2026-11-14 ABB面板提示移除（已上线）
+
+仅替换AbbProgramControl及对应CSS提示规则和作用域，32份更新、31份旧资源退出活动；1066份活动网页，API/上传/私有配置/Android/PM2与PID保持，无服务重启。回滚为`/opt/spare-parts/rollback/abb-program-note-20261114/web-dist-before`，同目录manifest.json与RESTORE.json可恢复。先核对无后续发布，把当前web/dist移至项目私有回收目录，再恢复完整上一版并验证公网、健康与权限。暂存移入`/opt/spare-parts/recycle-bin/abb-program-note-20261114-staging-final`，RECYCLE.json可恢复。无数据库变更、新APK/正式包、Git提交或推送。[验收](../docs/ABB_PROGRAM_CONTROL_20261114.md)。
+
+## 2026-11-14 消防照片缩放（已上线）
+
+仅替换已部署FireInspection中的App照片手势挂载和独立手势模块，其他业务代码逆变换逐字一致、生产CSS及依赖保持。33份更新、31份旧JS退出活动，1066份活动文件；API/上传/私有配置/Android/PM2与PID保持，无重启。完整上一版为`/opt/spare-parts/rollback/fire-photo-touch-20261114/web-dist-before`，同目录manifest.json及RESTORE.json可恢复；先核对无后续发布，将当前web/dist移至项目私有回收目录，再恢复完整目录并验证公网、健康与权限。暂存已移入`/opt/spare-parts/recycle-bin/fire-photo-touch-20261114-staging-final`，RECYCLE.json可恢复暂存。无数据库变更、新APK、正式包、Git提交/推送。[验收](../docs/FIRE_PHOTO_TOUCH_20261114.md)。
+
+## 2026-11-14 ABB清扫与甑盖模型（已上线）
+
+仅同步网页模型逻辑与必要资源引用，32份更新、31份旧资源移出活动目录。API、上传、私有配置、数据库及Android清单保持，PM2/PID保持，无服务重启。完整回滚为`/opt/spare-parts/rollback/abb-rim-20261113/web-dist-before`，同目录manifest.json、RESTORE.json可恢复。先核对无后续发布，再将当前web/dist移至项目私有回收目录并恢复上一版。暂存移入`/opt/spare-parts/recycle-bin/abb-rim-20261113-staging-final`，RECYCLE.json保留原路径和恢复方式。无新正式包、APK、微信发布、Git提交或推送。[验收](../docs/ABB_RIM_CORRECTION_20261114.md)。
+
+## 2026-11-13 后壳与储能模型（已上线）
+
+1065份活动网页，32更新/31旧资源退出活动目录；仅更新AGV几何模块及资源引用，保留其他生产业务代码。117份API、2258份原上传/私有文件、Android更新清单、PM2及PID保持，无重启。完整上一版为`/opt/spare-parts/rollback/agv-rear-storage-20261113/web-dist-before`，同目录manifest.json和RESTORE.json提供恢复步骤：核对无后续发布，先把活动web/dist移至项目私有回收目录，再还原完整目录并验证公网入口、资源和API健康。任务暂存移入`/opt/spare-parts/recycle-bin/agv-rear-storage-20261113-staging-final`，RECYCLE.json可恢复暂存。无新正式包、APK、SQL或Git操作。[验收](../docs/AGV_REAR_STORAGE_20261113.md)。
+
+## 2026-11-13 点选交互（已上线）
+
+1065份活动网页，32份更新/31旧资源退出活动目录；仅替换AGV交互及限定样式，其他模块归一资源引用后逻辑逐字保持。117份API、2258份原上传/私有文件、Android更新清单及PM2/PID保持，无重启。完整上一版位于`/opt/spare-parts/rollback/agv-part-select-20261113/web-dist-before`，同目录有manifest.json和RESTORE.json。恢复前核对无后续发布，再把活动web/dist移入项目私有回收目录、还原完整目录并核验公网及API健康。部署暂存已移入项目私有回收目录，保留恢复清单。
+
+## 2026-11-13 深包车头罩（已上线）
+
+1065份活动网页，32份更新/31旧资源退出活动目录。API117文件、2248份原上传/私有文件、Android更新清单及PM2/PID保持，无重启。完整回滚`/opt/spare-parts/rollback/agv-deep-hood-20261112/web-dist-before`，按同目录RESTORE.json操作：先将活动web/dist移至项目私有回收目录，再恢复完整目录，核对公网页面/资源及API健康；不得覆盖后续他人的发布。Three.js实现字节相同，仅对新模块导入的四个压缩编号做语义映射；生产库与全CSS保持。
+
+## 2026-11-12 新老车头同步（已上线）
+
+1065份活动网页，32更新/31旧资源退出活动目录；保留全CSS和非AGV模块逻辑，仅更新AGV几何及引用文件名。备份`/opt/spare-parts/rollback/agv-both-front-20261112/web-dist-before`，按同目录RESTORE.json恢复前先将活动目录移到本项目私有回收目录。API/数据库/私有配置/上传/Android/PM2及PID保持，无重启。不要覆盖后续发布。
+
+## 2026-11-12 车头壳返修（已同步）
+
+仅更新AGV编译几何及关联资源文件名；1065份网页，32份资源更新、31旧资源退出活动目录，全部原网页保存在`/opt/spare-parts/rollback/agv-front-shell-20261112/web-dist-before`。同目录manifest.json和RESTORE.json可恢复，先将当前web/dist移到本项目私有回收目录再还原。API/业务数据/私有配置/上传/Android和PM2保持，无重启。不要用本副本覆盖后续其他发布。
+
+## 2026-11-12 潜伏车模型（已同步）
+
+仅更新网页/既有App共用页面，32份文件（AGV模块、两组限定CSS及引用文件名），31份过期资源移出有效目录，原完整网页保留在`/opt/spare-parts/rollback/agv-photo-rebuild-20261112/web-dist-before`。没有API、数据库、私有配置、上传或APK变更，没有服务重启。服务器核验13465项通过。恢复：先将活动`web/dist`移到本项目私有回收目录，再将上述完整副本还原为`web/dist`，按回滚目录RESTORE.json核对公网入口/资源和API健康。不得覆盖其他模块的后续修改。
+
 ## 2026-11-07 App 列表与中控选择器精简
 
 2026-11-07 17:23 已同步网页和 App 共用界面。App库存总览合并筛选标题；App与网页中控电脑选择改为下拉框；App消防移除扫码定位和独立编码查找，拍照入口居中，已点检按实际时间从新到旧排列；App盘点列表移除总数提示和日期标签，刷新移到日期筛选右侧。生产构建与 10780 项发布校验通过。已安装的 App 重新进入页面即可加载此次界面。

@@ -1,0 +1,46 @@
+{
+  "at": "2026-11-15T22:40:25.3411325+08:00",
+  "deployment": "dsh-audit-fixes-20261115",
+  "method": "Windows Recycle Bin",
+  "preview": {
+    "port": 8534,
+    "released": true,
+    "action": "not-running"
+  },
+  "recycled": [
+    {
+      "bytes": 2190472,
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\dsh-audit-fixes-20261115\\build-temp",
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "bytes": 215948279,
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\dsh-audit-fixes-20261115\\web-dist-built",
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "bytes": 8609855,
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\dsh-audit-fixes-20261115\\production-assets",
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "bytes": 3285194,
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\dsh-audit-fixes-20261115\\payload",
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "bytes": 1013695,
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\dsh-audit-fixes-20261115\\deployment-payload.tar.gz",
+      "action": "moved-to-system-recycle-bin"
+    }
+  ],
+  "notPresent": [],
+  "failed": [],
+  "bytes": 231047495,
+  "preserved": [
+    "D:\\wx_xiangm\\xiangmu\\.local\\dsh-audit-fixes-20261115\\web-dist-isolated",
+    "production-assets.tar.gz, baseline, logs, scripts, source and regression tests",
+    "server previous web/API rollback, config, uploads, business data"
+  ],
+  "status": "passed"
+}

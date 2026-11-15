@@ -31,7 +31,7 @@ test('every family records the assembled envelope it actually generates',()=>{
         assert.deepEqual(root.userData.bodyEnvelopeMm,[1310,700,460])
         assert.ok(lwh[0]>1310&&lwh[0]<1420,`latent length ${lwh[0]}`)
         assert.ok(lwh[1]>700&&lwh[1]<740,`latent width ${lwh[1]}`)
-        assert.equal(lwh[2],460)
+        assert.equal(lwh[2],variant==='old'?459:460,'old external lever was moved below the deck; documented body height remains separate')
         if(variant==='old'){
           assert.equal(root.userData.overallEnvelopeMm[0],1370)
           assert.match(root.userData.envelopeNote,/No towing loops/)

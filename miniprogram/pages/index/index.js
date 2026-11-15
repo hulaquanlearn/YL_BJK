@@ -4,7 +4,7 @@ const auth = require('../../services/auth.js');
 function decodeOption(value) {
   try {
     return decodeURIComponent(value || '');
-  } catch (_) {
+  } catch (_) {if (_?.staleSession) return;
     return String(value || '');
   }
 }
@@ -116,7 +116,7 @@ Page({
         shelfMap: shelfMap || {},
         layerMap: layerMap || {}
       });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error('加载筛选数据失败：', err);
       wx.showToast({ title: err.message || '筛选数据加载失败', icon: 'none' });
     }
@@ -297,7 +297,7 @@ Page({
         currentPage: targetPage,
         hasMoreData: filteredParts.length < totalCount
       });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       if (requestId !== this._partsRequestId) return;
       this.setData({ loadError: true, failedPage: targetPage });
       console.error('加载备件失败：', err);

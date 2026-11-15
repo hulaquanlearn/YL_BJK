@@ -14,7 +14,7 @@ test('AGV model follows the 1310x700x460 envelope with the operator panel on the
   assert.deepEqual(root.userData.liftStrokeMm,90)
   assert.equal(root.userData.sourceKnowledgeId,21)
   const names=parts.map(part=>part.name)
-  assert.equal(names.length,15)
+  assert.ok(names.length>=25,'photo-visible devices have independent part IDs, not the former 15 coarse groups')
   assert.equal(new Set(names).size,names.length)
   for(const name of ['chassis','platform','left-cover','right-cover','operator-panel','rear-cover','drive-left','drive-right','lift','control','sensors','tpm','pickup','ekk','supercapacitor'])assert.ok(names.includes(name),name)
   const byName=Object.fromEntries(parts.map(part=>[part.name,part]))
@@ -23,7 +23,8 @@ test('AGV model follows the 1310x700x460 envelope with the operator panel on the
   // platform overhang stays inside the 1310 mm envelope.
   for(const name of ['left-cover','right-cover','platform']){
    const box=boxOf(byName[name])
-   assert.ok(span(box,'x')>1.27&&span(box,'x')<1.335,`${name} length ${span(box,'x')}`)
+   const length=span(box,'x')
+   assert.ok(name==='platform'?length>1.27&&length<1.335:length>.86&&length<.96,`${name} length excluding both independent deep end hoods ${length}`)
    assert.ok(span(box,'y')<.36,`${name} height ${span(box,'y')}`)
   }
   const platform=boxOf(byName.platform)
@@ -32,7 +33,8 @@ test('AGV model follows the 1310x700x460 envelope with the operator panel on the
 
   // The operator panel sits on the short +x face, not on a long side.
   const panel=boxOf(byName['operator-panel'])
-  assert.ok(span(panel,'x')<.06,`panel thickness ${span(panel,'x')}`)
+  // Folded shoulder/returns reach inboard; this is assembly depth, not skin thickness.
+  assert.ok(span(panel,'x')>.22&&span(panel,'x')<.27,`complete deep front hood and operator assembly depth ${span(panel,'x')}`)
   assert.ok(span(panel,'z')>.6,`panel width ${span(panel,'z')}`)
   assert.ok(panel.max.x>.65&&panel.max.x<.73,`panel position ${panel.max.x}`)
 

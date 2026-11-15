@@ -3,17 +3,22 @@
   <header><strong>{{ identity }}</strong><span :class="issue.status">{{ f.issueStatus(issue.status) }}</span></header>
   <p class="app-fire-issue-problem"><span>异常</span><strong>{{ problem }}</strong></p>
   <p class="app-fire-issue-location"><el-icon><Location /></el-icon><span>{{ location }}</span></p>
+  <img v-if="cover && f.photoUrls[cover.id]" class="app-fire-issue-photo" :src="f.photoUrls[cover.id]" :alt="photoLabel" />
+  <small v-else>{{ cover ? photoLabel+' · 点击查看详情' : '暂无'+photoLabel }}</small>
   <footer><span>上报人 {{ reporter }}</span><time>{{ f.time(issue.createdAt) }}</time></footer>
  </button>
 </template>
 <script setup>
-import {computed,inject} from 'vue'
-import {fireIssueProblem} from '../utils/fire-issue-problem.mjs'
+import {computed,inject,watch} from 'vue'
+import {fireIssueOriginalPhotos,fireIssueProblem} from '../utils/fire-issue-problem.mjs'
 const props=defineProps({issue:{type:Object,required:true}}),f=inject('fireInspection')
 defineEmits(['open'])
 const identity=computed(()=>props.issue.assets?.length?props.issue.assets.map(a=>[f.typeName(a.type),a.code||'编号未记录'].filter(Boolean).join(' ')).join('、'):'异常器材')
 const reporter=computed(()=>props.issue.actorName || props.issue.events?.[0]?.actorName || '未记录')
 const problem=computed(()=>fireIssueProblem(props.issue.remark))
+const photoLabel=computed(()=>props.issue.source==='ai_photo'?'消防检查卡':'异常现场照片')
+const cover=computed(()=>fireIssueOriginalPhotos(props.issue)[0])
+watch(cover,photo=>f.loadPhoto(photo,true),{immediate:true})
 const location=computed(()=>{
  const point=props.issue.pointSnapshot
  return [...new Set([point?.sectionName,point?.areaName,point?.location || point?.name].filter(Boolean))].join(' · ') || '位置未记录'
@@ -31,6 +36,7 @@ const location=computed(()=>{
 .app-fire-issue-problem>strong{font-weight:600;overflow-wrap:anywhere}
 .app-fire-issue-card .app-fire-issue-location{display:flex;align-items:flex-start;gap:5px;margin:0;font-size:12px;line-height:1.5;color:#607687;overflow-wrap:anywhere}
 .app-fire-issue-location>.el-icon{flex:none;margin-top:2px}
+.app-fire-issue-photo{width:96px;height:72px;object-fit:cover;border-radius:6px}
 .app-fire-issue-card>footer{display:flex;align-items:center;gap:4px 8px;flex-wrap:wrap;padding-top:7px;border-top:1px solid #edf1f5;font-size:11px;color:#607687;line-height:1.5}
 .app-fire-issue-card>footer time{margin-left:auto;font-variant-numeric:tabular-nums}
 .app-fire-issue-card:focus-visible{outline:2px solid #ac314a;outline-offset:2px}

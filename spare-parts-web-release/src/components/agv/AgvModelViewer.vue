@@ -10,7 +10,7 @@
     <div class="agv-stage">
       <div ref="host" class="agv-canvas"></div>
       <svg class="model-leaders" aria-hidden="true"><g v-for="label in labels.filter(item=>!selectionIds().length || selectionIds().includes(item.id))" :key="label.id"><path :d="label.path"/><circle :cx="label.anchorX" :cy="label.anchorY" r="3.5"/></g></svg>
-      <button v-for="label in labels" :key="label.id" type="button" class="model-part-label" :aria-pressed="selectionIds().includes(label.id)" :style="{left:label.x+'px',top:label.y+'px',width:label.width+'px',height:label.height+'px'}" @click="inspect(label.id)">{{label.text}}</button>
+      <button v-for="label in labels" :key="label.id" type="button" class="model-part-label" :title="label.text" :aria-pressed="selectionIds().includes(label.id)" :style="{left:label.x+'px',top:label.y+'px',width:label.width+'px',height:label.height+'px'}" @click="inspect(label.id)">{{label.text}}</button>
 
       <aside v-if="drawer" class="agv-drawer" aria-label="系统与部件">
         <header class="agv-drawer-head"><strong>系统与部件</strong><button type="button" class="agv-drawer-close" aria-label="关闭面板" @click="toggleDrawer('structure')">×</button></header>
@@ -86,7 +86,7 @@ const sectionEnabled=ref(false),sectionPosition=ref(60),playing=ref(false),explo
 const selectedGroup=computed(()=>systemRows.value.find(g=>g.id===selectedSystem.value))
 const selectedInfo=computed(()=>partInfo.value.find(p=>p.id===selectedPart.value))
 const selectionIds=()=>selectedPart.value?[selectedPart.value]:selectedGroup.value?groupPartIds(selectedGroup.value):[]
-const selectionState=computed(()=>{if(failure.value)return '三维不可用 · 仅查看说明';const ids=selectionIds().filter(id=>id!=='chassis'&&partInfo.value.some(p=>p.id===id));return ids.length?(expanded.value&&!ids.every(id=>restoredParts.value.has(id))?'拆开视图 · 再点可归位':'归位目标 · 再点可拆开'):selectedPart.value==='chassis'?'安装基准 · 始终显示':''})
+const selectionState=computed(()=>{if(failure.value)return '三维不可用 · 仅查看说明';const ids=selectionIds().filter(id=>id!=='chassis'&&partInfo.value.some(p=>p.id===id));return ids.length?(expanded.value&&!ids.every(id=>restoredParts.value.has(id))?'拆开视图':'装配视图'):selectedPart.value==='chassis'?'安装基准 · 始终显示':''})
 const groupDescription=computed(()=>selectedGroup.value?.description||'')
 const systemRows=computed(()=>matrixGroups(partInfo.value,groups))
 const timelinePercent=computed(()=>Math.round(clampUnit(explosionAmount.value)*100))
@@ -179,11 +179,8 @@ function resetAssembly(){progress=1;targetSpread=1;expanded.value=false;restored
 function inspect(id){
   if(!parts.some(p=>p.name===id))return
   if(failure.value){selectedPart.value=id;selectedSystem.value='';return}
-  if(!expanded.value)expandAll()
-  if(id!=='chassis')restoredParts.value=toggleRestored(restoredParts.value,[id])
   selectedPart.value=id;selectedSystem.value='';revealParts([id]);highlight([id])
-  
-  fitCamera(false,[id]);resumeAnimation()
+  fitCamera(false,[id]);requestRender()
 }
 function inspectSystem(group){
   if(failure.value){selectedSystem.value=group.id;selectedPart.value='';return}
@@ -226,7 +223,7 @@ function updateAssembly(dt){
 function updateLabels(){
   if(!host.value||!camera)return
   const width=host.value.clientWidth,height=host.value.clientHeight,ids=selectionIds()
-  const projected=labelsEnabled.value&&expanded.value&&(width>=600||ids.length)?parts.filter(p=>p.visible).flatMap(p=>{
+  const projected=labelsEnabled.value&&expanded.value&&(width>=600||ids.length)?parts.filter(p=>p.visible&&(!ids.length||ids.includes(p.name))).flatMap(p=>{
     p.updateWorldMatrix(true,true);const anchor=modelSurfaceAnchor([p],camera);if(!anchor)return []
     const v=anchor.project(camera)
     if(v.z<-1||v.z>1)return []
@@ -259,7 +256,6 @@ function pointerUp(e){
   ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera)
   const hit=ray.intersectObjects(parts.filter(p=>p.visible),true).find(candidate=>!sectionEnabled.value||!clipPlane||clipPlane.distanceToPoint(candidate.point)>=0)
   if(!hit)return
-  if(!expanded.value||parts.every(p=>p.name==='chassis'||restoredParts.value.has(p.name))){expandAll();return}
   let part=hit.object;while(part&&part.parent!==model)part=part.parent
   if(part)inspect(part.name)
 }

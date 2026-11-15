@@ -50,12 +50,15 @@ test('fire scan opens the automatic current month and reports a replaced old obj
   if(sql.startsWith('SELECT area_id,section_name FROM fire_points'))return[[{area_id:2}]];
   if(sql.startsWith('SELECT id,active FROM fire_assets'))return[[{id:7,active:0}]];
   if(sql.includes('FROM fire_photos WHERE point_id'))return[[]];
-  if(sql.startsWith('SELECT * FROM fire_issues WHERE point_id'))return[[]];
+  if(sql.includes('FROM fire_issues i JOIN fire_records r'))return[[{id:9,point_id:4,record_id:16,cycle_id:1,status:'resolved',has_recognition:1}]];
+  if(sql.includes('FROM fire_issue_events'))return[[{id:19,action:'resolve'}]];
+  if(sql.includes('FROM fire_photos WHERE (issue_id=')){assert.deepEqual(args,[9,16]);return[[{id:11},{id:12,issue_event_id:19}]];}
   throw Error(`Unexpected query: ${sql}`);
  }};
  const router=createRouter(db,{currentPeriod:async()=>({id:2,automatic:true,inspectionMonth:'2026-10'})}),user={id:1,role:'admin',displayName:'管理员'};
  const current=await request(router,{method:'GET',url:'/points/4?assetId=7',user});assert.equal(current.body.data.cycleId,2);assert.equal(current.body.data.dispatchStatus,'unassigned');assert.equal(current.body.data.workOrder,null);assert.equal(current.body.data.targetAsset.id,7);assert.equal(current.body.data.targetAsset.status,'retired');
  const past=await request(router,{method:'GET',url:'/points/4?cycleId=1&assetId=7',user});assert.equal(past.body.data.workOrder.cycleId,1);assert.equal(past.body.data.workOrder.assetId,7);assert.equal(past.body.data.workOrder.status,'pending');
+ const [issue]=past.body.data.issues;assert.equal(issue.source,'ai_photo');assert.deepEqual(issue.photos.map(p=>p.id),[11,12]);assert.deepEqual(issue.events[0].photos.map(p=>p.id),[12]);
 });
 
 test('standalone manual record endpoint is retired and cannot write a completion',async()=>{const {state,router}=fixture();const r=await request(router,{body:payload()});assert.equal(r.status,410);assert.match(r.body.msg,/先拍照/);assert.equal(state.records.length,0);assert.equal(state.mappings.length,0);});

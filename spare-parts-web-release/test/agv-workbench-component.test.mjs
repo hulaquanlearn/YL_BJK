@@ -99,7 +99,8 @@ for(const props of [{family:'latent',variant:'old'},{family:'latent',variant:'ne
       h.canvasEvents.get('pointerdown')(primary);h.canvasEvents.get('pointercancel')();h.canvasEvents.get('pointerup')(primary)
       assert.equal(s.expanded.value,false,'cancelled pointer must not retain a stale click')
       h.canvasEvents.get('pointerdown')(primary);h.canvasEvents.get('pointerup')(primary)
-      assert.equal(s.expanded.value,true,'an actual raycast on the model starts disassembly')
+      assert.equal(s.expanded.value,false,'an actual raycast selects without changing the assembled pose')
+      assert.ok(s.selectedPart.value,'raycast still selects a real part')
       s.resetAssembly();h.step(40)
       s.drawer.value='structure'
       s.toggleGroup(s.systemRows.value[0].id);assert.ok(s.collapsedGroups.value.has(s.systemRows.value[0].id))
@@ -171,6 +172,25 @@ for(const props of [{family:'latent',variant:'old'},{family:'latent',variant:'ne
   })
 }
 
+for(const props of [{family:'latent',variant:'old'},{family:'latent',variant:'new'},{family:'counterweight'},{family:'flipping'}])test(`${props.family}/${props.variant||'default'} part clicks preserve assembled, exploded and system-restored poses`,()=>{
+ const h=harness(props),s=h.s
+ try{
+  const id=s.parts.find(p=>p.name!=='chassis').name
+  const pose=()=>positions(s).map(([id,...coordinates])=>[id,...coordinates.map(v=>v===0?0:v)])
+  const verifySelection=()=>{
+   const before=pose(),installed=[...s.restoredParts.value],percent=s.timelinePercent.value,expanded=s.expanded.value
+   for(const candidate of [id,id,'chassis',id]){s.inspect(candidate);h.step(40);assert.deepEqual(pose(),before,'selection must never move a part');assert.deepEqual([...s.restoredParts.value],installed);assert.equal(s.timelinePercent.value,percent);assert.equal(s.expanded.value,expanded);assert.equal(s.selectedPart.value,candidate)}
+  }
+  verifySelection()
+  s.expandAll();h.step(40);verifySelection()
+  s.scrubAssembly(35);h.step(2);verifySelection()
+  s.scrubAssembly(100);const group=s.systemRows.value.find(g=>g.parts.some(p=>p.id===id));s.inspectSystem(group);h.step(40)
+  assert.ok(s.restoredParts.value.has(id),'explicit group action still restores its parts');verifySelection()
+  assert.equal(s.groupAction(group),'拆开');s.inspectSystem(group);h.step(40);assert.ok(!s.restoredParts.value.has(id),'explicit group action still splits its parts')
+  s.resetAssembly();h.step(40);assert.equal(s.timelinePercent.value,0);assert.ok(s.parts.every(p=>p.position.length()===0),'global reset still assembles the whole vehicle')
+ }finally{h.cleanup()}
+})
+
 test('reduced-motion uses the real target pose and completed feedback without an animation loop',()=>{
   const h=harness({family:'latent',variant:'old'},{reducedMotion:true})
   try{h.s.expandAll();h.step();assert.equal(h.s.timelinePercent.value,100);assert.equal(h.s.playing.value,false);assert.equal(h.frames.size,0);h.s.resetAssembly();h.step();assert.equal(h.s.timelinePercent.value,0)}finally{h.cleanup()}
@@ -226,6 +246,22 @@ test('phone bottom-sheet drawer keeps the whole vehicle above the sheet',()=>{
   s.drawer.value='';s.resize();h.step(2)
   const full=new THREE.Box3().setFromObject(s.model).getCenter(new THREE.Vector3()).project(s.camera)
   assert.ok(Math.abs(full.y)<.35,'closing the sheet re-centres the vehicle in the full canvas')
+ }finally{h.cleanup()}
+})
+
+test('phone labels follow only the selected part or system while the full matrix stays available',()=>{
+ const h=harness({family:'latent',variant:'old'}),s=h.s
+ try{
+  s.host.value.clientWidth=390;s.host.value.clientHeight=650;s.resize();s.expandAll();h.step(40)
+  assert.equal(s.labels.value.length,0,'an unselected phone view has no cloud of assembly labels')
+  for(const id of ['plc','ekk','supercapacitor','tpm','dcdc']){
+   s.inspect(id);h.step(40);assert.deepEqual(Array.from(s.labels.value,l=>l.id),[id])
+  }
+  const group=s.systemRows.value.find(g=>g.id==='power');s.inspectSystem(group);h.step(40)
+  assert.ok(s.labels.value.length>1);assert.ok(s.labels.value.every(l=>group.parts.some(p=>p.id===l.id)))
+  s.host.value.clientWidth=1100;s.resize();h.step(2)
+  assert.ok(s.labels.value.every(l=>group.parts.some(p=>p.id===l.id)),'desktop selection also excludes unrelated labels around its description')
+  s.resetAssembly();h.step(40);assert.equal(s.labels.value.length,0);assert.equal(s.partInfo.value.length,26)
  }finally{h.cleanup()}
 })
 

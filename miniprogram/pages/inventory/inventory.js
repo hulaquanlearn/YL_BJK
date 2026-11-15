@@ -86,7 +86,7 @@ Page({
         todayPendingPartIds: [...pendingIds],
         todayCompletedPartIds: [...completedIds]
       });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error('查询当日盘点单失败：', err);
       wx.showToast({ title: err.message || '获取盘点记录失败', icon: 'none' });
     }
@@ -153,7 +153,7 @@ Page({
         ...progress,
         isLoading: false
       });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error('加载盘点备件失败：', err);
       this.setData({ isLoading: false });
       wx.showToast({ title: err.message || '加载数据失败', icon: 'none' });
@@ -338,7 +338,7 @@ Page({
           fail: () => wx.redirectTo({ url: '/pages/filter/filter' })
         });
       }, 1200);
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error('提交盘点单失败：', err);
       this.setData({
         isSubmitting: false,

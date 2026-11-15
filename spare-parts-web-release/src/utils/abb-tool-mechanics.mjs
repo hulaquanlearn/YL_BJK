@@ -79,6 +79,21 @@ export function createToolMechanics(root,type){
  const drumCenters=drums.map(point),travelAxis=drumCenters[1].clone().sub(drumCenters[0]).normalize(),beltAxis=new Vector3(0,0,1)
  const normal=new Vector3().crossVectors(beltAxis,travelAxis);if(normal.y<0)normal.negate()
  const length=drumCenters[0].distanceTo(drumCenters[1]),radius=.06,perimeter=2*length+2*Math.PI*radius
+ // On the 640 CAD the two folded edges of the support deck break through
+ // the carrying surface. Keep the deck, seating its entire top behind the
+ // belt's inner face instead of exposing two metal strips in the hopper.
+ const deck=type==='tool-640'?sourceNode(root,164):null
+ let deckShift=0
+ if(deck){
+  let front=Infinity,beltFront=Infinity
+  const beltMatrix=invRoot.clone().multiply(belt.matrixWorld),beltPositions=belt.geometry.attributes.position,beltVertex=new Vector3()
+  for(let i=0;i<beltPositions.count;i++)beltFront=Math.min(beltFront,beltVertex.fromBufferAttribute(beltPositions,i).applyMatrix4(beltMatrix).sub(drumCenters[0]).dot(normal))
+  deck.traverse(mesh=>{if(!mesh.isMesh)return;const matrix=invRoot.clone().multiply(mesh.matrixWorld),p=mesh.geometry.attributes.position,v=new Vector3();for(let i=0;i<p.count;i++)front=Math.min(front,v.fromBufferAttribute(p,i).applyMatrix4(matrix).sub(drumCenters[0]).dot(normal))})
+  deckShift=Math.max(0,beltFront+.008-front)
+  const correction=new Matrix4().makeTranslation(...normal.clone().multiplyScalar(deckShift).toArray())
+  const local=deck.parent.matrixWorld.clone().invert().multiply(root.matrixWorld).multiply(correction).multiply(invRoot.clone().multiply(deck.matrixWorld))
+  local.decompose(deck.position,deck.quaternion,deck.scale);deck.updateMatrix();root.updateMatrixWorld(true)
+ }
  // Add surface coordinates only. Preserve the CAD positions and closed loop.
  belt.geometry=belt.geometry.clone();const positions=belt.geometry.attributes.position,uv=[],vertex=new Vector3(),transform=invRoot.clone().multiply(belt.matrixWorld)
  for(let i=0;i<positions.count;i++){
@@ -100,5 +115,5 @@ export function createToolMechanics(root,type){
   beltTexture.offset.x=distance/perimeter*8
   drums.forEach((drum,i)=>place(drum,around(drumCenters[i],new Quaternion().setFromAxisAngle(beltAxis,-distance/radius))))
  }
- return {setGuard,setRotor,setBeltTravel,belt,beltTexture,drums,pivot,axis,rotorCenter,rotorAxis,cylinders,rake,supports,frame,clearance}
+ return {setGuard,setRotor,setBeltTravel,belt,beltTexture,drums,pivot,axis,rotorCenter,rotorAxis,cylinders,rake,supports,frame,clearance,deck,deckShift}
 }

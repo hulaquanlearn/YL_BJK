@@ -1145,4 +1145,3 @@
 
 .program-parameter-value input[type=number]{appearance:textfield;-moz-appearance:textfield}
 .program-parameter-value input[type=number]::-webkit-inner-spin-button,.program-parameter-value input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-.abb-program-control .program-compatibility-note{margin:0;padding:8px 10px;color:#856018;background:#fff8e9;border:1px solid #efddb6;border-radius:8px;font-size:12px;line-height:1.5}

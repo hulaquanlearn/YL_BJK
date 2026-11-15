@@ -97,7 +97,7 @@ Page({
       });
       const existing = (res.data || []).find(item => String(item.materialCode || '').trim() === code);
       this.setData({ existingMaterialHint: existing ? `该编码已存在：${existing.materialDesc}。继续提交将为它新增库位。` : '' });
-    } catch (_) {
+    } catch (_) {if (_?.staleSession) return;
       this.setData({ existingMaterialHint: '' });
     }
   },
@@ -150,7 +150,7 @@ Page({
           selectedAreaIndex: 0
         });
       }
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error('加载位置数据失败：', err);
       wx.showToast({ title: '加载位置数据失败', icon: 'none' });
     }
@@ -478,7 +478,7 @@ Page({
       } else {
         wx.showToast({ title: res.msg || '添加失败', icon: 'none' });
       }
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error('添加失败：', err);
       wx.showToast({ title: err.message || '添加失败', icon: 'none' });
     } finally {

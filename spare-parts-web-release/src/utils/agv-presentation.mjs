@@ -1,13 +1,14 @@
 import * as THREE from 'three'
+import {powerPartDescriptions} from './agv-power-circuit.mjs'
 export const functionalGroups=[
  {id:'body',label:'车体与护罩',description:'底架承载整车部件，护罩保护内部机构；安全触边向安全回路反馈接触信号。',parts:['chassis','left-cover','right-cover','rear-cover']},
  {id:'lift',label:'顶升系统',description:'伺服电机带动丝杆升降，剪叉机构导向，推动载货平台完成顶升与下降。',parts:['platform','lift']},
  {id:'drive',label:'行走与抱闸',description:'左右轮组配合完成行走和转向，驱动器控制电机，抱闸回路负责对应制动控制。',parts:['drive-left','drive-right','kinco-left','kinco-right']},
- {id:'power',label:'供电与储能',description:'取电板接收能量，经TPM转换后进入车载供电回路；EKK与EKV超级电容配合进行能量管理。',parts:['pickup','tpm','ekk','supercapacitor']},
- {id:'control',label:'控制与操作',description:'操作面板提供人机交互，控制器汇总操作、导航及检测信号，协调车辆各执行机构。',parts:['control','operator-panel']},
- {id:'safety',label:'导航与避障',description:'导航雷达参与定位，避障雷达检测周围障碍物，并将检测信息交给控制及安全回路。',parts:['sensors']}
+ {id:'power',label:'供电与储能',description:'两块THM接入TPM后进入车载母线，稳压电源向负载供电；EKK管理器与EKS超级电容构成独立储能支路。',parts:['pickup','tpm','wireless-connectors','dcdc','ekk','supercapacitor']},
+ {id:'control',label:'控制与操作',description:'车辆主控与板卡处理行走、顶升及检测信号；PLC处理储能状态，继电器、熔断器与电源分别提供控制和配电。',parts:['control','plc','relay-bank','fuse-panel','io-board','aux-power','auxiliary-unit','operator-panel']},
+ {id:'safety',label:'导航与避障',description:'导航扫描头参与车辆定位，前后TIM检测障碍物；扫描器和安装支架可分别查看。',parts:['sensors','navigation','tim-front','tim-rear']}
 ]
-const offsets={chassis:[0,0,0],platform:[0,1.1,0],'left-cover':[0,.65,1.02],'right-cover':[0,.65,-1.02],'operator-panel':[1.04,.18,0],'rear-cover':[-1.04,.18,0],'drive-left':[.05,.12,.6],'drive-right':[.05,.12,-.6],lift:[0,.61,0],control:[-.48,.42,-.3],tpm:[.54,.3,-.56],pickup:[.2,.08,.98],ekk:[.45,.28,.52],supercapacitor:[-.56,.27,.45],sensors:[-.7,.34,-.72],'kinco-left':[.78,.45,.34],'kinco-right':[.78,.45,-.34]}
+const offsets={chassis:[0,0,0],platform:[0,1.1,0],'left-cover':[0,.65,1.02],'right-cover':[0,.65,-1.02],'operator-panel':[1.04,.18,0],'rear-cover':[-1.04,.18,0],'drive-left':[.05,.12,.6],'drive-right':[.05,.12,-.6],lift:[0,.61,0],control:[-.48,.42,-.3],tpm:[.54,.3,-.56],pickup:[.2,.08,.98],ekk:[.45,.28,.52],supercapacitor:[-.56,.27,.45],sensors:[-.7,.34,-.72],'kinco-left':[.78,.45,.34],'kinco-right':[.78,.45,-.34],plc:[-.65,.66,-.12],'relay-bank':[.30,.58,.55],'fuse-panel':[.65,.40,.42],'io-board':[.65,.64,.65],'aux-power':[-.60,.40,.52],'auxiliary-unit':[-.60,.38,-.55],'wireless-connectors':[-.60,.65,.38],navigation:[-.90,.28,0],'tim-front':[.88,.18,-.54],'tim-rear':[-.88,.18,.54],dcdc:[.52,.58,-.78]}
 export const explodedOffset=id=>offsets[id]||[0,.6,0]
 export function presentationOffset(part){return part.parent?.userData.sourceKnowledgeId===21?explodedOffset(part.name):part.userData.presentationOffset||explodedOffset(part.name)}
 export function groupsFor(family='latent'){
@@ -28,16 +29,22 @@ export const latentDescriptions={
  'left-cover':'保护左侧轮组及内部部件，散热开口帮助内部设备通风。',
  'right-cover':'保护右侧轮组及内部部件，拆开后可查看对应电气和机械布局。',
  'rear-cover':'后部护罩保护内部器件；安全触边在接触障碍物时向安全回路提供信号。',
- 'operator-panel':'查看车辆信息，连接手操器，使用模式切换、急停和复位等操作按钮。',
+ 'operator-panel':'完整车头罩向后包住两侧和上部，后缘与长侧罩分缝；拆开时整件端罩连同操作面板移开。屏幕、通讯接口、模式切换、急停和复位等按本车型配置展示。',
  'drive-left':'电机和减速机构带动左侧行走轮，编码器反馈运动信息，与右轮配合完成行走和转向。',
  'drive-right':'电机和减速机构带动右侧行走轮，与左轮配合完成行走和转向。',
  lift:'伺服电机驱动丝杆升降，剪叉导向机构保持平台运动方向，限位开关反馈升降位置。',
- control:'接收操作、导航及检测信号，协调驱动、顶升与安全回路，电气板提供供电分配及连接。',
- pickup:'车底两块取电板以非接触方式接收无线供电站提供的能量，再送入车载电源变换器。',
- tpm:'接收取电板的能量并转换成车载供电，连接后续供电分配及储能回路。',
- ekk:'连接供电与超级电容储能回路，参与能量转换与充放电控制。',
- supercapacitor:'储存电能，在车辆离开供电区域时参与车载能量供给，与EKK回路配合工作。',
- sensors:'导航雷达参与车辆定位，避障雷达检测周围障碍物，并向控制及安全回路反馈。',
+ control:'电气安装托架、固定件和线束主干承载并连接各电气设备，器件可分别选择查看。',
+ ...powerPartDescriptions,
+ 'relay-bank':'继电器排及其底座、接线端承担控制信号的切换；各段按实物外形示意，接线数量以本车型原图为准。',
+ 'fuse-panel':'独立熔断器板包含分层熔断器座、保护罩和接线端，为各支路提供保护。',
+ 'io-board':'车辆控制板卡与端子组件连接操作、驱动和检测回路；板卡、接插件与托架分别体现安装层次。',
+ 'aux-power':'辅助电源向控制与检测设备提供所需电源；端子接线和额定值按对应车型资料核对。',
+ 'auxiliary-unit':'实物照片中竖置的有筋设备，保留可辨认的壳体和接口特征；具体型号及电路功能待铭牌确认。',
+ 'wireless-connectors':'无线取电设备旁的独立连接盒，展示外壳、成组插接件与安装关系；内部接线按图纸核对。',
+ sensors:'传感器安装支架和固定线束用于承托、连接导航与避障设备。',
+ navigation:'导航扫描头参与车辆定位，红色扫描窗面向车外，底座与支架表达实物安装层次。',
+ 'tim-front':'前端TIM避障组件检测车前障碍物，并向车辆控制和安全回路反馈。',
+ 'tim-rear':'后端TIM避障组件检测车后障碍物，与前端组件分别展示。',
  'kinco-left':'新车左驱动器A5控制左轮电机，接口连接控制、反馈及电机回路；抱闸另有对应控制图。',
  'kinco-right':'新车右驱动器A6控制右轮电机，与左驱动器配合实现车辆行走和转向。'
 }

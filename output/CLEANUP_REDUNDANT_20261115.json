@@ -1,0 +1,717 @@
+{
+  "at": "2026-11-15T22:44:48.4560576+08:00",
+  "status": "passed",
+  "deployment": "dsh-audit-fixes-20261115",
+  "method": "Windows system Recycle Bin; no permanent deletion or emptying",
+  "recycled": [
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-pendant-layout-20261106\\payload-restored",
+      "bytes": 614922,
+      "files": 10,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-program-note-20261114\\payload",
+      "bytes": 3206377,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-program-note-20261114\\deployment-payload.tar.gz",
+      "bytes": 993176,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-rim-20261113\\payload",
+      "bytes": 3206201,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-rim-20261113\\payload-v2",
+      "bytes": 3207033,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-rim-20261113\\deployment-payload.tar.gz",
+      "bytes": 993034,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-strip-brush-20261107\\esbuild-temp",
+      "bytes": 2190368,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\abb-strip-brush-20261107\\payload-release",
+      "bytes": 468216,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-both-front-20261112\\build-temp",
+      "bytes": 2190408,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-both-front-20261112\\payload",
+      "bytes": 3163748,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-both-front-20261112\\production-assets",
+      "bytes": 8575560,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-both-front-20261112\\web-dist-final",
+      "bytes": 215931474,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-both-front-20261112\\web-dist-isolated",
+      "bytes": 8577302,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-both-front-20261112\\deployment-payload.tar.gz",
+      "bytes": 979043,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-build-20261112\\build-temp",
+      "bytes": 2190520,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-build-20261112\\build-temp-final",
+      "bytes": 2190528,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-build-20261112\\payload",
+      "bytes": 3153767,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-build-20261112\\production-assets",
+      "bytes": 8556070,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-build-20261112\\web-dist-final",
+      "bytes": 215928961,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-build-20261112\\web-dist-isolated",
+      "bytes": 8571522,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-build-20261112\\deployment-payload.tar.gz",
+      "bytes": 978186,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-deep-hood-20261112\\build-temp",
+      "bytes": 2190384,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-deep-hood-20261112\\payload",
+      "bytes": 3185243,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-deep-hood-20261112\\production-assets",
+      "bytes": 8577302,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-deep-hood-20261112\\web-dist-final",
+      "bytes": 215932891,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-deep-hood-20261112\\web-dist-isolated",
+      "bytes": 8580292,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-deep-hood-20261112\\deployment-payload.tar.gz",
+      "bytes": 984706,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-front-shell-20261112\\build-temp",
+      "bytes": 2190432,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-front-shell-20261112\\payload",
+      "bytes": 3159496,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-front-shell-20261112\\production-assets",
+      "bytes": 8571522,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-front-shell-20261112\\web-dist-final2",
+      "bytes": 215931305,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-front-shell-20261112\\web-dist-isolated",
+      "bytes": 8575560,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-front-shell-20261112\\deployment-payload.tar.gz",
+      "bytes": 978805,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-part-select-20261113\\build-temp",
+      "bytes": 2190360,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-part-select-20261113\\payload",
+      "bytes": 3190571,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-part-select-20261113\\production-assets",
+      "bytes": 8580292,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-part-select-20261113\\web-dist-final",
+      "bytes": 215932717,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-part-select-20261113\\web-dist-isolated",
+      "bytes": 8581690,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-part-select-20261113\\deployment-payload.tar.gz",
+      "bytes": 985541,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-opening-20261113\\payload",
+      "bytes": 3204449,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-storage-20261113\\build-temp",
+      "bytes": 1904020,
+      "files": 99,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-storage-20261113\\payload",
+      "bytes": 3200645,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-storage-20261113\\production-assets",
+      "bytes": 8581690,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-storage-20261113\\web-dist-final",
+      "bytes": 215937359,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-storage-20261113\\web-dist-final2",
+      "bytes": 215938085,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-storage-20261113\\web-dist-isolated",
+      "bytes": 8589193,
+      "files": 62,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-storage-20261113\\web-dist-ready",
+      "bytes": 215938647,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-storage-20261113\\deployment-payload.tar.gz",
+      "bytes": 990766,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\agv-rear-trapezoid-20261115\\web-dist-isolated",
+      "bytes": 8604335,
+      "files": 63,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\app-layout-20261107\\payload-release",
+      "bytes": 469679,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\app-part-return-20261107\\payload-release",
+      "bytes": 469684,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\app-pickers-20261107\\payload-release",
+      "bytes": 469680,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\app-stock-adjust-20261107\\payload-release",
+      "bytes": 469377,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\control-favorites-20261107\\payload-final",
+      "bytes": 469378,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\control-favorites-20261107\\payload-release",
+      "bytes": 469378,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\crane-components-pitcap-20261107\\esbuild-temp",
+      "bytes": 2190360,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\crane-components-pitcap-20261107\\payload-release",
+      "bytes": 429686,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\crane-disassembly-20261106\\esbuild-temp",
+      "bytes": 2190440,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\crane-disassembly-20261106\\payload-release",
+      "bytes": 418539,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\crane-joint-20261106\\payload-release",
+      "bytes": 404059,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\crane-label-lines-20261107\\esbuild-temp",
+      "bytes": 2190432,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\crane-label-lines-20261107\\payload-release",
+      "bytes": 436090,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\crane-program-20261106\\esbuild-temp",
+      "bytes": 2190496,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\crane-workshop-20261106\\esbuild-temp",
+      "bytes": 2190392,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\crane-workshop-20261106\\payload-release",
+      "bytes": 418824,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-app-count-20261107\\payload-release",
+      "bytes": 469375,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-app-layout-20261106\\payload-isolated-r2",
+      "bytes": 455378,
+      "files": 3,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-issue-action-20261110\\build",
+      "bytes": 215914961,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-issue-action-20261110\\payload",
+      "bytes": 2759250,
+      "files": 36,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-issue-card-20261108\\build-final2",
+      "bytes": 215913971,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-issue-card-20261108\\payload-final",
+      "bytes": 3017513,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-issue-card-20261108\\payload-restored.tar.gz",
+      "bytes": 935734,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-issue-detail-20261108\\build-final2",
+      "bytes": 215913971,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-issue-detail-20261108\\build-verified",
+      "bytes": 215914218,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-issue-detail-20261108\\payload-final",
+      "bytes": 3017762,
+      "files": 33,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-issue-detail-20261108\\payload-restored.tar.gz",
+      "bytes": 935779,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-minimal-20261107\\payload-release",
+      "bytes": 469379,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\payload",
+      "bytes": 3214920,
+      "files": 34,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\payload-v2",
+      "bytes": 3214947,
+      "files": 34,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\payload-v3",
+      "bytes": 3215027,
+      "files": 34,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photo-touch-20261114\\deployment-payload.tar.gz",
+      "bytes": 995212,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\mobile-ui-20261107\\payload-release",
+      "bytes": 469377,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\showroom-header-20261106\\build-wide",
+      "bytes": 214993727,
+      "files": 1055,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\showroom-header-20261106\\payload-restored",
+      "bytes": 2816981,
+      "files": 31,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\showroom-header-20261106\\payload-restored.tar.gz",
+      "bytes": 861792,
+      "files": 1,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\showroom-title-20261106\\payload",
+      "bytes": 2429162,
+      "files": 31,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\showroom-title-20261106\\temp",
+      "bytes": 2190480,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photos-20261110-build",
+      "bytes": 215914961,
+      "files": 1065,
+      "action": "moved-to-system-recycle-bin"
+    },
+    {
+      "path": "D:\\wx_xiangm\\xiangmu\\.local\\fire-photos-20261110-build-temp",
+      "bytes": 2190456,
+      "files": 194,
+      "action": "moved-to-system-recycle-bin"
+    }
+  ],
+  "failed": [],
+  "bytes": 3241175541,
+  "preserved": [
+    "D:\\wx_xiangm\\xiangmu\\.local\\dsh-audit-fixes-20261115\\web-dist-isolated",
+    "D:\\wx_xiangm\\xiangmu\\.local\\fire-evidence-compact-final-20261115\\web-dist-isolated"
+  ],
+  "sourceAndEvidenceRetained": true,
+  "completedAt": "2026-11-15T22:45:15.1774333+08:00",
+  "previewPort8534Occupied": false,
+  "server": {
+    "status": "passed",
+    "at": "2026-11-15T14:45:24.530Z",
+    "recycled": [
+      {
+        "at": "2026-11-15T14:45:03.013Z",
+        "originalPath": "/opt/spare-parts/rollback/abb-program-note-20261114",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/abb-program-note-20261114",
+        "bytes": 216601518,
+        "files": 1068,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:04.179Z",
+        "originalPath": "/opt/spare-parts/rollback/abb-rim-20261113",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/abb-rim-20261113",
+        "bytes": 216594343,
+        "files": 1067,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:05.350Z",
+        "originalPath": "/opt/spare-parts/rollback/agv-both-front-20261112",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/agv-both-front-20261112",
+        "bytes": 216549801,
+        "files": 1067,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:06.472Z",
+        "originalPath": "/opt/spare-parts/rollback/agv-deep-hood-20261112",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/agv-deep-hood-20261112",
+        "bytes": 216570853,
+        "files": 1067,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:07.687Z",
+        "originalPath": "/opt/spare-parts/rollback/agv-front-shell-20261112",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/agv-front-shell-20261112",
+        "bytes": 216542417,
+        "files": 1067,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:08.848Z",
+        "originalPath": "/opt/spare-parts/rollback/agv-part-select-20261113",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/agv-part-select-20261113",
+        "bytes": 216578581,
+        "files": 1067,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:09.980Z",
+        "originalPath": "/opt/spare-parts/rollback/agv-photo-rebuild-20261112",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/agv-photo-rebuild-20261112",
+        "bytes": 216524470,
+        "files": 1067,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:11.137Z",
+        "originalPath": "/opt/spare-parts/rollback/agv-rear-storage-20261113",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/agv-rear-storage-20261113",
+        "bytes": 216583357,
+        "files": 1067,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:12.309Z",
+        "originalPath": "/opt/spare-parts/rollback/agv-rear-trapezoid-20261115",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/agv-rear-trapezoid-20261115",
+        "bytes": 216605350,
+        "files": 1068,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:13.470Z",
+        "originalPath": "/opt/spare-parts/rollback/fire-evidence-compact-20261115",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/fire-evidence-compact-20261115",
+        "bytes": 216612855,
+        "files": 1068,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:14.652Z",
+        "originalPath": "/opt/spare-parts/rollback/fire-evidence-compact-final-20261115",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/fire-evidence-compact-final-20261115",
+        "bytes": 216619313,
+        "files": 1068,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:15.834Z",
+        "originalPath": "/opt/spare-parts/rollback/fire-issue-action-20261110",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/fire-issue-action-20261110",
+        "bytes": 216142184,
+        "files": 1069,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:16.960Z",
+        "originalPath": "/opt/spare-parts/rollback/fire-issue-card-20261108",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/fire-issue-card-20261108",
+        "bytes": 216429891,
+        "files": 1067,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:18.070Z",
+        "originalPath": "/opt/spare-parts/rollback/fire-issue-detail-20261108",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/fire-issue-detail-20261108",
+        "bytes": 216430319,
+        "files": 1067,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:19.152Z",
+        "originalPath": "/opt/spare-parts/rollback/fire-photo-touch-20261114",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/fire-photo-touch-20261114",
+        "bytes": 216601398,
+        "files": 1067,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      },
+      {
+        "at": "2026-11-15T14:45:20.300Z",
+        "originalPath": "/opt/spare-parts/rollback/fire-photos-20261110",
+        "target": "/opt/spare-parts/recycle-bin/redundant-20261115/rollback/fire-photos-20261110",
+        "bytes": 215952899,
+        "files": 1067,
+        "action": "moved-to-project-private-recycle",
+        "hashesVerified": true
+      }
+    ],
+    "bytes": 3463939549,
+    "recycleManifest": "/opt/spare-parts/recycle-bin/redundant-20261115/RECYCLE.json",
+    "restore": "For a listed entry, verify this project and no collision at originalPath; rename target back to originalPath. To roll back a service afterward, follow its saved RESTORE.json after checking no later release. Moving a directory alone does not deploy it.",
+    "latestRollbackPreserved": "/opt/spare-parts/rollback/dsh-audit-fixes-20261115",
+    "protectedFilesPreserved": 2264,
+    "processesPreserved": true,
+    "activeWebFiles": 1066,
+    "activeApiFiles": 117,
+    "health": "connected",
+    "publicAndPermissionChecksPassed": true
+  },
+  "activeJsReachability": {
+    "total": 55,
+    "reachable": 55,
+    "unreferenced": [],
+    "method": "Reference graph of deployed index and asset chunk filenames; read-only, no dynamic resource removal"
+  }
+}

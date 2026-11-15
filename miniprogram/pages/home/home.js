@@ -51,7 +51,7 @@ Page({
         dashboard: res.data?.dashboard || this.data.dashboard,
         lowStockParts: (res.data?.lowStockParts || []).slice(0,3)
       });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error('首页数据加载失败：', err);
       this.setData({ dashboardLoading: false, dashboardError: true });
     }

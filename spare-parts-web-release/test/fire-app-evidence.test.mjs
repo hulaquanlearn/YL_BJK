@@ -3,13 +3,19 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {compileScript,parse} from '@vue/compiler-sfc'
 import * as Vue from 'vue'
-import {fireIssueProblem} from '../src/utils/fire-issue-problem.mjs'
+import {fireIssueOriginalPhotos,fireIssueProblem} from '../src/utils/fire-issue-problem.mjs'
 import {renderToString} from '@vue/server-renderer'
+import {createFirePhotoMarker} from '../src/utils/fire-photo-gestures.mjs'
 
 function component(file){
  const {descriptor}=parse(readFileSync(new URL('../src/'+file,import.meta.url),'utf8'))
  const code=compileScript(descriptor,{id:'fire-app-evidence',inlineTemplate:true}).content.replace(/import\s+([\s\S]*?)\s+from\s+(['"])([^'"]+)\2\s*;?/g,(_,clause,_quote,specifier)=>`const ${clause.trim().startsWith('{')?clause.trim().replace(/\s+as\s+/g,': '):'{default:'+clause.trim()+'}'}=modules[${JSON.stringify(specifier)}];`).replace('export default','return')
- const modules={vue:Vue,'../utils/fire-issue-problem.mjs':{fireIssueProblem},'./FireCamera.vue':{default:{render(){return null}}},'./FirePhotoRecognition.vue':{default:{render(){return Vue.h('section','拍照识别')}}},'./FireRecordEvidence.vue':{default:{render(){return null}}},'../../app/AppFireRecordEvidence.vue':{default:{render(){return null}}},'../../app/AppFireIssue.vue':{default:{render(){return null}}},'../components/fire/FireRecordEvidence.vue':{default:{props:['record'],render(){return Vue.h('div',{'data-full-record':this.record.id},'完整原始凭证')}}}}
+ const modules={
+  vue:Vue,'../utils/fire-issue-problem.mjs':{fireIssueOriginalPhotos,fireIssueProblem},'../../utils/fire-issue-problem.mjs':{fireIssueOriginalPhotos},
+  './FireCamera.vue':{default:{render(){return null}}},'./FirePhotoRecognition.vue':{default:{render(){return Vue.h('section','拍照识别')}}},
+  './FireRecordEvidence.vue':{default:{render(){return null}}},'../../app/AppFireRecordEvidence.vue':{default:{render(){return null}}},'../../app/AppFireIssue.vue':{default:{render(){return null}}}
+ }
+ modules['../../utils/fire-photo-gestures.mjs']={createFirePhotoMarker}
  if(file!=='components/fire/FirePreviewImage.vue'){
   const preview={default:component('components/fire/FirePreviewImage.vue')}
   modules['./FirePreviewImage.vue']=preview
@@ -18,7 +24,7 @@ function component(file){
  return new Function('modules',code)(modules)
 }
 const Card=component('app/AppFireIssueCard.vue'),Issue=component('app/AppFireIssue.vue'),Record=component('app/AppFireRecordEvidence.vue')
-const base={issueStatus:s=>({open:'待整改',resolved:'待复核',closed:'已关闭'})[s],issueAction:a=>({created:'发现异常',opened:'发现异常',resolve:'登记整改'})[a]||a,typeName:t=>t==='hydrant'?'消防栓':'灭火器',resultName:r=>r==='normal'?'正常':'异常',time:t=>t||'—',photoUrls:{1:'blob:photo'},canInspect:()=>true,detail:{point:{id:3}},permissions:{canManage:false},openIssue(){}}
+const base={issueStatus:s=>({open:'待整改',resolved:'待复核',closed:'已关闭'})[s],issueAction:a=>({created:'发现异常',opened:'发现异常',resolve:'登记整改'})[a]||a,typeName:t=>t==='hydrant'?'消防栓':'灭火器',resultName:r=>r==='normal'?'正常':'异常',time:t=>t||'—',photoUrls:{1:'blob:photo'},canInspect:()=>true,detail:{point:{id:3}},permissions:{canManage:false},openIssue(){},loadPhoto(){}}
 async function render(c,props,fire={}){const app=Vue.createSSRApp({render:()=>Vue.h(c,props)});app.provide('fireInspection',{...base,...fire});app.config.warnHandler=()=>{};app.component('ElDialog',{setup:(_p,{slots})=>()=>Vue.h('article',[slots.default?.(),slots.footer?.()])});for(const name of ['ElButton','ElIcon'])app.component(name,{setup:(_p,{slots})=>()=>Vue.h(name==='ElButton'?'button':'i',slots.default?.())});app.component('ElImage',{props:['src'],setup:p=>()=>Vue.h('img',{src:p.src})});return renderToString(app)}
 const issue={id:1,status:'open',remark:'门锁损坏',actorName:'上报人员',createdAt:'2026/11/05 09:03:03',assets:[{id:55,code:'X342',type:'hydrant'}],pointSnapshot:{name:'三楼通道',location:'三楼通道北侧',sectionName:'输送工段'},events:[{id:9,action:'opened',actorName:'上报人员',createdAt:'2026/11/05 09:03:03',remark:'门锁损坏'}],photos:[]}
 test('abnormal list identifies the actual affected asset, reporter, problem and location',async()=>{
@@ -43,10 +49,34 @@ test('issue details retain discovery identity without repeating the same report 
  const viewer=await render(Issue,{issue:pending});assert.ok(viewer.includes('已更换门锁'));assert.ok(!viewer.includes('复核关闭'))
  const admin=await render(Issue,{issue:pending},{permissions:{canManage:true}});assert.ok(admin.includes('复核关闭'));assert.ok(admin.includes('重新打开'))
 })
-test('compact inspection evidence keeps actor/time, independent checks, images and original record access',async()=>{
+test('App inspection evidence shows actor/time, checks and photos once without nested desktop evidence',async()=>{
  const record={id:7,result:'normal',actorName:'点检人员',actualCheckedAt:'2026/11/04 08:35:10',recognition:{deviceCode:'492',year:2026,month:11,checks:[{name:'外观',mark:'√',result:'normal'},{name:'压力表',mark:'×',result:'abnormal'}]},photos:[{id:1}],pointSnapshot:{code:'internal-point'},items:[]}
- const html=await render(Record,{record});for(const text of ['点检人员','08:35:10','外观','压力表','×','blob:photo','查看完整凭证','data-full-record="7"'])assert.ok(html.includes(text),text)
+ const html=await render(Record,{record,showResult:false});for(const text of ['点检人员','08:35:10','外观','压力表','×','blob:photo'])assert.ok(html.includes(text),text)
  assert.ok(!html.includes('internal-point'))
+ for(const text of ['查看完整凭证','AI 识别凭证','已完成点检','检查正常','2026年11月','2026-11'])assert.ok(!html.includes(text),text)
+ for(const text of ['点检人员','08:35:10','外观','压力表','blob:photo'])assert.equal(html.split(text).length-1,1,text+' appears once')
+ assert.ok(!html.includes('<details'),'no empty recognition section')
+})
+
+test('recognition disclosure keeps only distinct audit fields and manual corrections',async()=>{
+ const record={id:18,result:'normal',actorName:'现场人员',actualCheckedAt:'2026-11-15 09:15:40',recognition:{deviceCode:'482',inspectionMonth:'2026-11',recognizedAt:'2026-11-15 09:15:33',location:'旧位置',confirmation:{originalDeviceCode:'481',ledgerLocation:'实际位置'},checks:[{key:'appearance',name:'外观',mark:'√',result:'normal',source:'manual_confirmation'}]},remark:'AI识别2026-11检查卡各项正常',photos:[{id:1}],items:[]}
+ const html=await render(Record,{record,showResult:false})
+ for(const text of ['识别记录','09:15:33','原识别编号','481','点检位置','旧位置','人工确认'])assert.ok(html.includes(text),text)
+ for(const text of ['AI识别2026-11检查卡各项正常','实际位置','所属月份','查看完整凭证'])assert.ok(!html.includes(text),text)
+ assert.equal(html.split('外观').length-1,1);assert.equal(html.split('blob:photo').length-1,1)
+ const note=await render(Record,{record:{...record,remark:'更换后已确认'},showResult:true,showDevice:true});assert.ok(note.includes('更换后已确认'));assert.ok(note.includes('482'));assert.ok(note.includes('检查正常'))
+})
+
+test('identical recognition time and unchanged identity do not create an empty or repetitive disclosure',async()=>{
+ const record={id:19,result:'normal',actualCheckedAt:'2026-11-15 09:15:40',recognition:{deviceCode:'482',inspectionMonth:'2026-11',recognizedAt:'2026-11-15 09:15:40',location:'实际位置',confirmation:{originalDeviceCode:'482',ledgerLocation:'实际位置'},checks:[]},photos:[],items:[]}
+ const html=await render(Record,{record});assert.ok(!html.includes('<details'));assert.equal(html.split('09:15:40').length-1,1)
+})
+
+test('single-device dialog uses its existing status while multi-record and whole-point views keep record identity',async()=>{
+ const record={id:20,result:'normal',recognition:{deviceCode:'482',checks:[]},photos:[],items:[]}
+ const single=await render(Record,{record},{activeAssetId:7,visibleRecords:[record]});assert.ok(!single.includes('检查正常'));assert.ok(!single.includes('482'))
+ const multiple=await render(Record,{record},{activeAssetId:7,visibleRecords:[record,{...record,id:21}]});assert.ok(multiple.includes('检查正常'))
+ const point=await render(Record,{record},{activeAssetId:null,visibleRecords:[record]});assert.ok(point.includes('482'))
 })
 
 test('inspection evidence shows the system task month before photographed dates',async()=>{
@@ -97,3 +127,14 @@ test('App completed devices display records and normal or abnormal status withou
  let html=await render(dialog,{},f);assert.ok(html.includes('正常'));assert.ok(html.includes('关闭此对话框'));for(const text of ['el-tabs','器材信息','拍照识别','确认保存'])assert.ok(!html.includes(text),text);
  html=await render(dialog,{},{...f,filteredRecords:[{id:13,result:'abnormal'}]});assert.ok(html.includes('异常'));assert.ok(html.includes('fire-result-abnormal'));
 });
+
+test('AI issue previews the inspection card and keeps rectification evidence separate',async()=>{
+ const photos=[{id:1},{id:2}], events=[...issue.events,{id:10,action:'resolve',photos:[photos[1]]}]
+ const value={...issue,source:'ai_photo',photos,events}
+ const urls={photoUrls:{1:'blob:card',2:'blob:resolved'}}
+ const card=await render(Card,{issue:value},urls)
+ assert.match(card,/src="blob:card" alt="消防检查卡"/)
+ assert.ok(!card.includes('blob:resolved'))
+ const detail=await render(Issue,{issue:value},urls)
+ for(const text of ['消防检查卡','blob:card','blob:resolved'])assert.ok(detail.includes(text),text)
+})

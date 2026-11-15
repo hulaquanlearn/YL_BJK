@@ -54,6 +54,14 @@ async function start(){
   app.get('/api/knowledge/:id/preview',(req,res,next)=>{const id=String(req.params.id),file=['12','17','19','20','26'].includes(id)?path.join(root,'spare-parts-web-release/public/documents/abb/irb6700-product.pdf'):null;if(!file||!require('fs').existsSync(file))return next();res.type('application/pdf').sendFile(file);});
   app.use('/api',(req,res,next)=>/^(?:\/knowledge|\/parts|\/part-models?|\/part-category-models|\/filters|\/stats|\/dashboard|\/replenishment|\/stock-movements|\/movement-reasons|\/warehouse|\/equipment|\/data-quality|\/inventory-orders|\/staging-points)(?:\/|$|-)/.test(req.path)?handler(req,res).catch(next):next());
  }});
+ // Optional isolated build review on the same loopback port. Serve only the
+ // verified index/assets; never expose the private .local directory itself.
+ if(process.env.REVIEW_DIST_DIR){
+  const fs=require('node:fs'),dist=path.resolve(root,process.env.REVIEW_DIST_DIR),allowed=path.join(root,'.local')+path.sep;
+  if(!dist.startsWith(allowed)||!fs.statSync(path.join(dist,'index.html')).isFile()||!fs.statSync(path.join(dist,'assets')).isDirectory())throw Error('Review build must be an index/assets directory within workspace .local');
+  app.use('/assets',require('../server/node_modules/express').static(path.join(dist,'assets'),{dotfiles:'deny',index:false}));
+  app.use((req,res,next)=>/^(GET|HEAD)$/.test(req.method)&&!/^\/(api|models|uploads)(?:\/|$)/.test(req.path)?res.sendFile(path.join(dist,'index.html')):next());
+ }
  const backend=require('node:http').createServer(app),webRoot=path.join(root,'spare-parts-web-release');
  const {createServer}=await import(pathToFileURL(require.resolve('../spare-parts-web-release/node_modules/vite')).href);
  const config=(await import(pathToFileURL(path.join(webRoot,'vite.config.js')).href)).default;

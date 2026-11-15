@@ -32,7 +32,7 @@ Page({
     try {
       const res = await api.getUsers();
       this.setData({ users: (res.data || []).map(user => ({ ...user, roleLabel:roleLabels[user.role] || '车间人员（只读）', identityLabel:identityLabel(user), roleIndex:Object.keys(roleLabels).indexOf(user.role), initial: user.displayName?.slice(0, 1) || '用' })) });
-    } catch (err) { wx.showToast({ title: err.message || '加载失败', icon: 'none' }); }
+    } catch (err) {if (err?.staleSession) return; wx.showToast({ title: err.message || '加载失败', icon: 'none' }); }
     finally { this.setData({ loading: false }); }
   },
 
@@ -57,7 +57,7 @@ Page({
       wx.showToast({ title: '创建成功', icon: 'success' });
       this.setData({ showCreate: false });
       await this.loadUsers();
-    } catch (err) { wx.showToast({ title: err.message || '创建失败', icon: 'none' }); }
+    } catch (err) {if (err?.staleSession) return; wx.showToast({ title: err.message || '创建失败', icon: 'none' }); }
     finally { this.setData({ submitting: false }); }
   },
 
@@ -66,7 +66,7 @@ Page({
     try {
       await api.updateUser(e.currentTarget.dataset.id, { enabled: e.detail.value });
       wx.showToast({ title: e.detail.value ? '已启用' : '已停用', icon: 'success' });
-    } catch (err) { wx.showToast({ title: err.message || '操作失败', icon: 'none' }); await this.loadUsers(); }
+    } catch (err) {if (err?.staleSession) return; wx.showToast({ title: err.message || '操作失败', icon: 'none' }); await this.loadUsers(); }
   },
 
   async changeRole(e) {
@@ -81,7 +81,7 @@ Page({
       await api.updateUser(e.currentTarget.dataset.id, { role });
       wx.showToast({ title: '角色已更新', icon: 'success' });
       await this.loadUsers();
-    } catch (err) { wx.showToast({ title: err.message || '更新失败', icon: 'none' }); }
+    } catch (err) {if (err?.staleSession) return; wx.showToast({ title: err.message || '更新失败', icon: 'none' }); }
   },
 
   openIdentity(e) {
@@ -109,7 +109,7 @@ Page({
       this.setData({showIdentity:false,pendingRole:''});
       wx.showToast({title:'岗位已更新',icon:'success'});
       await this.loadUsers();
-    } catch(err) { wx.showToast({title:err.message||'更新失败',icon:'none'}); }
+    } catch(err) {if (err?.staleSession) return; wx.showToast({title:err.message||'更新失败',icon:'none'}); }
     finally { this.setData({submitting:false}); }
   },
 
@@ -130,7 +130,7 @@ Page({
       await api.resetUserPassword(this.data.resetUser.id, this.data.resetPassword);
       wx.showToast({ title: '密码已重置', icon: 'success' });
       this.setData({ showReset: false });
-    } catch (err) { wx.showToast({ title: err.message || '重置失败', icon: 'none' }); }
+    } catch (err) {if (err?.staleSession) return; wx.showToast({ title: err.message || '重置失败', icon: 'none' }); }
     finally { this.setData({ submitting: false }); }
   }
 });

@@ -2,15 +2,15 @@ import {Group,Mesh,CylinderGeometry,BoxGeometry,TorusGeometry,LatheGeometry,Mesh
 
 // User's field photo: rear central hub, long rocker and pinned hydraulic drive.
 // All dimensions/stroke remain illustrative, not measured or mapped to valve IO.
-export function createHydraulicLid({radius=1.2,height=.97}={}){
+export function createHydraulicLid({radius=1.2,height=.97,hingeSetback=.8}={}){
  const root=new Group();root.name='hydraulic-pot-lid'
  const metal=new MeshStandardMaterial({color:'#aab5b9',metalness:.78,roughness:.34}),dark=new MeshStandardMaterial({color:'#536169',metalness:.55,roughness:.65}),chrome=new MeshStandardMaterial({color:'#ced8dc',metalness:.9,roughness:.19})
  const box=(parent,name,size,position,material=dark)=>{const m=new Mesh(new BoxGeometry(...size),material);m.name=name;m.position.fromArray(position);parent.add(m);return m}
  const axle=(parent,name,radius,length,position,material=chrome)=>{const m=new Mesh(new CylinderGeometry(radius,radius,length,24),material);m.name=name;m.rotation.z=Math.PI/2;m.position.copy(position);parent.add(m);return m}
- const pivot=new Vector3(0,height+.28,-radius-.30),hinge=new Group();hinge.name='lid-hinge';hinge.position.copy(pivot);root.add(hinge)
+ const pivot=new Vector3(0,height+.28,-radius-hingeSetback),hinge=new Group();hinge.name='lid-hinge';hinge.position.copy(pivot);root.add(hinge)
  const centre=new Vector3(0,height+.055-pivot.y,-pivot.z),hub=centre.clone().add(new Vector3(0,.50,0)),rodLocal=new Vector3(0,.05,-.45)
  // Rocker carries the centre of the lid; no floating rim hinge or short side prop.
- box(root,'pot-rocker-bracket',[.38,.36,.38],[0,pivot.y-.03,pivot.z]);box(root,'rocker-pedestal',[.28,pivot.y,.24],[0,pivot.y/2,pivot.z]);box(root,'pot-rocker-wall-bridge',[.38,.22,.34],[0,height*.7,-radius-.15]);
+ box(root,'pot-rocker-bracket',[.38,.36,.38],[0,pivot.y-.03,pivot.z]);box(root,'rocker-pedestal',[.28,pivot.y,.24],[0,pivot.y/2,pivot.z]);box(root,'pot-rocker-wall-bridge',[.38,.22,hingeSetback+.04],[0,height*.7,-radius-hingeSetback/2]);
  axle(root,'rocker-base-axle',.09,.48,pivot)
  const beam=box(hinge,'lid-cylinder-arm',[.20,hub.length(),.24],hub.clone().multiplyScalar(.5).toArray(),metal);beam.quaternion.setFromUnitVectors(new Vector3(0,1,0),hub.clone().normalize())
  box(hinge,'lid-drive-crank',[.24,.20,.62],[0,.025,-.215],metal)
@@ -24,7 +24,7 @@ export function createHydraulicLid({radius=1.2,height=.97}={}){
  const cap=new Mesh(new CylinderGeometry(.25,.25,.05,32),metal);cap.name='lid-centre-cap';cap.position.copy(centre).add(new Vector3(0,.225,0));hinge.add(cap)
  for(const x of [-.075,.075])box(hinge,'lid-clevis-ear-'+x,[.035,.18,.20],rodLocal.clone().add(new Vector3(x,0,0)).toArray())
  const pin=axle(hinge,'hydraulic-lid-pin',.035,.24,rodLocal)
- const base=new Vector3(0,.10,-radius-.95);box(root,'pot-cylinder-bracket',[.36,.18,1.10],[0,.09,-radius-.52]);
+ const base=new Vector3(0,.10,pivot.z-.65);box(root,'pot-cylinder-bracket',[.36,.18,hingeSetback+.80],[0,.09,-radius-(hingeSetback+.74)/2]);
  for(const x of [-.09,.09])box(root,'base-clevis-ear-'+x,[.035,.20,.20],base.clone().add(new Vector3(x,0,0)).toArray())
  axle(root,'hydraulic-base-pin',.035,.26,base)
  const cylinder=new Group();cylinder.name='hydraulic-oil-cylinder';cylinder.position.copy(base);root.add(cylinder)

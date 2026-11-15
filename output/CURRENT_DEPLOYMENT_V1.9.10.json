@@ -1,32 +1,109 @@
 {
-  "at": "2026-11-08T05:11:17.355Z",
-  "id": "fire-issue-detail-20261108",
+  "at": "2026-11-15T14:39:41.057Z",
+  "id": "dsh-audit-fixes-20261115",
   "status": "deployed-and-verified",
-  "checks": 11219,
-  "webFiles": 1065,
+  "checks": 14219,
+  "webFiles": 1066,
   "changedWebFiles": 32,
   "removedObsoleteWebFiles": 31,
-  "apiFiles": 0,
-  "protectedFiles": 1608,
+  "apiFiles": 3,
+  "unchangedApiFiles": 114,
+  "remoteRegressionTests": 33,
+  "protectedFiles": 2264,
   "protectedPreserved": true,
   "androidUnchanged": true,
   "webProcessesPreserved": true,
-  "restarted": [],
-  "rollback": "/opt/spare-parts/rollback/fire-issue-detail-20261108",
+  "restarted": [
+    "spare-parts-api (id 1)"
+  ],
+  "processes": [
+    {
+      "id": 1,
+      "name": "spare-parts-api",
+      "pid": 1894059,
+      "cwd": "/opt/spare-parts/server",
+      "script": "/opt/spare-parts/server/src/app.js",
+      "status": "online"
+    },
+    {
+      "id": 2,
+      "name": "spare-parts-web",
+      "pid": 88680,
+      "cwd": "/opt/spare-parts/web",
+      "script": "/opt/spare-parts/web/server.js",
+      "status": "online"
+    },
+    {
+      "id": 3,
+      "name": "spare-parts-web",
+      "pid": 88693,
+      "cwd": "/opt/spare-parts/web",
+      "script": "/opt/spare-parts/web/server.js",
+      "status": "online"
+    }
+  ],
+  "rollback": "/opt/spare-parts/rollback/dsh-audit-fixes-20261115",
   "version": "V1.9.10",
+  "scope": "DSH A01-A05: auth race, stale sessions, renamed equipment code collisions, batch quantities and test debt",
+  "source": {
+    "server/src/auth.js": "c8eb57fce7f45c0c3eabd1afbb81f7ca68de39019fc850bfab4d6a9d81c60763",
+    "server/src/routes/auth.js": "c0766c25595ace9915708ce59e62692dd6c04f7ee304d6a8abc891fed60ddbca",
+    "server/src/routes/operations.js": "7aa6eedfbe24c569359bcc22432955453e87b587730a64590f5c27e45448672e",
+    "spare-parts-web-release/src/api/office.js": "9dd6f9462c0b9ccff7749827c85eec39d7ec3cfefc5ba72a5a842385ef1b5567",
+    "spare-parts-web-release/src/api/raw-duties.js": "c929773315e73518335c5c365cde239e01a30e464f9b59677de1316f7ee5e715",
+    "spare-parts-web-release/test/header-workspace.test.mjs": "df1b7c5494f6a3c674bff018975becb78b6ca72a7cc8336c1bdd9ce53a4b4432",
+    "miniprogram/services/api.js": "c544caefd76dc1ebf39ea94582efdb41294979419add240b5cb065509306cf56",
+    "miniprogram/services/auth.js": "6d14ba97397fe6bf0de6f6556f0073c81743749baa6e67203132cb54a47c27ef",
+    "miniprogram/pages/approve/approve.js": "2ca121792eb1f5eb508bf58c06260dde2ced364f763814ee936de0b63ec72af6",
+    "miniprogram/pages/addPart/addPart.js": "830dc26cbdf7cc062492413ad1659b87c073205f50085b9dabcb2c20b5968b9f",
+    "miniprogram/pages/aiAgent/aiAgent.js": "b03314241d4ddb56b98bf37503d82dbe8b03af3a7af00cb9e469fb14765020ed",
+    "miniprogram/pages/account/account.js": "8085203b00b93ccb8657e246286e595ec431139ad4eb788763d2dd1d1455277c",
+    "miniprogram/pages/index/index.js": "67aea1d8fa16e987f27c83226ea60e76ccb9efcbbb31af5dadfcb6b4757460f9",
+    "miniprogram/pages/filter/filter.js": "927a225d0588c5d03765693d4021832d01e896ca40b996c0c0f4a2f4a319e352",
+    "miniprogram/pages/inventory/inventory.js": "8d8724537ea437f7eec824f4b1cb05989f0b8a31defe904e0e3f26f48e5e9007",
+    "miniprogram/pages/detail/detail.js": "94a740d6a90ee7a36dc8cb3bf5f254db09c61fca51321ffeef00890cffdcafd4",
+    "miniprogram/pages/home/home.js": "a01d7fc3209b661aa26fc118c1d14741cab768583356dfd7011fbd7efbadb5b3",
+    "miniprogram/pages/login/login.js": "2f22ae2dd1d6d64bd6597eae1308a2dd685c249d9e970774cd1ceaa217ea185d",
+    "miniprogram/pages/stats/stats.js": "4f69f6b5d1bd0e8a4e63af3e4f364078237abeda55458d273a43c99fd39faa65",
+    "miniprogram/pages/users/users.js": "be5453c0b002e39f84591b61ca691cac5da686d44265fbcb8b35daf5fa1fd821"
+  },
   "previousDeployment": {
-    "id": "fire-issue-card-20261108",
-    "at": "2026-11-08T05:05:38.163Z",
-    "rollback": "/opt/spare-parts/rollback/fire-issue-card-20261108"
+    "id": "fire-evidence-compact-final-20261115",
+    "at": "2026-11-15T14:06:24.014Z",
+    "indexSha256": "d734c93e0076a5f699b2a9d6d3584f0c14e8f6a37c840ab477d9a4de094078fc"
   },
   "buildPassed": true,
-  "focusedTests": 65,
-  "scope": "App 消防点检异常详情与列表共用异常项提取，详情分开显示异常项与整改状态。",
-  "android": {
-    "at": "2026-11-07T10:03:34.603Z",
-    "versionCode": 25,
-    "url": "https://czsdsg.cn/app-updates/android/digital-workbench-1.9.10-android.25.apk",
-    "sha256": "7cb306f8f712ca444225ee331561207e1eccd95b508cee909649d6878235d13b",
-    "rollback": "/opt/spare-parts/rollback/favorites-android25-20261107"
+  "apiTests": 516,
+  "webTests": 804,
+  "artifactChecks": 263,
+  "compiledClientTests": 6,
+  "miniProgram": {
+    "sourceFixed": true,
+    "published": false
+  },
+  "nativeEmulatorOrRealPhoneTested": false,
+  "productionAccountWritesTested": false,
+  "realMySQLConcurrencyTested": false,
+  "packageGenerated": false,
+  "localCleanup": {
+    "count": 5,
+    "bytes": 231047495,
+    "record": "output/CLEANUP_DSH_AUDIT_20261115.json",
+    "portReleased": true
+  },
+  "serverStagingRecycled": "/opt/spare-parts/recycle-bin/dsh-audit-fixes-20261115-staging-final",
+  "evidence": "docs/PROJECT_AUDIT_FIXES_20261115.md",
+  "additionalCleanup": {
+    "at": "2026-11-15T14:45:24.530Z",
+    "status": "passed",
+    "localCount": 89,
+    "localBytes": 3241175541,
+    "serverCount": 16,
+    "serverBytes": 3463939549,
+    "record": "output/CLEANUP_REDUNDANT_20261115.json",
+    "evidence": "docs/REDUNDANT_CLEANUP_20261115.md",
+    "recycleManifest": "/opt/spare-parts/recycle-bin/redundant-20261115/RECYCLE.json",
+    "latestRollbackPreserved": "/opt/spare-parts/rollback/dsh-audit-fixes-20261115",
+    "servicesPreserved": true
   }
 }

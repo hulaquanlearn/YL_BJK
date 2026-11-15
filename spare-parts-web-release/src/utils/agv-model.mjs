@@ -34,6 +34,10 @@ export function buildAgvModel({variant='old'}={}){
  if(variant==='old'){
   materials.orange.color.setHex(0xc23a2a);
   materials.orangeDark.color.setHex(0xa32a1e);
+  root.userData.geometryRevision='latent-local-rear-trapezoid-20261114';
+  root.userData.overallEnvelopeMm[2]=459;
+  root.userData.envelopeNote+=' Moving the old external load lever into the central deck opening leaves the illustrative generated height at 459 mm; the documented 460 mm body height is unchanged and not verified by this model.';
+  root.userData.geometryEvidenceNote+=' 2026-11-14本地看图修订：后壳内槽俯视为两端斜向过渡、中间平直的梯形；上下外壳保留，槽外到按钮侧及左右的中部空腔不加内挡板或水平隔板。平台接近开关位于中央矩形开口内、折弯片下方。形状按用户圈图，深度、角度与安装尺寸未实测。';
  }
  function assembly(id,label,offset,source,description){const group=new THREE.Group();group.name=id;group.userData={partId:id,label,explodeOffset:offset,presentationOffset:[...offset],sourceKnowledgeId:21,sourceFigure:source,description};root.add(group);parts.push(group);return group}
  function mesh(parent,geometry,material,x=0,y=0,z=0){const m=new THREE.Mesh(geometry,typeof material==='string'?materials[material]:material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
@@ -56,7 +60,14 @@ export function buildAgvModel({variant='old'}={}){
  // may run through the two tyres.
  for(const z of [-.29,.29])for(const x of [-.39,.40])box(chassis,[.41,.055,.032],[x,.062,z],'dark');
  for(const z of [-.13,.13])box(chassis,[1.19,.055,.026],[0,.062,z],'dark');
- for(const x of [-.52,-.24,.22,.48])box(chassis,[.036,.052,.58],[x,.062,0],'dark');
+ // End crossmembers are interrupted around each support-wheel swept volume.
+ for(const x of [-.52,-.24,.22,.48]){
+  if(x===-.52||x===.48){
+   box(chassis,[.036,.052,.446],[x,.062,0],'dark','caster-crossmember-center');
+   for(const z of [-.2785,.2785])box(chassis,[.036,.052,.023],[x,.062,z],'dark','caster-crossmember-end');
+   for(const side of [-1,1])box(chassis,[.075,.012,.075],[x,.088,side*.245],'dark','caster-support-bridge');
+  }else box(chassis,[.036,.052,.58],[x,.062,0],'dark','chassis-crossmember');
+ }
  for(const x of [-.4025,.4025])box(chassis,[.405,.012,.58],[x,.088,0],'dark','floor-end');
  box(chassis,[.40,.012,.26],[0,.088,0],'dark','floor-center');
  box(chassis,[1.16,.03,.05],[0,.06,0],'black','chassis-keel');
@@ -93,10 +104,28 @@ export function buildAgvModel({variant='old'}={}){
   box(platform,[.012,.01,.10],[-.34,.453,0],'steel');
  }
  for(const x of [-.29,.29])box(platform,[.018,.028,.60],[x,.404,0],'dark');
- // The reference shows a load-detection lever on TOP of the platform,
- // not a switch buried in the solid plate. Its exact mechanism is schematic.
- box(platform,[.055,.008,.040],[.10,.445,.13],'steel','load-switch-base');
- beam(platform,[.08,.451,.13],[.125,.457,.13],.006,'dark').name='load-switch-lever';
+ if(variant==='old'){
+  // User's close-up: threaded proximity switch inside the CENTRAL opening,
+  // below the bent flap, with the sensing face pointing along the deck.
+  // Cylinder size and mounting bracket are illustrative, not measured CAD.
+  cylinder(platform,.0075,.050,[-.012,.427,0],'steel','x').name='load-proximity-body';
+  cylinder(platform,.0075,.003,[-.0385,.427,0],'black','x').name='load-proximity-face';
+  const bracket=roundedShape(.032,.030,.002),hole=new THREE.Path();
+  hole.absarc(0,.004,.008,0,Math.PI*2,true);bracket.holes.push(hole);
+  const bracketGeo=new THREE.ExtrudeGeometry(bracket,{depth:.002,bevelEnabled:false,curveSegments:12});bracketGeo.rotateY(Math.PI/2);
+  mesh(platform,bracketGeo,'steel',.002,.423,0).name='load-proximity-bracket';
+  for(const x of [-.001,.007]){
+   const nut=new THREE.Shape();for(let i=0;i<6;i++){const a=i*Math.PI/3;if(i===0)nut.moveTo(.011*Math.cos(a),.011*Math.sin(a));else nut.lineTo(.011*Math.cos(a),.011*Math.sin(a))}nut.closePath();
+   const bore=new THREE.Path();bore.absarc(0,0,.0076,0,Math.PI*2,true);nut.holes.push(bore);
+   const geo=new THREE.ExtrudeGeometry(nut,{depth:.003,bevelEnabled:false,curveSegments:12});geo.rotateY(Math.PI/2);
+   mesh(platform,geo,'alloy',x,.427,0).name='load-proximity-locknut';
+  }
+  bundle(platform,[[.014,.427,0],[.035,.427,0],[.048,.414,.012],[.075,.400,.022]],0x24282b,.002).name='load-proximity-cable';
+  platform.userData.description+=' 接近开关按用户实物照片移至中央开口内、折弯片下方，圆柱体、锁紧螺母与线缆为安装关系示意。';
+ }else{
+  box(platform,[.055,.008,.040],[.10,.445,.13],'steel','load-switch-base');
+  beam(platform,[.08,.451,.13],[.125,.457,.13],.006,'dark').name='load-switch-lever';
+ }
  if(variant==='old'){
   // Long-edge upturned folds along the two 1310 mm sides of the thin deck.
   for(const side of [1,-1])box(platform,[1.22,.022,.016],[0,.448,side*.344],'deckPlate','deck-fold-long');
@@ -122,6 +151,14 @@ export function buildAgvModel({variant='old'}={}){
   const bellowsGeo=new THREE.BufferGeometry();bellowsGeo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));bellowsGeo.computeVertexNormals();
   const bellowsMat=materials.rubber.clone();bellowsMat.side=THREE.DoubleSide;
   mesh(platform,bellowsGeo,bellowsMat).name='deck-bellows';
+  // Sewn longitudinal joins and clamp strips remain part of the flexible
+  // cover assembly. They follow the pleats instead of a straight floating rod.
+  for(const side of [-1,1]){
+   const seam=[];for(let i=0;i<=12;i++)seam.push([-.06,.384+i*.004,side*(i%2?.3405:.3305)]);
+   bundle(platform,seam,0x383a3d,.0012).name='bellows-sewn-seam';
+   for(const y of [.384,.432])box(platform,[1.20,.003,.012],[0,y,side*.330],'black','bellows-clamp-strip');
+  }
+  for(const x of [-.625,.625])for(const y of [.384,.432])box(platform,[.012,.003,.62],[x,y,0],'black','bellows-end-clamp');
  }
 
  // ---- side covers: one extruded profile with the wheel arch ----
@@ -131,15 +168,58 @@ export function buildAgvModel({variant='old'}={}){
  const left=assembly('left-cover','左侧护罩',[0,.48,.46],'body-without-covers',variant==='old'?'左侧护罩按side-b原图：红色侧壳、轮拱、圆角横格散热孔与黑色腰线贴花；两侧散热细节按各自原图，不做机械镜像；拆装顺序非实车顺序。':'护罩分上下两层，侧板带轮拱和散热百叶；外形依据整车主视图和渲染图，拆装顺序非实车顺序。');
  const right=assembly('right-cover','右侧护罩',[0,.48,-.46],'body-without-covers',variant==='old'?'右侧护罩按side-a原图：红色侧壳、轮拱、竖向银色百叶散热孔与黑色腰线贴花；两侧散热细节按各自原图，不做机械镜像；拆装顺序非实车顺序。':'护罩分上下两层，侧板带轮拱和散热百叶；外形依据整车主视图和渲染图，拆装顺序非实车顺序。');
  for(const [group,side] of [[left,1],[right,-1]]){
-  const shape=new THREE.Shape(outline);
-  const geo=new THREE.ExtrudeGeometry(shape,{depth:.014,bevelEnabled:true,bevelSize:.003,bevelThickness:.003,bevelSegments:1,steps:1});
-  geo.translate(0,0,-.007);mesh(group,geo,'orange',0,0,side*.343);
+  if(variant==='old'){
+   // Separate folded skins, not one 20 mm thick beveled extrusion. The 4 mm
+   // centre joint and cooling aperture are actual missing material.
+   const panels=[
+    [[-.655,.270],[-.655,.355],[-.625,.365],[-.062,.365],[-.062,.282],[-.085,.282],[-.20,.115],[-.30,.270]],
+    [[-.058,.282],[.105,.282],[.22,.115],[.627,.115],[.627,.355],[.625,.365],[-.058,.365]]
+   ];
+   const ventX=side===1?-.38:.34;
+   for(let j=0;j<panels.length;j++){
+    const s=new THREE.Shape(panels[j].map(v=>new THREE.Vector2(...v)));
+    if((side===1&&j===0)||(side===-1&&j===1)){
+     const hole=roundedShape(.098,.072,side===1?.018:.003);
+     s.holes.push(new THREE.Path(hole.getPoints(12).map(v=>v.add(new THREE.Vector2(ventX,.315)))));
+    }
+    mesh(group,new THREE.ExtrudeGeometry(s,{depth:.002,bevelEnabled:false,curveSegments:12}),'orange',0,0,side*.348-.001).name='side-cover-skin';
+   }
+   for(const [a,b] of [[-.625,-.062],[-.058,.625]]){
+    const shoulder=facePlate(group,[[-side*.349,.365],[-side*.328,.385],[-side*.326,.383],[-side*.347,.363]],a,'orange',b-a);shoulder.name='side-shoulder-fold';
+    const upper=box(group,[b-a,.002,.022],[(a+b)/2,.384,side*.317],'orangeDark','side-upper-return');
+    const channel=box(group,[b-a,.018,.002],[(a+b)/2,.372,side*.307],'orangeDark','side-inner-channel');
+    if(b>0)for(const edge of [shoulder,upper,channel]){
+     const positions=edge.geometry.attributes.position;
+     const roll=(d,r)=>d<=0?0:r-Math.sqrt(Math.max(0,r*r-Math.min(d,r)**2));
+     for(let i=0;i<positions.count;i++){const x=positions.getX(i)+edge.position.x;if(x<b-1e-5)continue;const y=positions.getY(i)+edge.position.y,z=positions.getZ(i)+edge.position.z;positions.setX(i,.664-roll(y-.365,.037)-roll(Math.abs(z)-.307,.038)-edge.position.x)}
+     positions.needsUpdate=true;edge.geometry.computeVertexNormals();
+    }
+   }
+   // Return flanges, attachment studs and the small inner accessory visible in
+   // photo06 remain on their own removable cover, not on the chassis.
+   for(const x of [-.642,.616])box(group,[.002,.23,.033],[x,.237,side*.331],'orangeDark','side-end-return');
+   for(const x of [-.56,.42])for(const y of [.18,.35])cylinder(group,.003,.020,[x,y,side*.332],'steel','z').name='cover-stud';
+   if(side===1){
+    // Photo06 documents one accessory-equipped cover, not a mirrored pair.
+    box(group,[.34,.023,.016],[.28,.350,side*.319],'clear','cover-inner-accessory');
+    for(const x of [.14,.42])box(group,[.010,.030,.018],[x,.35,side*.319],'red','cover-accessory-clamp');
+    box(group,[.40,.009,.003],[.28,.325,side*.329],'blue','cover-inner-strip');
+    group.userData.innerAccessoryEvidence='photo06; one observed cover, side/size illustrative, no mirror inference';
+   }
+  }else{
+   const shape=new THREE.Shape(outline);
+   const geo=new THREE.ExtrudeGeometry(shape,{depth:.014,bevelEnabled:true,bevelSize:.003,bevelThickness:.003,bevelSegments:1,steps:1});
+   geo.translate(0,0,-.007);
+   const position=geo.attributes.position,roll=(d,r)=>d<=0?0:r-Math.sqrt(Math.max(0,r*r-Math.min(d,r)**2));
+   for(let i=0;i<position.count;i++)if(position.getX(i)>.620){const y=position.getY(i),z=position.getZ(i)+side*.343;position.setX(i,.664-roll(y-.365,.037)-roll(Math.abs(z)-.307,.038))}
+   position.needsUpdate=true;geo.computeVertexNormals();mesh(group,geo,'orange',0,0,side*.343);
+  }
   // wheel arch liner and dark seam under the raised cover edge
   const arch=new THREE.Shape();arch.absarc(0,.135,variant==='old'?.145:.168,0,Math.PI,false);arch.absarc(0,.135,variant==='old'?.128:.148,Math.PI,0,true);
   const archGeo=new THREE.ExtrudeGeometry(arch,{depth:.008,bevelEnabled:false,curveSegments:16});
   mesh(group,archGeo,'black',.01,0,side*.333);
-  if(variant==='new')for(const [x0,x1] of [[-.655,-.20],[.22,.655]])box(group,[x1-x0,.012,.006],[(x0+x1)/2,.115,side*.351],'black');
-  for(const [x0,x1] of [[-.655,-.20],[.22,.655]])box(group,[x1-x0,.012,.007],[(x0+x1)/2,.126,side*.352],'orange');
+  if(variant==='new')for(const [x0,x1] of [[-.655,-.20],[.22,.627]])box(group,[x1-x0,.012,.006],[(x0+x1)/2,.115,side*.351],'black');
+  for(const [x0,x1] of [[-.655,-.20],[.22,.627]])box(group,[x1-x0,.012,.007],[(x0+x1)/2,.126,side*.352],'orange');
   if(variant==='new'){
    beam(group,[-.20,.115,side*.351],[-.085,.315,side*.351],.012,'black');
    beam(group,[.105,.315,side*.351],[.22,.115,side*.351],.012,'black');
@@ -152,16 +232,13 @@ export function buildAgvModel({variant='old'}={}){
    box(group,[.082,.038,.006],[-.525,.185,side*.353],'orangeDark');
   }
   if(variant==='old'){
-   // Rear third of the side (side/rear close-ups): upper red shell, a 27 mm
-   // recessed cove and a separate lower red step. The cove is closed by an inner
-   // shell plate, so no interior equipment can show through and nothing floats
-   // across the recess. The step is a solid ledge, not a protruding steel shelf.
-   box(group,[.355,.210,.014],[-.4775,.165,side*.316],'orangeShadow','rear-side-inner-shell');
-   box(group,[.355,.130,.014],[-.4775,.125,side*.343],'orange','rear-side-step');
-   box(group,[.355,.012,.034],[-.4775,.1905,side*.330],'orange','rear-side-step-ledge');
-   box(group,[.355,.010,.034],[-.4775,.268,side*.330],'orangeShadow','rear-side-cove-ceiling');
-   box(group,[.014,.076,.034],[-.303,.2295,side*.330],'orange','rear-side-cove-return');
-   box(group,[.355,.012,.041],[-.4775,.064,side*.3305],'orangeDark','rear-side-step-floor');
+   // Recessed side wall is set inboard of the outer lip, not flush with it.
+   box(group,[.355,.080,.002],[-.4775,.230,side*.322],'orangeShadow','rear-side-inner-shell');
+   box(group,[.355,.130,.002],[-.4775,.125,side*.349],'orange','rear-side-step');
+   box(group,[.355,.002,.037],[-.4775,.1905,side*.3315],'orange','rear-side-step-ledge');
+   box(group,[.355,.002,.037],[-.4775,.269,side*.3315],'orangeShadow','rear-side-cove-ceiling');
+   box(group,[.002,.080,.037],[-.3005,.230,side*.3315],'orange','rear-side-cove-return');
+   box(group,[.355,.002,.037],[-.4775,.060,side*.3315],'orangeDark','rear-side-step-floor');
    // The two site photos show different cooling details on the two sides; neither
    // side is a mirror of the other. side-b (left, +Z) has a rounded horizontal
    // grille, side-a (right, -Z) has vertical silver louvres.
@@ -171,7 +248,8 @@ export function buildAgvModel({variant='old'}={}){
     grille.name='side-vent-grille-frame';grille.position.set(-.38,.315,side*.3545);grille.castShadow=grille.receiveShadow=true;group.add(grille);
     for(let i=0;i<6;i++)box(group,[.098,.006,.003],[-.38,.315+(i-2.5)*.011,side*.358],'dark','side-vent-grille');
    }else{
-    box(group,[.120,.086,.002],[.34,.315,side*.3545],'dark','side-vent-louver-backing');
+    const louverFrame=roundedShape(.120,.086,.004),louverHole=roundedShape(.098,.072,.003);louverFrame.holes.push(louverHole);
+    mesh(group,new THREE.ExtrudeGeometry(louverFrame,{depth:.002,bevelEnabled:false}),'orangeDark',.34,.315,side*.350).name='side-vent-louver-frame';
     for(let i=0;i<8;i++)box(group,[.006,.070,.004],[.34+(i-3.5)*.013,.315,side*.3575],'steel','side-vent-louver');
    }
   }
@@ -182,28 +260,102 @@ export function buildAgvModel({variant='old'}={}){
    // Visible body-side split above the wheel arch (both sides, photos).
    box(group,[.003,.068,.0015],[-.06,.349,decalZ],'black','side-seam');
    const stripe=new THREE.Shape();
-   const contour=[[-.655,.094],[-.30,.094],[-.085,.282],[.105,.282],[.22,.115],[.655,.115],[.655,.160],[.25,.160],[.13,.322],[-.11,.322],[-.30,.139],[-.655,.139]];
+   const contour=[[-.655,.094],[-.30,.094],[-.085,.282],[.105,.282],[.22,.115],[.627,.115],[.627,.160],[.25,.160],[.13,.322],[-.11,.322],[-.30,.139],[-.655,.139]];
    stripe.moveTo(...contour[0]);for(const pt of contour.slice(1))stripe.lineTo(...pt);stripe.closePath();
    const stripeGeo=new THREE.ExtrudeGeometry(stripe,{depth:.002,bevelEnabled:false});
    mesh(group,stripeGeo,'black',0,0,decalZ-.001).name='side-lower-decal';
   }
  }
 
- // ---- operator panel on the 700 mm front face ----
- const panel=assembly('operator-panel','触摸屏与操作面板',[.48,.03,0],'operator-panel',variant==='old'?'按操作面板图与四张现场照片还原：中央一体式深色操作器内为绿色液晶屏，屏下沿同体排列10键数字键盘、左右两侧功能键；面对端左侧自上至下为圆形接口、钥匙开关、旋转开关、红色按钮，右侧自上至下为急停、绿/红/绿按钮；下部为宽凹口、银灰横条与黑色下层。车号12、企业名/二维码等设备管理贴纸不属于通用车型，未建模；按键间距、字体和型号丝印为示意。':'按操作面板图还原触摸屏、手操器/通讯插头、急停与复位按钮；按钮间距和型号丝印为示意。');
- roundedFace(panel,.69,.30,.022,.641,.016,'orange',.252,variant==='old'?[[0,.150,.44,.090]]:[]);
+ // The site side view shows a complete deep end hood. Its longitudinal return
+ // belongs to this removable hood, not to the adjacent long side-cover panel.
+ const hoodRearX=y=>.445+.020*THREE.MathUtils.clamp((y-.104)/.297,0,1);
+ root.updateMatrixWorld(true);
+ for(const cover of [left,right])cover.traverse(object=>{
+  if(!object.isMesh)return;
+  const bounds=new THREE.Box3().setFromObject(object);
+  if(bounds.min.x>.470){object.position.x+=hoodRearX((bounds.min.y+bounds.max.y)/2)-.012-bounds.max.x;object.updateMatrixWorld(true)}
+  const position=object.geometry.attributes.position,inverse=object.matrixWorld.clone().invert(),point=new THREE.Vector3();let changed=false;
+  for(let i=0;i<position.count;i++){point.fromBufferAttribute(position,i).applyMatrix4(object.matrixWorld);const limit=hoodRearX(point.y)-.003;if(point.x<=limit)continue;point.x=limit;point.applyMatrix4(inverse);position.setXYZ(i,point.x,point.y,point.z);changed=true}
+  if(changed){position.needsUpdate=true;object.geometry.computeVertexNormals();object.geometry.computeBoundingBox();object.geometry.computeBoundingSphere()}
+ });
+ // The rear close-ups also show a deep removable end shell. Stop the old-car
+ // long covers at its joint; the short-end returns must leave with rear-cover.
+ if(variant==='old')for(const cover of [left,right])cover.traverse(object=>{
+  if(!object.isMesh)return;
+  const bounds=new THREE.Box3().setFromObject(object);
+  if(bounds.max.x<-.445){object.position.x+=-.432-bounds.min.x;object.updateMatrixWorld(true)}
+  const attr=object.geometry.attributes.position,inverse=object.matrixWorld.clone().invert(),point=new THREE.Vector3();let changed=false;
+  for(let i=0;i<attr.count;i++){point.fromBufferAttribute(attr,i).applyMatrix4(object.matrixWorld);if(point.x>=-.442)continue;point.x=-.442;point.applyMatrix4(inverse);attr.setXYZ(i,point.x,point.y,point.z);changed=true}
+  if(changed){attr.needsUpdate=true;object.geometry.computeVertexNormals();object.geometry.computeBoundingBox();object.geometry.computeBoundingSphere()}
+ });
+ // ---- deep front hood with the 700 mm operator face ----
+ const panel=assembly('operator-panel','车头罩与操作面板',[.48,.03,0],'operator-panel',variant==='old'?'车头罩按拆罩侧视图形成完整深包端罩，包含前脸、两侧长回包、上折面和后缘接缝；不是浅操作面板。中央绿色液晶屏带数字键盘和侧键，左右接口/急停/复位按本车配置保留；中部后退凹面与底部敞口。壳深、曲率与斜度按照片比例示意，不是实测制造尺寸。':'按用户要求同步深包车头罩，前脸、两侧长回包、上折面和后缝属于同一可拆部件；保留新车自己的蓝色触摸屏、通讯接口和按钮。外壳比例与位置为示意，不据旧车照片改变新车电气配置。');
+ {
+  // Front photo: a formed U-shaped shell with a broad rolled shoulder and
+  // wraparound cheeks, not a flat plate containing a rectangular punched hole.
+  // Native shape X is -world Z; its bottom notch remains open to the lower tier.
+  const shape=new THREE.Shape();
+  shape.moveTo(-.307,.401);shape.lineTo(-.3175,.393);shape.lineTo(-.328,.385);shape.lineTo(-.339,.375);shape.lineTo(-.350,.365);
+  shape.lineTo(-.350,.126);shape.quadraticCurveTo(-.350,.102,-.326,.102);
+  shape.lineTo(-.248,.102);shape.quadraticCurveTo(-.220,.102,-.220,.130);
+  shape.lineTo(-.220,.214);shape.quadraticCurveTo(-.220,.232,-.202,.232);
+  shape.lineTo(.202,.232);shape.quadraticCurveTo(.220,.232,.220,.214);
+  shape.lineTo(.220,.130);shape.quadraticCurveTo(.220,.102,.248,.102);
+  shape.lineTo(.326,.102);shape.quadraticCurveTo(.350,.102,.350,.126);
+  shape.lineTo(.350,.365);shape.lineTo(.339,.375);shape.lineTo(.328,.385);shape.lineTo(.3175,.393);shape.lineTo(.307,.401);shape.closePath();
+  const formed=new THREE.ExtrudeGeometry(shape,{depth:.002,bevelEnabled:false,curveSegments:12});formed.rotateY(Math.PI/2);
+  // Subdivide before forming so the shoulder is curved across the whole face,
+  // including its centre, rather than just bending the outline vertices.
+  let triangles=Array.from(formed.attributes.position.array);formed.dispose();
+  const mid=(a,b)=>a.map((v,i)=>(v+b[i])/2);
+  for(let pass=0;pass<3;pass++){const next=[];for(let i=0;i<triangles.length;i+=9){const a=triangles.slice(i,i+3),b=triangles.slice(i+3,i+6),c=triangles.slice(i+6,i+9),ab=mid(a,b),bc=mid(b,c),ca=mid(c,a);next.push(...a,...ab,...ca,...ab,...b,...bc,...ca,...bc,...c,...ab,...bc,...ca)}triangles=next}
+  const roll=(distance,radius)=>distance<=0?0:radius-Math.sqrt(Math.max(0,radius*radius-Math.min(distance,radius)**2));
+  for(let i=0;i<triangles.length;i+=3)triangles[i]+=.663-roll(triangles[i+1]-.365,.037)-roll(Math.abs(triangles[i+2])-.307,.038);
+  const skin=new THREE.BufferGeometry();skin.setAttribute('position',new THREE.Float32BufferAttribute(triangles,3));skin.computeVertexNormals();
+  const normals=skin.attributes.normal,vertices=skin.attributes.position,sums=new Map(),keys=[];
+  for(let i=0;i<vertices.count;i++){const key=[vertices.getX(i),vertices.getY(i),vertices.getZ(i)].map(v=>Math.round(v*1e6)).join(',');keys.push(key);const n=sums.get(key)||new THREE.Vector3();n.add(new THREE.Vector3().fromBufferAttribute(normals,i));sums.set(key,n)}
+  for(const n of sums.values())n.normalize();for(let i=0;i<vertices.count;i++){const n=sums.get(keys[i]);normals.setXYZ(i,n.x,n.y,n.z)}
+  mesh(panel,skin,'orange').name='front-formed-u-shell';
+  box(panel,[.1725,.002,.614],[.55125,.401,0],'orangeDark','front-top-return');
+  for(const side of [-1,1]){
+   // A ruled thin shell spans roughly 200 mm from the operator face to the
+   // rear seam. The upper return inclines inwards beneath the bellows.
+   const rows=[[.104,.350],[.130,.350],[.230,.350],[.330,.350],[.365,.350],[.375,.339],[.385,.328],[.393,.3175],[.401,.307]];
+   const positions=[],pushQuad=(a,b,c,d)=>positions.push(...a,...b,...c,...a,...c,...d);
+   const point=(row,front,inner=false)=>{const [y,z]=rows[row];return [front ? .664-roll(y-.365,.037)-roll(z-.307,.038) : hoodRearX(y),y,side*(z-(inner ? .002 : 0))]};
+   for(let i=0;i<rows.length-1;i++){
+    if(!(variant==='old'&&side===-1&&rows[i+1][0]<=.365)){
+     pushQuad(point(i,false),point(i,true),point(i+1,true),point(i+1,false));
+     pushQuad(point(i,false,true),point(i+1,false,true),point(i+1,true,true),point(i,true,true));
+    }
+    pushQuad(point(i,false),point(i+1,false),point(i+1,false,true),point(i,false,true));
+    pushQuad(point(i,true),point(i,true,true),point(i+1,true,true),point(i+1,true));
+    // Rear return flange is part of the same hood and gives its visible seam.
+    const a=point(i,false,true),b=point(i+1,false,true);pushQuad(a,b,[b[0],b[1],b[2]-side*.012],[a[0],a[1],a[2]-side*.012]);
+   }
+   for(const row of [0,rows.length-1])pushQuad(point(row,false),point(row,false,true),point(row,true,true),point(row,true));
+   const wall=new THREE.BufferGeometry();wall.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));wall.computeVertexNormals();
+   mesh(panel,wall,'orange').name='front-end-return';
+   if(variant==='old'&&side===-1){
+    const skin=new THREE.Shape([[hoodRearX(.104),.104],[.664,.104],[.664,.365],[hoodRearX(.365),.365]].map(p=>new THREE.Vector2(...p)));
+    const hole=roundedShape(.055,.029,.004);skin.holes.push(new THREE.Path(hole.getPoints(12).map(p=>p.add(new THREE.Vector2(.55,.139)))));
+    mesh(panel,new THREE.ExtrudeGeometry(skin,{depth:.002,bevelEnabled:false,curveSegments:8}),'orange',0,0,-.350).name='front-tim-side-skin';
+   }
+   for(const y of [.170,.335])cylinder(panel,.0045,.005,[hoodRearX(y)+.009,y,side*.352],'steel','z').name='hood-rear-fastener';
+  }
+  for(const z of [-.220,.220]){
+   box(panel,[.049,.102,.002],[.6395,.181,z],'orangeDark','front-cavity-return');
+  }
+  box(panel,[.049,.002,.404],[.6395,.232,0],'orangeDark','front-cavity-roof');
+ }
  if(variant==='new'){
   box(panel,[.018,.108,.255],[.657,.333,0],'dark');
  box(panel,[.005,.072,.20],[.668,.333,0],variant==='old'?'screenGreen':'screen');
  for(const y of [.388,.278])box(panel,[.004,.007,.262],[.676,y,0],'steel');
  for(const z of [-.131,.131])box(panel,[.004,.112,.007],[.676,.333,z],'steel');
- facePlate(panel,[[-.30,.118],[.30,.118],[.235,.262],[-.235,.262]],.655,'orangeDark');
- facePlate(panel,[[-.22,.126],[.19,.126],[.15,.19],[-.18,.19]],.659,'steel');
- box(panel,[.012,.014,.40],[.663,.256,0],'alloy');
  for(const [i,mat] of (variant==='old'?[[0,'black'],[1,'steel'],[2,'black'],[3,'red']]:[[0,'black'],[1,'steel'],[2,'steel'],[3,'dark']]))cylinder(panel,.0115,.014,[.661,.318-i*.042,-.268],mat,'x');
  for(const [i,mat] of (variant==='old'?[[0,'red'],[1,'green'],[2,'red'],[3,'green']]:[[0,'red'],[1,'rubber'],[2,'blue'],[3,'lamp']]))cylinder(panel,i===0?.0185:.0125,.016,[.662,.331-i*.045,.268],mat,'x');
- box(panel,[.006,.014,.10],[.663,.146,-.20],'steel');
- box(panel,[.02,.03,.72],[.66,.062,0],'rubber');
  }
  if(variant==='old'){
   // One integrated operator unit: green LCD, ten-key row directly beneath it and
@@ -229,39 +381,93 @@ export function buildAgvModel({variant='old'}={}){
   cylinder(panel,.0125,.014,[.671,.293,-.300],'green','x').name='panel-button-green';
   cylinder(panel,.0125,.014,[.671,.241,-.300],'red','x').name='panel-button-red';
   cylinder(panel,.0125,.014,[.671,.189,-.300],'green','x').name='panel-button-green';
-  // Real recessed lower opening cut through the end plate: dark lower cavity,
-  // silver bar across the upper part of the recess, then the red lower band.
-  box(panel,[.020,.095,.46],[.641,.150,0],'black','front-cavity');
-  box(panel,[.010,.012,.42],[.6515,.180,0],'alloy','front-silver-bar');
+ }
+ {
+  // Red inset slopes back under the upper face; its lower trapezoidal cutout
+  // stays open above the separate red bumper ledge. No black rectangular plug.
+  const inset=facePlate(panel,[[-.220,.232],[.220,.232],[.220,.112],[.172,.155],[-.172,.155],[-.220,.112]],.614,'orangeDark',.002);
+  const position=inset.geometry.attributes.position;for(let i=0;i<position.count;i++)position.setX(i,position.getX(i)+Math.max(0,.232-position.getY(i))*.20);position.needsUpdate=true;inset.geometry.computeVertexNormals();inset.name='front-cavity';
+  cylinder(panel,.0045,.405,[.632,.181,0],'alloy','z').name='front-silver-bar';
   box(panel,[.018,.042,.70],[.658,.082,0],'orangeDark','front-lower-band');
   box(panel,[.008,.010,.70],[.663,.056,0],'steel','front-lower-trim');
   box(panel,[.020,.030,.72],[.660,.036,0],'rubber','front-rubber-bumper');
  }
 
  // ---- rear cover: two end beams with a central recessed navigation scanner ----
- const rear=assembly('rear-cover','后端护罩与安全触边',[-.48,.03,0],'body-without-covers',variant==='old'?'后端护罩按rear原图分为上下两道端梁：上层端梁保留圆形接口、带盖接口、绿色按钮与急停（车号/管理贴纸未建模）；两道端梁之间是横向中部的**空槽**，槽内只安装导航扫描头（黑上盖+红色透明扫描窗），周围为空、没有内部电器与黑色填充壳，槽内壁/台阶为深色实体；下部端梁带银灰横条，面对端右侧下部为TIM。不设无依据的顶部外露灯；器件安装位置为示意。':'后端护罩、连接器和安全触边位置按整车图；红色标牌与指示灯为示意。');
+ const rear=assembly('rear-cover','后端护罩与安全触边',[-.48,.03,0],'body-without-covers',variant==='old'?'后壳按2026-11-14用户确认的俯视轮廓作本地预览：内槽两端斜向过渡，中间平直；槽外到按钮侧、左右两边的中部空腔无内挡板或水平隔板。上下外壳及其折边均保留，连同壳体侧缘、绿色按钮、急停、圆形接口、银色饰条及安全触边构成可拆护罩；中央导航扫描口贯通，导航头为独立部件。槽内折弯薄板与尺寸比例为看图示意，未实测，不是制造CAD。':'后端护罩、连接器和安全触边位置按整车图；红色标牌与指示灯为示意。');
  if(variant==='old'){
   // The close-up photos show an EMPTY slot between the two end beams: only the
   // scanner (black cap + red transparent window) sits in it. Do not fill the
   // slot with a housing or a bright fake wall; internals stay behind it.
-  roundedFace(rear,.69,.133,.022,-.657,.016,'orange',.3365);
-  roundedFace(rear,.69,.088,.022,-.657,.016,'orange',.146);
-  box(rear,[.012,.072,.68],[-.591,.230,0],'dark','rear-recess-back');
-  box(rear,[.072,.008,.68],[-.621,.186,0],'orangeDark','rear-recess-floor');
-  box(rear,[.072,.008,.68],[-.621,.274,0],'orangeDark','rear-recess-ceiling');
-  for(const z of [-.339,.339])box(rear,[.072,.072,.012],[-.621,.230,z],'dark','rear-recess-side');
+  roundedFace(rear,.654,.133,.010,-.665,.002,'orange',.3365).name='rear-upper-skin';
+  roundedFace(rear,.65,.088,.010,-.665,.002,'orange',.146).name='rear-lower-skin';
+  // Outer top/bottom skins enclose the removable hood. The confirmed empty
+  // region is its middle cavity, not a deletion of these exterior surfaces.
+  // Follow the front wraparound corners and reach both side skins; the old
+  // narrow rectangle left an unintended seam behind the front and side lips.
+  const outerPlan=new THREE.Shape();outerPlan.moveTo(-.445,-.349);outerPlan.lineTo(-.643,-.349);
+  outerPlan.quadraticCurveTo(-.665,-.349,-.665,-.327);outerPlan.lineTo(-.665,.327);
+  outerPlan.quadraticCurveTo(-.665,.349,-.643,.349);outerPlan.lineTo(-.445,.349);outerPlan.closePath();
+  for(const [name,y]of [['rear-skin-return',.402],['rear-lower-return',.101]]){
+   const skin=new THREE.ExtrudeGeometry(outerPlan,{depth:.002,bevelEnabled:false,curveSegments:12});skin.rotateX(-Math.PI/2);
+   if(name==='rear-skin-return'){
+    const vertices=skin.getAttribute('position');
+    for(let i=0;i<vertices.count;i++)vertices.setY(i,vertices.getY(i)-Math.max(0,vertices.getX(i)+.643)*.019/.198);
+    vertices.needsUpdate=true;skin.computeVertexNormals();
+   }
+   mesh(rear,skin,'orangeDark',0,y,0).name=name;
+  }
+  for(const side of [-1,1])for(const [top,height] of [[.403,.133],[.190,.130]]){
+   const a=side===1?Math.PI/2:Math.PI,b=a+Math.PI/2,s=new THREE.Shape();
+   s.absarc(0,0,.022,a,b,false);s.absarc(0,0,.020,b,a,true);s.closePath();
+   const g=new THREE.ExtrudeGeometry(s,{depth:height,bevelEnabled:false,curveSegments:8});g.rotateX(Math.PI/2);
+   mesh(rear,g,'orange',-.643,top,side*.327).name='rear-wraparound-fold';
+  }
+  for(const side of [-1,1]){
+   const shape=new THREE.Shape([new THREE.Vector2(-.643,.270),new THREE.Vector2(-.445,.270),new THREE.Vector2(-.445,.384),new THREE.Vector2(-.643,.403)]);
+   mesh(rear,new THREE.ExtrudeGeometry(shape,{depth:.002,bevelEnabled:false}),'orange',0,0,side*.348-.001).name='rear-end-return';
+   const lowerSide=roundedShape(.198,.088,.001);
+   if(side===1){const cut=roundedShape(.055,.029,.004);lowerSide.holes.push(new THREE.Path(cut.getPoints(12).map(p=>p.add(new THREE.Vector2(-.006,-.007)))))}
+   mesh(rear,new THREE.ExtrudeGeometry(lowerSide,{depth:.002,bevelEnabled:false,curveSegments:8}),'orange',-.544,.146,side*.348-.001).name='rear-side-step';
+   for(const y of [.145,.355])cylinder(rear,.0045,.005,[-.454,y,side*.350],'steel','z').name='rear-joint-fastener';
+  }
+  // Confirmed plan: \___/ with a straight middle. The small channel floor is
+  // INSIDE that contour (toward +x); the middle cavity outside it, toward the
+  // rear button face and both sides, has no added floor or internal baffles.
+  // Exterior top/bottom skins remain above/below the slot; the top follows
+  // the outer side skins' shallow slope instead of leaving a triangular seam.
+  const groovePlan=[[-.445,-.325],[-.574,-.145],[-.574,.145],[-.445,.325]];
+  rear.userData.groovePlan=groovePlan.map(p=>[...p]);
+  const grooveShape=new THREE.Shape(groovePlan.map(([x,z])=>new THREE.Vector2(x,-z)));
+  const grooveFloor=new THREE.ExtrudeGeometry(grooveShape,{depth:.002,bevelEnabled:false});grooveFloor.rotateX(-Math.PI/2);
+  mesh(rear,grooveFloor,'orangeDark',0,.189,0).name='rear-groove-floor';
+  for(const side of [-1,1]){
+   const a=new THREE.Vector3(-.574,.230,side*.145),b=new THREE.Vector3(-.445,.230,side*.325),delta=b.clone().sub(a);
+   const wall=box(rear,[delta.length(),.080,.002],a.clone().add(b).multiplyScalar(.5).toArray(),'orange','rear-groove-sloped-wall');wall.rotation.y=-Math.atan2(delta.z,delta.x);
+   // Keep the existing central navigation aperture, rather than adding a wall
+   // across the optical path. Its two coplanar margins form the flat middle.
+   box(rear,[.002,.080,.090],[-.574,.230,side*.100],'orangeDark','rear-groove-straight-wall');
+  }
+  const oldLower=rear.getObjectByName('rear-lower-skin');rear.remove(oldLower);oldLower.geometry.dispose();
+  const zs=[-.327,-.285,-.255,.255,.285,.327],xs=[-.643,-.665,-.631,-.631,-.665,-.643],vertices=[];
+  for(let i=0;i<zs.length-1;i++){
+   const a=[xs[i],.102,zs[i]],b=[xs[i+1],.102,zs[i+1]],c=[xs[i+1],.190,zs[i+1]],d=[xs[i],.190,zs[i]];
+   vertices.push(...a,...b,...c,...a,...c,...d);
+  }
+  const lowerGeo=new THREE.BufferGeometry();lowerGeo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));lowerGeo.computeVertexNormals();mesh(rear,lowerGeo,'orange').name='rear-lower-skin';
   // Upper-beam controls visible in rear.jpg (no "12"/management sticker).
-  box(rear,[.004,.052,.052],[-.664,.365,-.270],'steel','rear-connector-plate');
-  cylinder(rear,.014,.012,[-.668,.365,-.270],'black','x');
-  box(rear,[.020,.048,.060],[-.664,.315,.140],'dark','rear-covered-port');
-  box(rear,[.004,.030,.050],[-.669,.315,.140],'black','rear-covered-port-lid');
-  cylinder(rear,.013,.014,[-.668,.330,.230],'green','x');
-  cylinder(rear,.020,.010,[-.668,.325,.310],'dark','x');
-  cylinder(rear,.013,.020,[-.674,.325,.310],'red','x');
-  box(rear,[.010,.026,.020],[-.670,.286,.310],'black','rear-key');
+  box(rear,[.004,.045,.045],[-.666,.335,.225],'steel','rear-connector-plate');
+  cylinder(rear,.014,.012,[-.672,.335,.225],'black','x').name='rear-round-connector';
+  cylinder(rear,.013,.014,[-.668,.350,-.285],'green','x').name='rear-green-button';
+  cylinder(rear,.024,.008,[-.668,.350,-.238],'gold','x').name='rear-estop-base';
+  cylinder(rear,.021,.020,[-.674,.350,-.238],'red','x').name='rear-estop';
+  box(rear,[.025,.028,.026],[-.640,.350,-.238],'black','rear-estop-contact-block');
+  for(const z of [-.252,-.224])box(rear,[.014,.028,.006],[-.620,.350,z],'gold','rear-button-terminal');
+  cylinder(rear,.012,.024,[-.638,.335,.225],'black','x').name='rear-connector-back';
+  for(const [i,color]of [[0,0x3977a0],[1,0x433a38],[2,0xb44b3f]])bundle(rear,[[-.620,.350,-.238+i*.004],[-.615,.378,-.21],[-.610,.380,.12],[-.620,.350,.225]],color,.0015).name='rear-retained-control-lead';
   // Lower band: red lower band, silver bar, silver trim, real black rubber bumper.
   box(rear,[.018,.042,.70],[-.658,.082,0],'orangeDark','rear-lower-band');
-  box(rear,[.010,.012,.42],[-.664,.160,0],'alloy','rear-silver-bar');
+  box(rear,[.006,.012,.42],[-.636,.145,0],'alloy','rear-silver-bar');
   box(rear,[.008,.010,.70],[-.663,.056,0],'steel','rear-lower-trim');
   box(rear,[.020,.030,.72],[-.660,.036,0],'rubber','rear-rubber-bumper');
  }else{
@@ -292,25 +498,36 @@ export function buildAgvModel({variant='old'}={}){
    cylinder(drive,.042,.094,[.01,.135,z],'dark','z');
    for(let i=0;i<6;i++){const angle=i*Math.PI/3;cylinder(drive,.008,.012,[.01+Math.cos(angle)*.066,.135+Math.sin(angle)*.066,z+side*.048],'steel','z')}
   }
-  box(drive,[.16,.13,.10],[-.06,.205,side*.215],'steel','drive-gearbox');
-  cylinder(drive,.046,.17,[-.23,.212,side*.215],'dark','x').name='drive-motor';
-  for(let i=0;i<8;i++)box(drive,[.15,.006,.006],[-.23,.212+Math.cos(i*Math.PI/4)*.048,side*.215+Math.sin(i*Math.PI/4)*.048],'steel');
-  cylinder(drive,.03,.04,[-.33,.212,side*.215],'steel','x');
-  cylinder(drive,.022,.05,[-.365,.212,side*.215],'black','x').name='drive-encoder';
+  // Fixed gearmotor is inboard of the tyre's inner face (|z|=.234).
+  box(drive,[.16,.13,.090],[-.06,.205,side*.183],'steel','drive-gearbox');
+  cylinder(drive,.025,.018,[.01,.145,side*.220],'steel','z').name='drive-output-flange';
+  cylinder(drive,.014,.050,[.01,.135,side*.245],'steel','z').name='drive-output-shaft';
+  cylinder(drive,.018,.010,[-.1425,.212,side*.183],'steel','x').name='drive-motor-coupling';
+  cylinder(drive,.046,.17,[-.23,.212,side*.183],'dark','x').name='drive-motor';
+  for(let i=0;i<8;i++)box(drive,[.15,.006,.006],[-.23,.212+Math.cos(i*Math.PI/4)*.048,side*.183+Math.sin(i*Math.PI/4)*.048],'steel');
+  cylinder(drive,.03,.04,[-.33,.212,side*.183],'steel','x');
+  cylinder(drive,.022,.05,[-.365,.212,side*.183],'black','x').name='drive-encoder';
   box(drive,[.95,.03,.045],[-.06,.145,side*.205],'steel','drive-rocker');
-  box(drive,[.10,.04,.08],[-.29,.115,side*.215],'dark','drive-pivot-base');
+  box(drive,[.10,.04,.08],[-.29,.114,side*.215],'dark','drive-pivot-base');
   cylinder(drive,.018,.08,[-.29,.143,side*.215],'steel','z');
-  box(drive,[.05,.09,.045],[.30,.16,side*.215],'steel','drive-adjustment-seat');
-  cylinder(drive,.008,.11,[.30,.20,side*.215],'steel','y');
+  // Low saddle supports the end coil, not a solid block around four turns.
+  box(drive,[.05,.018,.045],[.30,.169,side*.215],'steel','drive-adjustment-seat');
+  cylinder(drive,.008,.11,[.30,.224,side*.215],'steel','y');
+  for(const x of [.279,.321])box(drive,[.008,.012,.040],[x,.154,side*.215],'steel','drive-spring-seat-foot');
   // A schematic spring around the adjustment stem, not a suspension simulation.
-  const springPoints=[];for(let i=0;i<=120;i++){const a=i/120*Math.PI*12;springPoints.push(new THREE.Vector3(.30+Math.cos(a)*.018,.155+i/120*.075,side*.215+Math.sin(a)*.018))}
+  const springPoints=[];for(let i=0;i<=120;i++){const a=i/120*Math.PI*12;springPoints.push(new THREE.Vector3(.30+Math.cos(a)*.018,.1815+i/120*.075,side*.215+Math.sin(a)*.018))}
   const spring=mesh(drive,new THREE.TubeGeometry(new THREE.CatmullRomCurve3(springPoints),120,.0035,6,false),'steel');spring.name='drive-spring';
   for(const x of [-.51,.48]){
-   cylinder(drive,.034,.03,[x,.036,side*.245],'rubber','z');
+   cylinder(drive,.034,.03,[x,.036,side*.245],'rubber','z').name='drive-caster';
    box(drive,[.038,.024,.032],[x,.075,side*.245],'steel');
    box(drive,[.048,.012,.04],[x,.098,side*.245],'dark');
   }
-  for(let i=0;i<3;i++)bundle(drive,[[.01,.135,z+side*.05],[.01,.30,side*.24],[-.10,.315,side*.30]],i===0?0xb74948:0x3d6d9d,.0023);
+  // Three distinct restrained runs from the fixed encoder/motor side; no
+  // artificial connector on the rotating hub and no path through the tyre.
+  for(let i=0;i<3;i++){
+   const dz=i*.008;
+   bundle(drive,[[-.388,.218+i*.004,side*(.183+dz)],[-.405,.282+i*.006,side*(.180+dz)],[-.34,.322+i*.006,side*(.205+dz)],[-.18,.330+i*.006,side*(.205+dz)]],i===0?0xb74948:0x3d6d9d,.0023).name='drive-fixed-harness';
+  }
  }
 
  // ---- lift: scissor arms with lightening holes, screw jack, servo ----
@@ -338,24 +555,72 @@ export function buildAgvModel({variant='old'}={}){
 
  // ---- controller and electrical group ----
  const control=assembly('control','控制器与电气组件',[0,0,0],'body-without-covers','依据拆罩图和现场照片示意控制器散热壳、继电器、驱动器、开关电源及端子。托架、器件数量、安装坐标与线槽走向为便于辨识的布局示意，不是实车安装图或电路图。');
- // Schematic zones, not measured mounting coordinates: rear controller above
- // storage, side electrical bays clear of the central lift and drive motors.
+ const plc=assembly('plc',variant==='old'?'SEW MOVI-PLC控制器':'PLC控制器（电路组成示意）',[-.65,.66,-.12],'control','独立PLC，不与车辆主控合并。老车08铭牌为DHR41B/MOVI-PLC红色长盒；新车只采用自身电路组成，不据照片确认型号。');
+ const relays=assembly('relay-bank','继电器排',[.30,.58,.55],'control','侧面长导轨继电器排，老车按照片01/02形态；可见件数仅示意，不作完整BOM。');
+ const aux=assembly('aux-power','辅助电源',[-.60,.40,.52],'control','独立辅助电源外壳与接线端，功能与参数以本车型图纸为准。');
+ const dcdc=assembly('dcdc','车载稳压电源',[.60,.28,-.48],'power','独立48V稳压电源。#19标500V→48V；#20/#26 PDF23标AC600V→DC48V 1500W，保留资料差异，不宣称实车输入额定值已核定。壳体与坐标为示意。');
+ const io=variant==='old'?assembly('io-board','车辆主控、板卡与端子组件',[.65,.64,.65],'control','照片中主控/板卡与插接件，独立于SEW储能PLC；板号与每根信号尚未实测映射。'):control;
+ const fuses=variant==='old'?assembly('fuse-panel','熔断器安装板',[.65,.40,.42],'control','照片01/03所见双层熔断器座与底板；不臆测遮挡编号和完整数量。'):control;
+ const auxiliary=variant==='old'?assembly('auxiliary-unit','竖置有筋设备（身份待核）',[-.60,.38,-.55],'control','照片05蓝色竖置设备，按外形辨识，不擅自认作驱动器或第二管理器。'):control;
+ // Schematic zones, not measured mounting coordinates. Keep the side electrical
+ // bays clear of the central lift and drive motors.
  box(control,[.20,.012,.24],[variant==='old'?-.480:-.505,.25,0],'dark','controller-shelf');
  box(control,[.32,.012,.13],[.39,.28,.23],'dark','relay-shelf');
  for(const z of [-.245,.245])box(control,[.17,.012,.13],[variant==='old'?-.480:-.505,.215,z],'dark','rear-equipment-shelf');
  for(const z of [-.115,.115])box(control,[.025,.14,.018],[-.505,.17,z],'steel');
  for(const z of [-.308,.308])box(control,[.95,.022,.022],[.085,.33,z],'dark','cable-duct');
  for(const x of [-.57,-.44])for(const z of [-.065,.065])box(control,[.018,.010,.018],[x,.261,z],'black');
- box(control,[.30,.010,.014],[.39,.291,.23],'steel','relay-din-rail');
  if(variant==='old')box(control,[.14,.005,.12],[-.505,.2235,.245],'black');
- box(control,[.17,.072,.17],[variant==='old'?-.490:-.505,.302,0],'alloy','controller-housing');
- for(let i=0;i<12;i++)box(control,[.007,.030,.165],[-.579+i*.0135,.353,0],'alloy');
- for(let i=0;i<5;i++){box(control,[.037,.045,.055],[.25+i*.055,.314,.23],'dark','relay-housing');box(control,[.031,.014,.048],[.25+i*.055,.344,.23],'clear')}
  if(variant==='old'){
-  box(control,[.14,.13,.12],[-.505,.286,-.245],'blue','inverter-housing');
-  for(let i=0;i<5;i++)box(control,[.008,.018,.11],[-.56+i*.027,.360,-.245],'steel');
-  box(control,[.14,.060,.12],[-.505,.256,.245],'alloy','smps-housing');
-  for(let i=0;i<5;i++)cylinder(control,.005,.008,[-.56+i*.027,.291,.245],'steel','y');
+  box(plc,[.34,.060,.115],[-.40,.302,0],'red','plc-housing');
+  box(plc,[.33,.008,.12],[-.40,.268,0],'dark','plc-base');
+  box(plc,[.15,.001,.045],[-.43,.333,0],'alloy','plc-nameplate');
+  for(const x of [-.53,-.44,-.32])box(plc,[.030,.020,.018],[x,.294,.065],'black','plc-connector');
+  // Elevated rear controller bridge; its legs stay behind the scissor arms.
+  for(const x of [-.57,-.405]){
+   box(control,[.020,.008,.30],[x,.260,0],'dark','plc-support-crossbar');
+   for(const z of [-.145,.145])box(control,[.010,.162,.010],[x,.175,z],'steel','plc-support-leg');
+  }
+ }else{
+  box(plc,[.17,.072,.17],[-.505,.302,0],'alloy','controller-housing');
+  for(let i=0;i<12;i++)box(plc,[.007,.030,.165],[-.579+i*.0135,.353,0],'alloy');
+ }
+ const relayCount=variant==='old'?12:5,relayPitch=variant==='old'?.024:.055;
+ box(relays,[.30,.010,.014],[.39,.291,.23],'steel','relay-din-rail');
+ for(let i=0;i<relayCount;i++){
+  const x=variant==='old'?.25+i*relayPitch:.25+i*relayPitch;
+  box(relays,[variant==='old'?.019:.037,.045,.055],[x,.314,.23],'dark','relay-housing');
+  box(relays,[variant==='old'?.016:.031,.014,.048],[x,.3435,.23],'clear','relay-clear-cap');
+  for(const z of [.201,.259])box(relays,[.012,.010,.009],[x,.300,z],'blue','relay-terminal');
+ }
+ box(dcdc,[.202,.012,.13],[.43,.108,-.23],'dark','dcdc-tray');
+ box(dcdc,[.21,.066,.115],[.43,.147,-.23],'alloy','dcdc-housing');
+ for(let i=0;i<9;i++)box(dcdc,[.012,.016,.11],[.34+i*.0225,.188,-.23],'steel','dcdc-fin');
+ box(dcdc,[.014,.035,.080],[.542,.164,-.23],'green','dcdc-terminals');
+ for(const child of dcdc.children)child.position.y+=.065;
+ for(const x of [.43,.53])box(dcdc,[.012,.073,.11],[x,.1305,-.23],'dark','dcdc-tray-support');
+ if(variant==='old'){
+  // Raised PCB above the relay level and a separate two-storey fuse tray.
+  box(io,[.27,.008,.105],[.38,.364,.23],'dark','io-upper-tray');
+  for(const x of [.27,.49])for(const z of [.19,.27])cylinder(io,.004,.014,[x,.375,z],'gold').name='pcb-standoff';
+  box(io,[.25,.003,.095],[.38,.384,.23],'green','io-pcb');
+  for(let i=0;i<8;i++)box(io,[.018,.011,.018],[.29+i*.026,.391,.23],i%2?'black':'alloy','pcb-component');
+  box(io,[.18,.018,.015],[.38,.393,.285],'green','io-terminal-strip');
+  box(fuses,[.17,.005,.105],[.08,.315,-.25],'alloy','fuse-lower-tray');
+  box(fuses,[.17,.005,.105],[.08,.366,-.25],'alloy','fuse-upper-tray');
+  for(const x of [.009,.151])for(const z of [-.29,-.21])cylinder(fuses,.0035,.046,[x,.3405,z],'steel').name='fuse-tray-post';
+  for(const y of [.333,.384])for(let i=0;i<6;i++){
+   const x=.018+i*.025;
+   box(fuses,[.017,.025,.055],[x,y,-.25],'dark','fuse-holder');
+   box(fuses,[.012,.010,.039],[x,y+.017,-.25],'clear','fuse-window');
+   for(const z of [-.282,-.218])box(fuses,[.012,.012,.009],[x,y,z],'steel','fuse-terminal');
+  }
+ }
+ if(variant==='old'){
+  box(auxiliary,[.14,.13,.12],[-.505,.286,-.245],'blue','auxiliary-finned-housing');
+  for(let i=0;i<5;i++)box(auxiliary,[.008,.018,.11],[-.56+i*.027,.360,-.245],'steel','auxiliary-rib');
+  box(aux,[.14,.060,.12],[-.505,.256,.245],'alloy','smps-housing');
+  for(let i=0;i<5;i++)cylinder(aux,.005,.008,[-.56+i*.027,.291,.245],'steel','y');
  }else{
   // Separate new-car drive housings occupy the rear side shelves. Move the
   // illustrative auxiliary supply above the side motor, not through a driver.
@@ -364,10 +629,10 @@ export function buildAgvModel({variant='old'}={}){
    box(control,[.01,.174,.01],[x,.181,.285],'steel','smps-support');
    box(control,[.02,.004,.02],[x,.278,.23],'black');
   }
-  box(control,[.14,.060,.12],[-.30,.310,.23],'alloy','smps-housing');
-  for(let i=0;i<5;i++)cylinder(control,.005,.008,[-.355+i*.027,.345,.23],'steel','y');
+  box(aux,[.14,.060,.12],[-.30,.310,.23],'alloy','smps-housing');
+  for(let i=0;i<5;i++)cylinder(aux,.005,.008,[-.355+i*.027,.345,.23],'steel','y');
  }
- for(let i=0;i<5;i++)box(control,[.023,.024,.04],[.26+i*.052,.304,.283],'steel','terminal-block');
+ for(let i=0;i<5;i++)box(control,[.023,.024,.04],[.26+i*.052,.304,.290],'steel','terminal-block');
  for(const side of [-1,1])for(let i=0;i<4;i++)bundle(control,[[-.56,.355+i*.004,side*.285],[-.32,.35+i*.004,side*.312],[.18,.35+i*.004,side*.312],[.50,.35+i*.004,side*.285]],i===0?0xb74948:0x3d6d9d,.0022);
  bundle(control,[[-.51,.34,.08],[-.54,.36,.18],[-.52,.35,.29]],0x468a72,.004);
 
@@ -377,26 +642,91 @@ export function buildAgvModel({variant='old'}={}){
  box(tpm,[.24,.012,.15],[.44,.27,-.23],'dark','tpm-tray');
  box(tpm,[.18,.009,.10],[.44,.2805,-.23],'black');
  box(tpm,[.20,.070,.13],[.44,.32,-.23],'alloy','tpm-housing');
- for(let i=0;i<7;i++)box(tpm,[.009,.014,.14],[.355+i*.028,.362,-.23],'steel');
+ for(let i=0;i<(variant==='old'?16:7);i++)box(tpm,[variant==='old'?.0035:.009,variant==='old'?.032:.014,.14],[.350+i*(variant==='old'?.012:.028),variant==='old'?.371:.362,-.23],'alloy','tpm-cooling-fin');
  box(tpm,[.016,.045,.10],[.548,.32,-.23],'dark','tpm-connectors');
+ if(variant==='old'){
+  const connections=assembly('wireless-connectors','无线取电邻接连接盒',[-.60,.65,.38],'power','照片05/07银长壳邻接的独立端子盒；内部功能待核，未新增第二TPM或管理器。');
+  box(connections,[.085,.045,.10],[.29,.316,-.23],'alloy','wireless-junction-box');
+  for(const z of [-.255,-.205])cylinder(connections,.008,.012,[.241,.316,z],'black','x').name='wireless-cable-gland';
+ }
  const pickup=assembly('pickup','THM平板型取电板（两块）',[.03,.10,.60],'wireless-power','知识#19列出两块THM10E015取电板；示意安装于车底，从无线供电设施获取能量，不是电池。展开时移到侧前方展示底面，不代表实际拆装方向。');
  pickup.userData.sourceKnowledgeId=19;pickup.userData.labelAnchor=[.42,.048,0];
  for(const x of [-.42,.42]){box(pickup,[.24,.012,.24],[x,.028,0],'alloy','pickup-plate');box(pickup,[.215,.008,.215],[x,.019,0],'dark');cylinder(pickup,.009,.03,[x,.05,0],'dark');bundle(pickup,[[x,.062,0],[x,.07,.07],[x+.04,.07,.12]],0x252d35,.004)}
- const ekk=assembly('ekk','EKK能量耦合器',[0,0,0],'wireless-power','知识#19列出EKK-A E12能量耦合器；此处壳体、安装托盘和插口仅为结构示意，不能据此接线。');
- ekk.userData.sourceKnowledgeId=19;ekk.userData.labelAnchor=[.52,.265,.23];
- box(ekk,[.20,.012,.13],[.52,.104,.23],'dark','ekk-tray');
- box(ekk,[.16,.15,.10],[.52,.185,.23],'alloy','ekk-housing');
- box(ekk,[.012,.14,.105],[.606,.185,.23],'red');
- for(let i=0;i<3;i++)cylinder(ekk,.008,.014,[.475+i*.045,.265,.23],'dark','y');
- const capacitor=assembly('supercapacitor','EKV超级电容模块',[0,0,0],'wireless-power','知识#19标注EKV138A-36S350；说明书列出MOVI-DPS 136kWs Block 6×350F储能模块。六块分组、托架和顶部跨条为示意，并非实际内部电芯或接线复刻。');
+ const ekk=assembly('ekk','EKK储能管理器',[0,0,0],'wireless-power','EKK管理器就是MOVI-DPS Energy Interface，独立于EKS超级电容。新补照片确认EKK-A-D500-I06-500-0-0/E12的黑色平盖、银色箱体、两端红色端盖、四只圆形接口及三只大矩形插接件；不把盖板画成顶置散热齿。端口编号按照片辨识，接线功能仍按图纸核对；托架、坐标和尺寸为示意。');
+ ekk.userData.sourceKnowledgeId=19;ekk.userData.labelAnchor=[.49,.265,.23];
+ box(ekk,[.272,.012,.13],[.465,.173,.23],'dark','ekk-tray');
+ for(const x of [.43,.59])box(ekk,[.012,.073,.11],[x,.1305,.23],'dark','ekk-tray-support');
+ if(variant==='old'){
+  box(ekk,[.255,.078,.10],[.46,.218,.23],'alloy','ekk-housing');
+  box(ekk,[.253,.005,.111],[.46,.2595,.23],'black','ekk-flat-lid');
+  for(const x of [.325,.595]){
+   box(ekk,[.014,.094,.112],[x,.226,.23],'red','ekk-red-end-cover');
+   for(const y of [.187,.207,.247,.267])box(ekk,[.026,.008,.124],[x,y,.23],'red','ekk-end-flange');
+  }
+  for(const x of [.35,.57])for(const z of [.187,.273])cylinder(ekk,.003,.002,[x,.263,z],'steel').name='ekk-lid-screw';
+  box(ekk,[.135,.001,.052],[.474,.263,.23],'white','ekk-port-diagram');
+  const signalPorts=[['X5221',.350,.242],['X5111',.386,.242],['X4102',.350,.202],['X4101',.386,.202]];
+  for(const [id,x,y]of signalPorts){
+   cylinder(ekk,.008,.009,[x,y,.2845],'steel','z').name='ekk-signal-port';
+   const insert=cylinder(ekk,.0055,.003,[x,y,.291],'black','z');insert.name='ekk-signal-insert';insert.userData.connector=id;
+  }
+  for(const [id,x,w]of [['X2381',.435,.033],['X2361',.490,.033],['X1501',.550,.040]]){
+   const shell=box(ekk,[w,.045,.024],[x,.222,.292],'steel','ekk-power-connector');shell.userData.connector=id;
+   box(ekk,[w-.006,.036,.020],[x,.222,.313],'black','ekk-power-plug');
+   for(const dx of [-1,1])box(ekk,[.003,.039,.011],[x+dx*(w/2+.0015),.222,.300],'steel','ekk-connector-latch');
+  }
+  Object.assign(ekk.userData,{photoReference:'site-20261113-ekk',connectorIds:['X5221','X5111','X4102','X4101','X2381','X2361','X1501'],placement:'illustrative'});
+ }else{
+  box(ekk,[.16,.060,.10],[.52,.209,.23],'alloy','ekk-housing');
+  box(ekk,[.016,.100,.112],[.606,.220,.23],'red','ekk-red-end-cover');
+  for(let i=0;i<3;i++)cylinder(ekk,.008,.014,[.475+i*.045,.229,.286],'dark','z').name='ekk-connector';
+ }
+ const capacitor=assembly('supercapacitor','EKS超级电容单元',[0,0,0],'wireless-power','老车EKS138A系列超级电容，与EKK管理器分别建模。新增照片显示三段封装、黑色端盖、灰色带菱形孔护板、连接耳和端部插接件，不能简化为裸电芯或车尾小盒。安装在车内前段内侧、剪叉前端下方，侧面电气件之后；实际尺寸、孔数和安装坐标未测量。新车只以自身电路确认储能功能，外壳仍为示意。');
  capacitor.userData.sourceKnowledgeId=19;capacitor.userData.labelAnchor=[-.505,.225,0];
- box(capacitor,[.19,.014,.17],[-.505,.104,0],'dark','capacitor-tray');
- for(let ix=0;ix<3;ix++)for(const z of [-.04,.04]){const x=-.56+ix*.055;box(capacitor,[.048,.10,.064],[x,.161,z],'black','capacitor-block');cylinder(capacitor,.006,.012,[x,.217,z],'steel')}
- for(const x of [-.599,-.411])box(capacitor,[.008,variant==='old'?.076:.105,.17],[x,variant==='old'?.1485:.1635,0],'dark');
- for(const z of [-.04,.04])box(capacitor,[.16,.005,.010],[-.505,.225,z],'gold');
- bundle(capacitor,variant==='old'?[[-.505,.223,.04],[-.53,.23,.09],[-.55,.24,.15]]:[[-.505,.223,.04],[-.57,.23,.09],[-.59,.24,.15]],0x282c31,.004);
+ if(variant==='old'){
+  capacitor.userData.labelAnchor=[.50,.31,0];
+  Object.assign(capacitor.userData,{photoReference:'site-20261113-eks-and-installed-location',visiblePackSections:3,placement:'photo-relative-position-dimensions-illustrative'});
+  box(capacitor,[.210,.017,.164],[.504,.1025,0],'dark','capacitor-tray');
+  for(const x of [.436,.504,.572]){
+   // Three sealed cassettes form ONE selectable EKS assembly. The perforated
+   // protective skin is separate from the dark sealed body behind the holes.
+   box(capacitor,[.062,.194,.144],[x,.208,0],'dark','capacitor-enclosure');
+   const panel=new THREE.Shape();panel.moveTo(-.027,-.097);panel.lineTo(.027,-.097);
+   for(let i=0;i<5;i++)panel.quadraticCurveTo(.035,-.097+(i+.5)*.0388,.027,-.097+(i+1)*.0388);
+   panel.lineTo(-.027,.097);
+   for(let i=0;i<5;i++)panel.quadraticCurveTo(-.035,.097-(i+.5)*.0388,-.027,.097-(i+1)*.0388);
+   panel.closePath();
+   for(const y of [-.065,-.022,.022,.065])for(const dx of [-.016,.016]){
+    const h=new THREE.Path();h.moveTo(dx-.007,y);h.lineTo(dx,y+.009);h.lineTo(dx+.007,y);h.lineTo(dx,y-.009);h.closePath();panel.holes.push(h);
+   }
+   mesh(capacitor,new THREE.ExtrudeGeometry(panel,{depth:.002,bevelEnabled:false,curveSegments:8}),'alloy',x,.208,.074).name='capacitor-perforated-side';
+   box(capacitor,[.062,.194,.002],[x,.208,-.075],'black','capacitor-installed-side');
+   box(capacitor,[.065,.008,.152],[x,.309,0],'black','capacitor-end-cap');
+   for(const z of [-.069,.069])cylinder(capacitor,.003,.004,[x,.314,z],'steel').name='capacitor-cap-screw';
+   const lug=box(capacitor,[.018,.030,.004],[x+.024,.270,.080],'alloy','capacitor-mounting-ear');
+   for(const y of [.261,.279])cylinder(capacitor,.003,.003,[lug.position.x,y,.084],'dark','z').name='capacitor-ear-bolt';
+  }
+  for(const z of [-.036,.036]){
+   cylinder(capacitor,.009,.018,[.436,.323,z],'steel').name='capacitor-connector';
+   cylinder(capacitor,.008,.020,[.436,.338,z],'black').name='capacitor-plug';
+   bundle(capacitor,[[.436,.347,z],[.419,.359,z],[.390,.357,z*1.8],[.378,.34,z*2.5]],0x282c31,.0035).name='capacitor-fixed-lead';
+  }
+  cylinder(capacitor,.009,.010,[.431,.270,-.082],'steel','z').name='capacitor-monitor-connector';
+  box(capacitor,[.031,.013,.001],[.463,.270,-.077],'white','capacitor-xs221-marker');
+ }else{
+ box(capacitor,[.19,.014,.16],[-.505,.104,0],'dark','capacitor-tray');
+ box(capacitor,[.17,.090,.15],[-.505,.157,0],'dark','capacitor-enclosure');
+ for(const x of [-.599,-.411])box(capacitor,[.008,.105,.16],[x,.1635,0],'alloy','capacitor-end-plate');
+ for(const z of [-.078,.078])box(capacitor,[.18,.105,.004],[-.505,.1635,z],'alloy','capacitor-side-panel');
+ const eksTop=flat(capacitor,.18,.16,.002,.216,'alloy',.003);eksTop.position.x=-.505;eksTop.name='capacitor-lid';
+ box(capacitor,[.025,.028,.035],[-.505,.185,.098],'black','capacitor-connector');
+ bundle(capacitor,[[-.505,.185,.115],[-.53,.23,.125],[-.55,.24,.15]],0x282c31,.004).name='capacitor-fixed-lead';
+ }
 
  // ---- navigation radar (rear centre recess) and one TIM per end ----
+ const navigation=assembly('navigation','导航扫描头',[-.90,.28,0],'safety','导航头与前后TIM分别选择/展开；安装位置按对应车型证据示意，不能作安全标定。');
+ const timFront=assembly('tim-front','前端TIM避障组件',[.88,.18,-.54],'safety','老车每端一只；新车保留原模型自身数量，非由老车照片推定。');
+ const timRear=assembly('tim-rear','后端TIM避障组件',[-.88,.18,.54],'safety','安装角度和扫描场均待实车标定。');
  const sensors=assembly('sensors','导航雷达与TIM避障组件',[0,0,0],'body-without-covers',variant==='old'?'按rear与rear-recess近照把导航雷达置于无屏端横向中部的**空槽**：上下端梁之间只有黑上盖+红色透明扫描头，周围为空，没有黑色填充壳或亮红假墙；槽顶/底为红台阶面，深色背/侧壁，内部电器收在槽后、不得外露；不偏置到角部，也不放在平台顶面。前后各1只TIM避障组件，位于面对该端右下角（front=-Z、rear=+Z，相反Z侧），蓝黑外壳、黑色圆柱朝下，并与导航雷达分开命名。器件安装坐标与扫描范围未按实车标定，不能用于标定或安全验收。':'依据拆罩图将导航雷达示意于短端平台下方，并预留对外开口；前后低位示意安全雷达。安装坐标、数量、角度和扫描范围需按实车核对，不能用于标定或安全验收。');
  if(variant==='old'){
   // The slot is empty in the photos: only the scanner sits between the beams.
@@ -407,12 +737,12 @@ export function buildAgvModel({variant='old'}={}){
   cylinder(sensors,.042,.014,[-.625,.262,0],'black').name='navigation-scan-cap';
   // Exactly one TIM per end, at the lower-right corner seen from that end:
   // front end (viewed at +X) is -Z, rear end (viewed at -X) is +Z.
-  box(sensors,[.008,.034,.040],[.667,.100,-.300],'blue','tim-front-housing');
-  box(sensors,[.010,.022,.034],[.671,.084,-.300],'black','tim-front-face');
-  cylinder(sensors,.013,.050,[.664,.058,-.300],'black','y').name='tim-front-cylinder';
-  box(sensors,[.008,.034,.040],[-.667,.160,.300],'blue','tim-rear-housing');
-  box(sensors,[.010,.022,.034],[-.671,.144,.300],'black','tim-rear-face');
-  cylinder(sensors,.013,.050,[-.664,.118,.300],'black','y').name='tim-rear-cylinder';
+  for(const [prefix,x,side]of [['tim-front',.55,-1],['tim-rear',-.55,1]]){
+   box(sensors,[.046,.030,.026],[x,.132,side*.335],'blue',prefix+'-housing');
+   box(sensors,[.043,.022,.002],[x,.139,side*.349],'black',prefix+'-face');
+   box(sensors,[.046,.018,.030],[x,.113,side*.331],'black',prefix+'-base');
+   cylinder(sensors,.016,.052,[x,.086,side*.331],'black','y').name=prefix+'-cylinder';
+  }
   for(let i=0;i<3;i++)bundle(sensors,[[-.58,.20,-.03],[-.57,.24,-.10],[-.55,.30,-.12]],i===0?0x252d35:0x3d6d9d,.002);
  }else{
   box(sensors,[.075,.012,.09],[-.625,.222,-.23],'steel','navigation-bracket');
@@ -431,6 +761,18 @@ export function buildAgvModel({variant='old'}={}){
   for(let i=0;i<3;i++)bundle(sensors,[[-.63,.23,-.23],[-.61,.24,-.29],[-.57,.32+i*.005,-.308]],i===0?0x252d35:0x3d6d9d,.002);
  }
 
+ // Reparent components into direct root assemblies; mounts and fixed loom
+ // deliberately stay in the nonempty compatibility sensors group.
+ for(const child of [...sensors.children]){
+  if(child.name.startsWith('tim-front')||(variant==='new'&&child.position.x>.63))timFront.add(child);
+  else if(child.name.startsWith('tim-rear')||(variant==='new'&&child.position.x<-.64&&child.position.y<.18))timRear.add(child);
+  else if(child.geometry?.type==='CylinderGeometry'&&child.position.x<-.62&&child.position.y>.18)navigation.add(child);
+ }
+ sensors.userData.label='传感器支架与固定线束';
+ for(const g of [timFront,timRear]){
+  const x=g===timFront?.645:-.645,z=variant==='old'?(g===timFront?-.300:.300):.255;
+  box(sensors,[.030,.055,.020],[x,variant==='old'?(g===timFront?.125:.185):.175,z],'steel','tim-fixed-bracket');
+ }
  root.userData.referenceKnowledgeIds=[17,19,20,21,36];
  if(variant==='new'){
   root.userData.referenceKnowledgeIds=[19,21,26];
@@ -457,14 +799,14 @@ export function buildAgvModel({variant='old'}={}){
    const drive=parts.find(part=>part.name===driveId);
    Object.assign(drive.userData,{sourceKnowledgeIds:[21,26],electricalKnowledgeId:26,sourcePdfPages:[12,13],motorReference:motorRef,encoderReference:encoderRef,brakeReference:brakeRef});
    drive.userData.description+=' 新车电路对应'+motorRef+'电机、'+encoderRef+'增量编码器和'+brakeRef+'抱闸；附加标识环只用于辨识抱闸回路，不代表已确认机械安装形式。';
-   const collar=cylinder(drive,.034,.014,[-.323,.212,z>0?.215:-.215],'dark','x');collar.name='drive-brake-collar';
+   const collar=cylinder(drive,.034,.014,[-.323,.212,z>0?.183:-.183],'dark','x');collar.name='drive-brake-collar';
    collar.userData={sourceKnowledgeId:26,deviceReference:brakeRef,geometryEvidence:'circuit-symbol-only',placement:'illustrative'};
   }
   // A7 stays within the existing control part: no new public part ID or
   // interaction contract is needed to represent the third servo circuit.
   box(control,[.13,.01,.08],[.52,.267,.12],'dark','kinco-lift-shelf');
   for(const x of [.48,.56]){
-   box(control,[.012,.168,.012],[x,.178,.13],'steel','kinco-lift-support');
+   box(control,[.012,.168,.012],[x,.183,.13],'steel','kinco-lift-support');
    box(control,[.018,.003,.018],[x,.2735,.12],'black');
   }
   const liftDriver=box(control,[.105,.08,.07],[.52,.315,.12],'blue','kinco-lift-housing');
@@ -481,8 +823,29 @@ export function buildAgvModel({variant='old'}={}){
   pickup.userData.description='新车电路#26的PDF第23页（图纸20/25）列出两块THM取电板；外形及车底位置为示意，不是电池。展开移到侧前方只为展示底面，不代表实际拆装方向。';
   pickup.userData.sourceComponentCount=2;
   ekk.userData.description='新车电路#26的PDF第23页（图纸20/25）列出EKK耦合器；外壳、托架、插口和位置沿用辨识示意，不能据此确认型号、安装或接线。';
-  capacitor.userData.description='新车电路#26的PDF第23页（图纸20/25）列出EKV储能模块，属于超级电容而非电池；六块分组外观沿用老车资料的辨识示意，不代表新车模块或电芯数量、型号及实际布线。';
+  capacitor.userData.description='新车电路#26的PDF第23页（图纸20/25）列出EKV储能模块，属于超级电容而非电池。界面按用户认件称EKS，组合级图纸仍保留EKV字样；整体封装示意不代表新车型号、内部电芯数量及实际布线。';
  }
+ root.userData.internalLayoutVersion=3;
+ root.userData.geometryRevision=variant==='old'?'latent-deep-front-hood-20261112-rev3':'latent-shared-deep-front-hood-20261112-rev3';
+ if(variant==='old'){
+  root.userData.geometryRevision='latent-open-rear-eks-ekk-20261113-rev2';
+  rear.userData.description='后壳上梁和下层台阶之间，两旁保留凹进的红色挡板，中央单独留空安装导航雷达；侧壁、折边与内挡板属于整件后壳。下部侧角有嵌入TIM的真实开孔，黑色扫描筒向下。外形按用户补充正面/内侧裁图示意，尺寸和安装坐标未实测。';
+  root.userData.rearShellEvidence='用户裁图确认：左右凹进红色内挡板保留，后端正中间单独留空给导航雷达，不将整条间隙掏空。TIM藏在下部侧角开孔内，黑色扫描筒向下；前后各一只，壳体尺寸/坐标为比例示意。';
+  root.userData.storageEvidence='用户认件：EKS为超级电容、EKK为独立管理器；新增电容本体/安装位置及EKK接口近照。形状和相对位置按照片，尺寸和绝对坐标仍为示意。';
+  root.userData.geometryEvidenceNote='按老车说明书#21、2026-11-03/12/13现场照片还原。后端左右红色内挡板向内凹进，正中为导航头开口；不是整条间隙完全贯通。TIM嵌在下部侧角开孔，黑色扫描筒向下。EKS三段封装置于剪叉前端内侧下方，EKK为独立管理器。尺寸、壳深、坐标和线束仍按比例示意，不是制造CAD。';
+  sensors.userData.description='导航头在后壳正中开口，两旁保留凹进红色内壁。前后各一只TIM，嵌于下部侧角开孔、黑色扫描筒向下，不外挂到端面。安装坐标、角度和扫描场为示意，不能用于安全标定。';
+ }
+ if(variant==='new')root.userData.frontShellEvidence='用户2026-11-12明确要求新老车统一修正车头外形；圆弧与凹面共用，尺寸为示意，不替代新车独立电气与操作器配置。';
+ root.userData.mechanicalCorrections=['fixed-side-separated-harness','inboard-gearbox-with-shafts','exposed-spring-working-coils','caster-crossmember-relief'];
+ const systemMembers={control:['control','plc','relay-bank','fuse-panel','io-board','aux-power','auxiliary-unit'],power:['tpm','pickup','ekk','supercapacitor','wireless-connectors','dcdc'],safety:['sensors','navigation','tim-front','tim-rear']};
+ for(const part of parts){
+  const system=Object.keys(systemMembers).find(key=>systemMembers[key].includes(part.name));
+  if(system)Object.assign(part.userData,{systemId:system,system,placement:'illustrative',evidenceBoundary:variant==='old'?'site-photos-20261112-and-own-wiring':'own-wiring-26-no-old-photo-identity'});
+ }
+ control.userData.label='电气安装托架与主干';control.userData.explodeOffset=[-.48,.42,-.30];
+ sensors.userData.explodeOffset=[-.70,.34,-.72];
+ for(const p of [control,sensors])p.userData.presentationOffset=[...p.userData.explodeOffset];
+ if(variant==='new')for(const p of [plc,relays,aux,dcdc,navigation,timFront,timRear])Object.assign(p.userData,{sourceKnowledgeId:26,sourceKnowledgeIds:[26],geometryEvidence:'illustrative-not-old-photo-identity'});
  root.updateMatrixWorld(true);
  return {root,parts,materials};
 }

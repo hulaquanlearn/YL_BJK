@@ -34,7 +34,7 @@ Page({
       auth.clearSession();
       wx.showToast({ title: '修改成功', icon: 'success' });
       setTimeout(() => wx.reLaunch({ url: '/pages/login/login' }), 800);
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       wx.showToast({ title: err.message || '修改失败', icon: 'none' });
     } finally { this.setData({ submitting: false }); }
   },

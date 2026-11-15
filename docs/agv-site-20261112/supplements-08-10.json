@@ -1,0 +1,20 @@
+[
+  {
+    "photo": "08-sew-controller.jpg",
+    "original": "d22e1b93eb0d5f89617bde4555d03311.jpg",
+    "sha256": "1D0AA9A878B72913EC8B0FA8C070A87178DCD6DF5FC430F122D4F4F7154362A5",
+    "bytes": 249031
+  },
+  {
+    "photo": "09-ekk-nameplate.jpg",
+    "original": "b88c908f7883608affba1a0082f64d9f.jpg",
+    "sha256": "EFBE7D72CE8647379956ECF10604F3F317E977B6D3AF507B992BD66CBB4C36A3",
+    "bytes": 186061
+  },
+  {
+    "photo": "10-eks-nameplate.jpg",
+    "original": "a4221de5926235c7113fc14122a18e48.jpg",
+    "sha256": "CA065B3B88CFFD571BDFA09BF0A4153A766F7F4A0798DDC21F50EA691C6268A6",
+    "bytes": 156815
+  }
+]

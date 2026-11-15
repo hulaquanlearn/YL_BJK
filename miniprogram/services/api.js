@@ -25,6 +25,8 @@ function request(path, options = {}) {
   }
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}), 'X-Client-Platform':'miniprogram' };
   const token = auth.getToken();
+  const currentSession = () => token === auth.getToken();
+  const staleSessionError = () => Object.assign(new Error('请求所属登录会话已结束'), {code:'ERR_CANCELED',staleSession:true});
   if (token) headers.Authorization = `Bearer ${token}`;
 
   if (!options.public && !token) {
@@ -40,6 +42,7 @@ function request(path, options = {}) {
       header: headers,
       timeout: options.timeout || config.requestTimeout,
       success(res) {
+        if (!currentSession()) { reject(staleSessionError()); return; }
         const body = res.data;
         if (!body || typeof body !== 'object' || Array.isArray(body)) {
           reject(new Error('服务器返回格式异常，请稍后重试'));
@@ -52,10 +55,11 @@ function request(path, options = {}) {
         const error = new Error(body.msg || `请求失败（${res.statusCode}）`);
         error.statusCode = res.statusCode;
         error.details = body.details;
-        if (res.statusCode === 401 && !options.public) auth.goLogin();
+        if (res.statusCode === 401 && !options.public) auth.goLogin(token);
         reject(error);
       },
       fail(error) {
+        if (!currentSession()) { reject(staleSessionError()); return; }
         const message = error?.errMsg?.includes('timeout')
           ? '服务器响应超时'
           : '无法连接备件服务器';

@@ -24,9 +24,37 @@ const equipmentImportUpload = multer({
 
 function cellText(value) { return String(value ?? '').trim().replace(/\.0$/, ''); }
 
-function equipmentModelCode(workshopCode, equipmentName) {
-  const digest = crypto.createHash('sha256').update(`${workshopCode}\0${equipmentName}`).digest('hex').slice(0, 16).toUpperCase();
+function equipmentModelCode(workshopCode, equipmentName, attempt = 0) {
+  const seed = `${workshopCode}\0${equipmentName}${attempt ? '\0'+attempt : ''}`;
+  const digest = crypto.createHash('sha256').update(seed).digest('hex').slice(0, 16).toUpperCase();
   return `MODEL-${digest}`;
+}
+
+async function insertEquipmentModel(executor, workshopCode, name, group, notes, reuseExisting = false) {
+  // Renaming must keep the existing identity. An occupied legacy name-derived
+  // code is therefore a collision, not proof that the current name exists.
+  // Concurrent identical names walk the same candidate sequence; the existing
+  // unique code index arbitrates each insertion. Locking reads see the winner
+  // even when an import already has a REPEATABLE READ snapshot.
+  for (let attempt = 0; attempt < 64; attempt++) {
+    const code = equipmentModelCode(workshopCode, name, attempt);
+    try {
+      const [result] = await executor.query(
+        'INSERT INTO workshop_equipment (workshop_code,equipment_code,equipment_name,workshop_group,location,notes) VALUES (?,?,?,?,NULL,?)',
+        [workshopCode, code, name, group, notes]);
+      return result;
+    } catch (error) {
+      if (error?.code !== 'ER_DUP_ENTRY') throw error;
+      const [same] = await executor.query(
+        'SELECT id FROM workshop_equipment WHERE equipment_code=? AND workshop_code=? AND equipment_name=? LIMIT 1 FOR UPDATE',
+        [code, workshopCode, name]);
+      if (same.length) {
+        if (reuseExisting) return {insertId:same[0].id,reused:true};
+        throw new ApiError(409, '该车间已存在同名设备型号');
+      }
+    }
+  }
+  throw new ApiError(409, '设备型号编码分配冲突，请稍后重试');
 }
 
 async function parseEquipmentWorkbook(buffer) {
@@ -127,6 +155,16 @@ function optionalNumber(value, field, { min = 0, max = Number.POSITIVE_INFINITY 
   const number = Number(value);
   if (!Number.isFinite(number) || number < min || number > max) throw new ApiError(400, `${field}必须是${min}至${max === Number.POSITIVE_INFINITY ? '有效上限' : max}之间的数字`);
   return number;
+}
+
+function requiredQuantity(value) {
+  if (!['number','string'].includes(typeof value)
+    || (typeof value === 'string' && !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(value.trim()))) {
+    throw new ApiError(400, '数量必须是大于0的有效数字');
+  }
+  const quantity = Number(value);
+  if (!Number.isFinite(quantity) || quantity < 0.0001) throw new ApiError(400, '数量必须是大于等于0.0001的有效数字');
+  return quantity;
 }
 
 router.get('/movement-reasons', (_req, res) => {
@@ -269,12 +307,9 @@ router.post('/equipment/import', requireAnyWorkshopEditor, equipmentImportUpload
       const [existing] = await connection.query('SELECT id FROM workshop_equipment WHERE workshop_code=? AND equipment_name=? LIMIT 1', [workshopCode, item.equipmentName]);
       let equipmentId = existing[0]?.id;
       if (!equipmentId) {
-        const [created] = await connection.query(
-          `INSERT INTO workshop_equipment (workshop_code,equipment_code,equipment_name,workshop_group,location,notes)
-           VALUES (?,?,?,?,NULL,?)`,
-          [workshopCode, equipmentModelCode(workshopCode, item.equipmentName), item.equipmentName, item.workshopGroup, item.notes]
-        );
+        const created = await insertEquipmentModel(connection, workshopCode, item.equipmentName, item.workshopGroup, item.notes, true);
         equipmentId = created.insertId;
+        if (created.reused) await connection.query('UPDATE workshop_equipment SET workshop_group=COALESCE(?,workshop_group), notes=COALESCE(?,notes) WHERE id=?', [item.workshopGroup, item.notes, equipmentId]);
       } else {
         await connection.query('UPDATE workshop_equipment SET workshop_group=COALESCE(?,workshop_group), notes=COALESCE(?,notes) WHERE id=?', [item.workshopGroup, item.notes, equipmentId]);
       }
@@ -332,10 +367,7 @@ router.post('/equipment', requireAnyWorkshopEditor, asyncHandler(async (req, res
   const [existing] = await pool.query('SELECT id FROM workshop_equipment WHERE workshop_code=? AND equipment_name=? LIMIT 1', [workshopCode, name]);
   if (existing.length) throw new ApiError(409, '该车间已存在同名设备型号');
   try {
-    const [result] = await pool.query(
-      `INSERT INTO workshop_equipment (workshop_code, equipment_code, equipment_name, workshop_group, location, notes) VALUES (?, ?, ?, ?, ?, ?)`,
-      [workshopCode, equipmentModelCode(workshopCode, name), name, optionalText(req.body?.workshopGroup, 100), null, optionalText(req.body?.notes)]
-    );
+    const result = await insertEquipmentModel(pool, workshopCode, name, optionalText(req.body?.workshopGroup, 100), optionalText(req.body?.notes));
     res.status(201).json({ success: true, msg: '设备型号已创建', data: { id: String(result.insertId) } });
   } catch (error) {
     if (error?.code === 'ER_DUP_ENTRY') throw new ApiError(409, '设备型号已存在');
@@ -457,7 +489,10 @@ router.post('/stock-movements/batch', requireAnyWorkshopEditor, asyncHandler(asy
   const metadata = parseMovementMetadata(type, req.body || {});
   const items = Array.isArray(req.body?.items) ? req.body.items : [];
   if (!items.length || items.length > 100) throw new ApiError(400, '请选择1至100条库存记录');
-  const normalized = items.map(item => ({ inventoryId: parseInventoryId(item.inventoryId), quantity: optionalNumber(item.quantity, '数量', { min: 0.0001 }) }));
+  const normalized = items.map(item => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) throw new ApiError(400, '批量库存条目格式无效');
+    return {inventoryId:parseInventoryId(item.inventoryId),quantity:requiredQuantity(item.quantity)};
+  });
   if (new Set(normalized.map(item => item.inventoryId)).size !== normalized.length) throw new ApiError(400, '批量操作不能包含重复备件');
   const batchNo = metadata.batchNo || makeNo('PL');
   const connection = await pool.getConnection();

@@ -3,8 +3,8 @@ import {BoxGeometry, CylinderGeometry, Group, InstancedMesh, Mesh, MeshStandardM
 // Photo proportions fitted to the CAD frame. The assembly's +Y points down
 // from the flange and its Z axis runs across the belt.
 const mounts = {
-  'tool-640': {x: -.315, frameY: .835, railY: .897},
-  'tool-700': {x: -.100, frameY: .760, railY: .865}
+  'tool-640': {x: -.108, frameY: .762, railY: .860},
+  'tool-700': {x: -.100, frameY: .760, railY: .860}
 }
 
 export function createCleaningBrush(toolType) {

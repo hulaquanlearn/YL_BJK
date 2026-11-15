@@ -5,7 +5,7 @@ import vm from 'node:vm'
 import * as Vue from 'vue'
 import { compile } from '@vue/compiler-dom'
 import { renderToString } from '@vue/server-renderer'
-import { mobileAccountLinks, mobileModules, mobileWorkspaceEnabled, nativeFieldPaths } from '../src/utils/mobile-workspace.mjs'
+import { inventoryDetailBack, mobileAccountLinks, mobileModules, mobileWorkspaceEnabled, nativeFieldPaths } from '../src/utils/mobile-workspace.mjs'
 
 const read = file => fs.readFileSync(new URL('../src/' + file, import.meta.url), 'utf8')
 const mobileSource = read('app/AppShell.vue'), statusSource = read('components/ServiceStatus.vue')
@@ -14,7 +14,7 @@ const script = source => source.match(/<script setup>([\s\S]*?)<\/script>/)[1].r
 const ServiceStatus = { props: { status: { type: String, default: 'checking' } }, render: render(statusSource), setup(props) { const context = { defineProps: () => props, computed: Vue.computed }; vm.runInNewContext(script(statusSource) + '\nglobalThis.state = {state,label}', context); return context.state } }
 async function renderPhone({ health = 'online', search = '', home = true } = {}) {
   const user = { id: 1, role: 'admin', displayName: '测试员' }, props = { enabled: true, user, modules: mobileModules(user), role: '总管理员', health }
-  const component = { render: render(mobileSource), setup() { const context = { defineProps: () => props, defineEmits:()=>()=>{}, useRoute: () => ({ path: home ? '/portal' : '/inventory', fullPath: home ? '/portal' : '/inventory', meta: { portal: home, title: '库存总览' } }), mobileAccountLinks,nativeFieldPaths, computed: Vue.computed, ref: Vue.ref, watch: Vue.watch, navigator: { userAgent: 'Mozilla/5.0 iPhone Mobile' } }; vm.runInNewContext(script(mobileSource) + '\nglobalThis.state = {enabled:props.enabled,user:props.user,modules:props.modules,role:props.role,health:props.health,route,search,catalogVisible,home,initial,accountLinks,currentGroup,catalogGroups,filteredModules,legacyNative,nativeAndroid,closeCatalog}', context); context.state.search.value = search; return context.state } }
+  const component = { render: render(mobileSource), setup() { const context = { defineProps: () => props, defineEmits:()=>()=>{}, useRoute: () => ({ path: home ? '/portal' : '/inventory', fullPath: home ? '/portal' : '/inventory', meta: { portal: home, title: '库存总览' } }), inventoryDetailBack,mobileAccountLinks,nativeFieldPaths,useRouter:()=>({options:{history:{state:{}}},back(){},push(){}}), computed: Vue.computed, ref: Vue.ref, watch: Vue.watch, navigator: { userAgent: 'Mozilla/5.0 iPhone Mobile' } }; vm.runInNewContext(script(mobileSource) + '\nglobalThis.state = {enabled:props.enabled,user:props.user,modules:props.modules,role:props.role,health:props.health,route,router,canReturnToPart,search,catalogVisible,home,initial,accountLinks,currentGroup,catalogGroups,filteredModules,legacyNative,nativeAndroid,closeCatalog}', context); context.state.search.value = search; return context.state } }
   const app = Vue.createSSRApp(component)
   app.config.warnHandler = () => {}
   app.component('ServiceStatus', ServiceStatus)

@@ -92,11 +92,11 @@ Page({
         areas: (data.areas || []).filter(Boolean),
         shelfMap: data.shelfMap || {}
       });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.warn('AI查询筛选上下文加载失败：', err);
     }
   },
-  async loadAiChannels(){const read=this.aiChannelRead=(this.aiChannelRead||0)+1,token=auth.getToken();try{const res=await api.aiChannels();if(read!==this.aiChannelRead||token!==auth.getToken())return;const choice=(res.data?.choices||[]).find(c=>c.id==='deepseek');this.setData({aiModelLabel:choice?choice.label+' · '+choice.model:''});}catch{if(read===this.aiChannelRead&&token===auth.getToken())this.setData({aiModelLabel:''});}},
+  async loadAiChannels(){const read=this.aiChannelRead=(this.aiChannelRead||0)+1,token=auth.getToken();try{const res=await api.aiChannels();if(read!==this.aiChannelRead||token!==auth.getToken())return;const choice=(res.data?.choices||[]).find(c=>c.id==='deepseek');this.setData({aiModelLabel:choice?choice.label+' · '+choice.model:''});}catch(__sessionError) {if (__sessionError?.staleSession) return;if(read===this.aiChannelRead&&token===auth.getToken())this.setData({aiModelLabel:''});}},
 
   handleInput(e) {
     this.setData({ userQuestion: e.detail.value || '' });
@@ -241,7 +241,7 @@ Page({
         resultTotal: total,
         isLoading: false
       });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error('实时库存查询失败：', err);
       this.setMessageResult(
         '实时库存暂时无法查询',
@@ -280,7 +280,7 @@ Page({
         resultSummary: summaryMap[summaryType],
         isLoading: false
       });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error('库存汇总查询失败：', err);
       this.setMessageResult('库存汇总暂时不可用', err.message || '请稍后重试', '服务异常');
     }
@@ -315,7 +315,7 @@ Page({
         messages: [...newMessages, { role: 'assistant', content: answer }].slice(-6),
         isLoading: false
       });
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error('维修助手调用失败：', err);
       this.setMessageResult(
         '维修助手暂时不可用',

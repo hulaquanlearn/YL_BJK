@@ -36,10 +36,23 @@ router.post('/login', loginLimiter, asyncHandler(async (req, res) => {
   const valid = user ? await verifyPassword(password, user.password_hash) : false;
   if (!valid || !Number(user.enabled)) throw new ApiError(401, '用户名或密码错误');
 
-  await pool.query('UPDATE app_users SET last_login_at = NOW() WHERE id = ?', [user.id]);
-  const token = await createSession(user.id);
+  const connection = await pool.getConnection();
+  let token, current;
+  try {
+    await connection.beginTransaction();
+    const [latest] = await connection.query(
+      `SELECT id, username, password_hash, display_name, role, staff_workshop_code, staff_position,
+              enabled, token_version FROM app_users WHERE id = ? FOR UPDATE`, [user.id]);
+    current = latest[0];
+    if (!current || !Number(current.enabled) || current.password_hash !== user.password_hash
+      || Number(current.token_version) !== Number(user.token_version)) throw new ApiError(401, '账号状态已变化，请重新登录');
+    await connection.query('UPDATE app_users SET last_login_at = NOW() WHERE id = ?', [user.id]);
+    token = await createSession(user.id, connection);
+    await connection.commit();
+  } catch (error) { await connection.rollback(); throw error; }
+  finally { connection.release(); }
   setAssetCookie({get:()=>`Bearer ${token}`}, res);
-  const account = publicUser(user);
+  const account = publicUser(current);
   account.fireAccess = await require('../fire-access').loadFireAccess(account, pool);
   res.json({ success: true, data: { token, user: account } });
 }));
@@ -66,7 +79,7 @@ router.post('/logout', requireAuth, asyncHandler(async (req, res) => {
 router.post('/change-password', requireAuth, passwordChangeLimiter, asyncHandler(async (req, res) => {
   const oldPassword = String(req.body?.oldPassword || '');
   const newPassword = validatePassword(req.body?.newPassword);
-  const [rows] = await pool.query('SELECT password_hash FROM app_users WHERE id = ? LIMIT 1', [req.user.id]);
+  const [rows] = await pool.query('SELECT password_hash, token_version FROM app_users WHERE id = ? LIMIT 1', [req.user.id]);
   if (!rows.length || !(await verifyPassword(oldPassword, rows[0].password_hash))) {
     throw new ApiError(400, '原密码不正确');
   }
@@ -75,6 +88,10 @@ router.post('/change-password', requireAuth, passwordChangeLimiter, asyncHandler
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+    const [latest] = await connection.query('SELECT password_hash, token_version, enabled FROM app_users WHERE id = ? FOR UPDATE', [req.user.id]);
+    const current = latest[0];
+    if (!current || !Number(current.enabled) || current.password_hash !== rows[0].password_hash
+      || Number(current.token_version) !== Number(rows[0].token_version)) throw new ApiError(401, '账号状态已变化，请重新登录');
     await connection.query('UPDATE app_users SET password_hash = ?, token_version = token_version + 1 WHERE id = ?', [passwordHash, req.user.id]);
     await connection.query('DELETE FROM app_sessions WHERE user_id = ?', [req.user.id]);
     await connection.commit();

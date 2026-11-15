@@ -11,6 +11,9 @@ const count=(root,name)=>{let total=0;root.traverse(node=>{if(node.name===name)t
 const find=(root,name)=>root.getObjectByName(name)
 const boxOf=object=>{object.updateMatrixWorld(true);return new THREE.Box3().setFromObject(object)}
 const centre=object=>boxOf(object).getCenter(new THREE.Vector3())
+// Independent photo-rebuild parts remain interior equipment; splitting a group
+// must not silently exempt its children from the established empty-slot checks.
+const interiorIds=['control','plc','relay-bank','fuse-panel','io-board','aux-power','auxiliary-unit','wireless-connectors','dcdc','tpm','ekk','supercapacitor','pickup','lift']
 
 test('old latent AGV drops the unsupported towing rings and management stickers but keeps real bumpers and waistline',()=>{
  const {root,parts}=buildAgvModel({variant:'old'})
@@ -48,7 +51,7 @@ test('old latent AGV drops the unsupported towing rings and management stickers 
   for(const skirt of skirts)assert.equal(skirt.material.color.getHex(),0x0f1317,'old-car lower skirt is black')
   assert.equal(count(root,'rear-step-skirt-fill'),2,'the short skirt run under the rear step is filled, not a see-through slit')
   // Envelope metadata no longer leans on the deleted loops.
-  assert.deepEqual(root.userData.overallEnvelopeMm,[1370,720,460])
+  assert.deepEqual(root.userData.overallEnvelopeMm,[1370,720,459])
   assert.match(root.userData.envelopeNote,/No towing loops/)
   assert.doesNotMatch(root.userData.envelopeNote,/towing loops and rubber bumpers extend/)
  }finally{dispose(root)}
@@ -134,8 +137,11 @@ test('old latent AGV operator panel keeps the real screen, keyboard, interfaces 
   const plateBox=boxOf(plate)
   assert.ok(boxOf(find(root,'front-silver-bar')).max.x<=plateBox.max.x+.001,'silver bar sits inside the recess')
   assert.ok(boxOf(find(root,'front-cavity')).max.x<plateBox.max.x,'dark cavity is recessed behind the end plate')
-  const recessRay=new THREE.Raycaster(new THREE.Vector3(.8,.1415,0),new THREE.Vector3(-1,0,0),0,.4)
+  const recessRay=new THREE.Raycaster(new THREE.Vector3(.8,.185,0),new THREE.Vector3(-1,0,0),0,.4)
   assert.ok(recessRay.intersectObject(find(root,'front-cavity')).length>0,'recess has a real back wall')
+  assert.equal(find(root,'front-cavity').material.color.getHex(),0xa32a1e,'the photographed inset is red, not a black rectangular plug')
+  const openBottom=new THREE.Raycaster(new THREE.Vector3(.8,.130,0),new THREE.Vector3(-1,0,0),0,.210)
+  assert.equal(openBottom.intersectObject(panel,true).length,0,'bottom of the U-shaped face is open above the independent bumper tier')
   // No fabricated 12 disc bars remain anywhere in the panel.
   let redSticker=0;panel.traverse(node=>{if(node.isMesh&&node.name===''&&node.geometry?.type==='BoxGeometry'&&node.material?.color?.getHex()===0xc03028&&node.position.z>.18)redSticker++})
   assert.equal(redSticker,0)
@@ -149,8 +155,8 @@ test('old latent AGV carries exactly one TIM per end, at the lower-right corner 
   assert.equal(count(root,'tim-rear-housing'),1)
   const front=boxOf(find(root,'tim-front-housing')),rear=boxOf(find(root,'tim-rear-housing'))
   const frontCentre=front.getCenter(new THREE.Vector3()),rearCentre=rear.getCenter(new THREE.Vector3())
-  assert.ok(frontCentre.x>.6,'front TIM belongs to the operator end')
-  assert.ok(rearCentre.x<-.6,'rear TIM belongs to the screenless end')
+  assert.ok(frontCentre.x>.45,'front TIM belongs to the operator end')
+  assert.ok(rearCentre.x<-.45,'rear TIM belongs to the screenless end')
   assert.ok(frontCentre.z<-.25,'front lower-right seen from +X is -Z')
   assert.ok(rearCentre.z>.25,'rear lower-right seen from -X is +Z')
   assert.ok(frontCentre.y<.2&&rearCentre.y<.2,'TIM sits at the shell lower edge, not on an upper plate')
@@ -163,7 +169,7 @@ test('old latent AGV carries exactly one TIM per end, at the lower-right corner 
   }
   assert.equal(count(root,'tim-front-housing')+count(root,'tim-rear-housing'),2,'not two boxes per end')
   const chassis=root.getObjectByName('chassis')
-  const outward=new THREE.Raycaster(new THREE.Vector3(.672,.110,-.300),new THREE.Vector3(1,0,0),0,.05)
+  const outward=new THREE.Raycaster(new THREE.Vector3(.55,.139,-.350),new THREE.Vector3(0,0,-1),0,.05)
   assert.equal(outward.intersectObject(chassis,true).length,0,'the chassis end beam must not hide the front TIM')
  }finally{dispose(root)}
 })
@@ -189,63 +195,25 @@ test('old latent AGV navigation radar sits at the rear transverse centre in the 
  }finally{dispose(root)}
 })
 
-test('rear recess and side step are closed shells: no interior equipment can show through them',()=>{
+test('rear shell retains the scanner slot and trapezoid channel without filling its outside',()=>{
  const {root,parts}=buildAgvModel({variant:'old'})
  try{
-  const byName=Object.fromEntries(parts.map(part=>[part.name,part]))
-  const partOf=object=>{let node=object;while(node&&node.parent!==root)node=node.parent;return node?.name}
-  // The recess is built from real shell pieces, not a black card.
-  for(const name of ['rear-recess-back','rear-recess-floor','rear-recess-ceiling','rear-recess-side','rear-side-inner-shell','rear-side-step','rear-side-step-ledge','rear-side-cove-ceiling','rear-side-cove-return'])assert.ok(find(root,name),name)
-  assert.equal(count(root,'rear-recess-side'),2)
-  // The 2026-11-03 close-ups show an EMPTY slot: only the scanner sits there,
-  // with no black filler and no internal equipment bleeding through.
+  const rear=parts.find(p=>p.name==='rear-cover')
+  for(const name of ['rear-groove-floor','rear-groove-sloped-wall','rear-groove-straight-wall','rear-side-step'])assert.ok(rear.getObjectByName(name),name)
+  for(const name of ['rear-recess-floor','rear-recess-ceiling','rear-inner-stiffener-web','rear-recess-cheek'])assert.equal(rear.getObjectByName(name),undefined,name+' was superseded by the confirmed open trapezoid')
+  for(const name of ['rear-skin-return','rear-lower-return'])assert.ok(rear.getObjectByName(name),'outer shell retained: '+name)
+  assert.equal(count(root,'rear-recess-back'),0,'2026-11-13: user/photo explicitly confirms a genuine opening, not a backed recess')
   assert.equal(count(root,'navigation-cap-housing'),0,'no fabricated fill around the scanner')
   const cap=find(root,'navigation-scan-cap'),window=find(root,'navigation-scan-window')
-  assert.ok(cap&&window,'scanner cap and transparent window are modelled')
-  assert.ok(boxOf(cap).max.y<=.2701,'scanner cap must not pierce the upper end beam')
-  assert.ok(boxOf(window).max.y<=.2701,'scan window stays inside the empty slot')
-  const cavity={minX:-.657,maxX:-.585,minY:.1905,maxY:.2695,halfZ:.33}
-  // Empty-slot check: interior equipment must never enter the scanner slot
-  // (shell pieces such as the side covers are the slot walls and are excluded).
-  const interiorParts=parts.filter(part=>['control','tpm','ekk','supercapacitor','pickup','lift'].includes(part.name)||part.name.startsWith('drive-'))
-  for(const part of interiorParts){
-   part.traverse(mesh=>{
-    if(!mesh.isMesh)return
-    const box=boxOf(mesh)
-    const intrudes=box.max.x>cavity.minX&&box.min.x<cavity.maxX&&box.max.y>cavity.minY&&box.min.y<cavity.maxY&&box.max.z>-cavity.halfZ&&box.min.z<cavity.halfZ
-    assert.ok(!intrudes,`${part.name}/${mesh.name||'mesh'} intrudes into the empty lidar slot`)
-   })
+  assert.ok(boxOf(cap).max.y<=.2701&&boxOf(window).max.y<=.2701,'scanner remains inside the slot')
+  for(const z of [-.025,0,.025])for(const y of [.205,.23,.255]){
+   const ray=new THREE.Raycaster(new THREE.Vector3(-.80,y,z),new THREE.Vector3(1,0,0),0,.5)
+   assert.equal(ray.intersectObject(rear,true).length,0,'slot must pass through the COMPLETE hood, not just its front skin')
   }
-  // Looking into the empty slot, the first mesh is shell or the scanner only.
-  for(const z of [-.25,0,.25])for(const y of [.20,.23,.26]){
-   const hit=new THREE.Raycaster(new THREE.Vector3(-.80,y,z),new THREE.Vector3(1,0,0),0,2).intersectObject(root,true).find(item=>item.object.isMesh)
-   if(!hit)continue
-   assert.ok(['rear-cover','sensors'].includes(partOf(hit.object)),`${partOf(hit.object)} fills the empty lidar slot`)
-  }
-  // Straight into the recess off the scanner: the ray must stop on the rear cover
-  // back wall before the interior, not run into the cargo bay.
-  const back=new THREE.Raycaster(new THREE.Vector3(-.70,.230,.170),new THREE.Vector3(1,0,0),0,.3).intersectObject(root,true)
-  assert.ok(back.length>0,'rear recess must have a back wall')
-  assert.equal(partOf(back[0].object),'rear-cover','recess back wall belongs to the rear shell')
-  assert.ok(back[0].point.x<-.58,'recess back wall is inside the end plane')
-  // Side cove is backed by the inner shell at the cover plane, not by an interior part.
-  for(const side of [1,-1]){
-   const hit=new THREE.Raycaster(new THREE.Vector3(-.40,.230,side*1.0),new THREE.Vector3(0,0,-side),0,1.2).intersectObject(root,true)[0]
-   assert.ok(hit,'side cove must be closed')
-   assert.match(partOf(hit.object),/cover/,'side cove is backed by the side shell')
-   assert.ok(Math.abs(hit.point.z)>.30,'side cove closes at the inner shell, not inside the vehicle')
-  }
-  // Low rear/side rays like the user's screenshot: the first surface hit is always
-  // bodywork, never controller/capacitor/drive/lift equipment.
-  const interior=new Set(parts.filter(part=>['control','tpm','ekk','supercapacitor','pickup','lift'].includes(part.name)||part.name.startsWith('drive-')).map(part=>part.name))
-  const origins=[[-1.25,.32,.85],[-1.25,.32,-.85],[-1.10,.50,.42],[-1.10,.50,-.42]]
-  const targets=[]
-  for(const x of [-.64,-.50,-.36])for(const y of [.20,.23,.26])for(const z of [-.30,-.15,.15,.30])targets.push([x,y,z])
-  for(const [ox,oy,oz] of origins)for(const target of targets){
-   const direction=new THREE.Vector3(...target).sub(new THREE.Vector3(ox,oy,oz)).normalize()
-   const hit=new THREE.Raycaster(new THREE.Vector3(ox,oy,oz),direction,0,3).intersectObject(root,true).find(item=>item.object.isMesh)
-   if(!hit)continue
-   assert.ok(!interior.has(partOf(hit.object)),`${partOf(hit.object)} shows through the rear/side shell from [${ox},${oy},${oz}] via [${target}]`)
+  for(const side of [-1,1]){
+   const ray=new THREE.Raycaster(new THREE.Vector3(-.54,.31,side*.60),new THREE.Vector3(0,0,-side),0,.3)
+   const hit=ray.intersectObject(rear,true)[0];assert.ok(hit,'deep rear side wall belongs to the removable rear hood')
+   assert.ok(Math.abs(hit.point.z)>.34)
   }
  }finally{dispose(root)}
 })

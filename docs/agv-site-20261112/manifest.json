@@ -1,0 +1,38 @@
+[
+  {
+    "photo": "01-side-electrical.jpg",
+    "original": "4288679f7993e4a24a6d36b91141b289.jpg",
+    "sha256": "6E1BE6DCF986D2C6B5841A2F200E1E0CD6A4E02D70BC1695870BCB86F13452E4",
+    "bytes": 3628698
+  },
+  {
+    "photo": "02-opposite-side.jpg",
+    "original": "ce20093128a2c2009fc7562e4e13491b.jpg",
+    "sha256": "4D3A9CB47381155435628CBBB850A020CD69E2EF65C0BCF62D5E5BD7B4138C86",
+    "bytes": 3574216
+  },
+  {
+    "photo": "03-fuse-closeup.jpg",
+    "original": "ea7e778b8f1d4c3d99a9bd775182b978.jpg",
+    "sha256": "3A552ECA56704BADEE50A6D4A40BF6EBE95A93AAF9B28888E8B057B1822A3067",
+    "bytes": 3647176
+  },
+  {
+    "photo": "04-open-side.jpg",
+    "original": "e6368eb3ed249a054afc3004d3aff1e8.jpg",
+    "sha256": "1E7103F858B30CEDA4549A6523229DEB3371BF48005B25B276B005C1E29BD5A7",
+    "bytes": 2616562
+  },
+  {
+    "photo": "05-controller-navigation.jpg",
+    "original": "2c7e1119b21e757167d0ab5353eb948c.jpg",
+    "sha256": "7316B85C166467C421F5C43D9E101AEF2BFCD2BF801571CBAC70AC2832EC0885",
+    "bytes": 3666671
+  },
+  {
+    "photo": "06-cover-inside.jpg",
+    "original": "509a44c4c2df07c04fe2b78b146c23a4.jpg",
+    "sha256": "F2A6CAB115D3BB82F8361F2E5482C5ADCD67356E834AB24DF700DD880BDEB95D",
+    "bytes": 3047445
+  }
+]

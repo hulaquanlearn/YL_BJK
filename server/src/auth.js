@@ -32,12 +32,12 @@ function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
 
-async function createSession(userId) {
+async function createSession(userId, executor = pool) {
   const token = crypto.randomBytes(32).toString('base64url');
   const hours = Math.min(Math.max(Number(config.auth.sessionHours) || 8, 1), 168);
   const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
-  await pool.query('DELETE FROM app_sessions WHERE expires_at <= NOW()');
-  await pool.query(
+  await executor.query('DELETE FROM app_sessions WHERE expires_at <= NOW()');
+  await executor.query(
     'INSERT INTO app_sessions (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
     [userId, hashToken(token), expiresAt]
   );

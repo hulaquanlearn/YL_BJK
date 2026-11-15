@@ -57,7 +57,7 @@ Page({
         wx.showToast({ title: '未找到该备件', icon: 'none' });
         wx.navigateBack();
       }
-    }).catch(err => {
+    }).catch(err => {if (err?.staleSession) return;
       console.error('获取详情失败：', err);
       wx.showToast({ title: '加载失败', icon: 'none' });
       wx.navigateBack();
@@ -70,7 +70,7 @@ Page({
       const models = (result.data || []).filter(model => !model.workshopCode || model.workshopCode === this.data.part.workshopCode).sort((a,b) => Number(a.id)-Number(b.id));
       const choices = [{ id: null, name: '解除绑定' }, ...models];
       this.setData({ modelChoices: choices, modelLabels: choices.map(model => model.id ? `${model.id} · ${model.name}${model.modelUrl ? '' : '（待生成）'}` : model.name), modelChoiceIndex: Math.max(0, choices.findIndex(model => Number(model.id) === Number(this.data.part.categoryModelId))) });
-    } catch (_) { wx.showToast({ title: '模型目录加载失败', icon: 'none' }); }
+    } catch (_) {if (_?.staleSession) return; wx.showToast({ title: '模型目录加载失败', icon: 'none' }); }
   },
 
   async changeBoundModel(event) {
@@ -82,7 +82,7 @@ Page({
       await api.bindPartModel(this.data.part.partId, model.id === null ? null : Number(model.id));
       await this.fetchPartByID(this.partId);
       wx.showToast({ title: '模型绑定已保存' });
-    } catch (error) { wx.showToast({ title: error.message || '绑定失败', icon: 'none' }); }
+    } catch (error) {if (error?.staleSession) return; wx.showToast({ title: error.message || '绑定失败', icon: 'none' }); }
     finally { this.setData({ modelBindingBusy: false }); }
   },
 
@@ -165,7 +165,7 @@ Page({
       } else {
         wx.showToast({ title: res.msg || '操作失败', icon: 'none' });
       }
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       console.error(`${type === 'in' ? '入库' : '出库'}失败：`, err);
       wx.showToast({ title: err.message || `${type === 'in' ? '入库' : '出库'}失败`, icon: 'none' });
     } finally {
@@ -200,7 +200,7 @@ Page({
           await api.deletePart(this.partId);
           wx.showToast({ title: '已停用', icon: 'success' });
           setTimeout(() => wx.navigateBack(), 800);
-        } catch (err) {
+        } catch (err) {if (err?.staleSession) return;
           wx.showToast({ title: err.message || '停用失败', icon: 'none' });
         }
       }

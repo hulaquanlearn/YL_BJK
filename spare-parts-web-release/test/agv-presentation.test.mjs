@@ -18,7 +18,8 @@ test('both vehicle types keep all assembly labels on screen, with no vertically 
   const {parts}=buildAgvModel({variant});const labels=layoutAgvLabels(parts.map((p,i)=>({id:p.name,text:p.userData.label,x:width*.5+Math.sin(i)*width*.3,y:height*.5+Math.cos(i)*height*.2})),width,height)
   assert.equal(labels.length,parts.length);assert.equal(new Set(labels.map(l=>l.id)).size,parts.length)
   for(const l of labels){assert.ok(l.x>=0&&l.y>=0&&l.x+l.width<=width&&l.y+l.height<=height);assert.ok(l.text)}
-  for(let i=0;i<labels.length;i++)for(let j=i+1;j<labels.length;j++)if(labels[i].x===labels[j].x)assert.ok(Math.abs(labels[i].y-labels[j].y)>=36)
+  for(const l of labels)assert.ok(l.height>=22,'labels retain a readable line height')
+  for(let i=0;i<labels.length;i++)for(let j=i+1;j<labels.length;j++)if(labels[i].x===labels[j].x){const a=labels[i].y<labels[j].y?labels[i]:labels[j],b=a===labels[i]?labels[j]:labels[i];assert.ok(b.y>=a.y+a.height+5.9,'each rail keeps a six-pixel gap between actual label rectangles')}
  }
 });
 test('old and new models reference separate electrical sources and new drive assemblies rather than relabeling one circuit',()=>{

@@ -100,7 +100,7 @@ Page({
           isLoading: false
         });
       })
-      .catch(err => {
+      .catch(err => {if (err?.staleSession) return;
         console.error('加载待审批列表失败：', err);
         wx.showToast({ title: err.message || '加载失败，请检查服务器', icon: 'none' });
         this.setData({ isLoading: false });
@@ -149,7 +149,7 @@ Page({
       this.setData({ processingOrderId: '' });
       wx.showToast({ title: `已${status === '已通过' ? '通过' : '驳回'}`, icon: 'success' });
       this.loadApproveList();
-    } catch (err) {
+    } catch (err) {if (err?.staleSession) return;
       wx.hideLoading();
       this.setData({ processingOrderId: '' });
       console.error('更新审批状态失败：', err);

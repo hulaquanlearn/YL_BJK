@@ -52,7 +52,7 @@ Page({
       }
       const selected=Boolean(code);
       this.setData({businessWorkshops,businessWorkshopNames:businessWorkshops.map(w=>w.name),businessWorkshopIndex:Math.max(0,businessWorkshops.findIndex(w=>w.code===code)),workshops:selected?['全部',...(data.areas||[]).filter(Boolean)]:['全部'],shelfMap:selected?(data.shelfMap||{}):{},layerMap:selected?layerMap:{}});
-    } catch(error) {
+    } catch(error) {if (error?.staleSession) return;
       if(read===this.filterRequest)wx.showToast({title:error.message||'筛选数据加载失败',icon:'none'});
     } finally { if(read===this.filterRequest)this.setData({isLoading:false}); }
   },

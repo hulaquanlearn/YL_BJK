@@ -3,9 +3,14 @@ import { ElMessage } from 'element-plus'
 import { getToken, clearSession } from '../auth'
 
 export const office = axios.create({ baseURL: '/api', timeout: 180000 })
-office.interceptors.request.use(config => { config.headers.Authorization = `Bearer ${getToken()}`; return config })
-office.interceptors.response.use(response => response.data, async error => {
-  if (error.response?.data instanceof Blob) { try { error.response.data = JSON.parse(await error.response.data.text()) } catch {} }
+const currentRequestSession=config=>!config||!Object.prototype.hasOwnProperty.call(config,'_sessionToken')||config._sessionToken===getToken()
+const staleSessionError=config=>new axios.CanceledError('请求所属登录会话已结束',config)
+office.interceptors.request.use(config => { config._sessionToken=getToken(); config.headers.Authorization = `Bearer ${config._sessionToken}`; return config })
+office.interceptors.response.use(response => {if(!currentRequestSession(response.config))throw staleSessionError(response.config);return response.data}, async error => {
+  if(axios.isCancel(error))return Promise.reject(error)
+  if(!currentRequestSession(error.config))return Promise.reject(staleSessionError(error.config))
+  if (typeof Blob!=='undefined' && error.response?.data instanceof Blob) { try { error.response.data = JSON.parse(await error.response.data.text()) } catch {} }
+  if(!currentRequestSession(error.config))return Promise.reject(staleSessionError(error.config))
   if (error.response?.status === 401) { clearSession(); location.assign('/login') }
   // Import validation errors are shown with row/column details in the page.
   if (!error.config?.validationRequest) ElMessage.error(error.response?.data?.msg || '操作失败，请稍后重试')
